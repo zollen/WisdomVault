@@ -44,20 +44,13 @@ public class CommonOps {
 	public static double normF(DMatrixRMaj a) {
 		
 		double total = 0;
-		if (a.numCols == 1 && a.numRows > 0) {
+		
+		for (int i = 0; i < a.numCols; i++) {
 			
-			for (int i = 0; i < a.numRows; i++) {
-			
-				double val = a.get(i, 0);
-				total += val * val;		
-			}
-		}
-		else {
-			
-			for (int i = 0; i < a.numCols; i++) {
+			for (int j = 0; j < a.numRows; j++) {
 				
-				double val = a.get(0, i);
-				total += val * val;		
+				double val = a.get(j, i);
+				total += val * val;
 			}
 		}
 		
