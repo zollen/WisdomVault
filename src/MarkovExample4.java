@@ -17,14 +17,14 @@ public class MarkovExample4 {
 		
 		eq.process("K = A * X");
 		
-		DMatrixRMaj K = eq.lookupMatrix("K");
+		DMatrixRMaj K = eq.lookupDDRM("K");
 		System.out.println(K);
 		
 		eq.process("K = A - eye(A)");
 		eq.process("K = [ K, [ 0; 0; 0 ]]");
 		eq.process("K = [ K ; [ 1, 1, 1, 1 ]]");
 		
-		K = eq.lookupMatrix("K");
+		K = eq.lookupDDRM("K");
 		CommonOps_DDRM.rref(K.copy(), K.numCols - 1, K);
 		System.out.println("STEADY: " + K);
 		

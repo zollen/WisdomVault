@@ -9,7 +9,7 @@ public class CoFactorExercise {
 		// TODO Auto-generated method stub
 		Equation eq = new Equation();
 		eq.process("A = [ 2, -2, 0, 3, 4; 4, -1, 0, 1, -1; 0, 5, 0, 0, -1; 3, 2, -3, 4, 3; 7, -2, 0, 9, -5 ]");
-		DMatrixRMaj A = eq.lookupMatrix("A");
+		DMatrixRMaj A = eq.lookupDDRM("A");
 		
 		System.out.println("<==== A ====>");
 		System.out.println(A);
@@ -33,12 +33,12 @@ public class CoFactorExercise {
 		
 		
 		System.out.println("<==== inv(A) ====>");
-		System.out.println(eq.lookupMatrix("AI"));
+		System.out.println(eq.lookupDDRM("AI"));
 		
 		System.out.println("<==== 1 / det(A) * adj(A) ====>");
-		System.out.println(eq.lookupMatrix("AC"));
+		System.out.println(eq.lookupDDRM("AC"));
 		
-		System.out.println("inv(A) == 1 / det(A) * adj(A): " + MatrixFeatures.isIdentical(eq.lookupMatrix("AI"), eq.lookupMatrix("AC"), 0.00000001));
+		System.out.println("inv(A) == 1 / det(A) * adj(A): " + MatrixFeatures.isIdentical(eq.lookupDDRM("AI"), eq.lookupDDRM("AC"), 0.00000001));
 		
 		
 	}

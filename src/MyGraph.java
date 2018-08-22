@@ -20,7 +20,7 @@ public class MyGraph {
 		eq.process("K = A * A");
 		
 		// matrix of total number of paths from i -> j when path-length = 2
-		System.out.println(eq.lookupMatrix("K"));
+		System.out.println(eq.lookupDDRM("K"));
 	}
 
 }

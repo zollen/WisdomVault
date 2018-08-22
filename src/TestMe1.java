@@ -11,9 +11,9 @@ public class TestMe1 {
 		Equation eq = new Equation();
 		eq.process("A = [ 2, 3, -4 ; 5, 4, -4  ; -1, 7, 0 ]");
 		eq.process("B = [5; 8; 1]");
-		DMatrixRMaj A = eq.lookupMatrix("A");
+		DMatrixRMaj A = eq.lookupDDRM("A");
 		DMatrixRMaj x = new DMatrixRMaj(3, 1);
-        DMatrixRMaj y = eq.lookupMatrix("B");
+        DMatrixRMaj y = eq.lookupDDRM("B");
 	//	CommonOps_DDRM.mult(A,x,y);
         
        

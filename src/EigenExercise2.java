@@ -15,7 +15,7 @@ public class EigenExercise2 {
 		// TODO Auto-generated method stub
 		Equation eq = new Equation();
 		eq.process("A = [ 1, 1; 0, 1 ]");
-		DMatrixRMaj A = eq.lookupMatrix("A");
+		DMatrixRMaj A = eq.lookupDDRM("A");
 
 		RealMatrix m = MatrixUtils.createRealMatrix(MatrixFeatures.array(A));
 		
@@ -69,10 +69,10 @@ public class EigenExercise2 {
 		System.out.println("<=== D ===>");
 		System.out.println(D);
 		
-		DMatrixRMaj K1 = eq.lookupMatrix("K1");
+		DMatrixRMaj K1 = eq.lookupDDRM("K1");
 		System.out.println(K1);
 		
-		DMatrixRMaj K2 = eq.lookupMatrix("K2");
+		DMatrixRMaj K2 = eq.lookupDDRM("K2");
 		System.out.println(K2);
 	}
 

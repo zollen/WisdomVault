@@ -24,7 +24,7 @@ public class MarkovExercise1 {
 						"]");
 		eq.process("X = [ 0; 1; 0; 0 ]");
 		
-		DMatrixRMaj A = eq.lookupMatrix("A");
+		DMatrixRMaj A = eq.lookupDDRM("A");
 		RealMatrix AA = MatrixUtils.createRealMatrix(MatrixFeatures.array(A));
 
 		DecimalFormat ff = new DecimalFormat("#,##0.000");
@@ -69,7 +69,7 @@ public class MarkovExercise1 {
 			
 			eq.process("K = [ S, X ]");
 
-			DMatrixRMaj K = eq.lookupMatrix("K");
+			DMatrixRMaj K = eq.lookupDDRM("K");
 			CommonOps_DDRM.rref(K.copy(), K.numCols - 1, K);
 
 			eq.process("C0 = K(0,4)");
@@ -93,11 +93,11 @@ public class MarkovExercise1 {
 			eq.process(
 				"ANS = (C0 * pow(LAMDA0, n) * V0) + (C1 * pow(LAMDA1, n) * V1) + (C2 * pow(LAMDA2, n) * V2) + (C3 * pow(LAMDA3, n) * V3)");
 			
-			System.out.println(eq.lookupMatrix("ANS"));
+			System.out.println(eq.lookupDDRM("ANS"));
 			
 			eq.process("ANS2 = C0 * V0");
 			
-			System.out.println("STEADY STATE: " + eq.lookupMatrix("ANS2"));
+			System.out.println("STEADY STATE: " + eq.lookupDDRM("ANS2"));
 		}
 		
 		{
@@ -119,7 +119,7 @@ public class MarkovExercise1 {
 					"    1,    1,    1,    1,  1" +
 			" ]");
 			
-			DMatrixRMaj K = eq.lookupMatrix("K");
+			DMatrixRMaj K = eq.lookupDDRM("K");
 		
 			CommonOps_DDRM.rref(K.copy(), K.numCols - 1, K);
 			

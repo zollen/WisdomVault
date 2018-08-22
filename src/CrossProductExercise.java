@@ -11,8 +11,8 @@ public class CrossProductExercise {
 		eq.process("A = [ 1;  2;  3 ]");
 		eq.process("B = [-1;  3; -2 ]");
 		
-		DMatrixRMaj A = eq.lookupMatrix("A");
-		DMatrixRMaj B = eq.lookupMatrix("B");
+		DMatrixRMaj A = eq.lookupDDRM("A");
+		DMatrixRMaj B = eq.lookupDDRM("B");
 		
 		DMatrixRMaj C = crossProducts(A, B);
 		

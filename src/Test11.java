@@ -14,8 +14,8 @@ public class Test11 {
 		eq.process("U = Q - P");
 		eq.process("V = R - P");
 		
-		DMatrixRMaj U = eq.lookupMatrix("U");
-		DMatrixRMaj V = eq.lookupMatrix("V");
+		DMatrixRMaj U = eq.lookupDDRM("U");
+		DMatrixRMaj V = eq.lookupDDRM("V");
 		
 		DMatrixRMaj W = CommonOps.crossProduct(U, V);
 		
@@ -37,23 +37,23 @@ public class Test11 {
 		eq.process("LEN1 = normF(L)");
 		eq.process("LEN2 = normF(K)");
 		
-		System.out.println("Perpendicular Vector: " + eq.lookupMatrix("K"));
+		System.out.println("Perpendicular Vector: " + eq.lookupDDRM("K"));
 		System.out.println("LEN(Projecting Vector): " + eq.lookupDouble("LEN1"));
 		System.out.println("LEN(Perpendicular Vector): " + eq.lookupDouble("LEN2"));
 		
 		eq.process("A = U");
 		eq.process("B = [ 2; 6; 10 ]");
-		System.out.println("B =====> " + eq.lookupMatrix("B"));
+		System.out.println("B =====> " + eq.lookupDDRM("B"));
 		
 		eq.process("RES = dot(A, B)");
 		System.out.println("RES: " + (int) eq.lookupDouble("RES"));
 		
-		DMatrixRMaj A = eq.lookupMatrix("A");
-		DMatrixRMaj B = eq.lookupMatrix("B");
+		DMatrixRMaj A = eq.lookupDDRM("A");
+		DMatrixRMaj B = eq.lookupDDRM("B");
 		DMatrixRMaj C = CommonOps.crossProduct(A, B);
 		eq.alias(C, "C");
 		eq.process("Q = [ A/normF(A), B/normF(B), C/normF(C) ]");
-		DMatrixRMaj Q = eq.lookupMatrix("Q");
+		DMatrixRMaj Q = eq.lookupDDRM("Q");
 		System.out.println("Q: " + Q);
 		System.out.println("Rank(Q): " + MatrixFeatures.rank(Q));
 		System.out.println("Orth(Q): " + MatrixFeatures.isOrthogonal(Q, 0.00000001d));
@@ -65,7 +65,7 @@ public class Test11 {
 							" 1, 1, 2, -4 " +
 						"]");
 		
-		A = eq.lookupMatrix("A");
+		A = eq.lookupDDRM("A");
 		CommonOps_DDRM.rref(A.copy(), 4, A);
 		
 		System.out.println(A);

@@ -70,8 +70,8 @@ public class TestMe12 {
 		eq.process("P = [ X1; X2; Y1; Y2; Z1; Z2 ]");
 		
 		
-		DMatrixRMaj M = eq.lookupMatrix("M");
-		DMatrixRMaj P = eq.lookupMatrix("P");
+		DMatrixRMaj M = eq.lookupDDRM("M");
+		DMatrixRMaj P = eq.lookupDDRM("P");
 		
 		drawRotatedPolyhedron(M, P);
 		
@@ -135,10 +135,10 @@ public class TestMe12 {
 		eq.process("W = VM");
 		eq.process("Z = W + M");
 		
-		DMatrixRMaj X = eq.lookupMatrix("X");
-		DMatrixRMaj Y = eq.lookupMatrix("K");
-		DMatrixRMaj W = eq.lookupMatrix("W");
-		DMatrixRMaj Z = eq.lookupMatrix("Z");
+		DMatrixRMaj X = eq.lookupDDRM("X");
+		DMatrixRMaj Y = eq.lookupDDRM("K");
+		DMatrixRMaj W = eq.lookupDDRM("W");
+		DMatrixRMaj Z = eq.lookupDDRM("Z");
 		
 		return quadIntersect(X, Y, W, Z);
 	}
@@ -161,7 +161,7 @@ public class TestMe12 {
 							" U(1,0), -1 * V(1,0),  C(1,0) - A(1,0) " +
 						"]");
 		
-		DMatrixRMaj K = eq.lookupMatrix("K");
+		DMatrixRMaj K = eq.lookupDDRM("K");
 		CommonOps_DDRM.rref(K.copy(), K.numCols - 1, K);
 		eq.alias(K, "K");
 		
@@ -169,10 +169,10 @@ public class TestMe12 {
 		eq.process("M1 = A + K(0,2) * U");
 		eq.process("M2 = C + K(1,2) * V");
 		
-		if (MatrixFeatures.isEquals(eq.lookupMatrix("M1"), 
-									eq.lookupMatrix("M2"), 
+		if (MatrixFeatures.isEquals(eq.lookupDDRM("M1"), 
+									eq.lookupDDRM("M2"), 
 									0.00000001d))
-			return eq.lookupMatrix("M1");
+			return eq.lookupDDRM("M1");
 		
 		return null;
 	}

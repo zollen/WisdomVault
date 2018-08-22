@@ -22,12 +22,12 @@ public class PseudoInverseExercise2 {
   							" 1,  0, -1 " +
  						" ]");  */
 		
-		DMatrixRMaj A = eq.lookupMatrix("A");
+		DMatrixRMaj A = eq.lookupDDRM("A");
 		System.out.println("Rank(A): " + MatrixFeatures.rank(A));
 
 		{
 			eq.process("K1 = A' * A");
-			EigenDecomposition eigenV = new EigenDecomposition(MatrixUtils.createRealMatrix(MatrixFeatures.array(eq.lookupMatrix("K1"))));
+			EigenDecomposition eigenV = new EigenDecomposition(MatrixUtils.createRealMatrix(MatrixFeatures.array(eq.lookupDDRM("K1"))));
 			DMatrixRMaj V = new DMatrixRMaj(eigenV.getV().getData());
 			DMatrixRMaj W = new DMatrixRMaj(eigenV.getD().getData());
 			
@@ -45,8 +45,8 @@ public class PseudoInverseExercise2 {
 			eq.process("U2 = 1./" + W.get(1, 1) + " * A * V2");
 			
 			
-			DMatrixRMaj U1 = eq.lookupMatrix("U1");
-			DMatrixRMaj U2 = eq.lookupMatrix("U2");
+			DMatrixRMaj U1 = eq.lookupDDRM("U1");
+			DMatrixRMaj U2 = eq.lookupDDRM("U2");
 			DMatrixRMaj U3 = crossProducts(U1, U2);
 			eq.alias(U3, "U3");
 			
@@ -59,14 +59,14 @@ public class PseudoInverseExercise2 {
 			eq.process("W = [ W , [ 0; 0 ] ]"); 
 			eq.process("K = V * W * U'");
 			
-			System.out.println("A' A: " + eq.lookupMatrix("K"));
+			System.out.println("A' A: " + eq.lookupDDRM("K"));
 
 		}
 		
 		{
 			
 			eq.process("K2 = A * A'");
-			EigenDecomposition eigenU = new EigenDecomposition(MatrixUtils.createRealMatrix(MatrixFeatures.array(eq.lookupMatrix("K2"))));
+			EigenDecomposition eigenU = new EigenDecomposition(MatrixUtils.createRealMatrix(MatrixFeatures.array(eq.lookupDDRM("K2"))));
 			DMatrixRMaj U = new DMatrixRMaj(eigenU.getV().getData());
 			DMatrixRMaj W = new DMatrixRMaj(eigenU.getD().getData());
 			eq.alias(U, "U");
@@ -93,7 +93,7 @@ public class PseudoInverseExercise2 {
 			
 			eq.process("K = V * W * U'");
 			
-			System.out.println("A * A': " + eq.lookupMatrix("K"));
+			System.out.println("A * A': " + eq.lookupDDRM("K"));
 
 		}
 
@@ -108,7 +108,7 @@ public class PseudoInverseExercise2 {
 			
 			eq.process("K = B * A");
 			
-			System.out.println("Pseudo(A) * A: " + eq.lookupMatrix("K"));
+			System.out.println("Pseudo(A) * A: " + eq.lookupDDRM("K"));
 		}
 
 	}

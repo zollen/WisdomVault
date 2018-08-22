@@ -11,7 +11,7 @@ public class TestMe4 {
 		// TODO Auto-generated method stub
 		Equation eq = new Equation();
 		eq.process("A = [ 1, -2, -4; 2, -5, -3; 3, -7, -7 ]");
-		DMatrixRMaj A = eq.lookupMatrix("A");	
+		DMatrixRMaj A = eq.lookupDDRM("A");	
 		DMatrixRMaj cloned = A.copy();
 		
 		System.out.println("RANK: " + MatrixFeatures.rank(A));

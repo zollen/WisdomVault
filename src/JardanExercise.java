@@ -15,7 +15,7 @@ public class JardanExercise {
 							" 1, 1,-1, 2" +
 						"]");
 		
-		DMatrixRMaj A = eq.lookupMatrix("A");
+		DMatrixRMaj A = eq.lookupDDRM("A");
 		System.out.println(A);
 
 		EigenDecomposition eigen = new EigenDecomposition(MatrixUtils.createRealMatrix(MatrixFeatures.array(A)));

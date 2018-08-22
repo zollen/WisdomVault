@@ -16,7 +16,7 @@ public class SVDExercise {
 							"       0,  1,  1 " +
 						"]");
 
-		DMatrixRMaj A = eq.lookupMatrix("A");
+		DMatrixRMaj A = eq.lookupDDRM("A");
 		
 		DMatrixRMaj c1 = new DMatrixRMaj(A.numCols, A.numCols);
 		CommonOps_DDRM.multInner(A, c1);
@@ -49,15 +49,15 @@ public class SVDExercise {
 			System.out.println("Using SingularValueDecomposition");
 		//	System.out.println("[V] " + V);
 		//	System.out.println("[U] " + U);
-			System.out.println("RESULT: " + eq.lookupMatrix("K"));
+			System.out.println("RESULT: " + eq.lookupDDRM("K"));
 		}
 		
 		{
 			eq.process("U = [ 1, 1, 1; 2, -1, 0; 1, 1, -1 ]");
 			eq.process("V = [ sqrt(2), -1, 3; 3, 0, -3./sqrt(2); 1, sqrt(2), 3./sqrt(2) ]");
 			
-			DMatrixRMaj U = eq.lookupMatrix("U");
-			DMatrixRMaj V = eq.lookupMatrix("V");
+			DMatrixRMaj U = eq.lookupDDRM("U");
+			DMatrixRMaj V = eq.lookupDDRM("V");
 			
 			U = unit(U);
 			V = unit(V);
@@ -67,7 +67,7 @@ public class SVDExercise {
 			eq.process("K = U * S * V'");
 			
 			System.out.println("Using EigenComp(A A') and 1/sigma * A' u_i = v_i");
-			System.out.println("RESULT: " + eq.lookupMatrix("K"));
+			System.out.println("RESULT: " + eq.lookupDDRM("K"));
 			
 			
 			
@@ -85,14 +85,14 @@ public class SVDExercise {
 					
 			eq.process("U = [ U1, U2, U3 ]");
 			
-			DMatrixRMaj U = eq.lookupMatrix("U");
+			DMatrixRMaj U = eq.lookupDDRM("U");
 			U = unit(U);
 			eq.alias(U, "U");
 			
 			eq.process("K = U * S * V'");
 			
 			System.out.println("Using EigenComp(A' A).getV() and 1/sigma * A v_i = u_i");
-			System.out.println("RESULT: " + eq.lookupMatrix("K"));	
+			System.out.println("RESULT: " + eq.lookupDDRM("K"));	
 		
 		}
 	

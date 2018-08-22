@@ -10,7 +10,7 @@ public class TestMe3 {
 		Equation eq = new Equation();
 		eq.process("A = [ 1, 0, -1, 2; 0, 3, 1, -1; 2, 4, 0, 3; -3, 1, -1, 2 ]");
 		
-		DMatrixRMaj A = eq.lookupMatrix("A");
+		DMatrixRMaj A = eq.lookupDDRM("A");
 		DMatrixRMaj B = new DMatrixRMaj(4, 2);
 		B.set(0, 0, 1); B.set(0, 1, 2);
 		B.set(1, 0, 3); B.set(1, 1, -1);
@@ -30,7 +30,7 @@ public class TestMe3 {
 		System.out.println(A);
 		System.out.println(B);
 		System.out.println(C);
-		System.out.println(eq.lookupMatrix("M"));
+		System.out.println(eq.lookupDDRM("M"));
 		
 		
 		DMatrixRMaj K = new DMatrixRMaj(3, 3);
@@ -51,7 +51,7 @@ public class TestMe3 {
 		
 		eq.process("J = A * A * A");
 		
-		System.out.println(eq.lookupMatrix("J"));
+		System.out.println(eq.lookupDDRM("J"));
 		
 		DMatrixRMaj multi = new DMatrixRMaj(4, 4);
 		ppow(A, 3, multi);
@@ -62,7 +62,7 @@ public class TestMe3 {
 		
 	
 		eq.process("DAMN = [ 1, 0, 0, 0; 1./4, 1, 0, 0; 1./3, 1./3, 0, 0; 1./2, 1./2, 1./2, 1 ]");
-		DMatrixRMaj damn = eq.lookupMatrix("DAMN");
+		DMatrixRMaj damn = eq.lookupDDRM("DAMN");
 		DMatrixRMaj inv = new DMatrixRMaj(4, 4);
 		CommonOps_DDRM.invert(damn, inv);
 		System.out.println(CommonOps_DDRM.det(damn));

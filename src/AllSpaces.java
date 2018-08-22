@@ -9,7 +9,7 @@ public class AllSpaces {
 		
 		Equation eq = new Equation();
 		eq.process("A = [ 1, 0, 0, 0; 1, 1, 1, 1; 1, 3, 9, 27; 1, 4, 16, 64 ]");	
-		DMatrixRMaj A = eq.lookupMatrix("A");
+		DMatrixRMaj A = eq.lookupDDRM("A");
 		DMatrixRMaj T = A.copy();
 		DMatrixRMaj I = CommonOps_DDRM.identity(A.numRows, A.numCols);
 		

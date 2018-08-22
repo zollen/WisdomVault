@@ -12,14 +12,14 @@ public class LeastSquareExample {
 		eq.process("A = [1, 1, 1; 2, 4, 1; 3, 2, 1 ]");
 		eq.process("b = [ 5; 2; 1 ]");
 	
-		DMatrixRMaj A = eq.lookupMatrix("A");
-		DMatrixRMaj b = eq.lookupMatrix("b");
+		DMatrixRMaj A = eq.lookupDDRM("A");
+		DMatrixRMaj b = eq.lookupDDRM("b");
 		DMatrixRMaj x = new DMatrixRMaj(A.numCols, 1);
 		
 		eq.process("P = A * inv(A' * A) * A' ");
 		eq.process("p = P * b");
-		DMatrixRMaj P = eq.lookupMatrix("P");
-		DMatrixRMaj p = eq.lookupMatrix("p");
+		DMatrixRMaj P = eq.lookupDDRM("P");
+		DMatrixRMaj p = eq.lookupDDRM("p");
 			
 		System.out.println("<=== Projection Matrix ===>");
 		System.out.println(P);
@@ -39,7 +39,7 @@ public class LeastSquareExample {
 		
 		System.out.println("<=== new x ===>");
 		eq.process("K = inv(A' * A) * A' * b");
-		System.out.println(eq.lookupMatrix("K"));
+		System.out.println(eq.lookupDDRM("K"));
 
 		
 		DMatrixRMaj y = new DMatrixRMaj(A.numRows, 1);
@@ -51,7 +51,7 @@ public class LeastSquareExample {
 		
 		
 		eq.process("E = b - p");
-		DMatrixRMaj E = eq.lookupMatrix("E");
+		DMatrixRMaj E = eq.lookupDDRM("E");
 		
 		System.out.println("<=== E ===>");
 		System.out.println(E);

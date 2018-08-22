@@ -9,7 +9,7 @@ public class LinearDependency {
 		// TODO Auto-generated method stub
 		Equation eq = new Equation();
 		eq.process("A =  [1, 1, 1, 5; -2, 3, 1, 2; 3, 4, -2, 3 ]");	
-		DMatrixRMaj A = eq.lookupMatrix("A");
+		DMatrixRMaj A = eq.lookupDDRM("A");
 		DMatrixRMaj b = new DMatrixRMaj(A.numRows, 1);
 		
 		System.out.println("RANK : " + MatrixFeatures.rank(A));

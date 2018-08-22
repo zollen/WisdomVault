@@ -18,7 +18,7 @@ public class MarkovExercise3 {
 					"]");
 		eq.process("X = [ 1; 0; 0 ]");
 
-		DMatrixRMaj A = eq.lookupMatrix("A");
+		DMatrixRMaj A = eq.lookupDDRM("A");
 		RealMatrix AA = MatrixUtils.createRealMatrix(MatrixFeatures.array(A));
 
 		EigenDecomposition eigen = new EigenDecomposition(AA);
@@ -36,7 +36,7 @@ public class MarkovExercise3 {
 		eq.process("K = [ K, [ 0; 0; 0 ]]");
 		eq.process("K = [ K ; [ 1, 1, 1, 1 ]]");
 		
-		DMatrixRMaj K = eq.lookupMatrix("K");
+		DMatrixRMaj K = eq.lookupDDRM("K");
 		
 		System.out.println(K);
 		

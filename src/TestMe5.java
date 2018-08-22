@@ -25,8 +25,8 @@ public class TestMe5 {
 			"]");
 		
 		
-		DMatrixRMaj A = eq.lookupMatrix("a");
-		DMatrixRMaj B = eq.lookupMatrix("B");
+		DMatrixRMaj A = eq.lookupDDRM("a");
+		DMatrixRMaj B = eq.lookupDDRM("B");
 	
 		
 		NormOps_DDRM.normalizeF(A);

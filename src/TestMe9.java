@@ -18,7 +18,7 @@ public class TestMe9 {
 						" 0.4, 0.4, 0.4 " +
 					"]");
 		
-		DMatrixRMaj A = eq.lookupMatrix("A");
+		DMatrixRMaj A = eq.lookupDDRM("A");
 		
 		System.out.println("DET(A): " + CommonOps_DDRM.det(A));
 		System.out.println("RANK(A): " + MatrixFeatures.rank(A));
@@ -37,7 +37,7 @@ public class TestMe9 {
 			eq.process("K = [ K, [ 0; 0; 0 ]]");
 			eq.process("K = [ K ; [ 1, 1, 1, 1 ]]");
 			
-			DMatrixRMaj K = eq.lookupMatrix("K");
+			DMatrixRMaj K = eq.lookupDDRM("K");
 			
 			System.out.println(K);
 			
@@ -51,12 +51,12 @@ public class TestMe9 {
 			eq.process("LEFT = inv(A' * A) * A'");
 			eq.process("K = LEFT * A");
 		
-			System.out.println("LEFT INVERSE: " + eq.lookupMatrix("K"));
+			System.out.println("LEFT INVERSE: " + eq.lookupDDRM("K"));
 			
 			eq.process("RIGHT = A' * inv(A * A')");
 			eq.process("K = A * RIGHT");
 		
-			System.out.println("RIGHT INVERSE: " + eq.lookupMatrix("K"));
+			System.out.println("RIGHT INVERSE: " + eq.lookupDDRM("K"));
 		}
 		
 	}

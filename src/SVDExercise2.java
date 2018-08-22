@@ -17,7 +17,7 @@ public class SVDExercise2 {
 							"  0,  2, -1, -2" +
 						"]");
 
-		DMatrixRMaj A = eq.lookupMatrix("A");
+		DMatrixRMaj A = eq.lookupDDRM("A");
 		
 		DMatrixRMaj c1 = new DMatrixRMaj(A.numCols, A.numCols);
 		CommonOps_DDRM.multInner(A, c1);
@@ -66,21 +66,21 @@ public class SVDExercise2 {
 			}
 			
 			eq.process("U = [ U0, U1, U2 ]");
-			U = eq.lookupMatrix("U");
+			U = eq.lookupDDRM("U");
 			U = unit(U);
 			eq.alias(U, "U");
 			
 			eq.process("V3 = [ -1; 0; 2; -1 ]");
 			eq.process("V = [ V0, V1, V2, V3 ]");
 			
-			V = eq.lookupMatrix("V");
+			V = eq.lookupDDRM("V");
 			
 			V = unit(V);
 			eq.alias(V, "V");
 			
 			
 			eq.process("K = U * S * V'");
-			System.out.println("RESULT: " + eq.lookupMatrix("K"));	
+			System.out.println("RESULT: " + eq.lookupDDRM("K"));	
 			
 		}
 

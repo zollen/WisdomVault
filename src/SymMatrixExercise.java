@@ -22,7 +22,7 @@ public class SymMatrixExercise {
 						"  0, -1,  2" +
 					"]");
 		
-		DMatrixRMaj A = eq.lookupMatrix("A");
+		DMatrixRMaj A = eq.lookupDDRM("A");
 		RealMatrix AA = MatrixUtils.createRealMatrix(MatrixFeatures.array(A));
 		EigenDecomposition eigen = new EigenDecomposition(AA);
 		
@@ -67,7 +67,7 @@ public class SymMatrixExercise {
 	        eq.process("SQR = K * K");
 	        
 	        System.out.println("[A] " + A);
-	        System.out.println("[SQR] " + eq.lookupMatrix("SQR"));
+	        System.out.println("[SQR] " + eq.lookupDDRM("SQR"));
 		}
 	
 	}

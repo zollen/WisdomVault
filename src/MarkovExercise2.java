@@ -26,7 +26,7 @@ public class MarkovExercise2 {
 					"]");
 		eq.process("X = [ 1; 0; 0; 0 ]");
 
-		DMatrixRMaj A = eq.lookupMatrix("A");
+		DMatrixRMaj A = eq.lookupDDRM("A");
 		RealMatrix AA = MatrixUtils.createRealMatrix(MatrixFeatures.array(A));
 
 		EigenDecomposition eigen = new EigenDecomposition(AA);
@@ -67,7 +67,7 @@ public class MarkovExercise2 {
 			
 			eq.process("K = [ " + builder.toString() + ", X ]");
 
-			DMatrixRMaj K = eq.lookupMatrix("K");
+			DMatrixRMaj K = eq.lookupDDRM("K");
 
 			CommonOps_DDRM.rref(K.copy(), K.numCols - 1, K);
 
@@ -94,11 +94,11 @@ public class MarkovExercise2 {
 			System.out.println(formula.toString());
 			eq.process(builder.toString());
 
-			System.out.println(eq.lookupMatrix("ANS"));
+			System.out.println(eq.lookupDDRM("ANS"));
 
 			eq.process("ANS2 = C0 * V0");
 
-			System.out.println("STEADY STATE: " + eq.lookupMatrix("ANS2"));
+			System.out.println("STEADY STATE: " + eq.lookupDDRM("ANS2"));
 		}
 		
 		{
@@ -107,7 +107,7 @@ public class MarkovExercise2 {
 			eq.process("K = [ K, [ 0; 0; 0; 0 ]]");
 			eq.process("K = [ K ; [ 1, 1, 1, 1, 1 ]]");
 			
-			DMatrixRMaj K = eq.lookupMatrix("K");
+			DMatrixRMaj K = eq.lookupDDRM("K");
 			
 			CommonOps_DDRM.rref(K.copy(), K.numCols - 1, K);
 

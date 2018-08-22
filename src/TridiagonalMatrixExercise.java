@@ -10,7 +10,7 @@ public class TridiagonalMatrixExercise {
 		Equation eq = new Equation();
 		eq.process("A = [ 1, 1, 0, 0; 1, 1, 1, 0; 0, 1, 1, 1; 0, 0, 1, 1 ]");
 	
-		DMatrixRMaj A = eq.lookupMatrix("A");
+		DMatrixRMaj A = eq.lookupDDRM("A");
 		
 		System.out.println("<=== A: " + CommonOps_DDRM.det(A) + "===>");
 		System.out.println(A);

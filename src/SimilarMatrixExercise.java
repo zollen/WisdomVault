@@ -27,8 +27,8 @@ public class SimilarMatrixExercise {
 						"  0,  1,  1" +
 					"]");
 		
-		DMatrixRMaj B = eq.lookupMatrix("B");
-		DMatrixRMaj D = eq.lookupMatrix("D");
+		DMatrixRMaj B = eq.lookupDDRM("B");
+		DMatrixRMaj D = eq.lookupDDRM("D");
 		
 		EigenMatrix BB = new EigenMatrix(new EigenDecomposition(MatrixUtils.createRealMatrix(MatrixFeatures.array(B))));
 		List<EigenVector> vec1 = BB.getVectors();
@@ -48,8 +48,8 @@ public class SimilarMatrixExercise {
 		eq.process("P = VB * inv(VD)");
 		eq.process("K = P * B * inv(P)");
 		
-		System.out.println(eq.lookupMatrix("P"));
-		System.out.println(eq.lookupMatrix("K"));
+		System.out.println(eq.lookupDDRM("P"));
+		System.out.println(eq.lookupDDRM("K"));
 		
 		
 
@@ -65,7 +65,7 @@ public class SimilarMatrixExercise {
 						" 0,  0, -1,  0,  0,  1,  2,  0, -2,   0" +
 						"]");
 						
-		DMatrixRMaj a = eq.lookupMatrix("KING");
+		DMatrixRMaj a = eq.lookupDDRM("KING");
 		
 		DMatrixRMaj reduced = new DMatrixRMaj(a.numRows, a.numCols);
 		

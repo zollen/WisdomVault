@@ -19,7 +19,7 @@ public class ShiftCurveExercise {
 						"]");
 		
 		eq.process("K = A * X");
-		System.out.println(eq.lookupMatrix("K"));
+		System.out.println(eq.lookupDDRM("K"));
 	}
 
 }

@@ -18,15 +18,15 @@ public class TestMe6 {
 					"  1, -1,  3 " +
 				"]");
 		
-		System.out.println("Rank(B): " + MatrixFeatures.rank(eq.lookupMatrix("B")));
+		System.out.println("Rank(B): " + MatrixFeatures.rank(eq.lookupDDRM("B")));
 		
 		eq.process("Pbc = inv(C) * B");
 		eq.process("Pcb = inv(B) * C");
 
-		DMatrixRMaj Pbc = eq.lookupMatrix("Pbc");
+		DMatrixRMaj Pbc = eq.lookupDDRM("Pbc");
 		System.out.println("Pb->c: " + Pbc);
 		
-		DMatrixRMaj Pcb = eq.lookupMatrix("Pcb");
+		DMatrixRMaj Pcb = eq.lookupDDRM("Pcb");
 		System.out.println("Pc->b: " + Pcb);
 	} 
 

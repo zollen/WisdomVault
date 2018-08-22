@@ -10,11 +10,11 @@ public class EignExercise {
 		Equation eq = new Equation();
 		eq.process("A = [ pow(e, 1), pow(e, 3); pow(e, 2), pow(e, 2) ]");
 		eq.process("Q = inv(A)");
-		DMatrixRMaj A = eq.lookupMatrix("A");
+		DMatrixRMaj A = eq.lookupDDRM("A");
 
 		System.out.println(A);
 		
-		DMatrixRMaj Q = eq.lookupMatrix("Q");
+		DMatrixRMaj Q = eq.lookupDDRM("Q");
 
 		System.out.println(Q);
 		
@@ -35,18 +35,18 @@ public class EignExercise {
 */		
 /*		
 		eq.process("S = [ -1, 1; 1, 1 ]");
-		DMatrixRMaj S = eq.lookupMatrix("S");
+		DMatrixRMaj S = eq.lookupDDRM("S");
 		
 		System.out.println(S);
 		
 		eq.process("D = inv(S) * A * S");
 		
-		System.out.println(eq.lookupMatrix("D"));
+		System.out.println(eq.lookupDDRM("D"));
 			
 	
 		
 		eq.process("K = (A - D * D * eye(A))");
-		DMatrixRMaj K = eq.lookupMatrix("K");
+		DMatrixRMaj K = eq.lookupDDRM("K");
 		
 		System.out.println(K);
 		
@@ -56,7 +56,7 @@ public class EignExercise {
 	
 		eq.process("K = A - (-1 * eye(A))");
 		
-		DMatrixRMaj K = eq.lookupMatrix("K");
+		DMatrixRMaj K = eq.lookupDDRM("K");
 	
 		System.out.println("<=== A ===>");
 		System.out.println("RANK(A): " + MatrixFeatures.rank(A));

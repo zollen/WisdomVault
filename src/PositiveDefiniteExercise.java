@@ -25,7 +25,7 @@ public class PositiveDefiniteExercise {
 					"  0, -1,  2" +
 					"]");
 		
-		DMatrixRMaj A = eq.lookupMatrix("A");
+		DMatrixRMaj A = eq.lookupDDRM("A");
 		
 		System.out.println(A);
 		

@@ -15,7 +15,7 @@ public class EigenExercise3 {
 		// TODO Auto-generated method stub
 		Equation eq = new Equation();
 		eq.process("A = [ 2, 1; 1, 2 ]");
-		DMatrixRMaj A = eq.lookupMatrix("A");
+		DMatrixRMaj A = eq.lookupDDRM("A");
 
 		RealMatrix m = MatrixUtils.createRealMatrix(MatrixFeatures.array(A));
 		

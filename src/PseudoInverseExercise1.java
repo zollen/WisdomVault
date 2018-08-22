@@ -21,17 +21,17 @@ public class PseudoInverseExercise1 {
   							" 1,  0, -1 " +
  						" ]");  */
 		
-		DMatrixRMaj A = eq.lookupMatrix("A");
+		DMatrixRMaj A = eq.lookupDDRM("A");
 		System.out.println("Rank(A): " + MatrixFeatures.rank(A));
 
 		DMatrixRMaj K = null;
 		
 		eq.process("K = A' * A");
-		K = eq.lookupMatrix("K");
+		K = eq.lookupDDRM("K");
 		System.out.println("Rank(A' A): " + MatrixFeatures.rank(K) + " ==> " + K);
 		
 		eq.process("K = A * A'");
-		K = eq.lookupMatrix("K");
+		K = eq.lookupDDRM("K");
 		System.out.println("Rank(A A'): " + MatrixFeatures.rank(K) + " ==> " + K);
 
 		
@@ -48,7 +48,7 @@ public class PseudoInverseExercise1 {
 		
 		eq.process("K = V * W' * U'");
 		
-		System.out.println(" V inv(W) U' ===> " + eq.lookupMatrix("K"));
+		System.out.println(" V inv(W) U' ===> " + eq.lookupDDRM("K"));
 		
 		
 		DMatrixRMaj B = new DMatrixRMaj(A.numRows, A.numCols);

@@ -24,8 +24,8 @@ public class MarkovExample {
 						"]");
 		eq.process("X = [ 0; 0; 0; 1000 ]");
 
-		DMatrixRMaj A = eq.lookupMatrix("A");
-		DMatrixRMaj X = eq.lookupMatrix("X");
+		DMatrixRMaj A = eq.lookupDDRM("A");
+		DMatrixRMaj X = eq.lookupDDRM("X");
 
 		RealMatrix AA = MatrixUtils.createRealMatrix(MatrixFeatures.array(A));
 
@@ -108,7 +108,7 @@ public class MarkovExample {
 
 		eq.process("K = [ S, X ]");
 
-		DMatrixRMaj K = eq.lookupMatrix("K");
+		DMatrixRMaj K = eq.lookupDDRM("K");
 
 		System.out.println(K);
 
@@ -195,11 +195,11 @@ public class MarkovExample {
 
 		
 		
-		System.out.println("ANS1 eq[A^n * X]\n" + eq.lookupMatrix("ANS1"));
-		System.out.println("ANS2 eq[S D^n inv(S) * X]\n" + eq.lookupMatrix("ANS2"));
+		System.out.println("ANS1 eq[A^n * X]\n" + eq.lookupDDRM("ANS1"));
+		System.out.println("ANS2 eq[S D^n inv(S) * X]\n" + eq.lookupDDRM("ANS2"));
 		System.out
 				.println("ANS3 eq[C0 * LAMDA0^n * V0 + C1 * LAMDA1^n * V1 + C2 * LAMDA2^n * V2 + C3 * LAMDA3^n * V3]\n"
-						+ eq.lookupMatrix("ANS3"));
+						+ eq.lookupDDRM("ANS3"));
 		System.out.println("ANS4 java[A^n * X]\n" + Y1);
 		System.out.println("ANS5 java[S D^n inv(S) * X]\n" + Y2);
 		System.out.println(

@@ -13,23 +13,23 @@ public class RightInverse {
 							" 4, 5, 6 " + 
 						"]");
 
-		DMatrixRMaj A = eq.lookupMatrix("A");
+		DMatrixRMaj A = eq.lookupDDRM("A");
 		System.out.println("Rank(A): " + MatrixFeatures.rank(A));
 		
 		{
 			// YES RIGHT INVERSE: Rank(A) = Rank(AA') = 2 fill the rowpsace
 			eq.process("K = A * A'");
-		//	System.out.println("AA': " + eq.lookupMatrix("K"));
+		//	System.out.println("AA': " + eq.lookupDDRM("K"));
 			eq.process("RIGHT = A' * inv(A * A')");
 			eq.process("K = A * RIGHT");
-			System.out.println("Right Inverse: " + eq.lookupMatrix("RIGHT"));
+			System.out.println("Right Inverse: " + eq.lookupDDRM("RIGHT"));
 
 			// NO LEFT INVERSE: Rank(A) = Rank(A'A) = 2 does not fill colspace
 			eq.process("K = A' * A");
-		//	System.out.println("A'A: " + eq.lookupMatrix("K"));
+		//	System.out.println("A'A: " + eq.lookupDDRM("K"));
 			eq.process("LEFT = inv(A' * A) * A'");
 			eq.process("K = LEFT * A");
-			System.out.println("Left Inverse: " + eq.lookupMatrix("LEFT"));
+			System.out.println("Left Inverse: " + eq.lookupDDRM("LEFT"));
 		}
 	}
 

@@ -21,7 +21,7 @@ public class GramSchmidtExercise {
 		
 		
 		eq.process("AA = [ a, b, c ]");
-		DMatrixRMaj AA = eq.lookupMatrix("AA");
+		DMatrixRMaj AA = eq.lookupDDRM("AA");
 		System.out.println("<=== A ====>");
 		System.out.println(AA);
 		
@@ -29,7 +29,7 @@ public class GramSchmidtExercise {
 		eq.process("B = B / normF(B)");
 		eq.process("C = C / normF(C)");
 		eq.process("Q = [ A, B, C ]");
-		DMatrixRMaj Q = eq.lookupMatrix("Q");
+		DMatrixRMaj Q = eq.lookupDDRM("Q");
 		System.out.println("<=== Q ====>");
 		System.out.println(Q);
 		

@@ -19,7 +19,7 @@ public class TestMe10 {
 							"  4, 1 " +
 						"]");
 		
-		DMatrixRMaj A = eq.lookupMatrix("A");
+		DMatrixRMaj A = eq.lookupDDRM("A");
 	
 		System.out.println(sineIntepolate(A));
 	}

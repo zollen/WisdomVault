@@ -20,7 +20,7 @@ public class PermutationExercise {
 		int i = 0;
 		for (i = 0; i < 1000; i++) {
 			eq.process("K = K * A");
-			DMatrixRMaj K = eq.lookupMatrix("K");
+			DMatrixRMaj K = eq.lookupDDRM("K");
 			
 			int num = total(K);
 			total += num;

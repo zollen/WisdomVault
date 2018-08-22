@@ -28,13 +28,13 @@ public class TestMe7 {
 				
 		eq.process("Xb = inv(B) * Xs3");
 		eq.process("Xc = inv(C) * Xs2");
-		System.out.println("Xb ==> " + eq.lookupMatrix("Xb"));
+		System.out.println("Xb ==> " + eq.lookupDDRM("Xb"));
 
-		System.out.println("Ass * Xs3: " + eq.lookupMatrix("Xs2"));
-		System.out.println("Xc ==> " + eq.lookupMatrix("Xc"));
+		System.out.println("Ass * Xs3: " + eq.lookupDDRM("Xs2"));
+		System.out.println("Xc ==> " + eq.lookupDDRM("Xc"));
 		
 		eq.process("K = inv(C) * Ass * B * Xb");
-		System.out.println("inv(C) * Ass * B * Xb = Xc: " + eq.lookupMatrix("K"));
+		System.out.println("inv(C) * Ass * B * Xb = Xc: " + eq.lookupDDRM("K"));
 
 		
 	}

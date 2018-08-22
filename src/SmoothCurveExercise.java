@@ -26,7 +26,7 @@ public class SmoothCurveExercise {
 		
 		eq.process("K = A * X");
 	
-		DMatrixRMaj K = eq.lookupMatrix("K");
+		DMatrixRMaj K = eq.lookupDDRM("K");
 		
 		K.print("%2.4f");
 	}

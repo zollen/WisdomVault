@@ -15,13 +15,13 @@ public class TestMe8 {
 							"  4,  1 " +
 						"]");
 		
-		DMatrixRMaj A = eq.lookupMatrix("A");
+		DMatrixRMaj A = eq.lookupDDRM("A");
 		
 		eq.process("TA = A' * A");
-		DMatrixRMaj TA = eq.lookupMatrix("TA");
+		DMatrixRMaj TA = eq.lookupDDRM("TA");
 		
 		eq.process("AT = A * A'");
-		DMatrixRMaj AT = eq.lookupMatrix("AT");
+		DMatrixRMaj AT = eq.lookupDDRM("AT");
 	
 		System.out.println("Rank(A' A): " + MatrixFeatures.rank(TA));
 		System.out.println("[A' A] ==> " + TA);
@@ -48,7 +48,7 @@ public class TestMe8 {
 		System.out.println("V ==> " + V);
 		System.out.println("U ==> " + U);
 		
-		System.out.println(eq.lookupMatrix("K"));
+		System.out.println(eq.lookupDDRM("K"));
 
 	}
 }

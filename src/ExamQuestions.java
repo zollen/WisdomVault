@@ -15,10 +15,10 @@ public class ExamQuestions {
 		
 		
 	
-		System.out.println(eq.lookupMatrix("A"));
-		System.out.println(eq.lookupMatrix("T"));
-		System.out.println(eq.lookupMatrix("R"));
-		System.out.println(eq.lookupMatrix("ANS"));
+		System.out.println(eq.lookupDDRM("A"));
+		System.out.println(eq.lookupDDRM("T"));
+		System.out.println(eq.lookupDDRM("R"));
+		System.out.println(eq.lookupDDRM("ANS"));
 		
 	}
 
