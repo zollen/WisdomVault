@@ -1,20 +1,18 @@
-import java.text.DecimalFormat;
 import java.util.Random;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.NormOps_DDRM;
 import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 
 public class LossyCompressionExercise {
 	
-	private static final DecimalFormat formatter = new DecimalFormat("0.000");
-
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
-		DMatrixRMaj A = RandomMatrices_DDRM.rectangle(50, 45, 100, 0, new Random());
+		DMatrixRMaj A = RandomMatrices_DDRM.rectangle(512, 400, 100, 0, new Random());
 		for (int i = 0; i < A.numRows; i++) 
 			for (int j = 0; j < A.numCols; j++)
 				A.set(i, j, (int) A.get(i, j));
@@ -46,6 +44,10 @@ public class LossyCompressionExercise {
 			CommonOps_DDRM.mult(su, vv, suv);
 			
 			result = suv;
+			
+			DMatrixRMaj _diff = new DMatrixRMaj(A.numRows, A.numCols);
+			CommonOps_DDRM.subtract(A, suv, _diff);
+			System.out.println("[" + i + "] ==> " + NormOps_DDRM.elementP(_diff, 1) / (A.numCols * A.numRows));
 		}
 		
 		System.out.println(A);
