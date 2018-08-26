@@ -1,3 +1,4 @@
+import java.text.DecimalFormat;
 import java.util.Random;
 
 import org.ejml.data.DMatrixRMaj;
@@ -9,6 +10,8 @@ import org.ejml.equation.Equation;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 
 public class TestMe14 {
+	
+	private static final DecimalFormat formatter = new DecimalFormat("0.000");
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -19,7 +22,9 @@ public class TestMe14 {
 							" 3,  8, 10,  2 " +
 						"]");
 		
+		
 		DMatrixRMaj A = eq.lookupDDRM("A");
+	
 		
 		SingularValueDecomposition<DMatrixRMaj> svd = 
 				DecompositionFactory_DDRM.svd(A.numRows, A.numCols, true, true, false);
@@ -47,16 +52,16 @@ public class TestMe14 {
 			CommonOps_DDRM.subtract(suv, A, suv_a);
 	
 			System.out.println("Rank(suv, " + i + "): [" + MatrixFeatures.rank(suv) +
-					"], frobenius(" + i + ", suv_a): " + NormOps_DDRM.normF(suv_a) + 
-					", " + "Absolute(" + i + ", suv_a): " + NormOps_DDRM.elementP(suv_a, 1));
+					"], frobenius(" + i + ", suv_a): " + formatter.format(NormOps_DDRM.normF(suv_a)) + 
+					", " + "Absolute(" + i + ", suv_a): " + formatter.format(NormOps_DDRM.elementP(suv_a, 1)));
 		}
 		
 		
 	
 		DMatrixRMaj orth = RandomMatrices_DDRM.orthogonal(3, 3, new Random(System.currentTimeMillis()));
 
-		System.out.println(orth);
-		System.out.println("Det(orth): " + CommonOps_DDRM.det(orth));
+		System.out.println("RandomOrth(3,3): " + orth);
+		System.out.println("Det(orth): " + formatter.format(CommonOps_DDRM.det(orth)));
 		
 	}
 	

@@ -41,7 +41,7 @@ public class CommonOps {
 		return null;
 	}
 	
-	public static double normF(DMatrixRMaj a) {
+	public static double normA(DMatrixRMaj a) {
 		
 		double total = 0;
 		
@@ -55,6 +55,22 @@ public class CommonOps {
 		}
 		
 		return Math.sqrt(total);
+	}
+	
+	public static double normAbs(DMatrixRMaj a) {
+		
+		double total = 0;
+		
+		for (int i = 0; i < a.numCols; i++) {
+			
+			for (int j = 0; j < a.numRows; j++) {
+				
+				double val = a.get(j, i);
+				total += Math.abs(val);
+			}
+		}
+		
+		return total;
 	}
 
 }

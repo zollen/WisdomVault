@@ -236,10 +236,10 @@ public class TestMe12 {
 
 		
 		// Projection of above every vector on each edge
-		double len1 = CommonOps_DDRM.dot(aoo, u) / CommonOps.normF(u) * CommonOps.normF(u);
-		double len2 = CommonOps_DDRM.dot(boo, v) / CommonOps.normF(v) * CommonOps.normF(v);
-		double len3 = CommonOps_DDRM.dot(coo, w) / CommonOps.normF(w) * CommonOps.normF(w);
-		double len4 = CommonOps_DDRM.dot(doo, z) / CommonOps.normF(z) * CommonOps.normF(z);
+		double len1 = CommonOps_DDRM.dot(aoo, u) / CommonOps.normA(u) * CommonOps.normA(u);
+		double len2 = CommonOps_DDRM.dot(boo, v) / CommonOps.normA(v) * CommonOps.normA(v);
+		double len3 = CommonOps_DDRM.dot(coo, w) / CommonOps.normA(w) * CommonOps.normA(w);
+		double len4 = CommonOps_DDRM.dot(doo, z) / CommonOps.normA(z) * CommonOps.normA(z);
 		
 		
 		DMatrixRMaj u1 = new DMatrixRMaj(2, 1);
@@ -263,10 +263,10 @@ public class TestMe12 {
 		
 		// Looking for the nearest edge
 		double min = 9999999;
-		double lenPa = CommonOps.normF(d1);
-		double lenPb = CommonOps.normF(d2);
-		double lenPc = CommonOps.normF(d3);
-		double lenPd = CommonOps.normF(d4);
+		double lenPa = CommonOps.normA(d1);
+		double lenPb = CommonOps.normA(d2);
+		double lenPc = CommonOps.normA(d3);
+		double lenPd = CommonOps.normA(d4);
 		
 		if (min > lenPa && len1 > 0 && lenPa > 0)
 			min = lenPa;
