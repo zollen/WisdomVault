@@ -30,9 +30,9 @@ public class LossyCompressionExercise {
 		DMatrixRMaj S = svd.getW(null);
 		DMatrixRMaj result = null;
 		
-		// omit the last 5 singular values
+		// keep only the first 10% of the column for strong compression
 		
-		for (int i = 1; i <= A.numCols - 5; i++) {
+		for (int i = 1; i <= (A.numCols * 0.1) ; i++) {
 		
 			DMatrixRMaj ss = reconstruct(S, i);
 			DMatrixRMaj uu = reconstruct(U, i);
