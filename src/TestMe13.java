@@ -4,7 +4,7 @@ public class TestMe13 {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		System.out.println(trigBasis(2));
+		System.out.println(trigBasis(3));
 	}
 	
 	public static DMatrixRMaj trigBasis(int k) {
@@ -20,8 +20,9 @@ public class TestMe13 {
 			for (int row = 1; row <= n; row++) {
 				
 				dft.set(row - 1, 2 * col - 1, Math.cos(col * row * Math.PI / k));
-				if (2 * col <= k)
+				if (2 * col < n) {
 					dft.set(row - 1, 2 * col, Math.sin(col * row  * Math.PI / k));
+				}
 			}
 		}
 		
