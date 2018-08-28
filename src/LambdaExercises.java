@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -98,6 +99,11 @@ public class LambdaExercises {
 
 		totalAge = people.stream().mapToInt(Person::getAge).reduce(0, (a,b) -> a * 2 + b );
 		System.out.println("Crazy Age: " + totalAge);
+		
+		double [] input = { 1.0, 2.3, 4.5, 5.6 };
+		
+		Arrays.stream(input).mapToObj( Double::valueOf )
+	      .forEach(System.out::println);
 
 
 	}
