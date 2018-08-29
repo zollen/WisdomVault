@@ -1,9 +1,13 @@
+import java.text.DecimalFormat;
+
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
 
 public class FastFourierTransformer1 {
+	
+	private static DecimalFormat formatter = new DecimalFormat("0.000");
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -27,7 +31,6 @@ public class FastFourierTransformer1 {
 	    title[6] = "Fs/4";
 	    title[7] = "Fs/8";
 	   
-																							// =
 
 		FastFourierTransformer transformer = new FastFourierTransformer(DftNormalization.STANDARD);
 		
@@ -42,7 +45,16 @@ public class FastFourierTransformer1 {
 
 	            Magnitude[i] = Math.sqrt((rr * rr) + (ri * ri));
 	            
-	            System.out.println(i + "   " + title[i] + "      " + Magnitude[i]);
+	            System.out.println(i + "   " + title[i] + "      " + formatter.format(Magnitude[i]));
+	        }
+	        
+	        System.out.println("============================================");
+	        
+	        Complex [] arr = transformer.transform(complx, TransformType.INVERSE);
+	        
+	        for (int i = 0; i < arr.length; i++) {
+	        	System.out.println("AFTER ==> " + formatter.format(arr[i].getReal()) + ", " +
+	        					formatter.format(arr[i].getImaginary()));
 	        }
 
 	    } catch (IllegalArgumentException e) {
