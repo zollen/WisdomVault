@@ -23,13 +23,13 @@ public class FastFourierTransformer1 {
 	    
 	    String [] title = new String[8];
 	    title[0] = "0(DC)";
-	    title[1] = "Fs/8";
-	    title[2] = "Fs/4";
+	    title[1] = "Fs/8 ";
+	    title[2] = "Fs/4 ";
 	    title[3] = "3Fs/8";
-	    title[4] = "Fs/2";
+	    title[4] = "Fs/2 ";
 	    title[5] = "3Fs/8";
-	    title[6] = "Fs/4";
-	    title[7] = "Fs/8";
+	    title[6] = "Fs/4 ";
+	    title[7] = "Fs/8 ";
 	   
 
 		FastFourierTransformer transformer = new FastFourierTransformer(DftNormalization.STANDARD);
@@ -45,7 +45,9 @@ public class FastFourierTransformer1 {
 
 	            Magnitude[i] = Math.sqrt((rr * rr) + (ri * ri));
 	            
-	            System.out.println(i + "   " + title[i] + "      " + formatter.format(Magnitude[i]));
+	            System.out.println(i + "   " + title[i] + "      " + 
+	            formatter.format(input[i]) + "       " +
+	            formatter.format(Magnitude[i]));
 	        }
 	        
 	        System.out.println("============================================");
