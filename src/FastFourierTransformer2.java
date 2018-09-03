@@ -33,7 +33,7 @@ public class FastFourierTransformer2 {
 	    
 	    String [] Angles = new String[8];
 	    Angles[0] = "0";
-	    Angles[1] = "3PI/2";  // Magitude: 0 - 8j
+	    Angles[1] = "3PI/2 (0 - 8j)";  // Magitude: 0 - 8j
 	    Angles[2] = "0";
 	    Angles[3] = "0";
 	    Angles[4] = "ignore";
@@ -62,7 +62,7 @@ public class FastFourierTransformer2 {
 
 	            Magnitude[i] = Math.sqrt((rr * rr) + (ri * ri));
 	                
-	            System.out.println(String.format("%9s   %6s  ===>   %3s   %6s  %6s     %6s     %6s", 
+	            System.out.println(String.format("%9s   %6s  ===>   %3s   %6s  %6s     %6s     %s", 
 	            title[i],
 	            formatter.format(input[i]),
 	            String.valueOf(i + "Hz"),
