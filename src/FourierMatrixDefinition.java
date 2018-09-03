@@ -1,12 +1,7 @@
-import java.text.DecimalFormat;
-
 import org.ejml.equation.Equation;
 
 public class FourierMatrixDefinition {
 	
-	private static DecimalFormat formatter = new DecimalFormat("0.000");
-	
-
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Equation eq = new Equation();
