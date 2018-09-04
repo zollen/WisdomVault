@@ -69,7 +69,7 @@ public class FastFourierTransformer3 {
 	            String.valueOf(i + "Hz"),
 	            formatter.format(rr),
 	            formatter.format(ri),
-	            formatter.format( Magnitude[i] * 2 / complx.length ),
+	            (i < complx.length / 2) ? formatter.format( Magnitude[i] * 2 / complx.length ) : "ignore",
 	            Angles[i]));
 	        }
 	        
