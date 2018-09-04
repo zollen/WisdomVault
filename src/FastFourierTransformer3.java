@@ -95,7 +95,7 @@ public class FastFourierTransformer3 {
 	        samples[6] = Math.sin(6 * 2 * Math.PI / 8);
 	        samples[7] = Math.sin(7 * 2 * Math.PI / 8);
 	        
-	        System.out.println("------------------------");
+	        System.out.println("------------ sin(x) ----------------");
 	        Arrays.stream(samples).forEach(p -> { System.out.println("COMPARE ==> " + formatter.format(p)); });
 	        
 
