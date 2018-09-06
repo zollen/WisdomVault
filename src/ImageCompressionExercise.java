@@ -2,7 +2,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.io.File;
-import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -15,10 +14,6 @@ import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 
 public class ImageCompressionExercise {
-	
-	
-	@SuppressWarnings("unused")
-	private static DecimalFormat formatter = new DecimalFormat("0.000");
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
