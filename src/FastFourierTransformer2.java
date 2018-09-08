@@ -1,6 +1,8 @@
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 import org.apache.commons.math3.complex.Complex;
+import org.apache.commons.math3.complex.ComplexFormat;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
@@ -11,6 +13,15 @@ public class FastFourierTransformer2 {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		NumberFormat nf = NumberFormat.getInstance();
+		nf.setMinimumFractionDigits(3);
+		nf.setMaximumFractionDigits(3);
+
+		// create complex format with custom number format
+		// when one number format is used, both real and
+		// imaginary parts are formatted the same
+		ComplexFormat cf = new ComplexFormat(nf);
+		
 		double [] input = new double[8];
 	    input[0] = Math.sin(0 * 2 * Math.PI / 8);
 	    input[1] = Math.sin(1 * 2 * Math.PI / 8);
@@ -62,12 +73,11 @@ public class FastFourierTransformer2 {
 
 	            Magnitude[i] = Math.sqrt((rr * rr) + (ri * ri));
 	                
-	            System.out.println(String.format("%9s   %6s  ===>   %3s   %6s  %6s     %6s     %s", 
+	            System.out.println(String.format("%9s   %6s  ===>   %3s   %20s     %6s     %s", 
 	            title[i],
 	            formatter.format(input[i]),
 	            String.valueOf(i + "Hz"),
-	            formatter.format(rr),
-	            formatter.format(ri),
+	            cf.format(complx[i]),
 	            (i < complx.length / 2) ? formatter.format( (Magnitude[i] * 2) / complx.length ) : "ignore",
 	            Angles[i]));
 	        }
@@ -80,8 +90,7 @@ public class FastFourierTransformer2 {
 	        Complex [] arr = transformer.transform(complx, TransformType.INVERSE);
 	        
 	        for (int i = 0; i < arr.length; i++) {
-	        	System.out.println("AFTER ==> " + formatter.format(arr[i].getReal()) + ", " +
-	        					formatter.format(arr[i].getImaginary()));
+	        	System.out.println("AFTER ==> " + cf.format(arr[i]));
 	        }
 
 	    } catch (IllegalArgumentException e) {

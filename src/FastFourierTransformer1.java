@@ -1,6 +1,8 @@
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 import org.apache.commons.math3.complex.Complex;
+import org.apache.commons.math3.complex.ComplexFormat;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
@@ -11,6 +13,16 @@ public class FastFourierTransformer1 {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		NumberFormat nf = NumberFormat.getInstance();
+		nf.setMinimumFractionDigits(3);
+		nf.setMaximumFractionDigits(3);
+
+		// create complex format with custom number format
+		// when one number format is used, both real and
+		// imaginary parts are formatted the same
+		ComplexFormat cf = new ComplexFormat(nf);
+		
+		
 		double [] input = new double[8];
 	    input[0] = 0.0;
 	    input[1] = 162.6345596729059;
@@ -55,8 +67,7 @@ public class FastFourierTransformer1 {
 	        Complex [] arr = transformer.transform(complx, TransformType.INVERSE);
 	        
 	        for (int i = 0; i < arr.length; i++) {
-	        	System.out.println("AFTER ==> " + formatter.format(arr[i].getReal()) + ", " +
-	        					formatter.format(arr[i].getImaginary()));
+	        	System.out.println("AFTER ==> " + cf.format(arr[i]));
 	        }
 
 	    } catch (IllegalArgumentException e) {
