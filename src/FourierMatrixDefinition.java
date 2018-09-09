@@ -17,7 +17,7 @@ public class FourierMatrixDefinition {
 		
 		eq.process("F4 = [" +
 						"  1,  1,  1,  1;" +
-						"  1,  i,  1, -1;" +
+						"  1,  i, -1, -i;" +
 						"  1, -1,  1, -1;" +
 						"  1, -i, -1,  i " +
 					"]");
