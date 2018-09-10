@@ -25,10 +25,10 @@ public class FastFourierTransformer4 {
 		
 		
 		double[] inputs = new double[4];
-		inputs[0] = 2 * Math.cos(0 * 5 * 2 * Math.PI / 8) + Math.sin(0 * 1 * 2 * Math.PI / 8);
-		inputs[1] = 2 * Math.cos(1 * 5 * 2 * Math.PI / 8) + Math.sin(1 * 1 * 2 * Math.PI / 8);
-		inputs[2] = 2 * Math.cos(2 * 5 * 2 * Math.PI / 8) + Math.sin(2 * 1 * 2 * Math.PI / 8);
-		inputs[3] = 2 * Math.cos(3 * 5 * 2 * Math.PI / 8) + Math.sin(3 * 1 * 2 * Math.PI / 8);
+		inputs[0] = 2 * Math.cos(0 * 5 * 2 * Math.PI / 4) + Math.sin(0 * 1 * 2 * Math.PI / 4);
+		inputs[1] = 2 * Math.cos(1 * 5 * 2 * Math.PI / 4) + Math.sin(1 * 1 * 2 * Math.PI / 4);
+		inputs[2] = 2 * Math.cos(2 * 5 * 2 * Math.PI / 4) + Math.sin(2 * 1 * 2 * Math.PI / 4);
+		inputs[3] = 2 * Math.cos(3 * 5 * 2 * Math.PI / 4) + Math.sin(3 * 1 * 2 * Math.PI / 4);
 		
 	
 		System.out.println("f(x)=2cos(5x)+sin(x)");
