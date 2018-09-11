@@ -11,6 +11,8 @@ import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
 
 public class FastFourierTransformer5 {
+	
+	private static final int SAMPLE_SIZE = 16;
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -18,25 +20,16 @@ public class FastFourierTransformer5 {
 		nf.setMinimumFractionDigits(3);
 		nf.setMaximumFractionDigits(3);
 		ComplexFormat cf = new ComplexFormat(nf);
-		
-		Complex[][] inputs = new Complex[][] {
-			{ new Complex(2 * Math.cos(0 * 5 * 2 * Math.PI / 8) + Math.sin(0 * 1 * 2 * Math.PI / 8), 0) },
-			{ new Complex(2 * Math.cos(1 * 5 * 2 * Math.PI / 8) + Math.sin(1 * 1 * 2 * Math.PI / 8), 0) },
-			{ new Complex(2 * Math.cos(2 * 5 * 2 * Math.PI / 8) + Math.sin(2 * 1 * 2 * Math.PI / 8), 0) },
-			{ new Complex(2 * Math.cos(3 * 5 * 2 * Math.PI / 8) + Math.sin(3 * 1 * 2 * Math.PI / 8), 0) },
-			{ new Complex(2 * Math.cos(4 * 5 * 2 * Math.PI / 8) + Math.sin(4 * 1 * 2 * Math.PI / 8), 0) },
-			{ new Complex(2 * Math.cos(5 * 5 * 2 * Math.PI / 8) + Math.sin(5 * 1 * 2 * Math.PI / 8), 0) },
-			{ new Complex(2 * Math.cos(6 * 5 * 2 * Math.PI / 8) + Math.sin(6 * 1 * 2 * Math.PI / 8), 0) },
-			{ new Complex(2 * Math.cos(7 * 5 * 2 * Math.PI / 8) + Math.sin(7 * 1 * 2 * Math.PI / 8), 0) }
-		};
-		
-		Complex [] inps = new Complex[8];
-		for (int i = 0; i < 8; i++) 
-			inps[i] = inputs[i][0];
-		
-	
+
 		System.out.println("f(x)=2cos(5x)+sin(x)");
 		System.out.println("==================================");
+		
+		Complex[][] inputs = new Complex[SAMPLE_SIZE][1];
+		Complex inps[] = new Complex[SAMPLE_SIZE];
+		for (int i = 0; i < SAMPLE_SIZE; i++) {
+			inputs[i][0] = new Complex(2 * Math.cos(i * 5 * 2 * Math.PI / SAMPLE_SIZE) + Math.sin(i * 1 * 2 * Math.PI / SAMPLE_SIZE), 0);
+			inps[i] = inputs[i][0];
+		}
 		
 		FastFourierTransformer transformer = new FastFourierTransformer(DftNormalization.STANDARD);
 		Complex[] complx = transformer.transform(inps, TransformType.FORWARD);
@@ -46,7 +39,7 @@ public class FastFourierTransformer5 {
 		
 		
 		FieldMatrix<Complex> m = MatrixUtils.createFieldMatrix(inputs);
-		FieldMatrix<Complex> p = dft(8);
+		FieldMatrix<Complex> p = dft(SAMPLE_SIZE);
 		
 		System.out.println(print(p.multiply(m)));
 	}
