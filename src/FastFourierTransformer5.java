@@ -1,3 +1,4 @@
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Arrays;
 
@@ -13,6 +14,8 @@ import org.apache.commons.math3.transform.TransformType;
 public class FastFourierTransformer5 {
 	
 	private static final int SAMPLE_SIZE = 16;
+	
+	private static DecimalFormat ff = new DecimalFormat("0.000000");
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -21,13 +24,13 @@ public class FastFourierTransformer5 {
 		nf.setMaximumFractionDigits(3);
 		ComplexFormat cf = new ComplexFormat(nf);
 
-		System.out.println("f(x)=2cos(5x)+sin(x)");
+		System.out.println("f(x)=3tan(1/9x)");
 		System.out.println("==================================");
 		
 		Complex[][] inputs = new Complex[SAMPLE_SIZE][1];
 		Complex inps[] = new Complex[SAMPLE_SIZE];
 		for (int i = 0; i < SAMPLE_SIZE; i++) {
-			inputs[i][0] = new Complex(2 * Math.cos(i * 5 * 2 * Math.PI / SAMPLE_SIZE) + Math.sin(i * 1 * 2 * Math.PI / SAMPLE_SIZE), 0);
+			inputs[i][0] = new Complex(3 * Math.tan(i * 1/9 * 2 * Math.PI / SAMPLE_SIZE), 0);
 			inps[i] = inputs[i][0];
 		}
 		
@@ -39,9 +42,11 @@ public class FastFourierTransformer5 {
 		
 		
 		FieldMatrix<Complex> m = MatrixUtils.createFieldMatrix(inputs);
+		
 		FieldMatrix<Complex> p = dft(SAMPLE_SIZE);
 		
 		System.out.println(print(p.multiply(m)));
+		
 	}
 	
 	public static FieldMatrix<Complex> dft(int size) {
