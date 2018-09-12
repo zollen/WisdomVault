@@ -1,4 +1,3 @@
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Arrays;
 
@@ -15,8 +14,6 @@ public class FastFourierTransformer5 {
 	
 	private static final int SAMPLE_SIZE = 16;
 	
-	private static DecimalFormat ff = new DecimalFormat("0.000000");
-
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		NumberFormat nf = NumberFormat.getInstance();
