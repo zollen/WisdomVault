@@ -68,7 +68,7 @@ public class TextRecogExercise {
 
 		
 		
-		// "hello world!"          = [ 0, 1, 0, 0, ? ] 
+		// hello world!            = [ 0, 1, 0, 0, ? ] 
 		// Personal: 9 / 14 * 7 / 7 = 9 / 14
 		// Spam:     5 / 14 * 0     = 0
 		// Conclusion [ 0, 1, 0, 0 ] is personal
