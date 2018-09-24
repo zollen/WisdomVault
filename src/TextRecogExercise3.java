@@ -13,11 +13,11 @@ public class TextRecogExercise3 {
 
 	public static void main(String[] args) throws Exception {
 
-		int [][] data = populateData("data/car.data.txt");
+		int [][] data = loadData("data/car.data.txt");
 
 		double [][][] classifier = learnClassifier(data);
 		
-		Record rec1 = new Record("low", "low", "2", "4", "med", "high");
+		Record rec1 = new Record("low", "low", "4", "4", "big", "high");
 		
 		System.out.println(rec1);
 		System.out.println("CONCLUSION: " + applyClassifier(classifier, rec1));
@@ -79,7 +79,7 @@ public class TextRecogExercise3 {
 		return classifier;	
 	}
 
-	private static int[][] populateData(String file) {
+	private static int[][] loadData(String file) {
 
 		CSVParser csvParser = null;
 		List<Record> records = new ArrayList<Record>();
