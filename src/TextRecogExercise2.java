@@ -19,20 +19,20 @@ public class TextRecogExercise2 {
 
 	public static void main(String[] args) {
 
-		Random rand = new Random(System.nanoTime());
+		Random rand = new Random(1000);
 		SimpleMatrix AA = SimpleMatrix.random_DDRM(9000, 5, 0, 1, rand);
 		DMatrixRMaj A = AA.getDDRM();
 
 		for (int i = 0; i < A.numRows; i++) {
 			for (int j = 0; j < A.numCols; j++) {
-				A.set(i, j, A.get(i, j) > 0.5 ? 1 : 0);
+				A.set(i, j, A.get(i, j) > 0.7 ? 1 : 0);
 			}
 		}
 
 		DMatrixRMaj classifier = learnClassifier(A);
 		System.out.println(classifier);
 
-		SimpleMatrix ins = SimpleMatrix.random_DDRM(50, 4, 0, 1, rand);
+		SimpleMatrix ins = SimpleMatrix.random_DDRM(10, 4, 0, 1, rand);
 		DMatrixRMaj inputs = ins.getDDRM();
 		for (int i = 0; i < inputs.numRows; i++) {
 			for (int j = 0; j < inputs.numCols; j++) {
@@ -47,25 +47,25 @@ public class TextRecogExercise2 {
 
 		DMatrixRMaj classifier = new DMatrixRMaj(2, 5);
 
-		// Freq(Personal, friend) = #T(Personal, friend) / #T(friend)
-		classifier.set(0, 0, (double) countPersonal(FRIEND, A) / countOne(FRIEND, A));
-		// Freq(Personal, hello) = #T(Personal, hello) / #T(hello)
-		classifier.set(0, 1, (double) countPersonal(HELLO, A) / countOne(HELLO, A));
-		// Freq(Personal, reward) = #T(Personal, reward) / #T(reward)
-		classifier.set(0, 2, (double) countPersonal(REWARD, A) / countOne(REWARD, A));
-		// Freq(Personal, money) = #T(Personal, money) / #T(money)
-		classifier.set(0, 3, (double) countPersonal(MONEY, A) / countOne(MONEY, A));
+		// Freq(Personal, friend) = #T(Personal, friend) / #T(personal)
+		classifier.set(0, 0, (double) countPersonal(FRIEND, A) / countOne(CONCLUSION, A));
+		// Freq(Personal, hello) = #T(Personal, hello) / #T(personal)
+		classifier.set(0, 1, (double) countPersonal(HELLO, A) / countOne(CONCLUSION, A));
+		// Freq(Personal, reward) = #T(Personal, reward) / #T(personal)
+		classifier.set(0, 2, (double) countPersonal(REWARD, A) / countOne(CONCLUSION, A));
+		// Freq(Personal, money) = #T(Personal, money) / #T(personal)
+		classifier.set(0, 3, (double) countPersonal(MONEY, A) / countOne(CONCLUSION, A));
 		// Freq(Personal) = #T(Personal) / #T
 		classifier.set(0, 4, (double) countOne(CONCLUSION, A) / A.numRows);
 
-		// Freq(Spam, friend) = #T(Spam, friend) / #T(friend)
-		classifier.set(1, 0, (double) countSpam(FRIEND, A) / countOne(FRIEND, A));
-		// Freq(Spam, hello) = #T(Spam, hello) / #T(hello)
-		classifier.set(1, 1, (double) countSpam(HELLO, A) / countOne(HELLO, A));
-		// Freq(Spam, reward) = #T(Spam, reward) / #T(reward)
-		classifier.set(1, 2, (double) countSpam(REWARD, A) / countOne(REWARD, A));
-		// Freq(Spam, money) = #T(Spam, money) / #T(money)
-		classifier.set(1, 3, (double) countSpam(MONEY, A) / countOne(MONEY, A));
+		// Freq(Spam, friend) = #T(Spam, friend) / #T(spam)
+		classifier.set(1, 0, (double) countSpam(FRIEND, A) / countZero(CONCLUSION, A));
+		// Freq(Spam, hello) = #T(Spam, hello) / #T(spam)
+		classifier.set(1, 1, (double) countSpam(HELLO, A) / countZero(CONCLUSION, A));
+		// Freq(Spam, reward) = #T(Spam, reward) / #T(spam)
+		classifier.set(1, 2, (double) countSpam(REWARD, A) / countZero(CONCLUSION, A));
+		// Freq(Spam, money) = #T(Spam, money) / #T(spam)
+		classifier.set(1, 3, (double) countSpam(MONEY, A) / countZero(CONCLUSION, A));
 		// Freq(Spam) = #T(Spam) / #T
 		classifier.set(1, 4, (double) countZero(CONCLUSION, A) / A.numRows);
 
