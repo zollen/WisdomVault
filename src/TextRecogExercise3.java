@@ -18,13 +18,20 @@ public class TextRecogExercise3 {
 		double [][][] classifier = learnClassifier(data);
 		
 		Record rec1 = new Record("low", "low", "4", "4", "big", "high");
-		
+		applyClassifier(classifier, rec1);
 		System.out.println(rec1);
-		System.out.println("CONCLUSION: " + applyClassifier(classifier, rec1));
+			
+		Record rec2 = new Record("med", "med", "2", "4", "med", "med");	
+		applyClassifier(classifier, rec2);
+		System.out.println(rec2);
+		
+		Record rec3 = new Record("high", "med", "2", "4", "small", "low");	
+		applyClassifier(classifier, rec3);
+		System.out.println(rec3);
 		
 	}
 	
-	private static int applyClassifier(double [][][] classifier, Record record) {
+	private static void applyClassifier(double [][][] classifier, Record record) {
 		
 		int [] inputs = record.toArray();
 		
@@ -44,8 +51,8 @@ public class TextRecogExercise3 {
 				selected = i;
 			}
 		}
-		
-		return selected;
+	
+		record.setConclusion(Record.parse(selected, Record.val6));
 	}
 	
 	private static double[][][] learnClassifier(int [][] data) {
@@ -191,6 +198,10 @@ public class TextRecogExercise3 {
 		public String getConclusion() {
 			return conclusion;
 		}
+		
+		public void setConclusion(String conclusion) {
+			this.conclusion = conclusion;
+		}
 
 		public static int format(String val, String [] possibleValues) {
 			
@@ -205,6 +216,13 @@ public class TextRecogExercise3 {
 			
 			return -9999;
 			
+		}
+		
+		public static String parse(int val, String [] possibleValues) {
+			if (val >= 0 && val < possibleValues.length)
+				return possibleValues[val];
+			
+			return "unknown";
 		}
 		
 		@Override
