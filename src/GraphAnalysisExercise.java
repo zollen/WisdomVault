@@ -36,14 +36,14 @@ public class GraphAnalysisExercise {
 	static {	
 		WEIGHTS.put(01, 1);
 		WEIGHTS.put(10, 1);
-		WEIGHTS.put(02, 7);
-		WEIGHTS.put(20, 7);
-		WEIGHTS.put(13, 17);
-		WEIGHTS.put(31, 17);
-		WEIGHTS.put(23, 67);
-		WEIGHTS.put(32, 67);
-		WEIGHTS.put(12, 97);
-		WEIGHTS.put(21, 97);
+		WEIGHTS.put(02, 3);
+		WEIGHTS.put(20, 3);
+		WEIGHTS.put(13, 5);
+		WEIGHTS.put(31, 5);
+		WEIGHTS.put(23, 11);
+		WEIGHTS.put(32, 11);
+		WEIGHTS.put(12, 23);
+		WEIGHTS.put(21, 23);
 		
 		map.put(0, new ArrayList<Set<Integer>>());
 		map.put(1, new ArrayList<Set<Integer>>());
@@ -55,7 +55,7 @@ public class GraphAnalysisExercise {
 	
 	private static final Set<Set<Integer>> result = new HashSet<Set<Integer>>();
 	
-	private static final int DEPTH = 6;
+	private static final int DEPTH = 2;
 	
 
 	public static void main(String[] args) {
