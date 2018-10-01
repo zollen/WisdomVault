@@ -36,14 +36,14 @@ public class GraphAnalysisExercise {
 	static {	
 		WEIGHTS.put(01, 1);
 		WEIGHTS.put(10, 1);
-		WEIGHTS.put(02, 3);
-		WEIGHTS.put(20, 3);
-		WEIGHTS.put(13, 5);
-		WEIGHTS.put(31, 5);
-		WEIGHTS.put(23, 7);
-		WEIGHTS.put(32, 7);
-		WEIGHTS.put(12, 9);
-		WEIGHTS.put(21, 9);
+		WEIGHTS.put(02, 7);
+		WEIGHTS.put(20, 7);
+		WEIGHTS.put(13, 17);
+		WEIGHTS.put(31, 17);
+		WEIGHTS.put(23, 67);
+		WEIGHTS.put(32, 67);
+		WEIGHTS.put(12, 97);
+		WEIGHTS.put(21, 97);
 		
 		map.put(0, new ArrayList<Set<Integer>>());
 		map.put(1, new ArrayList<Set<Integer>>());
@@ -55,7 +55,7 @@ public class GraphAnalysisExercise {
 	
 	private static final Set<Set<Integer>> result = new HashSet<Set<Integer>>();
 	
-	private static final int DEPTH = 2;
+	private static final int DEPTH = 6;
 	
 
 	public static void main(String[] args) {
@@ -124,18 +124,8 @@ public class GraphAnalysisExercise {
 	
 	public static void printGraph() {
 		
-		for (Set<Integer> set : result) {
-			
-			StringBuilder builder = new StringBuilder();
-			for (Integer val : set) {
-				if (builder.length() > 0)
-					builder.append(", ");
-				
-				String tmp = (val < 10) ? "0" + val : String.valueOf(val);
-				builder.append(tmp);
-			}
-			
-			System.out.println(builder.toString());
+		for (Set<Integer> set : result) {		
+			System.out.println(toString(set));
 		}
 	}
 	
@@ -159,14 +149,29 @@ public class GraphAnalysisExercise {
 			if (set.contains(y * 10 + x))
 				return false;		
 		}
-/*		
+		
 		int cal = calculateWeight(set);
 		if (weights.contains(cal))
 			return false;
 		
 		weights.add(cal);
-*/		
+	
 		return true;
+	}
+	
+	public static String toString(Set<Integer> set) {
+		
+		StringBuilder builder = new StringBuilder();
+		for (Integer val : set) {
+			if (builder.length() > 0)
+				builder.append(", ");
+			
+			String tmp = (val < 10) ? "0" + val : String.valueOf(val);
+			builder.append(tmp);
+		}
+		
+		return builder.toString();
+		
 	}
 
 }
