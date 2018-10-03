@@ -1,7 +1,11 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -105,6 +109,38 @@ public class LambdaExercises {
 		Arrays.stream(input).mapToObj( Double::valueOf )
 	      .forEach(System.out::println);
 
+		Map<String, Set<Integer>> map = new HashMap<String, Set<Integer>>();
+		Set<Integer> aa = new HashSet<Integer>();
+		aa.add(3);
+		aa.add(4);
+		aa.add(1);
+		Set<Integer> bb = new HashSet<Integer>();
+		bb.add(2);
+		bb.add(5);
+		bb.add(7);
+		map.put("KONGS", aa);
+		map.put("ME", bb);
+		
+		map.entrySet().stream().map( Entry::getValue ).forEach( 
+				p -> { 
+						StringBuilder builder = new StringBuilder();
+						p.forEach( 
+						q -> { 
+								if (builder.length() > 0)
+									builder.append(", ");
+								builder.append(q);
+							}
+						);
+						System.out.println("[" + builder.toString() + "]");
+					}
+			);
+		
+		map.entrySet().stream().map( Entry::getValue ).forEach(
+				p -> {  
+						String kk = p.stream().map( String::valueOf ).collect(Collectors.joining(", ")); 
+						System.out.println("[" + kk + "]");
+					} 
+				);
 
 	}
 
