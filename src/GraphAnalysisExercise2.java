@@ -33,7 +33,7 @@ public class GraphAnalysisExercise2 {
 		System.out.println(A);
 		System.out.println("Rank(A): " + MatrixFeatures.rank(A));
 		
-		eq.process("K = A * A * A * A");
+		eq.process("K = A * A");
 		
 		System.out.println(eq.lookupDDRM("K"));
 	}
