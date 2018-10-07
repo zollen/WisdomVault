@@ -4,25 +4,44 @@ public class BlackJackExercise {
 
 	private static DecimalFormat formatter = new DecimalFormat("0.000");
 
-	private static final int LTARGET = 21;
-	private static final int UTARGET = LTARGET;
-
-	private static final boolean[][] PLAY = new boolean[LTARGET][LTARGET];
-	private static final double[][] PROB = new double[LTARGET][LTARGET];
+	private static final int LIMIT = 21;
+	
+	private static final boolean[][] PLAY = new boolean[LIMIT + 1][LIMIT + 1];
+	private static final double[][] PROB = new double[LIMIT + 1][LIMIT + 1];
 
 	private static final int NCARD = 10;
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		blackJack();
+		
+		System.out.println("TOTAL PROB_NEXT_X(5, 5): " + formatter.format(nextMove(5, 5)));
+		System.out.println("TOTAL PROB_NEXT_X(3, 2): " + formatter.format(nextMove(3, 2)));
+		System.out.println("TOTAL PROB_NEXT_X(4, 5): " + formatter.format(nextMove(4, 5)));
+		System.out.println("TOTAL PROB_NEXT_X(5, 4): " + formatter.format(nextMove(5, 4)));
+		System.out.println("TOTAL PROB_NEXT_X(5, 4): " + formatter.format(nextMove(10, 8)));
 
 		printInfo();
+	}
+	
+	public static double nextMove(int X, int Y) {
+		
+		double total = 0d;
+		
+		for (int i = 1; i <= NCARD; i++) {
+			
+			if (X + i <= LIMIT) {
+				total += PROB[X + i][Y];
+			}
+		}
+		
+		return total;	
 	}
 
 	public static void blackJack() {
 
-		for (int XT = LTARGET - 1; XT >= 0; XT--) {
-			for (int YT = LTARGET - 1; YT >= 0; YT--) {
+		for (int XT = LIMIT; XT >= 0; XT--) {
+			for (int YT = LIMIT; YT >= 0; YT--) {
 
 				double dealt = decideDraw(XT, YT);
 				double brust = decidePass(XT, YT);
@@ -59,7 +78,7 @@ public class BlackJackExercise {
 
 	private static double decidePass(int X, int Y) {
 
-		int brust = (LTARGET - (X + NCARD)) <= 0 ? Math.abs(LTARGET - (X + NCARD)) : 0;
+		int brust = (LIMIT - (X + NCARD)) <= 0 ? Math.abs(LIMIT - (X + NCARD)) : 0;
 
 		return (double) brust / NCARD;
 	}
@@ -68,11 +87,11 @@ public class BlackJackExercise {
 
 		StringBuilder info = new StringBuilder();
 
-		for (int XT = 0; XT < LTARGET; XT++) {
+		for (int XT = 0; XT <= LIMIT; XT++) {
 
 			StringBuilder builder = new StringBuilder();
 
-			for (int YT = 0; YT < LTARGET; YT++) {
+			for (int YT = 0; YT <= LIMIT; YT++) {
 				if (builder.length() > 0)
 					builder.append(", ");
 
