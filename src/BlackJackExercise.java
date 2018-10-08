@@ -15,11 +15,11 @@ public class BlackJackExercise {
 		// TODO Auto-generated method stub
 		blackJack();
 		
-		System.out.println("TOTAL PROB_NEXT_X(5, 5): " + formatter.format(nextMove(5, 5)));
-		System.out.println("TOTAL PROB_NEXT_X(3, 2): " + formatter.format(nextMove(3, 2)));
-		System.out.println("TOTAL PROB_NEXT_X(4, 5): " + formatter.format(nextMove(4, 5)));
-		System.out.println("TOTAL PROB_NEXT_X(5, 4): " + formatter.format(nextMove(5, 4)));
-		System.out.println("TOTAL PROB_NEXT_X(5, 4): " + formatter.format(nextMove(10, 8)));
+		System.out.println("TOTAL PROB_NEXT_X(20, 18): " + formatter.format(nextMove(20, 18)) + " : " + (PLAY[20][18] == true ? "T" : "F"));
+		System.out.println("TOTAL PROB_NEXT_X(20, 19): " + formatter.format(nextMove(20, 19)) + " : " + (PLAY[20][19] == true ? "T" : "F"));
+		System.out.println("TOTAL PROB_NEXT_X(18, 20): " + formatter.format(nextMove(18, 20)) + " : " + (PLAY[18][20] == true ? "T" : "F"));
+		System.out.println("TOTAL PROB_NEXT_X(19, 20): " + formatter.format(nextMove(19, 20)) + " : " + (PLAY[19][20] == true ? "T" : "F"));
+		System.out.println("TOTAL PROB_NEXT_X(20, 20): " + formatter.format(nextMove(20, 20)) + " : " + (PLAY[20][20] == true ? "T" : "F"));
 
 		printInfo();
 	}
