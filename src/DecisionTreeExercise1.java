@@ -13,28 +13,28 @@ public class DecisionTreeExercise1 {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		DecisionTree.INode<Double> askorNot = DecisionTree.createDecisionNode(1d);
+		DecisionTree.Node<ExpectValue> askorNot = DecisionTree.createDecisionNode(new ExpectValue("root"));
 		
-		DecisionTree.INode<Double> ask = DecisionTree.createChanceNode(1d);
-		DecisionTree.INode<Double> discount80 = DecisionTree.createUtilityNode(0.80d);
-		DecisionTree.INode<Double> discount75 = DecisionTree.createUtilityNode(0.75d);
-		DecisionTree.INode<Double> discount90 = DecisionTree.createUtilityNode(0.90d);
+		DecisionTree.Node<ExpectValue> ask = DecisionTree.createChanceNode(new ExpectValue("Ask"));
+		DecisionTree.Node<ExpectValue> discount80 = DecisionTree.createUtilityNode(new ExpectValue(20d));
+		DecisionTree.Node<ExpectValue> discount75 = DecisionTree.createUtilityNode(new ExpectValue(25d));
+		DecisionTree.Node<ExpectValue> discount90 = DecisionTree.createUtilityNode(new ExpectValue(10d));
 		
-		DecisionTree.INode<Double> notAsk = DecisionTree.createChanceNode(1d);
-		DecisionTree.INode<Double> tryAgain = DecisionTree.createChanceNode(1d);
-		DecisionTree.INode<Double> giveUp = DecisionTree.createChanceNode(1d); 
+		DecisionTree.Node<ExpectValue> notAsk = DecisionTree.createChanceNode(new ExpectValue("Not Ask"));
+		DecisionTree.Node<ExpectValue> tryAgain = DecisionTree.createChanceNode(new ExpectValue("Try Again"));
+		DecisionTree.Node<ExpectValue> giveUp = DecisionTree.createChanceNode(new ExpectValue("Give Up")); 
 		
-		DecisionTree.INode<Double> nodiscount0 = DecisionTree.createUtilityNode(0d);
-		DecisionTree.INode<Double> dis90 = DecisionTree.createUtilityNode(0.9d);
+		DecisionTree.Node<ExpectValue> nodiscount0 = DecisionTree.createUtilityNode(new ExpectValue(0d));
+		DecisionTree.Node<ExpectValue> dis90 = DecisionTree.createUtilityNode(new ExpectValue(10d));
 		
-		DecisionTree.INode<Double> nodiscount1 = DecisionTree.createUtilityNode(0d);
-		DecisionTree.INode<Double> lessBargin = DecisionTree.createChanceNode(1d);
+		DecisionTree.Node<ExpectValue> nodiscount1 = DecisionTree.createUtilityNode(new ExpectValue(0d));
+		DecisionTree.Node<ExpectValue> lessBargin = DecisionTree.createChanceNode(new ExpectValue("Lesser"));
 		
-		DecisionTree.INode<Double> discount95 = DecisionTree.createUtilityNode(0.95d);
+		DecisionTree.Node<ExpectValue> discount95 = DecisionTree.createUtilityNode(new ExpectValue(5d));
 		
-		DecisionTree.INode<Double> nodiscount2 = DecisionTree.createUtilityNode(0d);
+		DecisionTree.Node<ExpectValue> nodiscount2 = DecisionTree.createUtilityNode(new ExpectValue(0d));
 		
-		DecisionTree<Double> tree = new DecisionTree<Double>(askorNot);
+		DecisionTree<ExpectValue> tree = new DecisionTree<ExpectValue>(askorNot);
 		tree.add("ask", ask);
 		ask.add(0.25, discount80);
 		ask.add(0.30, discount75);
@@ -56,7 +56,36 @@ public class DecisionTreeExercise1 {
 		
 		System.out.println(tree);
 		
-		tree.analysis();
+		System.out.println("Expect Value: " + tree.analysis());
+		
+	}
+	
+	private static class ExpectValue implements DecisionTree.Computable {
+		
+		private Double value = null;
+		private String label = null;
+		
+		public ExpectValue(double val) {
+			this.value = val;
+		}
+		
+		public ExpectValue(String label) {
+			this.label = label;
+		}
+
+		@Override
+		public double value() {
+			// TODO Auto-generated method stub
+			if (value != null)
+				return value;
+			
+			return 0;
+		}
+		
+		@Override
+		public String toString() {
+			return (label != null ? label.toString() : "") + (value != null ? String.valueOf(value) : "");
+		}
 		
 	}
 
