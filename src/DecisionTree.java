@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -7,6 +8,10 @@ import java.util.Random;
 import java.util.Set;
 
 public class DecisionTree<T extends DecisionTree.Computable> {
+	
+	private static final int DESCISION_NODETYPE = 100;
+	private static final int CHANCE_NODETYPE = 101;
+	private static final int UTILITY_NODETYPE = 102;
 	
 	private Node<T> root = null;
 
@@ -36,55 +41,19 @@ public class DecisionTree<T extends DecisionTree.Computable> {
 	
 	@Override
 	public String toString() {
-		return toString(0, null, root);
-	}
-	
-	private String toString(int indent, Branch brch, Node<T> parent) {
-		
-		StringBuilder builder = new StringBuilder();
-		Map<Branch, Node<T>> children = parent.children();
-		Set<Branch> keys = children.keySet();
-		
-		for (int i = 0; i < indent; i++)
-				builder.append(" ");
-		
-		if (brch != null)
-			builder.append(brch + " ==> ");
-		
-		switch(parent.type) {
-		case DecisionNode.NODETYPE:
-			builder.append("? ");
-		break;
-		case ChanceNode.NODETYPE:
-			builder.append("% ");
-		break;
-		case UtilityNode.NODETYPE:
-			builder.append("@ ");
-		break;
-		}
-		
-		builder.append(parent.data.toString() + "\n");
-		
-		for (Branch key : keys) {
-			
-			Node<T> child = children.get(key);
-				
-			builder.append(toString(indent + 4, key, child));
-		}
-		
-		return builder.toString();
+		return root.toString(0, null);
 	}
 	
 	public static <T extends DecisionTree.Computable> DecisionNode<T> createDecisionNode(T data) {
-		return new DecisionNode<T>(data, DecisionNode.NODETYPE);
+		return new DecisionNode<T>(data);
 	}
 	
 	public static <T extends DecisionTree.Computable> ChanceNode<T> createChanceNode(T data) {
-		return new ChanceNode<T>(data, ChanceNode.NODETYPE);
+		return new ChanceNode<T>(data);
 	}
 	
 	public static <T extends DecisionTree.Computable> UtilityNode<T> createUtilityNode(T data) {
-		return new UtilityNode<T>(data, UtilityNode.NODETYPE);
+		return new UtilityNode<T>(data);
 	}
 	
 	
@@ -124,18 +93,33 @@ public class DecisionTree<T extends DecisionTree.Computable> {
 		}
 		
 		public abstract double analysis(); 
-	}
-	
-	public static class DecisionNode<T extends DecisionTree.Computable> extends Node<T> {
 		
-		private static final int NODETYPE = 100;
+		protected abstract String prefix();
 		
-		private DecisionNode(T data, int type) {
-			super(data, type);
+		protected String toString(int indent, Branch brch) {
+			StringBuilder builder = new StringBuilder();
+			Map<Branch, Node<T>> children = this.children();
+			Set<Branch> keys = children.keySet();
+			
+			for (int i = 0; i < indent; i++)
+					builder.append(" ");
+			
+			if (brch != null)
+				builder.append(brch + " ==> " + this.prefix() + " ");
+			
+			builder.append("[" + this.data.toString() + "]\n");
+			
+			for (Branch key : keys) {
+				
+				Node<T> child = children.get(key);
+					
+				builder.append(child.toString(indent + 4, key));
+			}
+			
+			return builder.toString();
 		}
 		
-		@Override
-		public double analysis() {
+		protected Collection<Double> calculate() {
 			
 			Set<Branch> branches = children.keySet();
 			List<Double> list = new ArrayList<Double>();
@@ -146,19 +130,36 @@ public class DecisionTree<T extends DecisionTree.Computable> {
 				Node<T> child = children.get(branch);
 				
 				switch(child.type) {
-				case DecisionNode.NODETYPE:
-				case ChanceNode.NODETYPE: 
+				case DESCISION_NODETYPE:
+				case CHANCE_NODETYPE: 
 					if (branch.prob != null)
 						tmp = branch.prob;
+	
 					list.add(tmp * child.analysis());
 				break;
-				case UtilityNode.NODETYPE:
+				case UTILITY_NODETYPE:
 					if (branch.prob != null)
 						tmp = branch.prob;
+					
 					list.add(tmp * child.analysis());						
 				break;
 				}
 			}
+			
+			return list;		
+		}
+	}
+	
+	public static class DecisionNode<T extends DecisionTree.Computable> extends Node<T> {
+		
+		private DecisionNode(T data) {
+			super(data, DESCISION_NODETYPE);
+		}
+		
+		@Override
+		public double analysis() {
+			
+			Collection<Double> list = calculate();
 			
 			OptionalDouble dd = list.stream().mapToDouble(b -> b).max();
 			if (dd != null && dd.isPresent())
@@ -166,55 +167,62 @@ public class DecisionTree<T extends DecisionTree.Computable> {
 			
 			return 0d;
 		}
+		
+		@Override
+		protected String prefix() {
+			return "?";
+		}
+		
+		@Override
+		public String toString(int indent, Branch brch) {
+			return super.toString(indent, brch);
+		}
 	}
 	
 	public static class ChanceNode<T extends DecisionTree.Computable> extends Node<T> {
 		
-		private static final int NODETYPE = 101;
-		
-		private ChanceNode(T data, int type) {
-			super(data, type);
+		private ChanceNode(T data) {
+			super(data, CHANCE_NODETYPE);
 		}
 		
 		@Override
 		public double analysis() {
 			
-			Set<Branch> branches = children.keySet();
-			List<Double> list = new ArrayList<Double>();
-			
-			for (Branch branch : branches) {
-				
-				double tmp = 1d;
-				Node<T> child = children.get(branch);
-				
-				switch(child.type) {
-				case DecisionNode.NODETYPE:
-				case ChanceNode.NODETYPE:
-					list.add(child.analysis());
-				break;
-				case UtilityNode.NODETYPE:
-					if (branch.prob != null)
-						tmp = branch.prob;
-					list.add(tmp * child.analysis());						
-				break;
-				}
-			}
+			Collection<Double> list = calculate();
 			
 			return list.stream().mapToDouble(b -> b).sum();
+		}
+		
+		@Override
+		protected String prefix() {
+			return "%";
+		}
+		
+		@Override
+		public String toString(int indent, Branch brch) {
+			return super.toString(indent, brch);
 		}
 	}
 	
 	public static class UtilityNode<T extends DecisionTree.Computable> extends Node<T> {
 		
-		private static final int NODETYPE = 102;
-		
-		private UtilityNode(T data, int type) {
-			super(data, type);
+		private UtilityNode(T data) {
+			super(data, UTILITY_NODETYPE);
 		}
 		
 		@Override
 		public double analysis() {
 			return data.value();
+		}
+		
+		@Override
+		protected String prefix() {
+			return "@";
+		}
+		
+		@Override
+		public String toString(int indent, Branch brch) {
+			return super.toString(indent, brch);
 		}
 	}
 	

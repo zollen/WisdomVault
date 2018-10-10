@@ -56,7 +56,7 @@ public class DecisionTreeExercise1 {
 		
 		System.out.println(tree);
 		
-		System.out.println("Expect Value: " + tree.analysis());
+		System.out.println("Expect Discount: " + tree.analysis());
 		
 	}
 	
