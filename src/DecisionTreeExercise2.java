@@ -66,6 +66,14 @@ public class DecisionTreeExercise2 {
 		 * P(R=T) = P(R=T and S=T) + P(R=T and S=F) = P(R=T) = 0.46
 		 * P(R=F) = 1 - P(R=T) = 0.56
 		 * 
+		 * Based on P(R=T|S=T) = 0.7
+		 * P(S=T|R=T)P(R=T)/P(S=T) = 0.7
+		 * P(S=T|R=T) = 0.7 * P(S=T) / P(R=T) = 0.7 * 0.2 / 0.46 = 0.3043 = 0.30
+		 * 
+		 * Based on P(R=T|S=F) = 0.4
+		 * P(S=F|R=T)P(R=T)/P(S=F) = 0.4
+		 * P(S=F|R=T) = 0.4 * P(S=F) / P(R=T) = 0.4 * 0.8 / 0.46 = 0.6956 = 0.70
+		 * 
 		 * Let A1 be the above strategy
 		 * Exp(Outcome(A1)) = Exp(Outcome(A1)|R=T)P(R=T) + Exp(Outcome(A1)|R=F)P(R=F)
 		 * 
