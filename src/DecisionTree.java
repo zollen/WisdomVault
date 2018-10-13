@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalDouble;
@@ -69,7 +69,7 @@ public class DecisionTree<T extends DecisionTree.Computable> {
 		public Node(T data, int type) {
 			this.data = data;
 			this.type = type;
-			this.children = new HashMap<Branch, Node<T>>();
+			this.children = new LinkedHashMap<Branch, Node<T>>();
 		}	
 		
 		public void add(Node<T> child) {
