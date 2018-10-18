@@ -53,7 +53,7 @@ public class DecisionTreeExercise2 {
 		*/
 		/**
 		 * 
-		 * Reviewer has the following conditional probabilitiy:
+		 * Reviewer has the following conditional probability:
 		 * 
 		 * Let R be a random variable of reviewer's opinion
 		 * Let S be a random variable of book would be a success
