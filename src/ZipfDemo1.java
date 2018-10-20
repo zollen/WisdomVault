@@ -51,8 +51,8 @@ public class ZipfDemo1 extends ApplicationFrame {
         	total += (double) 1 / Math.pow(i, EULER_MASCHERONI_CONSTANT);
         }
    
-        System.out.println("Rank            Word         Frequency      Probability          K             Average(K)          Deviation(K)");
-        System.out.println("===============================================================================================================");
+        System.out.println("Rank            Word    Frequency      Freq(#N)/Freq(#1)  Probability          K             Average(K)          Deviation(K)");
+        System.out.println("=============================================================================================================================");
         List<Double> allKs = new ArrayList<Double>();
         for (int i = 0; i < words.size(); i++) {
         	
@@ -66,15 +66,17 @@ public class ZipfDemo1 extends ApplicationFrame {
         	allKs.add(k);
         	double avg = (double) allKs.stream().collect(Collectors.summingDouble(p -> p)) / allKs.size();
         	
-        	System.out.println(String.format("%2d [%15s]         %4d           %5s               %5s        %5s             %7s", 
+        	System.out.println(String.format("%3d [%15s]   %4d           %5s             %5s               %5s        %5s             %7s", 
         			(i + 1), 
         			(word.getWord().substring(0, word.getWord().length() < 15 ? word.getWord().length() : 15)),
         			word.getCount(),
+        			formatter.format((double) word.getCount() / words.get(0).getCount()),
         			formatter.format(prob),
         			formatter.format(k),
         			formatter.format(avg),
         			formatter.format(k - avg)
         			));
+
         }
 
         final XYSeriesCollection dataset = new XYSeriesCollection();

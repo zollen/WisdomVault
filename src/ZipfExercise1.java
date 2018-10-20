@@ -1,7 +1,6 @@
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -32,9 +31,17 @@ public class ZipfExercise1 {
 			
 			String [] tokens = content.split("[^\\p{Alpha}]+");
 			
-			total = tokens.length;
+			List<String> refined = new ArrayList<String>();
+			for (String token : tokens) {
+				if (token.length() == 1 && !token.equals("a") && !token.equals("i"))
+						continue;
+				
+				refined.add(token);
+			}
 			
-			Map<String, Long> map = Arrays.stream(tokens).collect(Collectors.groupingBy(p -> p.toLowerCase(), Collectors.counting()));
+			total = refined.size();
+			
+			Map<String, Long> map = refined.stream().collect(Collectors.groupingBy(p -> p.toLowerCase(), Collectors.counting()));
 			
 			Map<?, ?> map2 = map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey, (a, b) -> a + ", " + b, TreeMap::new));
 						
