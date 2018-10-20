@@ -59,13 +59,13 @@ public class ZipfDemo1 extends ApplicationFrame {
         	ZipfExercise1.Word word = words.get(i);
         	
         	data1.add(i + 1, word.getCount());
-        	data2.add(i + 1, 30000 * (double)(1 / Math.pow((i + 1), EULER_MASCHERONI_CONSTANT) / total));
+        	data2.add(i + 1, 70000 * (double)(1 / Math.pow((i + 1), EULER_MASCHERONI_CONSTANT) / total));
         	
         	double prob = (double) word.getCount() / wordsCount;
         	double k = (double) prob * (i + 1);
         	allKs.add(k);
         	double avg = (double) allKs.stream().collect(Collectors.summingDouble(p -> p)) / allKs.size();
-        	
+       	
         	System.out.println(String.format("%3d [%15s]   %4d           %5s             %5s               %5s        %5s             %7s", 
         			(i + 1), 
         			(word.getWord().substring(0, word.getWord().length() < 15 ? word.getWord().length() : 15)),
