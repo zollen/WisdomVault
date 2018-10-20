@@ -42,7 +42,7 @@ public class ZipfDemo1 extends ApplicationFrame {
 
         super(title);
 
-        final XYSeries data1 = new XYSeries("USA.txt Words Analysis");
+        final XYSeries data1 = new XYSeries("book.txt Words Analysis");
         final XYSeries data2 = new XYSeries("Zipf Distribution Prediction");
        
        
@@ -66,7 +66,7 @@ public class ZipfDemo1 extends ApplicationFrame {
         	allKs.add(k);
         	double avg = (double) allKs.stream().collect(Collectors.summingDouble(p -> p)) / allKs.size();
        	
-        	System.out.println(String.format("%3d [%15s]   %4d           %5s             %5s               %5s        %5s             %7s", 
+        	System.out.println(String.format("%3d [%15s]   %4d          |%5s            |%5s              |%5s       |%5s             |%7s", 
         			(i + 1), 
         			(word.getWord().substring(0, word.getWord().length() < 15 ? word.getWord().length() : 15)),
         			word.getCount(),
