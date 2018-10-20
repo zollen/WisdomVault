@@ -59,7 +59,7 @@ public class ZipfDemo1 extends ApplicationFrame {
         	ZipfExercise1.Word word = words.get(i);
         	
         	data1.add(i + 1, word.getCount());
-        	data2.add(i + 1, 10000 * (double)(1 / Math.pow((i + 1), EULER_MASCHERONI_CONSTANT) / total));
+        	data2.add(i + 1, 30000 * (double)(1 / Math.pow((i + 1), EULER_MASCHERONI_CONSTANT) / total));
         	
         	double prob = (double) word.getCount() / wordsCount;
         	double k = (double) prob * (i + 1);
@@ -127,7 +127,7 @@ public class ZipfDemo1 extends ApplicationFrame {
      */
     public static void main(final String[] args) {
 
-    	ZipfExercise1 zipf = new ZipfExercise1("data/USA.txt");
+    	ZipfExercise1 zipf = new ZipfExercise1("data/book.txt");
     	
     	
         final ZipfDemo1 demo = new ZipfDemo1("Zipf Distribution", zipf.getTotal(), zipf.getWords());
