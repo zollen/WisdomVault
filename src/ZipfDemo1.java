@@ -1,9 +1,7 @@
 
 import java.awt.Color;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -29,8 +27,6 @@ public class ZipfDemo1 extends ApplicationFrame {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private static final double EULER_MASCHERONI_CONSTANT = 0.5772156649d;
-	
 	private static final DecimalFormat formatter = new DecimalFormat("0.0000");
 
 	/**
@@ -43,50 +39,49 @@ public class ZipfDemo1 extends ApplicationFrame {
         super(title);
 
         final XYSeries data1 = new XYSeries("book.txt Words Analysis");
-        final XYSeries data2 = new XYSeries("Zipf Distribution Prediction");
-       
+        final XYSeries data2 = new XYSeries("Stanard Zipf Distribution");
+      
        
         double total = 0d;
-        for (int i = 1; i < words.size(); i++) {
-        	total += (double) 1 / Math.pow(i, EULER_MASCHERONI_CONSTANT);
+        for (int i = 1; i < wordsCount; i++) {
+        	total += (double) 1 / i;
         }
    
-        System.out.println("Rank            Word    Frequency      Freq(#N)/Freq(#1)  Probability          K             Average(K)          Deviation(K)");
-        System.out.println("=============================================================================================================================");
-        List<Double> allKs = new ArrayList<Double>();
+        System.out.println("Total Words: " + wordsCount);
+        System.out.println("Rank            Word    Frequency      Freq(#N)/Freq(#1)  Freq(#N)/Total     Zipf-Freq(#Rank)");
+        System.out.println("=============================================================================================");
+        
         for (int i = 0; i < words.size(); i++) {
         	
         	ZipfExercise1.Word word = words.get(i);
         	
-        	data1.add(i + 1, word.getCount());
-        	data2.add(i + 1, 70000 * (double)(1 / Math.pow((i + 1), EULER_MASCHERONI_CONSTANT) / total));
-        	
         	double prob = (double) word.getCount() / wordsCount;
-        	double k = (double) prob * (i + 1);
-        	allKs.add(k);
-        	double avg = (double) allKs.stream().collect(Collectors.summingDouble(p -> p)) / allKs.size();
+        	double c = (double) 1 / total;
+        	double zipf = (double) c / (i + 1);
+   
        	
-        	System.out.println(String.format("%3d [%15s]   %4d          |%5s            |%5s              |%5s       |%5s             |%7s", 
+        	System.out.println(String.format("%3d [%15s]   %4d          |%5s            |%5s            |%5s", 
         			(i + 1), 
         			(word.getWord().substring(0, word.getWord().length() < 15 ? word.getWord().length() : 15)),
         			word.getCount(),
         			formatter.format((double) word.getCount() / words.get(0).getCount()),
         			formatter.format(prob),
-        			formatter.format(k),
-        			formatter.format(avg),
-        			formatter.format(k - avg)
+        			formatter.format(zipf)
         			));
+        	
+        	data1.add(i + 1, prob);
+        	data2.add(i + 1, zipf);
 
         }
 
         final XYSeriesCollection dataset = new XYSeriesCollection();
         dataset.addSeries(data1);
         dataset.addSeries(data2);
-       
+        
      
 
         final JFreeChart chart = ChartFactory.createXYLineChart(
-            "Zipf Distribution",      		// chart title
+            "Zipf and WH40K Novel Comparison",      		// chart title
             "Rank",              		 	// domain axis label
             "Frequency",                  	// range axis label
             dataset,                  		// data
@@ -132,7 +127,7 @@ public class ZipfDemo1 extends ApplicationFrame {
     	ZipfExercise1 zipf = new ZipfExercise1("data/book.txt");
     	
     	
-        final ZipfDemo1 demo = new ZipfDemo1("Zipf Distribution", zipf.getTotal(), zipf.getWords());
+        final ZipfDemo1 demo = new ZipfDemo1("Zipf Comparsion", zipf.getTotal(), zipf.getWords());
         demo.pack();
         RefineryUtilities.centerFrameOnScreen(demo);
         demo.setVisible(true);
