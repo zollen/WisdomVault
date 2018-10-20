@@ -34,14 +34,14 @@ public class ZipfExercise1 {
 			List<String> refined = new ArrayList<String>();
 			for (String token : tokens) {
 				if (token.trim().length() <= 1 && !token.equals("a") && !token.equals("i"))
-						continue;
+					continue;
 				
-				refined.add(token);
+				refined.add(token.trim().toLowerCase());
 			}
 			
 			total = refined.size();
 			
-			Map<String, Long> map = refined.stream().collect(Collectors.groupingBy(p -> p.toLowerCase(), Collectors.counting()));
+			Map<String, Long> map = refined.stream().collect(Collectors.groupingBy(p -> p, Collectors.counting()));
 			
 			Map<?, ?> map2 = map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey, (a, b) -> a + ", " + b, TreeMap::new));
 						
