@@ -33,7 +33,7 @@ public class ZipfExercise1 {
 			
 			List<String> refined = new ArrayList<String>();
 			for (String token : tokens) {
-				if (token.length() == 1 && !token.equals("a") && !token.equals("i"))
+				if (token.trim().length() <= 1 && !token.equals("a") && !token.equals("i"))
 						continue;
 				
 				refined.add(token);
