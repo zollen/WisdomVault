@@ -56,8 +56,7 @@ public class ZipfDemo1 extends ApplicationFrame {
         	ZipfExercise1.Word word = words.get(i);
         	
         	double prob = (double) word.getCount() / wordsCount;
-        	double c = (double) 1 / total;
-        	double zipf = (double) c / (i + 1);
+        	double zipf = (double) 1 / total / (i + 1);
    
        	
         	System.out.println(String.format("%3d [%15s]   %4d          |%5s            |%5s            |%5s", 
