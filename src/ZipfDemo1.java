@@ -81,7 +81,7 @@ public class ZipfDemo1 extends ApplicationFrame {
      
 
         final JFreeChart chart = ChartFactory.createXYLineChart(
-            "Zipf and WH40K Novel Comparison",      		// chart title
+            "Zipf and Novel Comparison",      		// chart title
             "Rank",              		 	// domain axis label
             "Frequency",                  	// range axis label
             dataset,                  		// data
