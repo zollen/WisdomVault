@@ -34,12 +34,12 @@ public class ZipfDemo1 extends ApplicationFrame {
      *
      * @param title  the frame title.
      */
-    public ZipfDemo1(final String title, long wordsCount, List<ZipfExercise1.Word> words) {
+    public ZipfDemo1(final String title, long wordsCount, List<ZipfDistribution.Word> words) {
 
         super(title);
 
         final XYSeries data1 = new XYSeries("book.txt Words Analysis");
-        final XYSeries data2 = new XYSeries("Stanard Zipf Distribution");
+        final XYSeries data2 = new XYSeries("Standard Zipf Distribution");
       
        
         double total = 0d;
@@ -53,7 +53,7 @@ public class ZipfDemo1 extends ApplicationFrame {
         
         for (int i = 0; i < words.size(); i++) {
         	
-        	ZipfExercise1.Word word = words.get(i);
+        	ZipfDistribution.Word word = words.get(i);
         	
         	double prob = (double) word.getCount() / wordsCount;
         	double zipf = (double) 1 / total / (i + 1);
@@ -123,7 +123,7 @@ public class ZipfDemo1 extends ApplicationFrame {
      */
     public static void main(final String[] args) {
 
-    	ZipfExercise1 zipf = new ZipfExercise1("data/book.txt");
+    	ZipfDistribution zipf = new ZipfDistribution("data/book.txt");
     	
     	
         final ZipfDemo1 demo = new ZipfDemo1("Zipf Comparsion", zipf.getTotal(), zipf.getWords());

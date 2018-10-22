@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-public class ZipfExercise1 {
+public class ZipfDistribution {
 	
 	private String file = null;
 	
@@ -17,7 +17,7 @@ public class ZipfExercise1 {
 	
 	private long total = 0;
 	
-	public ZipfExercise1(String file) {
+	public ZipfDistribution(String file) {
 		this.file = file;
 		
 		this.analysis();
