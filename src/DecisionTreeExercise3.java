@@ -11,40 +11,6 @@ public class DecisionTreeExercise3 {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		/**
-		 * 
-		 * Reviewer has the following conditional probability:
-		 * 
-		 * Let R be a random variable of reviewer's opinion
-		 * Let S be a random variable of book would be a success
-		 * 
-		 * P(S=T) = 0.2
-		 * P(S=F) = 0.8
-		 * 
-		 * P(R=T|S=T) = 0.7, P(R=T and S=T)/P(S=T) = 0.7, P(R=T and S=T) = 0.14
-		 * P(R=T|S=F) = 0.4, P(R=T and S=F)/P(S=F) = 0.4, P(R=T and S=F) = 0.32
-		 * P(R=T) = P(R=T and S=T) + P(R=T and S=F) = P(R=T) = 0.46
-		 * P(R=F) = 1 - P(R=T) = 0.54
-		 * 
-		 * Based on P(R=T|S=T) = 0.7
-		 * P(S=T|R=T)P(R=T)/P(S=T) = 0.7
-		 * P(S=T|R=T) = 0.7 * P(S=T) / P(R=T) = 0.7 * 0.2 / 0.46 = 0.3043 = 0.30434784
-		 * 
-		 * Based on P(R=T|S=F) = 0.4
-		 * P(S=F|R=T)P(R=T)/P(S=F) = 0.4
-		 * P(S=F|R=T) = 0.4 * P(S=F) / P(R=T) = 0.4 * 0.8 / 0.46 = 0.6956 = 0.69565217
-		 * 
-		 * Let A1 be the above strategy
-		 * Exp(Outcome(A1)) = Exp(Outcome(A1)|R=T)P(R=T) + Exp(Outcome(A1)|R=F)P(R=F)
-		 * 
-		 * Since Exp(OutCome(A1)|R=F)P(R=F) = 0
-		 * Exp(Outcome(A1)) = Exp(Outcome(A1)|R=T)P(R=T)
-		 * Exp(Outcome(A1)) = $50,000 * P(S=T|R=T)P(R=T) + (-10,000) * P(S=F|R=T)P(R=T)
-		 * Exp(Outcome(A1)) = $50,000 * P(R=T|S=T)P(S=T) + (-10,000) * P(R=T|S=F)P(S=F)
-		 * Exp(Outcome(A1)) = $50,000 * 0.7 * 0.2 + (-10,000) * 0.4 * 0.8
-		 * Exp(Outcome(A1)) = $3,800
-		 * 
-		 */
 		{
 			DecisionTree.Node<ExpectValue> reviewerDecision = DecisionTree
 					.createDecisionNode(new ExpectValue("Decisions"));
@@ -52,11 +18,13 @@ public class DecisionTreeExercise3 {
 
 			DecisionTree.Node<ExpectValue> publishedAny = DecisionTree.createChanceNode(new ExpectValue("Published"));
 			DecisionTree.Node<ExpectValue> rejectedAny = DecisionTree.createChanceNode(new ExpectValue("Rejected"));
-			DecisionTree.Node<ExpectValue> consulted = DecisionTree.createChanceNode(new ExpectValue("Consulted"));
+			DecisionTree.Node<ExpectValue> consulted1 = DecisionTree.createChanceNode(new ExpectValue("Consulted #1"));
+			DecisionTree.Node<ExpectValue> consulted2 = DecisionTree.createChanceNode(new ExpectValue("Consulted #2"));
 
+			
 			tree.add("Published", publishedAny);
 			tree.add("Rejected", rejectedAny);
-			tree.add("Consulted", consulted);
+			tree.add("Consulted #1", consulted1);
 
 			DecisionTree.Node<ExpectValue> success1 = DecisionTree.createUtilityNode(new ExpectValue(50000d));
 			DecisionTree.Node<ExpectValue> failure1 = DecisionTree.createUtilityNode(new ExpectValue(-10000d));
@@ -67,25 +35,53 @@ public class DecisionTreeExercise3 {
 			DecisionTree.Node<ExpectValue> lose0 = DecisionTree.createUtilityNode(new ExpectValue(0d));
 			rejectedAny.add(1.0, lose0);
 
-			DecisionTree.Node<ExpectValue> published = DecisionTree
+			DecisionTree.Node<ExpectValue> published1 = DecisionTree
 					.createDecisionNode(new ExpectValue("Published After Reviewed"));
-			DecisionTree.Node<ExpectValue> rejected = DecisionTree
+			DecisionTree.Node<ExpectValue> rejected1 = DecisionTree
+					.createDecisionNode(new ExpectValue("Rejected After Reviewed"));
+			
+			consulted1.add(0.46, published1);
+			consulted1.add(0.54, rejected1);
+			
+			DecisionTree.Node<ExpectValue> published2 = DecisionTree
+					.createDecisionNode(new ExpectValue("Published After Reviewed"));
+			DecisionTree.Node<ExpectValue> rejected2 = DecisionTree
 					.createDecisionNode(new ExpectValue("Rejected After Reviewed"));
 
-			consulted.add(0.46, published);
-			consulted.add(0.54, rejected);
+			published1.add(1.0, consulted2);
+			
+			consulted2.add(0.46, published2);
+			consulted2.add(0.54, rejected2);
+
+			DecisionTree.Node<ExpectValue> loseFee1 = DecisionTree.createUtilityNode(new ExpectValue(-500d));
+			rejected1.add(1.0, loseFee1);
+			
+			DecisionTree.Node<ExpectValue> loseFee2 = DecisionTree.createUtilityNode(new ExpectValue(-1000d));
+			rejected2.add(1.0, loseFee2);
+
+			DecisionTree.Node<ExpectValue> success2 = DecisionTree.createUtilityNode(new ExpectValue(49000d));
+			DecisionTree.Node<ExpectValue> failure2 = DecisionTree.createUtilityNode(new ExpectValue(-11000d));
 
 			DecisionTree.Node<ExpectValue> goAhead = DecisionTree.createChanceNode(new ExpectValue("Go Ahead"));
-			published.add(1.0, goAhead);
-
-			DecisionTree.Node<ExpectValue> loseFee = DecisionTree.createUtilityNode(new ExpectValue(-500d));
-			rejected.add(1.0, loseFee);
-
-			DecisionTree.Node<ExpectValue> success2 = DecisionTree.createUtilityNode(new ExpectValue(49500d));
-			DecisionTree.Node<ExpectValue> failure2 = DecisionTree.createUtilityNode(new ExpectValue(-10500d));
-
-			goAhead.add(0.30434784d, success2);
-			goAhead.add(0.69565217d, failure2);
+			
+			published2.add(1.0, goAhead);
+			
+			/**
+			 * P(S=T|R1=T,R2=T) = P(S=T,R1=T,R2=T)/P(R1=T,R2=T)
+			 * 					= P(R1=T|R2=T,S=T)P(R2=T,S=T)/P(R1=T,R2=T)
+			 * 					= P(R1=T|S=T)P(R2=T|S=T)P(S=T)/(P(R1=T)P(R2=T))
+			 * 					= 0.7 * 0.7 * 0.2 / (0.46 * 0.46)
+			 * 					= 0.463138
+			 * 
+			 * P(S=F|R1=T,R2=T) = P(S=F,R1=T,R2=T)/P(P1=T,R2=T)
+			 * 					= P(R1=T|R2=T,S=F)P(R2=T,S=F)/P(R1=T,R2=T)
+			 * 					= P(R1=T|S=F)P(R2=T|S=F)P(S=F)/(P(R1=T)P(R2=T))
+			 * 					= 0.4 * 0.4 * 0.8 / (0.46 * 0.46)
+			 * 					= 0.60491493
+			 */
+			
+			goAhead.add(0.463138d, success2);
+			goAhead.add(0.60491493d, failure2);
 
 			System.out.println(tree);
 
