@@ -1,4 +1,4 @@
-public class DecisionTreeExercise2 {
+public class DecisionTreeExercise3 {
 
 	/**
 	 * A book is either a success or failure. If the book is a success, the
@@ -11,46 +11,6 @@ public class DecisionTreeExercise2 {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		/*
-		{
-			DecisionTree.Node<ExpectValue> successOrFailure = DecisionTree
-					.createChanceNode(new ExpectValue("Success or Failure"));
-			DecisionTree<ExpectValue> tree = new DecisionTree<ExpectValue>(successOrFailure);
-
-			DecisionTree.Node<ExpectValue> gain500000 = DecisionTree.createUtilityNode(new ExpectValue(50000d));
-			DecisionTree.Node<ExpectValue> lose100000 = DecisionTree.createUtilityNode(new ExpectValue(-10000d));
-
-			tree.add(0.20, gain500000);
-			tree.add(0.80, lose100000);
-
-			System.out.println(tree);
-
-			System.out.println("Expect Net Profit: " + tree.analysis());
-		}
-		 */
-		/**
-		 * 
-		 * If the infallible reviewer approve it, then publish it.
-		 * 
-		 */
-		/*
-		{
-
-			DecisionTree.Node<ExpectValue> successOrFailure = DecisionTree
-					.createChanceNode(new ExpectValue("Success or Failure"));
-			DecisionTree<ExpectValue> tree = new DecisionTree<ExpectValue>(successOrFailure);
-
-			DecisionTree.Node<ExpectValue> gain500000 = DecisionTree.createUtilityNode(new ExpectValue(50000d));
-			DecisionTree.Node<ExpectValue> lose0 = DecisionTree.createUtilityNode(new ExpectValue(0d));
-
-			tree.add(0.20, gain500000);
-			tree.add(0.80, lose0);
-
-			System.out.println(tree);
-
-			System.out.println("Expect Net Profit: " + tree.analysis());
-		}
-		*/
 		/**
 		 * 
 		 * Reviewer has the following conditional probability:
