@@ -8,6 +8,8 @@ public class DecisionTreeExercise4 {
 	 * The probability that a manuscript will succeed is 0.2, and the
 	 * probability that it will fail is 0.8.
 	 * 
+	 * Consult with two reviewers. It either reviewer approves the manuscript, the publish,
+	 * otherwise reject.
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -43,7 +45,7 @@ public class DecisionTreeExercise4 {
 			consulted.add(0.46 * 0.54, approved1);
 			consulted.add(0.54 * 0.46, approved2);
 			
-			DecisionTree.Node<ExpectValue> goAhead2 = DecisionTree.createDecisionNode(new ExpectValue("Go Ahead"));
+			DecisionTree.Node<ExpectValue> goAhead2 = DecisionTree.createChanceNode(new ExpectValue("Go Ahead"));
 			DecisionTree.Node<ExpectValue> success2 = DecisionTree.createUtilityNode(new ExpectValue(49000d));
 			DecisionTree.Node<ExpectValue> failure2 = DecisionTree.createUtilityNode(new ExpectValue(-11000d));
 			
@@ -75,7 +77,7 @@ public class DecisionTreeExercise4 {
 			bothApproved.add(1.0d, goAhead2);
 			
 			
-			DecisionTree.Node<ExpectValue> goAhead3 = DecisionTree.createDecisionNode(new ExpectValue("Go Ahead"));
+			DecisionTree.Node<ExpectValue> goAhead3 = DecisionTree.createChanceNode(new ExpectValue("Go Ahead"));
 			DecisionTree.Node<ExpectValue> success3 = DecisionTree.createUtilityNode(new ExpectValue(49000d));
 			DecisionTree.Node<ExpectValue> failure3 = DecisionTree.createUtilityNode(new ExpectValue(-11000d));
 			
