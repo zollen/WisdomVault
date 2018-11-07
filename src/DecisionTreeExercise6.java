@@ -42,15 +42,14 @@ public class DecisionTreeExercise6 {
 			DecisionTree.Node<ExpectValue> goAhead1 = DecisionTree.createChanceNode(new ExpectValue("Go Ahead"));
 			DecisionTree.Node<ExpectValue> success1 = DecisionTree.createUtilityNode(new ExpectValue(49500d));
 			DecisionTree.Node<ExpectValue> failure1 = DecisionTree.createUtilityNode(new ExpectValue(-10500d));
-			DecisionTree.Node<ExpectValue> loseFee1 = DecisionTree.createUtilityNode(new ExpectValue(-500d));
-		
+			
 			consulted.add(0.46d, approved1);
 			consulted.add(0.56d, rejected1);
 			
 			approved1.add(1.0, goAhead1);
 			goAhead1.add(0.30434784d, success1);
 			goAhead1.add(0.69565217d, failure1);
-			rejected1.add(1.0, loseFee1);
+			
 		
 			
 			DecisionTree.Node<ExpectValue> approved2 = DecisionTree
@@ -63,8 +62,8 @@ public class DecisionTreeExercise6 {
 			DecisionTree.Node<ExpectValue> loseFee2 = DecisionTree.createUtilityNode(new ExpectValue(-1000d));
 			
 			
-			approved1.add(0.46, approved2);
-			approved1.add(0.54, rejected2);	
+			rejected1.add(0.46, approved2);
+			rejected1.add(0.54, rejected2);	
 			approved2.add(1.0, goAhead2);
 			goAhead2.add(0.16908213d, success2);
 			goAhead2.add(0.83091787d, failure2);			
