@@ -16,7 +16,8 @@ public class MarkovExercise5 {
 			/* W */ "   0,    0,    1,    0,    0,    0,  0.05;" +
 			/* X */ "-0.35, -0.35, -0.35, 1,    0,    0,  0.05;" +
 			/* Y */ "-0.35, -0.35, -0.35, 0,    1,    0,  0.05;" +
-			/* Z */ "   0,    0,    0,  -0.7,  -0.7,  1,  0.05 " + "]");
+			/* Z */ "   0,    0,    0,  -0.7,  -0.7,  1,  0.05 " + 
+						"]");
 
 			DMatrixRMaj A = eq.lookupDDRM("A");
 			DMatrixRMaj B = new DMatrixRMaj(A.numRows, A.numCols);
