@@ -53,26 +53,35 @@ public class ViterbiAlgoExercise1 {
 			return;
 		
 		int val = Integer.MAX_VALUE;
+		int selected = -1;
 		
 		for (int j : current) {
 			
-			if (j < val)
-				val = j;
+			Arc arc = results.get(j);
+			
+			if (arc != null && arc.getCost() < val) {
+				val = arc.getCost();
+				selected = j;
+			}
+			else 
+			if (arc == null) {
+				selected = j;
+			}
 		}
 		
-		Arc arc = results.get(val);
+		Arc arc = results.get(selected);
 		if (arc != null) {
 			
 			Collection<Integer> nexts = new HashSet<Integer>();
 			nexts.add(arc.getFrom());
 			
-			output.append(Arc.STATES[val] + " <== ");
+			output.append(Arc.STATES[selected] + " <== ");
 		
 			traverse(results, nexts, output);
 		}
 		else {
 			
-			output.append(Arc.STATES[val]);
+			output.append(Arc.STATES[selected]);
 		}
 	}
 	
