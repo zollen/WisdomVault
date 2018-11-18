@@ -77,9 +77,9 @@ public class ViterbiAlgoExercise1 {
 			Collection<Integer> nexts = new HashSet<Integer>();
 			nexts.add(arc.getFrom());
 			
-			output.append(Arc.STATES[selected] + " <== ");
-		
 			traverse(results, nexts, output);
+			
+			output.append(" ==> " + Arc.STATES[selected]);
 		}
 		else {
 			
