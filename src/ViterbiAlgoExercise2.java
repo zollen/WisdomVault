@@ -11,6 +11,8 @@ public class ViterbiAlgoExercise2 {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		// https://www.youtube.com/watch?v=6JVqutwtzmo
+		
 		Equation eq = new Equation();
 		eq.process("A = [ " +
 				 /* A, B, C, D, E, F, G, I, J, K, L, M */
