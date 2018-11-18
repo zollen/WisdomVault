@@ -92,28 +92,26 @@ public class ViterbiAlgoExercise1 {
 		if (current.isEmpty())
 			return;
 		
-		for (int j : current) {
+		for (int from : current) {
 		
-			for (int i = 0; i < graph.numRows; i++) {
+			for (int to = 0; to < graph.numRows; to++) {
 				
-				int state = (int) graph.get(i, j);
+				int cost = (int) graph.get(to, from);
 				
-				if (state > 0) {
+				if (cost > 0) {
 					
-					int jj = min(graph, i);
-					if (jj != j)
-						continue;
+					Arc src = results.get(from);
+					Arc dest = results.get(to);
 					
-					int origcost = (int) graph.get(i, jj);
+					int total = 0;
+					if (src != null)
+						total = src.getCost();
 					
-					int cost = 0;
-					Arc arc = results.get(jj);
-					if (arc != null)
-						cost = arc.getCost(); 
+					if (dest == null || (dest != null && dest.getCost() > total + cost)) {
+						results.put(to, new Arc(from, to, total + cost));
+					}
 					
-					results.put(i, new Arc(jj, i, cost + origcost));
-					
-					nexts.add(i);
+					nexts.add(to);
 				}
 			}
 		}
