@@ -125,25 +125,6 @@ public class ViterbiAlgoExercise2 {
 	}
 	
 	
-	
-	public static int min(DMatrixRMaj graph, int row) {
-		
-		int val = Integer.MAX_VALUE;
-		int pos = Integer.MIN_VALUE;
-		
-		for (int i = 0; i < graph.numCols; i++) {
-			
-			int curr = (int) graph.get(row, i);
-			if (curr > 0 && curr < val && i != row) {
-				val = curr;
-				pos = i;
-			}
-		}
-		
-		return pos;
-	}
-	
-	
 	public static class Arc {
 		
 		public static final String [] STATES = { "A", "B", "C", "D", "E", "F", "G", 
