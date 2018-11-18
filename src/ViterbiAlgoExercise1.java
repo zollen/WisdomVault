@@ -109,9 +109,8 @@ public class ViterbiAlgoExercise1 {
 					
 					if (dest == null || (dest != null && dest.getCost() > total + cost)) {
 						results.put(to, new Arc(from, to, total + cost));
+						nexts.add(to);
 					}
-					
-					nexts.add(to);
 				}
 			}
 		}
