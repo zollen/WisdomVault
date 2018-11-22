@@ -32,10 +32,11 @@ public class MarkovExercise8 {
 		}
 
 		eq.alias(A, "A");
-
-		System.out.println("Prob(-50): " + prob(eq, -50));
-		System.out.println("Prob(0): " + prob(eq, 0));
-		System.out.println("Prob(50): " + prob(eq, 50));
+		
+		System.out.println("Probabilty of getting to state 50 from state i");
+		for (int i = -50; i < 51; i++) {
+			System.out.println("Prob(" + i + "): " + prob(eq, i));
+		}
 
 	}
 
@@ -54,9 +55,7 @@ public class MarkovExercise8 {
 		eq.process("K = " + buf.toString() + " X");
 		
 		DMatrixRMaj K = eq.lookupDDRM("K");
-		
-	//	System.out.println(K);
-		
+			
 		return formatter.format(K.get(2 * N, 0));
 	}
 
