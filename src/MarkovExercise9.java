@@ -2,17 +2,20 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
 
 public class MarkovExercise9 {
+	
+	private static final String [] TOKENS = { "A", "B", "C", "D", "E", "F" };
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Equation eq = new Equation();
 		eq.process("A = [ " +
-				 /* A,    B,    C,    D,    E  */
-		/* A */ "   0,    0,    0,    0,    0;" +
-		/* B */ "   1,    0,    0,    1,    0;" +
-		/* C */ "   1,    0,    0,    0,    0;" +
-		/* D */ "   0,    0,    1,    0,    0;" +
-		/* E */ "   0,    1,    0,    1,    0 " +
+				 /* A,    B,    C,    D,    E,   F */
+		/* A */ "   0,    0,    0,    0,    0,   0;" +
+		/* B */ "   1,    0,    1,    0,    1,   0;" +
+		/* C */ "   0,    1,    0,    0,    1,   0;" +
+		/* D */ "   1,    0,    0,    0,    1,   0;" +
+		/* E */ "   0,    1,    0,    1,    0,   0;" +
+		/* F */ "   0,    1,    1,    0,    1,   0 " +
 					"]");
 		
 		DMatrixRMaj A = eq.lookupDDRM("A");
@@ -39,17 +42,20 @@ public class MarkovExercise9 {
 				
 				if (A.get(i, j) == 1) {
 				
-					if (hasOutLinks(A, j)) {
+					if (hasOutLinks(A, i)) {
 						
 						if (hasReturnLinks(A, i, j)) {
-							B.set(i, j, (1 - F) / N + F / numOutLinks(A, j));
+							System.out.println("HasReturnLinks(" + TOKENS[j] + ", " + TOKENS[i] + ")");
+							B.set(i, j, (double) (1 - F) / N + F / numOutLinks(A, i));
 						}
 						else {
-							B.set(i, j, (1 - F) / N);
+							System.out.println("HasOutLinks(" + TOKENS[j] + ", " + TOKENS[i] + ")");
+							B.set(i, j, (double) (1 - F) / N);
 						}		
 					}
 					else {
-						B.set(i, j, 1 / N);
+						System.out.println("NoOutLinks(" + TOKENS[j] + ", " + TOKENS[i] + ")");
+						B.set(i, j, (double) 1 / N);
 					}
 					
 				}
