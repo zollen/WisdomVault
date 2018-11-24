@@ -25,39 +25,30 @@ public class MarkovExercise9 {
 	
 	public static DMatrixRMaj analysis(DMatrixRMaj A) {
 		
-		// M[P,Q] = 1 / N if Q has no outlinks
-		// M[P,Q] = (1 - F) / N if Q has some outlinks but not to P
-		// M[P,Q] = (1 - F) / N  +  F/O(Q) if Q has links to P
+		// M[P <- Q] = 1 / N if Q has no outlinks
+		// M[P <- Q] = (1 - F) / N if Q has some outlinks but not to P
+		// M[P <- Q] = (1 - F) / N  +  F/O(Q) if Q has links to P
 				
 		// F = 0.7
-		// e = 0.05
 		
 		DMatrixRMaj B = new DMatrixRMaj(A.numRows, A.numCols);
 		int N = A.numCols;
 		double F = 0.7d;
 		
-		for (int j = 0; j < A.numCols; j++) {
+		for (int from = 0; from < A.numCols; from++) {
 				
-			for (int i = 0; i < A.numRows; i++) {
+			for (int to = 0; to < A.numRows; to++) {
 				
-				if (A.get(i, j) == 1) {
-				
-					if (hasOutLinks(A, i)) {
-						
-						if (hasReturnLinks(A, i, j)) {
-							System.out.println("HasReturnLinks(" + TOKENS[j] + ", " + TOKENS[i] + ")");
-							B.set(i, j, (double) (1 - F) / N + F / numOutLinks(A, i));
-						}
-						else {
-							System.out.println("HasOutLinks(" + TOKENS[j] + ", " + TOKENS[i] + ")");
-							B.set(i, j, (double) (1 - F) / N);
-						}		
+				if (hasLink(A, to, from)) {
+					B.set(to, from, (double) (1 - F)/N + (double)F/numOutLinks(A, from));
+				}
+				else {
+					if (hasOutLinks(A, from)) {
+						B.set(to, from, (double) (1 - F)/N);
 					}
 					else {
-						System.out.println("NoOutLinks(" + TOKENS[j] + ", " + TOKENS[i] + ")");
-						B.set(i, j, (double) 1 / N);
+						B.set(to, from, (double) 1/N);
 					}
-					
 				}
 			}
 		}
@@ -65,6 +56,10 @@ public class MarkovExercise9 {
 		
 		return B;
 		
+	}
+	
+	public static boolean hasLink(DMatrixRMaj A, int i, int j) {
+		return ((int) A.get(i, j) == 1);
 	}
 	
 	public static int numOutLinks(DMatrixRMaj A, int j) {
@@ -89,11 +84,6 @@ public class MarkovExercise9 {
 		}
 		
 		return false;	
-	}
-	
-	public static boolean hasReturnLinks(DMatrixRMaj A, int i, int j) {
-		
-		return ((int)A.get(j, i) == 1);
 	}
 
 }
