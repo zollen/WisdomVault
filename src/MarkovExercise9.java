@@ -3,10 +3,9 @@ import org.ejml.equation.Equation;
 
 public class MarkovExercise9 {
 	
-	private static final String [] TOKENS = { "A", "B", "C", "D", "E", "F" };
-
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		// Compute PageRank of the following documents links
 		Equation eq = new Equation();
 		eq.process("A = [ " +
 				 /* A,    B,    C,    D,    E,   F */
@@ -19,8 +18,17 @@ public class MarkovExercise9 {
 					"]");
 		
 		DMatrixRMaj A = eq.lookupDDRM("A");
+		DMatrixRMaj B = analysis(A);
 		
-		System.out.println(analysis(A));
+		eq.alias(B, "B");
+		
+		eq.process("K = B - eye(B)");
+		eq.process("K1 = [ K, [ 0; 0; 0; 0; 0; 0 ]]");
+		eq.process("K2 = [ K1 ; [ 1, 1, 1, 1, 1, 1, 1 ]]");
+		eq.process("K3 = rref(K2)");
+		eq.process("K4 = K3(0:5,6)");
+
+		System.out.println("STEADY STATE: " + eq.lookupDDRM("K4"));
 	}
 	
 	public static DMatrixRMaj analysis(DMatrixRMaj A) {
