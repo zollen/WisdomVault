@@ -12,13 +12,6 @@ public class HiddenMarkovModelExercise1 {
 	
 	private static final String[] STATES = { "A", "C", "G", "T" };
 
-	private static final int STATE_0 = 0;
-	private static final int STATE_1 = 1;
-	private static final int STATE_A = 0;
-	private static final int STATE_C = 1;
-	private static final int STATE_T = 2;
-	private static final int STATE_G = 3;
-
 	private static DMatrixRMaj T = null;
 	private static DMatrixRMaj E = null;
 
