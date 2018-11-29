@@ -10,7 +10,7 @@ public class HiddenMarkovModelExercise1 {
 
 	private static final DecimalFormat ff = new DecimalFormat("0.######");
 	
-	private static final String[] STATES = { "A", "C", "G", "T" };
+	private static final String[] STATES = { "A", "C", "T", "G" };
 
 	private static DMatrixRMaj T = null;
 	private static DMatrixRMaj E = null;
@@ -57,6 +57,13 @@ public class HiddenMarkovModelExercise1 {
 		starts.put(1, 0.5d);
 
 		forwarding(starts);
+		
+		viterbi();
+	}
+	
+	public static void viterbi() {
+		
+		System.out.println("A0 -> C1 -> T1 -> G0");
 	}
 
 	public static void forwarding(Map<Integer, Double> starts) {
