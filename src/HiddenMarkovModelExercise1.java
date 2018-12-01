@@ -47,7 +47,15 @@ public class HiddenMarkovModelExercise1 {
 		T = eq.lookupDDRM("T");
 		E = eq.lookupDDRM("E");
 
-		// FORWARD	
+		// FORWARD Algorithm with N states(0, 1) and M emissions(A, C, T, G)
+		// f(0, k) = startprob(i) * E(i)    <-- 1 <= i <= N, 1 <= k <= M
+		// for k in { A, C, T, G }          <-- specific sequence of emissions
+		//    for i in 1..N
+		//       sum(i) = 0
+		//       for j in i..N
+		//	        sum(i) += f(i - 1) * P(state(i) <- state(j)) * E(i, k)     <-- state(i) and *current* emission state
+		//       f(i, k) = sum(i)
+		
 		// A0 = 0.225 = 0.5 * 0.75 * 0.45 + 0.5 * 0.25 * 0.45
 		// A1 = 0.025 = 0.5 * 0.75 * 0.05 + 0.5 * 0.25 * 0.05
 		// C0 = 0.00875 = A0 * 0.75 * 0.05 + A1 * 0.25 * 0.05
@@ -56,10 +64,6 @@ public class HiddenMarkovModelExercise1 {
 		// T1 = 0.012375 = C1 * 0.75 * 0.45 + C0 * 0.25 * 0.45
 		// G0 = 0.001645 = T0 * 0.75 * 0.05 + T1 * 0.25 * 0.05
 		// G1 = 0.000473 = T1 * 0.75 * 0.45 + T0 * 0.25 * 0.45
-		// A0: 0.225,    A1: 0.025
-		// C0: 0.00875,  C1: 0.03375
-		// T0: 0.00075,  T1: 0.012375
-		// G0: 0.001645, G1: 0.000473
 
 		Map<Integer, Double> starts = new HashMap<Integer, Double>();
 		starts.put(0, 0.5d);
@@ -69,17 +73,21 @@ public class HiddenMarkovModelExercise1 {
 		
 		viterbi();
 		
-		// BACKWARD
+		// BACKWARD Algorithm with N states(0, 1) and M emissions(A, C, T, G)
+		// f(0, k) = 1                    <-- 1 <= i <= N, 1 <= k <= M
+		// for k in { G, T, C, A }        <-- reversed sequence of emissions
+		//    for i in 1..N
+		//       sum(i) = 0
+		//       for j in 1..N
+		//          sum(i) += f(i - 1) * P(state(i) -> state(j)) * E(j, k - 1)  <-- state(j) and *last* emission state
+		//       f(i, k) = sum(i)
+		
 		// T0 = 0.15 = 1 * 0.75 * 0.45 + 1 * 0.25 * 0.05 
 		// T1 = 0.35 = 1 * 0.75 * 0.05 + 1 * 0.25 * 0.45 
 		// C0 = 0.03 = t0 * 0.75 * 0.05 + t1 * 0.25 * 0.45   
 		// C1 = 0.055 = t1 * 0.75 * 0.45 + t0 * 0.25 * 0.05  
 		// A0 = 0.007313 = c0 * 0.75 * 0.05 + c1 * 0.25 * 0.45 
 		// A1 = 0.018938 = c1 * 0.75 * 0.45 + c0 * 0.25 * 0.05
-		// A0: 0.007313,  A1: 0.018938
-		// C0: 0.03,      C1: 0.055
-		// T0: 0.35,      T1: 0.15
-		// G0: 1,         G1: 1
 		
 		backward(starts);
 	}
