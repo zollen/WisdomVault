@@ -46,6 +46,8 @@ public class HiddenMarkovModelExercise1 {
 
 		T = eq.lookupDDRM("T");
 		E = eq.lookupDDRM("E");
+		
+		System.out.println("===================Forward===================");
 
 		// FORWARD Algorithm with N states(0, 1) and M emissions(A, C, T, G)
 		// f(0, k) = startprob(i) * E(i)    <-- 1 <= i <= N, 1 <= k <= M
@@ -71,7 +73,11 @@ public class HiddenMarkovModelExercise1 {
 
 		forward(starts);
 		
+		System.out.println("==================Viterbi====================");
+		
 		viterbi();
+		
+		System.out.println("===================Backward===================");
 		
 		// BACKWARD Algorithm with N states(0, 1) and M emissions(A, C, T, G)
 		// f(0, k) = 1                    <-- 1 <= i <= N, 1 <= k <= M
@@ -91,36 +97,54 @@ public class HiddenMarkovModelExercise1 {
 		// A0 = 0.007313 = c0 * 0.75 * 0.05 + c1 * 0.25 * 0.45 
 		// A1 = 0.018938 = c1 * 0.75 * 0.45 + c0 * 0.25 * 0.05
 		
-		backward(starts);
+		Map<Integer, Double> ends = new HashMap<Integer, Double>();
+		ends.put(0, 1d);
+		ends.put(1, 1d);
+		
+		backward(ends);
 	}
 	
 	public static void backward(Map<Integer, Double> ends) {
 			
-		double g1 = 1;
-		double g0 = 1;
+		Map<Integer, Double> states = new HashMap<Integer, Double>();
+		final Map<Integer, Double> ss = states;
 		
-		System.out.println("G0: " + g0 + ", G1: " + g1);
+		ends.entrySet().stream().forEach(p -> ss.put(p.getKey(), p.getValue())); 
+		
+		ss.entrySet().stream().forEach(p -> System.out.println(STATES[STATES.length - 1] + p.getKey() + " ===> " + p.getValue()));
+		
+		for (int gene = STATES.length - 1; gene > 0; gene--) {
+			
+			Map<Integer, Double> nexts = new HashMap<Integer, Double>();
+			Set<Integer> froms = states.keySet();
+			
+			for (Integer from : froms) {
 				
-		double t0 = 1 * 0.75 * 0.45 + 1 * 0.25 * 0.05;
-		double t1 = 1 * 0.75 * 0.05 + 1 * 0.25 * 0.45;
-		
-		System.out.println("T0: " + ff.format(t0) + ", T1: " + ff.format(t1));
-		
-		double c0 = t0 * 0.75 * 0.05 + t1 * 0.25 * 0.45;
-		double c1 = t1 * 0.75 * 0.45 + t0 * 0.25 * 0.05;
-		
-		System.out.println("C0: " + ff.format(c0) + ", C1: " + ff.format(c1));
-		
-		double a0 = c0 * 0.75 * 0.05 + c1 * 0.25 * 0.45;
-		double a1 = c1 * 0.75 * 0.45 + c0 * 0.25 * 0.05;
-		
-		System.out.println("A0: " + ff.format(a0) + ", A1: " + ff.format(a1));
-		
+				double sum = 0d;
+				
+				for (int to = 0; to < T.numRows; to++) {
+				
+					if (T.get(to, from) > 0 && E.get(gene, to) > 0) {
+						
+						double last = 0d;
+						if (states.get(to) != null)
+							last = states.get(to);
+						
+						sum += (double) last * T.get(to, from) * E.get(gene, to);
+					}
+				}
+				
+				System.out.println(STATES[gene - 1] + from + " ===> " + ff.format(sum));
+				nexts.put(from, sum);
+			}
+			
+			states = nexts;
+		}
 	}
 	
 	public static void viterbi() {
 		
-		System.out.println("A0(0.225) -> C1(0.3375) -> T1(0.012375) -> G0(0.001645)");
+		
 	}
 
 	public static void forward(Map<Integer, Double> starts) {
