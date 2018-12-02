@@ -62,7 +62,7 @@ public class HiddenMarkovModelExercise1 {
 		// A0 = 0.225 = 0.5 * 0.75 * 0.45 + 0.5 * 0.25 * 0.45
 		// A1 = 0.025 = 0.5 * 0.75 * 0.05 + 0.5 * 0.25 * 0.05
 		// C0 = 0.00875 = A0 * 0.75 * 0.05 + A1 * 0.25 * 0.05
-		// C1 = 0.003375 = A1 * 0.75 * 0.45 + A0 * 0.25 * 0.45
+		// C1 = 0.03375 = A1 * 0.75 * 0.45 + A0 * 0.25 * 0.45
 		// T0 = 0.00075 = C0 * 0.75 * 0.05 + C1 * 0.25 * 0.05
 		// T1 = 0.012375 = C1 * 0.75 * 0.45 + C0 * 0.25 * 0.45
 		// G0 = 0.001645 = T0 * 0.75 * 0.05 + T1 * 0.25 * 0.05
@@ -103,6 +103,11 @@ public class HiddenMarkovModelExercise1 {
 		ends.put(1, 1d);
 		
 		backward(ends);
+		
+		System.out.println("Posterior Probability Of Position #2");
+		System.out.println("PP(0) = F(C0) * B(C0) = 0.00875 * 0.03 = " + ff.format(0.00875 * 0.03));
+		System.out.println("PP(1) = F(C1) * B(C1) = 0.03375 * 0.05 = " + ff.format(0.03375 * 0.05));
+		System.out.println("PP(0) + PP(1) = F(G0) + F(G1) = " + ff.format(0.002118));
 	}
 	
 	public static void viterbi() {
