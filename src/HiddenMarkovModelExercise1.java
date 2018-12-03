@@ -1,4 +1,6 @@
 import java.text.DecimalFormat;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -47,9 +49,7 @@ public class HiddenMarkovModelExercise1 {
 
 		T = eq.lookupDDRM("T");
 		E = eq.lookupDDRM("E");
-		
-		System.out.println("===================Forward===================");
-
+	
 		// FORWARD Algorithm with N states(0, 1) and M emissions(A, C, T, G)
 		// f(0, k) = startprob(i) * E(i)    <-- 1 <= i <= N, 1 <= k <= M
 		// for k in { A, C, T, G }          <-- specific sequence of emissions
@@ -67,18 +67,43 @@ public class HiddenMarkovModelExercise1 {
 		// T1 = 0.012375 = C1 * 0.75 * 0.45 + C0 * 0.25 * 0.45
 		// G0 = 0.001645 = T0 * 0.75 * 0.05 + T1 * 0.25 * 0.05
 		// G1 = 0.000473 = T1 * 0.75 * 0.45 + T0 * 0.25 * 0.45
+		{
+			System.out.println("===================Forward===================");
+			
+			Map<Integer, Double> starts = new LinkedHashMap<Integer, Double>();
+			starts.put(0, 0.5d);
+			starts.put(1, 0.5d);
 
-		Map<Integer, Double> starts = new LinkedHashMap<Integer, Double>();
-		starts.put(0, 0.5d);
-		starts.put(1, 0.5d);
+			forward(starts);
+		}
+		
+		{
+			System.out.println("==================Viterbi====================");
+		
+			eq.process("C = [" +
+			      /*   S0,     A0,     A1,     C0,     C1,     T0,     T1,     G0,     G1 */
+		/* S0 */ "      0,      0,      0,      0,      0,      0,      0,      0,      0;" +
+		/* A0 */ "  0.225,      0,      0,      0,      0,      0,      0,      0,      0;" +
+		/* A1 */ "  0.025,      0,      0,      0,      0,      0,      0,      0,      0;" +
+		/* C0 */ "      0, 0.0375, 0.0125,      0,      0,      0,      0,      0,      0;" +
+		/* C1 */ "      0, 0.1125, 0.3375,      0,      0,      0,      0,      0,      0;" +
+		/* T0 */ "      0,      0,      0, 0.0375, 0.0125,      0,      0,      0,      0;" +
+		/* T1 */ "      0,      0,      0, 0.1125, 0.3375,      0,      0,      0,      0;" +
+		/* G0 */ "      0,      0,      0,      0,      0, 0.3375, 0.1125,      0,      0;" +
+		/* G1 */ "      0,      0,      0,      0,      0, 0.1125, 0.0375,      0,      0 " +
+					"]"); 
 
-		forward(starts);
+			Set<Integer> starts = new HashSet<Integer>(); 
+			starts.add(0);
+			
+			Map<Integer, Arc> results = new LinkedHashMap<Integer, Arc>();
+			DMatrixRMaj C = eq.lookupDDRM("C");
 		
-		System.out.println("==================Viterbi====================");
-		
-		viterbi();
-		
-		System.out.println("===================Backward===================");
+			viterbi(0, C, starts, results);
+			
+			results.entrySet().stream().forEach(p -> System.out.println(Arc.STATES[p.getKey()] + " ===> " + p.getValue()));
+			
+		}
 		
 		// BACKWARD Algorithm with N states(0, 1) and M emissions(A, C, T, G)
 		// f(0, k) = 1                    <-- 1 <= i <= N, 1 <= k <= M
@@ -97,12 +122,15 @@ public class HiddenMarkovModelExercise1 {
 		// C1 = 0.055 = t1 * 0.75 * 0.45 + t0 * 0.25 * 0.05  
 		// A0 = 0.007313 = c0 * 0.75 * 0.05 + c1 * 0.25 * 0.45 
 		// A1 = 0.018938 = c1 * 0.75 * 0.45 + c0 * 0.25 * 0.05
+		{
+			System.out.println("===================Backward===================");
+			
+			Map<Integer, Double> ends = new LinkedHashMap<Integer, Double>();
+			ends.put(0, 1d);
+			ends.put(1, 1d);
 		
-		Map<Integer, Double> ends = new LinkedHashMap<Integer, Double>();
-		ends.put(0, 1d);
-		ends.put(1, 1d);
-		
-		backward(ends);
+			backward(ends);
+		}
 		
 		System.out.println("Posterior Probability Of Position #2");
 		System.out.println("PP(0) = F(C0) * B(C0) = 0.00875 * 0.03 = " + ff.format(0.00875 * 0.03));
@@ -110,8 +138,37 @@ public class HiddenMarkovModelExercise1 {
 		System.out.println("PP(0) + PP(1) = F(G0) + F(G1) = " + ff.format(0.002118));
 	}
 	
-	public static void viterbi() {
+	public static void viterbi(int depth, DMatrixRMaj graph, Collection<Integer> current, Map<Integer, Arc> results) {
 		
+		Collection<Integer> nexts = new HashSet<Integer>();
+		
+		if (depth >= 5 || current.isEmpty())
+			return;
+		
+		for (int from : current) {
+		
+			for (int to = 0; to < graph.numRows; to++) {
+				
+				double cost = (double) graph.get(to, from);
+				
+				if (cost > 0) {
+					
+					Arc src = results.get(from);
+					Arc dest = results.get(to);
+					
+					double total = 0d;
+					if (src != null)
+						total = src.getCost();
+					
+					if (dest == null || (dest != null && dest.getCost() > total + cost)) {
+						results.put(to, new Arc(from, to, total + cost));
+						nexts.add(to);
+					}
+				}
+			}
+		}
+		
+		viterbi(depth + 1, graph, nexts, results);
 		
 	}
 	
@@ -209,6 +266,48 @@ public class HiddenMarkovModelExercise1 {
 		}
 		
 		probs.entrySet().stream().forEach( p -> System.out.println(p.getKey() + " ===> " + ff.format(p.getValue())));
+	}
+	
+	
+	public static class Arc {
+		
+		public static final String [] STATES = { "S0", "A0", "A1", "C0", "C1", "T0", "T1", "G0", "G1" };
+
+		
+		private int from = -1;
+		private int to = -1;
+		private double cost = -1;
+		
+		public Arc() {}
+		
+		public Arc(int from, int to, double cost) {
+			this.from = from;
+			this.to = to;
+			this.cost = cost;
+		}
+		
+		public int getFrom() {
+			return from;
+		}
+		public void setFrom(int from) {
+			this.from = from;
+		}
+		public int getTo() {
+			return to;
+		}
+		public void setTo(int to) {
+			this.to = to;
+		}
+		public double getCost() {
+			return cost;
+		}
+		public void setCost(double cost) {
+			this.cost = cost;
+		}
+		@Override
+		public String toString() {
+			return "Arc [from=" + STATES[from] + ", to=" + STATES[to] + ", cost=" + ff.format(cost) + "]";
+		}
 	}
 
 }
