@@ -18,7 +18,7 @@ public class HiddenMarkovModelExercise2 {
 		/**
 		 * states = ('1', '2') observations = ('a', 'b', 'c', 'd')
 		 * 
-		 * start_probability = {'0': 0.5, '1': 0.5}
+		 * start_probability = {'1': 0.6, '2': 0.4}
 		 * 
 		 * transition_probability = { 
 		 * 				'1' : {'start': 0.6, '1': 0.5, '2': 0.3}, 
