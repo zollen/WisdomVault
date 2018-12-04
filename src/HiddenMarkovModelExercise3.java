@@ -104,24 +104,26 @@ public class HiddenMarkovModelExercise3 {
 			eq.process("G = [" +
 							/*   S,    0A,     0B,    1A,    1B,    0A,    0B  */
 				/* S  */   " 0.000, 0.000,  0.000, 0.000, 0.000, 0.000, 0.000;" +
-				/* 0A */   " 0.792, 0.000,  0.000, 0.792, 0.008, 0.000, 0.000;" +
-				/* 0B */   " 0.001, 0.000,  0.000, 0.001, 0.099, 0.000, 0.000;" +
+				/* 0A */   " 0.792, 0.000,  0.000, 0.000, 0.000, 0.000, 0.000;" +
+				/* 0B */   " 0.001, 0.000,  0.000, 0.000, 0.000, 0.000, 0.000;" +
 				/* 1A */   " 0.000, 0.198,  0.002, 0.000, 0.000, 0.000, 0.000;" +
 				/* 1B */   " 0.000, 0.009,  0.891, 0.000, 0.000, 0.000, 0.000;" +
-				/* 0A */   " 0.000, 0.000,  0.000, 0.000, 0.000, 0.000, 0.000;" +
-				/* 0B */   " 0.000, 0.000,  0.000, 0.000, 0.000, 0.000, 0.000 " +
+				/* 0A */   " 0.000, 0.000,  0.000, 0.792, 0.008, 0.000, 0.000;" +
+				/* 0B */   " 0.000, 0.000,  0.000, 0.001, 0.099, 0.000, 0.000 " +
 							"]");
 			
 			Set<Integer> starts = new HashSet<Integer>(); 
 			starts.add(0);
 			
-			Map<Integer, Arc> results = new LinkedHashMap<Integer, Arc>();
+			Map<String, Arc> results = new LinkedHashMap<String, Arc>();
 			DMatrixRMaj G = eq.lookupDDRM("G");
 		
-			viterbi(G, starts, results);
+			viterbi(G, starts, 0, results);
 			
-			results.entrySet().stream().forEach(p -> System.out.println(Arc.STATES[p.getKey()] + " ===> " + p.getValue()));
+			results.entrySet().stream().forEach(
+					p -> System.out.println(p.getKey() + " ===> " + p.getValue()));	
 			
+			System.out.println("0A -> 1A -> 0A");
 		}
 	}
 	
@@ -233,9 +235,9 @@ public class HiddenMarkovModelExercise3 {
 		System.out.println("Forward1(A) * Backward3(A) + Forward1(B) * Backward3(B) =  0.792 * 0.157977 + 0.001 * 0.096923 = 0.125215");
 	}
 	
-	public static void viterbi(DMatrixRMaj graph, Collection<Integer> current, Map<Integer, Arc> results) {
+	public static void viterbi(DMatrixRMaj graph, Collection<Integer> current, int seq, Map<String, Arc> results) {
 		
-		Collection<Integer> nexts = new HashSet<Integer>();
+		Collection<Integer> nexts = new LinkedHashSet<Integer>();
 		
 		if (current.isEmpty())
 			return;
@@ -250,64 +252,24 @@ public class HiddenMarkovModelExercise3 {
 				
 				if (cost > 0) {
 					
-					Arc src = results.get(from);
-					Arc dest = results.get(to);
+					Arc src = results.get(String.valueOf(seq - 1) + "#" + Arc.STATES[from]);
+					Arc dest = results.get(String.valueOf(seq) + "#" + Arc.STATES[to]);
 					
 					double total = 0d;
 					if (src != null)
 						total = src.getProb();
 					
 					if (dest == null || (dest != null && dest.getProb() < total + cost)) {
-						results.put(to, new Arc(from, to, total + cost));
+						results.put(String.valueOf(seq) + "#" + Arc.STATES[to], new Arc(from, to, total + cost));
 						nexts.add(to);
 					}
 				}
 			}
 		}
 		
-		viterbi(graph, nexts, results);
+		viterbi(graph, nexts, seq + 1, results);
 		
 	}
-	
-	public static void traverse(Map<Integer, Arc> results, Collection<Integer> current, StringBuffer output) {
-		
-		if (current.isEmpty())
-			return;
-		
-		double val = Double.MIN_VALUE;
-		int selected = -1;
-		
-		for (int j : current) {
-			
-			Arc arc = results.get(j);
-			
-			if (arc != null && arc.getProb() > val) {
-				val = arc.getProb();
-				selected = j;
-			}
-			else 
-			if (arc == null) {
-				selected = j;
-			}
-		}
-		
-		
-		Arc arc = results.get(selected);
-		if (arc != null) {
-			
-			Collection<Integer> nexts = new HashSet<Integer>();
-			nexts.add(arc.getFrom());
-			
-			
-			traverse(results, nexts, output);
-			
-			output.append(" ==> " + Arc.STATES[selected]);
-		}
-		else {
-			output.append(Arc.STATES[selected]);
-		}
-	}
-	
 	
 	public static class Arc {
 		
