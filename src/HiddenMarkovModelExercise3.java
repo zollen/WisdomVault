@@ -15,6 +15,10 @@ public class HiddenMarkovModelExercise3 {
 	private static DMatrixRMaj T = null;
 	private static DMatrixRMaj E = null;	
 	
+	private static final String [] SEQUENCE = { "0", "1", "0" };
+	
+	private static final int [] CONVERT = { 0, 1, 0 };
+	
 	
 	private static final String [] STATES = { "A", "B" };
 	private static final int STATE_A = 0;
@@ -58,8 +62,6 @@ public class HiddenMarkovModelExercise3 {
 		T = eq.lookupDDRM("T");
 		E = eq.lookupDDRM("E");
 		
-		String [] sequence = { "0", "1", "0" };
-		
 		{
 			// find: P(O1=0, O2=1, O3=0, T1, T2, T3)
 			System.out.println("======== [Forward] ==========");
@@ -67,7 +69,7 @@ public class HiddenMarkovModelExercise3 {
 			starts.put(STATE_A, 0.99d);
 			starts.put(STATE_B, 0.01d);
 		
-			forward(starts, sequence);
+			forward(starts, SEQUENCE);
 		}
 		
 		
@@ -78,11 +80,16 @@ public class HiddenMarkovModelExercise3 {
 			ends.put(STATE_A, 1d);
 			ends.put(STATE_B, 1d);
 			
-			backward(ends, sequence);		
+			backward(ends, SEQUENCE);		
 		}
 		
 		System.out.println("============================");
 		System.out.println("The final result of both Backend algo and Fordward algo are the same");
+		System.out.println("============= [Verification] =============");
+		System.out.println("P(0,1,0) = F3(0) + F3(1) = 0.124264008 + 0.000950699 = 0.12521471");
+		System.out.println("P(0,1,0) = F1(A0) * B3(A0) + F1(B0) * B3(B0) = 0.792 * 0.157977 + 0.001 * 0.096923 = 0.12521471");
+		System.out.println("P(0,1,0) = F2(A1) * B2(A1) + F2(B1) * B2(B1) = 0.793 * 0.156818 + 0.107 * 0.008019 = 0.12521471");
+		System.out.println("P(0,1,0) = F3(A0) * B1(A0) + F3(B0) * B1(B0) = 0.12426408 * 1 + 0.000950699 * 1 = 0.12521471");
 		System.out.println();
 		
 		{
@@ -106,7 +113,7 @@ public class HiddenMarkovModelExercise3 {
 			starts.put(0, 0.99d);
 			starts.put(1, 0.01d);
 			
-			viterbi(starts, sequence);
+			viterbi(starts, SEQUENCE);
 			
 			System.out.println();
 			System.out.println("0A -> 1A -> 0A");
@@ -119,12 +126,12 @@ public class HiddenMarkovModelExercise3 {
 		final Map<String, Double> ss = probs;
 		
 		starts.entrySet().stream().forEach(p -> { 
-				ss.put("0" + String.valueOf(p.getKey()), p.getValue() * E.get(0, p.getKey())); 
+				ss.put("0" + "#" + STATES[p.getKey()], p.getValue() * E.get(CONVERT[0], p.getKey())); 
 		});
 		
 		Set<Integer> tos = new LinkedHashSet<Integer>(starts.keySet());
 		
-		for (int observable = 0 + 1; observable < sequence.length; observable++) {
+		for (int step = 0 + 1; step < sequence.length; step++) {
 			
 			Set<Integer> nexts = new LinkedHashSet<Integer>();
 
@@ -134,17 +141,17 @@ public class HiddenMarkovModelExercise3 {
 					double sum = 0d;
 					for (int from = 0; from < T.numCols; from++) {
 					
-						if (T.get(to, from) > 0 && E.get(new Integer(sequence[observable]), to) > 0) {
+						if (T.get(to, from) > 0 && E.get(CONVERT[step], to) > 0) {
 					
 							double last = 0d;
-							if (probs.get(String.valueOf(observable - 1) + String.valueOf(from)) != null)
-								last = probs.get(String.valueOf(observable - 1) + String.valueOf(from));
-					
-							sum += (double) last * T.get(to, from) * E.get(new Integer(sequence[observable]), to);
+							if (probs.get(String.valueOf(step - 1) + "#" + STATES[from]) != null)
+								last = probs.get(String.valueOf(step - 1) + "#" + STATES[from]);
+			
+							sum += (double) last * T.get(to, from) * E.get(CONVERT[step], to);
 						}
 					}
 					
-					probs.put(String.valueOf(observable) + String.valueOf(to), sum);
+					probs.put(String.valueOf(step) + "#" + STATES[to], sum);
 				}
 				
 				
@@ -160,13 +167,10 @@ public class HiddenMarkovModelExercise3 {
 			tos = nexts;
 		}
 		
-		probs.entrySet().stream().forEach( p -> System.out.println("OBSERV(" +
-				sequence[new Integer(p.getKey().substring(0,  1))] + ") State(" +
-				STATES[new Integer(p.getKey().substring(1,  2))] + ") ===> " + 
+		probs.entrySet().stream().forEach( p -> System.out.println(
+				p.getKey() + sequence[new Integer(p.getKey().substring(0, 1))] +
+				" ===> " + 
 				ff.format(p.getValue())));
-		
-		System.out.println("P(O1=0, O2=1, O3=0, T1, T2, T3)");
-		System.out.println("Forward3(A) + Forward3(B) = 0.124264 + 0.000951 = 0.125215");
 	}
 	
 	public static void backward(Map<Integer, Double> ends, String [] sequence) {
@@ -174,11 +178,11 @@ public class HiddenMarkovModelExercise3 {
 		Map<String, Double> probs = new LinkedHashMap<String, Double>();
 		final Map<String, Double> ss = probs;
 		
-		ends.entrySet().stream().forEach(p -> ss.put(String.valueOf(sequence.length - 1) + String.valueOf(p.getKey()), p.getValue())); 
+		ends.entrySet().stream().forEach(p -> ss.put(String.valueOf(sequence.length - 1) + "#" + STATES[p.getKey()], p.getValue())); 
 		
 		Set<Integer> froms = new LinkedHashSet<Integer>(ends.keySet());
 		
-		for (int observable = sequence.length - 2; observable >= 0; observable--) {
+		for (int step = sequence.length - 2; step >= 0; step--) {
 			
 			Set<Integer> nexts = new LinkedHashSet<Integer>();
 			
@@ -188,17 +192,17 @@ public class HiddenMarkovModelExercise3 {
 					double sum = 0d;				
 					for (int to = 0; to < T.numRows; to++) {
 				
-						if (T.get(to, from) > 0 && E.get(new Integer(sequence[observable]), to) > 0) {
+						if (T.get(to, from) > 0 && E.get(CONVERT[step], to) > 0) {
 						
 							double last = 0d;
-							if (probs.get(String.valueOf((observable + 1) + String.valueOf(to))) != null)
-								last = probs.get(String.valueOf((observable + 1) + String.valueOf(to)));
+							if (probs.get(String.valueOf((step + 1) + "#" + STATES[to])) != null)
+								last = probs.get(String.valueOf((step + 1) + "#" + STATES[to]));
 						
-							sum += (double) last * T.get(to, from) * E.get(new Integer(sequence[observable + 1]), to);
+							sum += (double) last * T.get(to, from) * E.get(CONVERT[step + 1], to);
 						}
 					}
 
-					probs.put(String.valueOf(observable) + String.valueOf(from), sum);
+					probs.put(String.valueOf(step) + "#" + STATES[from], sum);
 				}
 				
 				{
@@ -212,13 +216,11 @@ public class HiddenMarkovModelExercise3 {
 			froms = nexts;
 		}
 		
-		probs.entrySet().stream().forEach( p -> System.out.println("OBSERV(" +
-				sequence[new Integer(p.getKey().substring(0,  1))] + ") State(" +
-				STATES[new Integer(p.getKey().substring(1,  2))] + ") ===> " + 
+		probs.entrySet().stream().forEach( p -> System.out.println(
+				p.getKey() +
+				sequence[new Integer(p.getKey().substring(0,  1))] + 
+				" ===> " + 
 				ff.format(p.getValue())));
-		
-		System.out.println("P(O1=0, O2=1, O3=0, T1, T2, T3");
-		System.out.println("Forward1(A) * Backward3(A) + Forward1(B) * Backward3(B) =  0.792 * 0.157977 + 0.001 * 0.096923 = 0.125215");
 	}
 	
 	public static void viterbi(Map<Integer, Double> starts, String [] sequence) {
@@ -228,7 +230,7 @@ public class HiddenMarkovModelExercise3 {
 		
 		starts.entrySet().stream().forEach(
 				p -> { 
-					ss.put("0" + "#" + STATES[p.getKey()] + sequence[0], p.getValue() * E.get(0, p.getKey()));
+					ss.put("0" + "#" + STATES[p.getKey()] + sequence[0], p.getValue() * E.get(CONVERT[0], p.getKey()));
 				}
 		);
 		
@@ -241,7 +243,7 @@ public class HiddenMarkovModelExercise3 {
 				
 				for (int to = 0; to < T.numRows; to++) {
 					
-					if (T.get(to, from) > 0 && E.get(new Integer(sequence[step]), to) > 0) {
+					if (T.get(to, from) > 0 && E.get(CONVERT[step], to) > 0) {
 						
 						double left = 0.0d;
 						double right = 0.0d;
@@ -254,7 +256,7 @@ public class HiddenMarkovModelExercise3 {
 						}
 						
 						if (left > 0) {							
-							left = left * T.get(to, from) * E.get(new Integer(sequence[step]), to);
+							left = left * T.get(to, from) * E.get(CONVERT[step], to);
 							
 							if (left > right)
 								ss.put(step + "#" + STATES[to] + sequence[step], left);
@@ -272,5 +274,5 @@ public class HiddenMarkovModelExercise3 {
 		
 		ss.entrySet().stream().forEach(p -> System.out.println(p.getKey() + " ==> " + ff.format(p.getValue())));
 	}
-
+	
 }
