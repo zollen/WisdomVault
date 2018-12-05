@@ -81,6 +81,14 @@ public class HiddenMarkovModelExercise2 {
 		ends.put(0, 1d);
 		ends.put(1, 1d);
 		backward(ends, SEQUENCE);
+		
+		System.out.println("========== Verification =========");
+		System.out.println("P(b,a,d) = F(d1) + F(d2) = 0.003594 + 0.010692 = 0.014286");
+		System.out.println("P(b,a,d) at position #1 = F(b1) * B(b1) + F(b2) * B(b2) = 0.18 * 0.0555 + 0.08 * 0.0537 = 0.014286");
+		System.out.println("P(b,a,d) at position #2 = F(a1) * B(a1) + F(a2) * B(a2) = 0.0456 * 0.15 + 0.0438 * 0.17 = 0.014286");
+		System.out.println("P(b,a,d) at position #3 = F(d1) * B(d1) + F(d2) * B(d2) = 0.003594 * 1 + 0.010692 * 1 = 0.014286");
+		
+		
 	}
 	
 	public static void forward(Map<Integer, Double> starts, String [] sequence) {
