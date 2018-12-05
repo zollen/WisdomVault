@@ -10,7 +10,7 @@ import org.ejml.equation.Equation;
 
 public class HiddenMarkovModelExercise2 {
 	
-	private static final DecimalFormat ff = new DecimalFormat("0.###########");
+	private static final DecimalFormat ff = new DecimalFormat("0.########");
 	
 	private static DMatrixRMaj T = null;
 	private static DMatrixRMaj E = null;	
@@ -19,6 +19,8 @@ public class HiddenMarkovModelExercise2 {
 	private static final String [] STATES = { "1", "2" };
 	
 	private static final String [] SEQUENCE = { "b", "a", "d" };
+	
+	private static final int [] CONVERT = { 1, 0, 3 };
 	
 	
 	public static void main(String[] args) {
@@ -29,8 +31,8 @@ public class HiddenMarkovModelExercise2 {
 		 * start_probability = {'1': 0.6, '2': 0.4}
 		 * 
 		 * transition_probability = { 
-		 * 				'1' : {'start': 0.6, '1': 0.5, '2': 0.5}, 
-		 * 				'2' : {'start': 0.4, '1': 0.3, '2': 0.7}
+		 * 				'1' : {'1': 0.5, '2': 0.5}, 
+		 * 				'2' : {'1': 0.3, '2': 0.7}
 		 * }
 		 * 
 		 * emission_probability = { 
@@ -87,7 +89,7 @@ public class HiddenMarkovModelExercise2 {
 		final Map<String, Double> ss = probs;
 		
 		starts.entrySet().stream().forEach(p -> { 
-				ss.put("0" + "#" + String.valueOf(p.getKey()), p.getValue() * E.get(0, p.getKey())); 
+				ss.put("0" + "#" + String.valueOf(p.getKey()), p.getValue() * E.get(CONVERT[0], p.getKey())); 
 		});
 		
 		Set<Integer> tos = new LinkedHashSet<Integer>(starts.keySet());
@@ -102,13 +104,13 @@ public class HiddenMarkovModelExercise2 {
 					double sum = 0d;
 					for (int from = 0; from < T.numCols; from++) {
 					
-						if (T.get(to, from) > 0 && E.get(step, to) > 0) {
+						if (T.get(to, from) > 0 && E.get(CONVERT[step], to) > 0) {
 					
 							double last = 0d;
 							if (probs.get(String.valueOf(step - 1) + "#" + String.valueOf(from)) != null)
 								last = probs.get(String.valueOf(step - 1) + "#" + String.valueOf(from));
-					
-							sum += (double) last * T.get(to, from) * E.get(step, to);
+			
+							sum += (double) last * T.get(to, from) * E.get(CONVERT[step], to);
 						}
 					}
 					
@@ -153,13 +155,13 @@ public class HiddenMarkovModelExercise2 {
 					double sum = 0d;				
 					for (int to = 0; to < T.numRows; to++) {
 				
-						if (T.get(to, from) > 0 && E.get(step, to) > 0) {
+						if (T.get(to, from) > 0 && E.get(CONVERT[step], to) > 0) {
 						
 							double last = 0d;
-							if (probs.get(String.valueOf((step + 1) + "#" + String.valueOf(to))) != null)
-								last = probs.get(String.valueOf((step + 1) + "#" + String.valueOf(to)));
+							if (probs.get(String.valueOf((step + 1) + "#" + String.valueOf(from))) != null)
+								last = probs.get(String.valueOf((step + 1) + "#" + String.valueOf(from)));
 						
-							sum += (double) last * T.get(to, from) * E.get(step + 1, to);
+							sum += (double) last * T.get(to, from) * E.get(CONVERT[step + 1], to);
 						}
 					}
 
@@ -191,7 +193,7 @@ public class HiddenMarkovModelExercise2 {
 		
 		starts.entrySet().stream().forEach(
 				p -> { 
-					ss.put("0" + "#" + STATES[p.getKey()] + sequence[0], p.getValue() * E.get(0, p.getKey()));
+					ss.put("0" + "#" + STATES[p.getKey()] + sequence[0], p.getValue() * E.get(CONVERT[0], p.getKey()));
 				}
 		);
 		
@@ -204,7 +206,7 @@ public class HiddenMarkovModelExercise2 {
 				
 				for (int to = 0; to < T.numRows; to++) {
 					
-					if (T.get(to, from) > 0 && E.get(step, to) > 0) {
+					if (T.get(to, from) > 0 && E.get(CONVERT[step], to) > 0) {
 						
 						double left = 0.0d;
 						double right = 0.0d;
@@ -217,7 +219,7 @@ public class HiddenMarkovModelExercise2 {
 						}
 						
 						if (left > 0) {							
-							left = left * T.get(to, from) * E.get(step, to);
+							left = left * T.get(to, from) * E.get(CONVERT[step], to);
 							
 							if (left > right)
 								ss.put(step + "#" + STATES[to] + sequence[step], left);
