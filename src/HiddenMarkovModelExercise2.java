@@ -158,8 +158,8 @@ public class HiddenMarkovModelExercise2 {
 						if (T.get(to, from) > 0 && E.get(CONVERT[step], to) > 0) {
 						
 							double last = 0d;
-							if (probs.get(String.valueOf((step + 1) + "#" + String.valueOf(from))) != null)
-								last = probs.get(String.valueOf((step + 1) + "#" + String.valueOf(from)));
+							if (probs.get(String.valueOf((step + 1) + "#" + String.valueOf(to))) != null)
+								last = probs.get(String.valueOf((step + 1) + "#" + String.valueOf(to)));
 						
 							sum += (double) last * T.get(to, from) * E.get(CONVERT[step + 1], to);
 						}

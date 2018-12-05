@@ -1,6 +1,4 @@
 import java.text.DecimalFormat;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -13,7 +11,11 @@ public class HiddenMarkovModelExercise1 {
 
 	private static final DecimalFormat ff = new DecimalFormat("0.######");
 	
-	private static final String[] GENES = { "A", "C", "T", "G" };
+	private static final String [] STATES = { "0", "1" };
+	
+	private static final String[] SEQUENCE = { "A", "C", "T", "G" };
+	
+	private static final int [] CONVERT = { 0, 1, 2, 3 };
 
 	private static DMatrixRMaj T = null;
 	private static DMatrixRMaj E = null;
@@ -23,24 +25,31 @@ public class HiddenMarkovModelExercise1 {
 		/**
 		 * states = ('0', '1') observations = ('A', 'C', 'T', 'G')
 		 * 
-		 * start_probability = {'0': 0.5, '1': 0.5}
+		 * start_probability = {
+		 * 			'0': 0.5, 
+		 * 			'1': 0.5
+		 * }
 		 * 
-		 * transition_probability = { '0' : {'0': 0.75, '1': 0.25}, '1' : {'0': 0.25,
-		 * '1': 0.75}, }
+		 * transition_probability = { 
+		 * 			'0' : {'0': 0.75, '1': 0.25}, 
+		 * 			'1' : {'0': 0.25, '1': 0.75}
+		 * }
 		 * 
-		 * emission_probability = { '0' : {'A': 0.45, 'C': 0.05, 'T': 0.05, 'G': 0.45},
-		 * '1' : {'A': 0.05, 'C': 0.45, 'T': 0.45, 'G': 0.05}, }
+		 * emission_probability = { 
+		 * 			'0' : {'A': 0.45, 'C': 0.05, 'T': 0.05, 'G': 0.45},
+		 * 			'1' : {'A': 0.05, 'C': 0.45, 'T': 0.45, 'G': 0.05}
+		 * }
 		 */
 
 		Equation eq = new Equation();
 		eq.process("T = [ " +
-						/* 0, 1 */
+						/* 0,     1 */
 			/* 0 */ "   0.75,  0.25;" +
 			/* 1 */ "   0.25,  0.75 " +
 						"]");
 
 		eq.process("E = [" +
-					/* 0, 1 */
+					/* 0,     1 */
 		/* A */ "   0.45,  0.05;" +
 		/* C */ "   0.05,  0.45;" +
 		/* T */ "   0.05,  0.45;" +
@@ -50,23 +59,7 @@ public class HiddenMarkovModelExercise1 {
 		T = eq.lookupDDRM("T");
 		E = eq.lookupDDRM("E");
 	
-		// FORWARD Algorithm with N states(0, 1) and M emissions(A, C, T, G)
-		// f(0, k) = startprob(i) * E(i)    <-- 1 <= i <= N, 1 <= k <= M
-		// for k in { A, C, T, G }          <-- specific sequence of emissions
-		//    for i in 1..N
-		//       sum(i) = 0
-		//       for j in i..N
-		//	        sum(i) += f(i - 1) * P(state(i) <- state(j)) * E(i, k)     <-- state(i) and *current* emission state
-		//       f(i, k) = sum(i)
-		
-		// A0 = 0.225 = 0.5 * 0.75 * 0.45 + 0.5 * 0.25 * 0.45
-		// A1 = 0.025 = 0.5 * 0.75 * 0.05 + 0.5 * 0.25 * 0.05
-		// C0 = 0.00875 = A0 * 0.75 * 0.05 + A1 * 0.25 * 0.05
-		// C1 = 0.03375 = A1 * 0.75 * 0.45 + A0 * 0.25 * 0.45
-		// T0 = 0.00075 = C0 * 0.75 * 0.05 + C1 * 0.25 * 0.05
-		// T1 = 0.012375 = C1 * 0.75 * 0.45 + C0 * 0.25 * 0.45
-		// G0 = 0.001645 = T0 * 0.75 * 0.05 + T1 * 0.25 * 0.05
-		// G1 = 0.000473 = T1 * 0.75 * 0.45 + T0 * 0.25 * 0.45
+
 		{
 			System.out.println("===================Forward===================");
 			
@@ -74,54 +67,22 @@ public class HiddenMarkovModelExercise1 {
 			starts.put(0, 0.5d);
 			starts.put(1, 0.5d);
 
-			forward(starts);
+			forward(starts, SEQUENCE);
 		}
 		
 		{
 			System.out.println("==================Viterbi====================");
-		
-			eq.process("C = [" +
-			      /*   S0,     A0,     A1,     C0,     C1,     T0,     T1,     G0,     G1 */
-		/* S0 */ "      0,      0,      0,      0,      0,      0,      0,      0,      0;" +
-		/* A0 */ "  0.225,      0,      0,      0,      0,      0,      0,      0,      0;" +
-		/* A1 */ "  0.025,      0,      0,      0,      0,      0,      0,      0,      0;" +
-		/* C0 */ "      0, 0.0375, 0.0125,      0,      0,      0,      0,      0,      0;" +
-		/* C1 */ "      0, 0.1125, 0.3375,      0,      0,      0,      0,      0,      0;" +
-		/* T0 */ "      0,      0,      0, 0.0375, 0.0125,      0,      0,      0,      0;" +
-		/* T1 */ "      0,      0,      0, 0.1125, 0.3375,      0,      0,      0,      0;" +
-		/* G0 */ "      0,      0,      0,      0,      0, 0.3375, 0.1125,      0,      0;" +
-		/* G1 */ "      0,      0,      0,      0,      0, 0.1125, 0.0375,      0,      0 " +
-					"]"); 
 
-			Set<Integer> starts = new HashSet<Integer>(); 
-			starts.add(0);
+
+			Map<Integer, Double> starts = new LinkedHashMap<Integer, Double>();
+			starts.put(0, 0.5d);
+			starts.put(1, 0.5d);
 			
-			Map<Integer, Arc> results = new LinkedHashMap<Integer, Arc>();
-			DMatrixRMaj C = eq.lookupDDRM("C");
 		
-			viterbi(0, C, starts, results);
-			
-			results.entrySet().stream().forEach(p -> System.out.println(Arc.STATES[p.getKey()] + " ===> " + p.getValue()));
-			
+			viterbi(starts, SEQUENCE);
+			System.out.println("A0 -> C1 -> T1 -> G0");
 		}
 		
-		// BACKWARD Algorithm with N states(0, 1) and M emissions(A, C, T, G)
-		// f(0, k) = 1                    <-- 1 <= i <= N, 1 <= k <= M
-		// for k in { G, T, C, A }        <-- reversed sequence of emissions
-		//    for i in 1..N
-		//       sum(i) = 0
-		//       for j in 1..N
-		//          sum(i) += f(i - 1) * P(state(i) -> state(j)) * E(j, k - 1)  <-- state(j) and *last* emission state
-		//       f(i, k) = sum(i)
-		
-		// G0 = 1
-		// G1 = 1
-		// T0 = 0.35 = 1 * 0.75 * 0.45 + 1 * 0.25 * 0.05 
-		// T1 = 0.15 = 1 * 0.75 * 0.05 + 1 * 0.25 * 0.45 
-		// C0 = 0.03 = t0 * 0.75 * 0.05 + t1 * 0.25 * 0.45   
-		// C1 = 0.055 = t1 * 0.75 * 0.45 + t0 * 0.25 * 0.05  
-		// A0 = 0.007313 = c0 * 0.75 * 0.05 + c1 * 0.25 * 0.45 
-		// A1 = 0.018938 = c1 * 0.75 * 0.45 + c0 * 0.25 * 0.05
 		{
 			System.out.println("===================Backward===================");
 			
@@ -129,7 +90,7 @@ public class HiddenMarkovModelExercise1 {
 			ends.put(0, 1d);
 			ends.put(1, 1d);
 		
-			backward(ends);
+			backward(ends, SEQUENCE);
 		}
 		
 		System.out.println("Posterior Probability Of Position #2");
@@ -138,98 +99,18 @@ public class HiddenMarkovModelExercise1 {
 		System.out.println("PP(0) + PP(1) = F(G0) + F(G1) = " + ff.format(0.002118));
 	}
 	
-	public static void viterbi(int depth, DMatrixRMaj graph, Collection<Integer> current, Map<Integer, Arc> results) {
-		
-		Collection<Integer> nexts = new HashSet<Integer>();
-		
-		if (depth >= 5 || current.isEmpty())
-			return;
-		
-		for (int from : current) {
-		
-			for (int to = 0; to < graph.numRows; to++) {
-				
-				double cost = (double) graph.get(to, from);
-				
-				if (cost > 0) {
-					
-					Arc src = results.get(from);
-					Arc dest = results.get(to);
-					
-					double total = 0d;
-					if (src != null)
-						total = src.getCost();
-					
-					if (dest == null || (dest != null && dest.getCost() > total + cost)) {
-						results.put(to, new Arc(from, to, total + cost));
-						nexts.add(to);
-					}
-				}
-			}
-		}
-		
-		viterbi(depth + 1, graph, nexts, results);
-		
-	}
-	
-	public static void backward(Map<Integer, Double> ends) {
-			
-		Map<String, Double> probs = new LinkedHashMap<String, Double>();
-		final Map<String, Double> ss = probs;
-		
-		ends.entrySet().stream().forEach(p -> ss.put(GENES[GENES.length - 1] + String.valueOf(p.getKey()), p.getValue())); 
-		
-		Set<Integer> froms = new LinkedHashSet<Integer>(ends.keySet());
-		
-		for (int gene = GENES.length - 2; gene >= 0; gene--) {
-			
-			Set<Integer> nexts = new LinkedHashSet<Integer>();
-			
-			for (int from : froms) {
-				
-				{
-					double sum = 0d;				
-					for (int to = 0; to < T.numRows; to++) {
-				
-						if (T.get(to, from) > 0 && E.get(gene, to) > 0) {
-						
-							double last = 0d;
-							if (probs.get(GENES[gene + 1] + String.valueOf(to)) != null)
-								last = probs.get(GENES[gene + 1] + String.valueOf(to));
-						
-							sum += (double) last * T.get(to, from) * E.get(gene + 1, to);
-						}
-					}
-
-					probs.put(GENES[gene] + String.valueOf(from), sum);
-				}
-				
-				{
-					for (int _to = 0; _to < T.numRows; _to++) {
-						if (T.get(_to, from) > 0)
-							nexts.add(_to);
-					}	
-				}
-			}
-				
-			froms = nexts;
-		}
-		
-		probs.entrySet().stream().forEach( p -> System.out.println(p.getKey() + " ===> " + ff.format(p.getValue())));
-	}
-	
-	public static void forward(Map<Integer, Double> starts) {
+	public static void forward(Map<Integer, Double> starts, String [] sequence) {
 
 		Map<String, Double> probs = new LinkedHashMap<String, Double>();
 		final Map<String, Double> ss = probs;
 		
 		starts.entrySet().stream().forEach(p -> { 
-				ss.put(GENES[0] + String.valueOf(p.getKey()), p.getValue() * E.get(0, p.getKey())); 
+				ss.put("0" + "#" + String.valueOf(p.getKey()), p.getValue() * E.get(CONVERT[0], p.getKey())); 
 		});
 		
 		Set<Integer> tos = new LinkedHashSet<Integer>(starts.keySet());
 		
-		for (int gene = 0 + 1; gene < E.numRows; gene++) {
+		for (int step = 0 + 1; step < sequence.length; step++) {
 			
 			Set<Integer> nexts = new LinkedHashSet<Integer>();
 
@@ -239,17 +120,17 @@ public class HiddenMarkovModelExercise1 {
 					double sum = 0d;
 					for (int from = 0; from < T.numCols; from++) {
 					
-						if (T.get(to, from) > 0 && E.get(gene, to) > 0) {
+						if (T.get(to, from) > 0 && E.get(CONVERT[step], to) > 0) {
 					
 							double last = 0d;
-							if (probs.get(GENES[gene - 1] + String.valueOf(from)) != null)
-								last = probs.get(GENES[gene - 1] + String.valueOf(from));
-					
-							sum += (double) last * T.get(to, from) * E.get(gene, to);
+							if (probs.get(String.valueOf(step - 1) + "#" + String.valueOf(from)) != null)
+								last = probs.get(String.valueOf(step - 1) + "#" + String.valueOf(from));
+			
+							sum += (double) last * T.get(to, from) * E.get(CONVERT[step], to);
 						}
 					}
 					
-					probs.put(GENES[gene] + String.valueOf(to), sum);
+					probs.put(String.valueOf(step) + "#" + String.valueOf(to), sum);
 				}
 				
 				
@@ -265,49 +146,111 @@ public class HiddenMarkovModelExercise1 {
 			tos = nexts;
 		}
 		
-		probs.entrySet().stream().forEach( p -> System.out.println(p.getKey() + " ===> " + ff.format(p.getValue())));
+		probs.entrySet().stream().forEach( p -> System.out.println(
+				p.getKey() + sequence[new Integer(p.getKey().substring(0, 1))] +
+				" ===> " + 
+				ff.format(p.getValue())));
 	}
 	
-	
-	public static class Arc {
+	public static void backward(Map<Integer, Double> ends, String [] sequence) {
 		
-		public static final String [] STATES = { "S0", "A0", "A1", "C0", "C1", "T0", "T1", "G0", "G1" };
+		Map<String, Double> probs = new LinkedHashMap<String, Double>();
+		final Map<String, Double> ss = probs;
+		
+		ends.entrySet().stream().forEach(p -> ss.put(String.valueOf(sequence.length - 1) + "#" + String.valueOf(p.getKey()), p.getValue())); 
+		
+		Set<Integer> froms = new LinkedHashSet<Integer>(ends.keySet());
+		
+		for (int step = sequence.length - 2; step >= 0; step--) {
+			
+			Set<Integer> nexts = new LinkedHashSet<Integer>();
+			
+			for (int from : froms) {
+				
+				{
+					double sum = 0d;				
+					for (int to = 0; to < T.numRows; to++) {
+				
+						if (T.get(to, from) > 0 && E.get(CONVERT[step], to) > 0) {
+						
+							double last = 0d;
+							if (probs.get(String.valueOf((step + 1) + "#" + String.valueOf(to))) != null)
+								last = probs.get(String.valueOf((step + 1) + "#" + String.valueOf(to)));
+						
+							sum += (double) last * T.get(to, from) * E.get(CONVERT[step + 1], to);
+						}
+					}
 
-		
-		private int from = -1;
-		private int to = -1;
-		private double cost = -1;
-		
-		public Arc() {}
-		
-		public Arc(int from, int to, double cost) {
-			this.from = from;
-			this.to = to;
-			this.cost = cost;
+					probs.put(String.valueOf(step) + "#" + String.valueOf(from), sum);
+				}
+				
+				{
+					for (int _to = 0; _to < T.numRows; _to++) {
+						if (T.get(_to, from) > 0)
+							nexts.add(_to);
+					}	
+				}
+			}
+				
+			froms = nexts;
 		}
 		
-		public int getFrom() {
-			return from;
-		}
-		public void setFrom(int from) {
-			this.from = from;
-		}
-		public int getTo() {
-			return to;
-		}
-		public void setTo(int to) {
-			this.to = to;
-		}
-		public double getCost() {
-			return cost;
-		}
-		public void setCost(double cost) {
-			this.cost = cost;
-		}
-		@Override
-		public String toString() {
-			return "Arc [from=" + STATES[from] + ", to=" + STATES[to] + ", cost=" + ff.format(cost) + "]";
-		}
+		probs.entrySet().stream().forEach( p -> System.out.println(
+				p.getKey() +
+				sequence[new Integer(p.getKey().substring(0,  1))] + 
+				" ===> " + 
+				ff.format(p.getValue())));
 	}
-
+	
+	public static void viterbi(Map<Integer, Double> starts, String [] sequence) {
+		
+		Map<String, Double> probs = new LinkedHashMap<String, Double>();
+		final Map<String, Double> ss = probs;
+		
+		starts.entrySet().stream().forEach(
+				p -> { 
+					ss.put("0" + "#" + STATES[p.getKey()] + sequence[0], p.getValue() * E.get(CONVERT[0], p.getKey()));
+				}
+		);
+		
+		Set<Integer> froms = new LinkedHashSet<Integer>(starts.keySet());
+		Set<Integer> nexts = new LinkedHashSet<Integer>();
+		
+		for (int step = 1; step < sequence.length; step++) {
+			
+			for (int from : froms) {
+				
+				for (int to = 0; to < T.numRows; to++) {
+					
+					if (T.get(to, from) > 0 && E.get(CONVERT[step], to) > 0) {
+						
+						double left = 0.0d;
+						double right = 0.0d;
+						if (ss.get((step - 1) + "#" + STATES[from] + sequence[step - 1]) != null) {
+							left = ss.get((step - 1) + "#" + STATES[from] + sequence[step - 1]);
+						}
+						
+						if (ss.get(step + "#" + STATES[to] + sequence[step]) != null) {
+							right = ss.get(step + "#" + STATES[to] + sequence[step]);
+						}
+						
+						if (left > 0) {							
+							left = left * T.get(to, from) * E.get(CONVERT[step], to);
+							
+							if (left > right)
+								ss.put(step + "#" + STATES[to] + sequence[step], left);
+						}	
+						
+						nexts.add(to);
+					}
+				}
+			}
+			
+			froms = new LinkedHashSet<Integer>(nexts);
+			nexts.clear();
+		}
+		
+		
+		ss.entrySet().stream().forEach(p -> System.out.println(p.getKey() + " ==> " + ff.format(p.getValue())));
+	}
 }
