@@ -10,7 +10,7 @@ import org.ejml.equation.Equation;
 
 public class HiddenMarkovModelExercise2 {
 	
-	private static final DecimalFormat ff = new DecimalFormat("0.######");
+	private static final DecimalFormat ff = new DecimalFormat("0.###########");
 	
 	private static DMatrixRMaj T = null;
 	private static DMatrixRMaj E = null;	
@@ -58,6 +58,8 @@ public class HiddenMarkovModelExercise2 {
 		T = eq.lookupDDRM("T");
 		E = eq.lookupDDRM("E");
 		
+		System.out.println("========== viterbi ============");
+		
 		Map<Integer, Double> starts = new HashMap<Integer, Double>(); 
 		starts.put(0, 0.6d);
 		starts.put(1, 0.4d);
@@ -65,6 +67,121 @@ public class HiddenMarkovModelExercise2 {
 		viterbi(starts, SEQUENCE);
 		
 		System.out.println("1b -> 1a -> 2d");
+		
+		
+		System.out.println("========== forward ============");
+		forward(starts, SEQUENCE);
+		
+		
+		System.out.println("========== backward ============");
+		
+		Map<Integer, Double> ends = new HashMap<Integer, Double>(); 
+		ends.put(0, 1d);
+		ends.put(1, 1d);
+		backward(ends, SEQUENCE);
+	}
+	
+	public static void forward(Map<Integer, Double> starts, String [] sequence) {
+
+		Map<String, Double> probs = new LinkedHashMap<String, Double>();
+		final Map<String, Double> ss = probs;
+		
+		starts.entrySet().stream().forEach(p -> { 
+				ss.put("0" + "#" + String.valueOf(p.getKey()), p.getValue() * E.get(0, p.getKey())); 
+		});
+		
+		Set<Integer> tos = new LinkedHashSet<Integer>(starts.keySet());
+		
+		for (int step = 0 + 1; step < sequence.length; step++) {
+			
+			Set<Integer> nexts = new LinkedHashSet<Integer>();
+
+			for (int to : tos) {
+				
+				{
+					double sum = 0d;
+					for (int from = 0; from < T.numCols; from++) {
+					
+						if (T.get(to, from) > 0 && E.get(step, to) > 0) {
+					
+							double last = 0d;
+							if (probs.get(String.valueOf(step - 1) + "#" + String.valueOf(from)) != null)
+								last = probs.get(String.valueOf(step - 1) + "#" + String.valueOf(from));
+					
+							sum += (double) last * T.get(to, from) * E.get(step, to);
+						}
+					}
+					
+					probs.put(String.valueOf(step) + "#" + String.valueOf(to), sum);
+				}
+				
+				
+				{
+					int from = to;
+					for (int _to = 0; _to < T.numRows; _to++) {
+						if (T.get(_to, from) > 0)
+							nexts.add(_to);
+					}
+				}
+			}
+			
+			tos = nexts;
+		}
+		
+		probs.entrySet().stream().forEach( p -> System.out.println(
+				p.getKey() + sequence[new Integer(p.getKey().substring(0, 1))] +
+				" ===> " + 
+				ff.format(p.getValue())));
+	}
+	
+	public static void backward(Map<Integer, Double> ends, String [] sequence) {
+		
+		Map<String, Double> probs = new LinkedHashMap<String, Double>();
+		final Map<String, Double> ss = probs;
+		
+		ends.entrySet().stream().forEach(p -> ss.put(String.valueOf(sequence.length - 1) + "#" + String.valueOf(p.getKey()), p.getValue())); 
+		
+		Set<Integer> froms = new LinkedHashSet<Integer>(ends.keySet());
+		
+		for (int step = sequence.length - 2; step >= 0; step--) {
+			
+			Set<Integer> nexts = new LinkedHashSet<Integer>();
+			
+			for (int from : froms) {
+				
+				{
+					double sum = 0d;				
+					for (int to = 0; to < T.numRows; to++) {
+				
+						if (T.get(to, from) > 0 && E.get(step, to) > 0) {
+						
+							double last = 0d;
+							if (probs.get(String.valueOf((step + 1) + "#" + String.valueOf(to))) != null)
+								last = probs.get(String.valueOf((step + 1) + "#" + String.valueOf(to)));
+						
+							sum += (double) last * T.get(to, from) * E.get(step + 1, to);
+						}
+					}
+
+					probs.put(String.valueOf(step) + "#" + String.valueOf(from), sum);
+				}
+				
+				{
+					for (int _to = 0; _to < T.numRows; _to++) {
+						if (T.get(_to, from) > 0)
+							nexts.add(_to);
+					}	
+				}
+			}
+				
+			froms = nexts;
+		}
+		
+		probs.entrySet().stream().forEach( p -> System.out.println(
+				p.getKey() +
+				sequence[new Integer(p.getKey().substring(0,  1))] + 
+				" ===> " + 
+				ff.format(p.getValue())));
 	}
 	
 	public static void viterbi(Map<Integer, Double> starts, String [] sequence) {
