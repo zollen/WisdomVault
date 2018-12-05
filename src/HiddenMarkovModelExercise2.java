@@ -87,7 +87,13 @@ public class HiddenMarkovModelExercise2 {
 		System.out.println("P(b,a,d) at position #1 = F(b1) * B(b1) + F(b2) * B(b2) = 0.18 * 0.0555 + 0.08 * 0.0537 = 0.014286");
 		System.out.println("P(b,a,d) at position #2 = F(a1) * B(a1) + F(a2) * B(a2) = 0.0456 * 0.15 + 0.0438 * 0.17 = 0.014286");
 		System.out.println("P(b,a,d) at position #3 = F(d1) * B(d1) + F(d2) * B(d2) = 0.003594 * 1 + 0.010692 * 1 = 0.014286");
-		
+		System.out.println("=========== Posterior Probability of each state ==========");
+		System.out.println("PP(b1) = F(b1) * B(b1) = 0.18 * 0.0555 = 0.010008");
+		System.out.println("PP(b2) = F(b2) * B(b2) = 0.08 * 0.0537 = 0.004296");
+		System.out.println("PP(a1) = F(a1) * B(a1) = 0.0456 * 0.15 = 0.00684");
+		System.out.println("PP(a2) = F(a2) * B(a2) = 0.0438 * 0.17 = 0.007446");
+		System.out.println("PP(d1) = F(d1) * B(d1) = 0.003594 * 1 = 0.003594");
+		System.out.println("PP(d2) = F(d2) * B(d2) = 0.010692 * 1 = 0.010692");
 		
 	}
 	
@@ -97,7 +103,7 @@ public class HiddenMarkovModelExercise2 {
 		final Map<String, Double> ss = probs;
 		
 		starts.entrySet().stream().forEach(p -> { 
-				ss.put("0" + "#" + String.valueOf(p.getKey()), p.getValue() * E.get(CONVERT[0], p.getKey())); 
+				ss.put("0" + "#" + STATES[p.getKey()], p.getValue() * E.get(CONVERT[0], p.getKey())); 
 		});
 		
 		Set<Integer> tos = new LinkedHashSet<Integer>(starts.keySet());
@@ -115,14 +121,14 @@ public class HiddenMarkovModelExercise2 {
 						if (T.get(to, from) > 0 && E.get(CONVERT[step], to) > 0) {
 					
 							double last = 0d;
-							if (probs.get(String.valueOf(step - 1) + "#" + String.valueOf(from)) != null)
-								last = probs.get(String.valueOf(step - 1) + "#" + String.valueOf(from));
+							if (probs.get(String.valueOf(step - 1) + "#" + STATES[from]) != null)
+								last = probs.get(String.valueOf(step - 1) + "#" + STATES[from]);
 			
 							sum += (double) last * T.get(to, from) * E.get(CONVERT[step], to);
 						}
 					}
 					
-					probs.put(String.valueOf(step) + "#" + String.valueOf(to), sum);
+					probs.put(String.valueOf(step) + "#" + STATES[to], sum);
 				}
 				
 				
@@ -149,7 +155,7 @@ public class HiddenMarkovModelExercise2 {
 		Map<String, Double> probs = new LinkedHashMap<String, Double>();
 		final Map<String, Double> ss = probs;
 		
-		ends.entrySet().stream().forEach(p -> ss.put(String.valueOf(sequence.length - 1) + "#" + String.valueOf(p.getKey()), p.getValue())); 
+		ends.entrySet().stream().forEach(p -> ss.put(String.valueOf(sequence.length - 1) + "#" + STATES[p.getKey()], p.getValue())); 
 		
 		Set<Integer> froms = new LinkedHashSet<Integer>(ends.keySet());
 		
@@ -166,14 +172,14 @@ public class HiddenMarkovModelExercise2 {
 						if (T.get(to, from) > 0 && E.get(CONVERT[step], to) > 0) {
 						
 							double last = 0d;
-							if (probs.get(String.valueOf((step + 1) + "#" + String.valueOf(to))) != null)
-								last = probs.get(String.valueOf((step + 1) + "#" + String.valueOf(to)));
+							if (probs.get(String.valueOf((step + 1) + "#" + STATES[to])) != null)
+								last = probs.get(String.valueOf((step + 1) + "#" + STATES[to]));
 						
 							sum += (double) last * T.get(to, from) * E.get(CONVERT[step + 1], to);
 						}
 					}
 
-					probs.put(String.valueOf(step) + "#" + String.valueOf(from), sum);
+					probs.put(String.valueOf(step) + "#" + STATES[from], sum);
 				}
 				
 				{
