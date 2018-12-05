@@ -1,6 +1,5 @@
 import java.text.DecimalFormat;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -11,7 +10,7 @@ import org.ejml.equation.Equation;
 
 public class HiddenMarkovModelExercise3 {
 	
-	private static final DecimalFormat ff = new DecimalFormat("0.######");
+	private static final DecimalFormat ff = new DecimalFormat("0.###########");
 	
 	private static DMatrixRMaj T = null;
 	private static DMatrixRMaj E = null;	
@@ -101,28 +100,15 @@ public class HiddenMarkovModelExercise3 {
 			System.out.println("========== [Viterbi] ==========");
 			System.out.println("Compute the most likely sequence of states given the sequence of 010");
 			
-			eq.process("G = [" +
-							/*   S,    0A,     0B,    1A,    1B,    0A,    0B  */
-				/* S  */   " 0.000, 0.000,  0.000, 0.000, 0.000, 0.000, 0.000;" +
-				/* 0A */   " 0.792, 0.000,  0.000, 0.000, 0.000, 0.000, 0.000;" +
-				/* 0B */   " 0.001, 0.000,  0.000, 0.000, 0.000, 0.000, 0.000;" +
-				/* 1A */   " 0.000, 0.198,  0.002, 0.000, 0.000, 0.000, 0.000;" +
-				/* 1B */   " 0.000, 0.009,  0.891, 0.000, 0.000, 0.000, 0.000;" +
-				/* 0A */   " 0.000, 0.000,  0.000, 0.792, 0.008, 0.000, 0.000;" +
-				/* 0B */   " 0.000, 0.000,  0.000, 0.001, 0.099, 0.000, 0.000 " +
-							"]");
 			
-			Set<Integer> starts = new HashSet<Integer>(); 
-			starts.add(0);
 			
-			Map<String, Arc> results = new LinkedHashMap<String, Arc>();
-			DMatrixRMaj G = eq.lookupDDRM("G");
-		
-			viterbi(G, starts, 0, results);
+			Map<Integer, Double> starts = new HashMap<Integer, Double>(); 
+			starts.put(0, 0.99d);
+			starts.put(1, 0.01d);
 			
-			results.entrySet().stream().forEach(
-					p -> System.out.println(p.getKey() + " ===> " + p.getValue()));	
+			viterbi(starts, sequence);
 			
+			System.out.println();
 			System.out.println("0A -> 1A -> 0A");
 		}
 	}
@@ -235,80 +221,56 @@ public class HiddenMarkovModelExercise3 {
 		System.out.println("Forward1(A) * Backward3(A) + Forward1(B) * Backward3(B) =  0.792 * 0.157977 + 0.001 * 0.096923 = 0.125215");
 	}
 	
-	public static void viterbi(DMatrixRMaj graph, Collection<Integer> current, int seq, Map<String, Arc> results) {
+	public static void viterbi(Map<Integer, Double> starts, String [] sequence) {
 		
-		Collection<Integer> nexts = new LinkedHashSet<Integer>();
+		Map<String, Double> probs = new LinkedHashMap<String, Double>();
+		final Map<String, Double> ss = probs;
 		
-		if (current.isEmpty())
-			return;
+		starts.entrySet().stream().forEach(
+				p -> { 
+					ss.put("0" + "#" + STATES[p.getKey()] + sequence[0], p.getValue() * E.get(0, p.getKey()));
+				}
+		);
 		
-		for (int from : current) {
+		Set<Integer> froms = new LinkedHashSet<Integer>(starts.keySet());
+		Set<Integer> nexts = new LinkedHashSet<Integer>();
 		
-			for (int to = 0; to < graph.numRows; to++) {
+		for (int step = 1; step < sequence.length; step++) {
+			
+			for (int from : froms) {
 				
-				double cost = 0.0d;
-				if (to < graph.numRows && from < graph.numCols)
-					cost = (double) graph.get(to, from);
-				
-				if (cost > 0) {
+				for (int to = 0; to < T.numRows; to++) {
 					
-					Arc src = results.get(String.valueOf(seq - 1) + "#" + Arc.STATES[from]);
-					Arc dest = results.get(String.valueOf(seq) + "#" + Arc.STATES[to]);
-					
-					double total = 0d;
-					if (src != null)
-						total = src.getProb();
-					
-					if (dest == null || (dest != null && dest.getProb() < total + cost)) {
-						results.put(String.valueOf(seq) + "#" + Arc.STATES[to], new Arc(from, to, total + cost));
+					if (T.get(to, from) > 0 && E.get(new Integer(sequence[step]), to) > 0) {
+						
+						double left = 0.0d;
+						double right = 0.0d;
+						if (ss.get((step - 1) + "#" + STATES[from] + sequence[step - 1]) != null) {
+							left = ss.get((step - 1) + "#" + STATES[from] + sequence[step - 1]);
+						}
+						
+						if (ss.get(step + "#" + STATES[to] + sequence[step]) != null) {
+							right = ss.get(step + "#" + STATES[to] + sequence[step]);
+						}
+						
+						if (left > 0) {							
+							left = left * T.get(to, from) * E.get(new Integer(sequence[step]), to);
+							
+							if (left > right)
+								ss.put(step + "#" + STATES[to] + sequence[step], left);
+						}	
+						
 						nexts.add(to);
 					}
 				}
 			}
+			
+			froms = new LinkedHashSet<Integer>(nexts);
+			nexts.clear();
 		}
 		
-		viterbi(graph, nexts, seq + 1, results);
 		
+		ss.entrySet().stream().forEach(p -> System.out.println(p.getKey() + " ==> " + ff.format(p.getValue())));
 	}
-	
-	public static class Arc {
-		
-		public static final String [] STATES = { "S", "0A", "0B", "1A", "1B", "0A", "0B" };
 
-		
-		private int from = -1;
-		private int to = -1;
-		private double prob = -1;
-		
-		public Arc() {}
-		
-		public Arc(int from, int to, double cost) {
-			this.from = from;
-			this.to = to;
-			this.prob = cost;
-		}
-		
-		public int getFrom() {
-			return from;
-		}
-		public void setFrom(int from) {
-			this.from = from;
-		}
-		public int getTo() {
-			return to;
-		}
-		public void setTo(int to) {
-			this.to = to;
-		}
-		public double getProb() {
-			return prob;
-		}
-		public void setProb(double cost) {
-			this.prob = cost;
-		}
-		@Override
-		public String toString() {
-			return "Arc [from=" + STATES[from] + ", to=" + STATES[to] + ", prob=" + ff.format(prob) + "]";
-		}
-	}
 }
