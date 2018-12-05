@@ -63,6 +63,8 @@ public class HiddenMarkovModelExercise2 {
 		starts.put(1, 0.4d);
 	
 		viterbi(starts, SEQUENCE);
+		
+		System.out.println("1b -> 1a -> 2d");
 	}
 	
 	public static void viterbi(Map<Integer, Double> starts, String [] sequence) {
