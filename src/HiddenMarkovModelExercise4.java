@@ -81,14 +81,22 @@ public class HiddenMarkovModelExercise4 {
 					"]");
 		
 			eq.process("F1 = Ed * S");
-			System.out.println("F1: " + eq.lookupDDRM("F1"));
+			System.out.print("F1: ");
+			DMatrixRMaj F1 = eq.lookupDDRM("F1");
+			F1.print("%2.6f");
 			eq.process("F2 = El * T * F1");
-			System.out.println("F2: " + eq.lookupDDRM("F2"));
+			System.out.print("F2: ");
+			DMatrixRMaj F2 = eq.lookupDDRM("F2");
+			F2.print("%2.6f");
 		
 			eq.process("B3 = [1; 1; 1; 1]"); 
 			eq.process("B2 = T * El * B3");
-			System.out.println("B3: " + eq.lookupDDRM("B3"));
-			System.out.println("B2: " + eq.lookupDDRM("B2"));
+			System.out.print("B3: ");
+			DMatrixRMaj B3 = eq.lookupDDRM("B3");
+			B3.print("%2.6f");
+			System.out.print("B2: ");
+			DMatrixRMaj B2 = eq.lookupDDRM("B2");
+			B2.print("%2.6f");
 		}
 		
 		{
