@@ -86,6 +86,21 @@ public class HiddenMarkovModelExercise2 {
 		
 		System.out.println("1b -> 1a -> 2d");
 		
+		eq.process("V1 = Eb * S");
+		eq.process("V2 = Ea * T * max(V1) * [ 1; 0 ]"); // [1; 0] <- state 0 has larger value, pick state 0
+		eq.process("V3 = Ed * T * max(V2) * [ 1; 0 ]"); // [1; 0] <- state 0 has larger value, pick state 0
+			
+		System.out.print("V1: ");
+		DMatrixRMaj V1 = eq.lookupDDRM("V1");
+		V1.print("%2.2f");
+		System.out.print("V2: ");
+		DMatrixRMaj V2 = eq.lookupDDRM("V2");
+		V2.print("%2.3f");
+		DMatrixRMaj V3 = eq.lookupDDRM("V3");
+		System.out.print("V3: ");
+		V3.print("%2.5f");
+		
+		System.out.println("1b -> 1a -> 2d");
 		
 		System.out.println("========== forward ============");
 		forward(starts, SEQUENCE);

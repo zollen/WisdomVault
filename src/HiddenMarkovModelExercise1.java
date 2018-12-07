@@ -122,6 +122,24 @@ public class HiddenMarkovModelExercise1 {
 		
 			viterbi(starts, SEQUENCE);
 			System.out.println("A0 -> C1 -> T1 -> G0");
+			
+			eq.process("V1 = Ea * S");
+			eq.process("V2 = Ec * T * max(V1) * [ 1; 0 ]"); // [1; 0] <- state 0 has larger value, pick state 0
+			eq.process("V3 = Et * T * max(V2) * [ 0; 1 ]"); // [0; 1] <- state 1 has larger value, pick state 1
+			eq.process("V4 = Eg * T * max(V3) * [ 0; 1 ]"); // [0; 1] <- state 1 has larger value, pick state 1
+					
+			System.out.print("V1: ");
+			DMatrixRMaj V1 = eq.lookupDDRM("V1");
+			V1.print("%2.3f");
+			System.out.print("V2: ");
+			DMatrixRMaj V2 = eq.lookupDDRM("V2");
+			V2.print("%2.6f");
+			System.out.print("V3: ");
+			DMatrixRMaj V3 = eq.lookupDDRM("V3");
+			V3.print("%2.6f");
+			System.out.print("V4: ");
+			DMatrixRMaj V4 = eq.lookupDDRM("V4");
+			V4.print("%2.6f");
 		}
 		
 		{
