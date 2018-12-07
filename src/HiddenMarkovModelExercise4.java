@@ -90,7 +90,7 @@ public class HiddenMarkovModelExercise4 {
 			F2.print("%2.6f");
 		
 			eq.process("B3 = [1; 1; 1; 1]"); 
-			eq.process("B2 = T * El * B3");
+			eq.process("B2 = T' * El * B3");
 			System.out.print("B3: ");
 			DMatrixRMaj B3 = eq.lookupDDRM("B3");
 			B3.print("%2.6f");

@@ -55,8 +55,24 @@ public class HiddenMarkovModelExercise2 {
 				/* c */	" 0.2,  0.3;" +
 				/* d */	" 0.1,  0.2 " +	
 					"]");
-	
 		
+		eq.process("S = [ 0.6; 0.4 ]");
+	
+		eq.process("Ea = [" +
+				"0.4,   0;" +
+				"  0, 0.3 " +
+			"]");
+
+		eq.process("Eb = [" +
+				"0.3,   0;" +
+				"  0, 0.2 " +
+			"]");	
+
+		eq.process("Ed = [" +
+				" 0.1,   0;" +
+				"   0, 0.2 " +
+			"]");
+
 		T = eq.lookupDDRM("T");
 		E = eq.lookupDDRM("E");
 		
@@ -74,6 +90,19 @@ public class HiddenMarkovModelExercise2 {
 		System.out.println("========== forward ============");
 		forward(starts, SEQUENCE);
 		
+		eq.process("F1 = Eb * S");
+		eq.process("F2 = Ea * T * F1");
+		eq.process("F3 = Ed * T * F2");
+		System.out.print("F1: ");
+		DMatrixRMaj F1 = eq.lookupDDRM("F1");
+		F1.print("%2.2f");
+		System.out.print("F2: ");
+		DMatrixRMaj F2 = eq.lookupDDRM("F2");
+		F2.print("%2.4f");
+		System.out.print("F3: ");
+		DMatrixRMaj F3 = eq.lookupDDRM("F3");
+		F3.print("%2.6f");
+		
 		
 		System.out.println("========== backward ============");
 		
@@ -81,6 +110,21 @@ public class HiddenMarkovModelExercise2 {
 		ends.put(0, 1d);
 		ends.put(1, 1d);
 		backward(ends, SEQUENCE);
+		
+		eq.process("B3 = [1; 1]");
+		eq.process("B2 = T' * Ed * B3");
+		eq.process("B1 = T' * Ea * B2");
+		
+		System.out.print("B3: ");
+		DMatrixRMaj B3 = eq.lookupDDRM("B3");
+		B3.print("%2.0f");
+		System.out.print("B2: ");
+		DMatrixRMaj B2 = eq.lookupDDRM("B2");
+		B2.print("%2.2f");
+		System.out.print("B1: ");
+		DMatrixRMaj B1 = eq.lookupDDRM("B1");
+		B1.print("%2.4f");
+		
 		
 		System.out.println("========== Verification =========");
 		System.out.println("P(b,a,d) = F(d1) + F(d2) = 0.003594 + 0.010692 = 0.014286");

@@ -109,8 +109,8 @@ public class HiddenMarkovModelExercise3 {
 		
 			
 			eq.process("B3 = [1; 1]");
-			eq.process("B2 = T * E0 * B3");
-			eq.process("B1 = T * E1 * B2");
+			eq.process("B2 = T' * E0 * B3");
+			eq.process("B1 = T' * E1 * B2");
 			
 			System.out.print("B3: ");
 			DMatrixRMaj B3 = eq.lookupDDRM("B3");
@@ -118,6 +118,7 @@ public class HiddenMarkovModelExercise3 {
 			System.out.print("B2: ");
 			DMatrixRMaj B2 = eq.lookupDDRM("B2");
 			B2.print("%2.3f");
+			System.out.print("B1: ");
 			DMatrixRMaj B1 = eq.lookupDDRM("B1");
 			B1.print("%2.6f");
 		}

@@ -55,6 +55,28 @@ public class HiddenMarkovModelExercise1 {
 		/* T */ "   0.05,  0.45;" +
 		/* G */ "   0.45,  0.05 " + 
 					"]");
+		
+		eq.process("S = [0.5; 0.5]");
+		
+		eq.process("Ea = [" +
+					" 0.45,    0;" +
+					"    0, 0.05 " +
+					"]");
+		
+		eq.process("Ec = [" +
+					" 0.05,    0;" +
+					"    0, 0.45 " +
+					"]");
+		
+		eq.process("Et = [" +
+					" 0.05,    0;" +
+					"    0, 0.45 " +
+					"]");
+		
+		eq.process("Eg = [" +
+					" 0.45,    0;" +
+					"    0, 0.05 " +
+					"]");
 
 		T = eq.lookupDDRM("T");
 		E = eq.lookupDDRM("E");
@@ -68,6 +90,25 @@ public class HiddenMarkovModelExercise1 {
 			starts.put(1, 0.5d);
 
 			forward(starts, SEQUENCE);
+			
+			eq.process("F1 = Ea * S");
+			eq.process("F2 = Ec * T * F1");
+			eq.process("F3 = Et * T * F2");
+			eq.process("F4 = Eg * T * F3");
+			
+			System.out.print("F1: ");
+			DMatrixRMaj F1 = eq.lookupDDRM("F1");
+			F1.print("%2.3f");
+			System.out.print("F2: ");
+			DMatrixRMaj F2 = eq.lookupDDRM("F2");
+			F2.print("%2.5f");
+			System.out.print("F3: ");
+			DMatrixRMaj F3 = eq.lookupDDRM("F3");
+			F3.print("%2.6f");
+			System.out.print("F4: ");
+			DMatrixRMaj F4 = eq.lookupDDRM("F4");
+			F4.print("%2.6f");
+			
 		}
 		
 		{
@@ -91,8 +132,27 @@ public class HiddenMarkovModelExercise1 {
 			ends.put(1, 1d);
 		
 			backward(ends, SEQUENCE);
+			
+			eq.process("B4 = [1; 1]");
+			eq.process("B3 = T' * Eg * B4");
+			eq.process("B2 = T' * Et * B3");
+			eq.process("B1 = T' * Ec * B2");
+			
+			System.out.print("B4: ");
+			DMatrixRMaj B4 = eq.lookupDDRM("B4");
+			B4.print("%2.0f");
+			System.out.print("B3: ");
+			DMatrixRMaj B3 = eq.lookupDDRM("B3");
+			B3.print("%2.2f");
+			System.out.print("B2: ");
+			DMatrixRMaj B2 = eq.lookupDDRM("B2");
+			B2.print("%2.3f");
+			System.out.print("B1: ");
+			DMatrixRMaj B1 = eq.lookupDDRM("B1");
+			B1.print("%2.6f");
 		}
 		
+		System.out.println();
 		System.out.println("Posterior Probability Of Position #2");
 		System.out.println("PP(0) = F(C0) * B(C0) = 0.00875 * 0.03 = " + ff.format(0.00875 * 0.03));
 		System.out.println("PP(1) = F(C1) * B(C1) = 0.03375 * 0.055 = " + ff.format(0.03375 * 0.055));
