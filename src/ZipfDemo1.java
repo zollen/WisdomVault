@@ -59,7 +59,7 @@ public class ZipfDemo1 extends ApplicationFrame {
         	double zipf = (double) 1 / total / (i + 1);
    
        	
-        	System.out.println(String.format("%3d [%15s]   %4d          |%5s            |%5s            |%5s", 
+        	System.out.println(String.format("%3d [%-15s]   %4d          |%5s            |%5s            |%5s", 
         			(i + 1), 
         			(word.getWord().substring(0, word.getWord().length() < 15 ? word.getWord().length() : 15)),
         			word.getCount(),
