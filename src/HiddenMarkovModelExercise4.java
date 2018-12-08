@@ -1,9 +1,4 @@
 import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
@@ -81,56 +76,61 @@ public class HiddenMarkovModelExercise4 {
 					"]");
 		
 			eq.process("F1 = Ed * S");
-			System.out.print("F1: ");
-			DMatrixRMaj F1 = eq.lookupDDRM("F1");
-			F1.print("%2.6f");
 			eq.process("F2 = El * T * F1");
-			System.out.print("F2: ");
+			DMatrixRMaj F1 = eq.lookupDDRM("F1");
 			DMatrixRMaj F2 = eq.lookupDDRM("F2");
-			F2.print("%2.6f");
+			
+			System.out.println(String.format("Forward  D(P): %-8s  D(A): %-8s  D(C): %-8s  D(B): %-8s", 
+					ff.format(F1.get(0, 0)),
+					ff.format(F1.get(1, 0)),
+					ff.format(F1.get(2, 0)),
+					ff.format(F1.get(3, 0))));
+			
+			System.out.println(String.format("Forward  L(P): %-8s  L(A): %-8s  L(C): %-8s  L(B): %-8s", 
+					ff.format(F2.get(0, 0)),
+					ff.format(F2.get(1, 0)),
+					ff.format(F2.get(2, 0)),
+					ff.format(F2.get(3, 0))));
 		
 			eq.process("B3 = [1; 1; 1; 1]"); 
 			eq.process("B2 = T' * El * B3");
-			System.out.print("B3: ");
 			DMatrixRMaj B3 = eq.lookupDDRM("B3");
-			B3.print("%2.6f");
-			System.out.print("B2: ");
 			DMatrixRMaj B2 = eq.lookupDDRM("B2");
-			B2.print("%2.6f");
+			
+			System.out.println(String.format("Backward D(P): %-8s  D(A): %-8s  D(C): %-8s  D(B): %-8s", 
+					ff.format(B3.get(0, 0)),
+					ff.format(B3.get(1, 0)),
+					ff.format(B3.get(2, 0)),
+					ff.format(B3.get(3, 0))));
+			
+			System.out.println(String.format("Backward L(P): %-8s  L(A): %-8s  L(C): %-8s  L(B): %-8s", 
+					ff.format(B2.get(0, 0)),
+					ff.format(B2.get(1, 0)),
+					ff.format(B2.get(2, 0)),
+					ff.format(B2.get(3, 0))));
+			
+			eq.process("V1 = Ed * S");
+			eq.process("V2 = El * T * max(V1) * [ 1; 0; 0; 0 ]"); // [1; 0; 0; 0] <- state P has larger value, pick state P
+			
+			DMatrixRMaj V1 = eq.lookupDDRM("V1");
+			DMatrixRMaj V2 = eq.lookupDDRM("V2");
+			
+			System.out.println(String.format("Viterbi  D(P): %-8s  D(A): %-8s  D(C): %-8s  D(B): %-8s", 
+					ff.format(V1.get(0, 0)),
+					ff.format(V1.get(1, 0)),
+					ff.format(V1.get(2, 0)),
+					ff.format(V1.get(3, 0))));
+			
+			System.out.println(String.format("Viterbi  L(P): %-8s  L(A): %-8s  L(C): %-8s  L(B): %-8s", 
+					ff.format(V2.get(0, 0)),
+					ff.format(V2.get(1, 0)),
+					ff.format(V2.get(2, 0)),
+					ff.format(V2.get(3, 0))));
+			
+		
 		}
 		
 		{
-			// Using my own implementations for Forward/Backward/Viterbi algos
-			
-			T = eq.lookupDDRM("T");
-			E = eq.lookupDDRM("E");
-		
-			System.out.println("========== viterbi ============");
-		
-			Map<Integer, Double> starts = new HashMap<Integer, Double>(); 
-			starts.put(0, 0.25d);
-			starts.put(1, 0.25d);
-			starts.put(2, 0.25d);
-			starts.put(3, 0.25d);
-	
-			viterbi(starts, SEQUENCE);
-		
-			System.out.println("PD -> CL");
-		
-			System.out.println("========== forward ============");
-			forward(starts, SEQUENCE);
-		
-		
-			System.out.println("========== backward ============");
-		
-			Map<Integer, Double> ends = new HashMap<Integer, Double>(); 
-			ends.put(0, 1d);
-			ends.put(1, 1d);
-			ends.put(2, 1d);
-			ends.put(3, 1d);
-		
-			backward(ends, SEQUENCE);
-		
 			System.out.println("========== Verification =========");
 			System.out.println("P(E=D,E=L) = F(PL) + F(AL) + F(CL) + F(BL) = 0.015975 + 0.042825 + 0.0742 + 0.071775 = 0.204775");
 			System.out.println("P(E=D,E=L) at position #1 = F(PD) * B(PD) + F(AD) * B(AD) + F(CD) * B(CD) + F(BD) * B(BD) = 0.204775");
@@ -150,162 +150,4 @@ public class HiddenMarkovModelExercise4 {
 			System.out.println("	PP(S|D,L) = PP(PL) + PP(AL) + PP(CL) + PP(BL) = 0.204775");
 		}
 	}
-	
-	public static void forward(Map<Integer, Double> starts, String [] sequence) {
-
-		Map<String, Double> probs = new LinkedHashMap<String, Double>();
-		final Map<String, Double> ss = probs;
-		
-		starts.entrySet().stream().forEach(p -> { 
-				ss.put("0" + "#" + STATES[p.getKey()], p.getValue() * E.get(CONVERT[0], p.getKey())); 
-		});
-		
-		Set<Integer> tos = new LinkedHashSet<Integer>(starts.keySet());
-		
-		for (int step = 0 + 1; step < sequence.length; step++) {
-			
-			Set<Integer> nexts = new LinkedHashSet<Integer>();
-
-			for (int to : tos) {
-				
-				{
-					double sum = 0d;
-					for (int from = 0; from < T.numCols; from++) {
-					
-						if (T.get(to, from) > 0 && E.get(CONVERT[step], to) > 0) {
-					
-							double last = 0d;
-							if (probs.get(String.valueOf(step - 1) + "#" + STATES[from]) != null)
-								last = probs.get(String.valueOf(step - 1) + "#" + STATES[from]);
-			
-							sum += (double) last * T.get(to, from) * E.get(CONVERT[step], to);
-						}
-					}
-					
-					probs.put(String.valueOf(step) + "#" + STATES[to], sum);
-				}
-				
-				
-				{
-					int from = to;
-					for (int _to = 0; _to < T.numRows; _to++) {
-						if (T.get(_to, from) > 0)
-							nexts.add(_to);
-					}
-				}
-			}
-			
-			tos = nexts;
-		}
-		
-		probs.entrySet().stream().forEach( p -> System.out.println(
-				p.getKey() + sequence[new Integer(p.getKey().substring(0, 1))] +
-				" ===> " + 
-				ff.format(p.getValue())));
-	}
-	
-	public static void backward(Map<Integer, Double> ends, String [] sequence) {
-		
-		Map<String, Double> probs = new LinkedHashMap<String, Double>();
-		final Map<String, Double> ss = probs;
-		
-		ends.entrySet().stream().forEach(p -> {
-			ss.put(String.valueOf(sequence.length - 1) + "#" + STATES[p.getKey()], p.getValue()); 
-		}); 
-		
-		Set<Integer> froms = new LinkedHashSet<Integer>(ends.keySet());
-		
-		for (int step = sequence.length - 2; step >= 0; step--) {
-			
-			Set<Integer> nexts = new LinkedHashSet<Integer>();
-			
-			for (int from : froms) {
-				
-				{
-					double sum = 0d;				
-					for (int to = 0; to < T.numRows; to++) {
-				
-						if (T.get(to, from) > 0 && E.get(CONVERT[step], to) > 0) {
-						
-							double last = 0d;
-							if (probs.get(String.valueOf((step + 1) + "#" + STATES[to])) != null)
-								last = probs.get(String.valueOf((step + 1) + "#" + STATES[to]));
-						
-							sum += (double) last * T.get(to, from) * E.get(CONVERT[step + 1], to);
-						}
-					}
-
-					probs.put(String.valueOf(step) + "#" + STATES[from], sum);
-				}
-				
-				{
-					for (int _to = 0; _to < T.numRows; _to++) {
-						if (T.get(_to, from) > 0)
-							nexts.add(_to);
-					}	
-				}
-			}
-				
-			froms = nexts;
-		}
-		
-		probs.entrySet().stream().forEach( p -> System.out.println(
-				p.getKey() +
-				sequence[new Integer(p.getKey().substring(0,  1))] + 
-				" ===> " + 
-				ff.format(p.getValue())));
-	}
-	
-	public static void viterbi(Map<Integer, Double> starts, String [] sequence) {
-		
-		Map<String, Double> probs = new LinkedHashMap<String, Double>();
-		final Map<String, Double> ss = probs;
-		
-		starts.entrySet().stream().forEach(
-				p -> { 
-					ss.put("0" + "#" + STATES[p.getKey()] + sequence[0], p.getValue() * E.get(CONVERT[0], p.getKey()));
-				}
-		);
-		
-		Set<Integer> froms = new LinkedHashSet<Integer>(starts.keySet());
-		Set<Integer> nexts = new LinkedHashSet<Integer>();
-		
-		for (int step = 1; step < sequence.length; step++) {
-			
-			for (int from : froms) {
-				
-				for (int to = 0; to < T.numRows; to++) {
-					
-					if (T.get(to, from) > 0 && E.get(CONVERT[step], to) > 0) {
-						
-						double left = 0.0d;
-						double right = 0.0d;
-						if (ss.get((step - 1) + "#" + STATES[from] + sequence[step - 1]) != null) {
-							left = ss.get((step - 1) + "#" + STATES[from] + sequence[step - 1]);
-						}
-						
-						if (ss.get(step + "#" + STATES[to] + sequence[step]) != null) {
-							right = ss.get(step + "#" + STATES[to] + sequence[step]);
-						}
-						
-						if (left > 0) {							
-							left = left * T.get(to, from) * E.get(CONVERT[step], to);
-							
-							if (left > right)
-								ss.put(step + "#" + STATES[to] + sequence[step], left);
-						}	
-						
-						nexts.add(to);
-					}
-				}
-			}
-			
-			froms = new LinkedHashSet<Integer>(nexts);
-			nexts.clear();
-		}
-		
-		
-		ss.entrySet().stream().forEach(p -> System.out.println(p.getKey() + " ==> " + ff.format(p.getValue())));
-	}
-	
 }
