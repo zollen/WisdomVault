@@ -7,17 +7,6 @@ public class HiddenMarkovModelExercise4 {
 	
 	private static final DecimalFormat ff = new DecimalFormat("0.########");
 	
-	private static DMatrixRMaj T = null;
-	private static DMatrixRMaj E = null;	
-	
-	
-	private static final String [] STATES = { "P", "A", "C", "B" };
-	
-	private static final String [] SEQUENCE = { "D", "L" };
-	
-	private static final int [] CONVERT = { 0, 1 };
-	
-	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		/**
