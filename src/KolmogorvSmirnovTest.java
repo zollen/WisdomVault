@@ -8,6 +8,7 @@ public class KolmogorvSmirnovTest {
 		
 		double [] a = new double[10];
 		double [] b = new double[10];
+		double [] c = new double[10];
 		
 		a[0] = 0d;
 		a[1] = 1d;
@@ -31,6 +32,9 @@ public class KolmogorvSmirnovTest {
 		b[8] = 64d;
 		b[9] = 81d;
 		
+		for (int i = 0; i < 10; i++)
+			c[i] = b[i] - 0.9d;
+		
 		// Null hypothesis: both vectors fit perfectly
 		
 		// A small p-value (typically <= 0.05) indicates strong evidence against 
@@ -41,7 +45,7 @@ public class KolmogorvSmirnovTest {
 		
 		System.out.println("P-Value: " + ks.kolmogorovSmirnovTest(a, a));
 		System.out.println("P-Value: " + ks.kolmogorovSmirnovTest(a, b));
-
+		System.out.println("P-Value: " + ks.kolmogorovSmirnovTest(c, b));
 	}
 
 }
