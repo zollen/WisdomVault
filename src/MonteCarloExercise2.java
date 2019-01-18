@@ -52,6 +52,10 @@ public class MonteCarloExercise2 {
 		// Choose T2
 		// 2^(4-2) = 4
 		// P(T2) = 4 / |Q| = 4 / 8 = 0.5
+		
+		// Choose T1
+		// 2^(4-2) = 4
+		// P(T1) = 4 / |Q| = 4 / 8 = 0.5
 	}
 	
 	
