@@ -23,24 +23,19 @@ public class MonteCarloExercise6 {
 				builder.append(('0' + x));
 			}
 			
-			System.out.println(builder.toString());
-			
 			if (check(builder.toString())) {
 				withIn++;
 			}
 		}
 		
-		double enclosing = LEN;
 		double p = (double) withIn / n;
-		double sample = LEN * p;
 		double sd = Math.sqrt(p * (1 - p) / n);
 		
 		System.out.println("STDDEV: " + sd);
 		System.out.println("P: " + p);
-		System.out.println("SAMPLE: " + sample);
 	
-		int lower = (int) (sample - sd * enclosing * 1.96);
-		int upper = (int) (sample + sd * enclosing * 1.96);
+		double lower = (double) p - sd * 1.96;
+		double upper = (double) p + sd * 1.96;
 		
 		System.out.println("95% Confident Interval: " +  lower + ", " + upper);
 
@@ -50,10 +45,10 @@ public class MonteCarloExercise6 {
 		
 		for (int i = 0; i < str.length() - 4; i++) {
 			
-			if (str.charAt(i) < str.charAt(i + 1) &&
-					str.charAt(i + 1) < str.charAt(i + 2) &&
-					str.charAt(i + 2) < str.charAt(i + 3) &&
-					str.charAt(i + 3) < str.charAt(i + 4)) {
+			if (str.charAt(i) <= str.charAt(i + 1) &&
+					str.charAt(i + 1) <= str.charAt(i + 2) &&
+					str.charAt(i + 2) <= str.charAt(i + 3) &&
+					str.charAt(i + 3) <= str.charAt(i + 4)) {
 				return true;
 			}
 		}
