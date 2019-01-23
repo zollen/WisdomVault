@@ -73,6 +73,8 @@ public class MonteCarloExercise7 {
 		List<Double> p = new ArrayList<Double>();
 		for (int i = 0; i < r.size(); i++) {
 			p.add((double) c.get(i) / Q);
+			
+			System.out.println("Prob(" + RULES[i] + ") = " + (double) c.get(i) / Q);
 		}
 
 		
