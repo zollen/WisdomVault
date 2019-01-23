@@ -52,7 +52,7 @@ public class MonteCarloExercise7 {
 		r.add(2); // 2 atoms
 		r.add(2); // 2 atoms		
 		
-		System.out.println("Number of Valuations: " + countCNF(u, r, F, 100));
+		System.out.println("Number of Valuations: " + countCNF(u, r, F, 10000) + " +/- E");
 	}
 	
 	public static double countCNF(List<Function<Boolean, Boolean, Boolean, Boolean, Boolean>> u, 
@@ -69,6 +69,7 @@ public class MonteCarloExercise7 {
 			Q += val;
 		}
 		
+		
 		List<Double> p = new ArrayList<Double>();
 		for (int i = 0; i < r.size(); i++) {
 			p.add((double) c.get(i) / Q);
@@ -83,7 +84,6 @@ public class MonteCarloExercise7 {
 			int pos = rand.nextInt(r.size());
 			
 			// setting up parameters based on the random DNF(u)
-			Function<Boolean, Boolean, Boolean, Boolean, Boolean> df = u.get(pos);
 			Boolean [] args = new Boolean[F.numCols];
 			for (int j = 0; j < F.numCols; j++) {
 				if (F.get(pos, j) != 0) {
@@ -100,7 +100,7 @@ public class MonteCarloExercise7 {
 				}
 			}
 			
-			System.out.println(RULES[pos] + " ==> " + args[0] + ", " + args[1] + ", " + args[2] + ", " + args[3]);
+			
 			// evaluate the parameters with other DNF(others)
 			boolean duplicated = false;
 			for (int j = 0; j < F.numRows; j++) {
@@ -118,7 +118,8 @@ public class MonteCarloExercise7 {
 			
 		}
 		
-		return (double) count * Q / N;
+
+		return (double) count / N * Q;
 	}
 	
 	public static int myAttempt(DMatrixRMaj F) {
