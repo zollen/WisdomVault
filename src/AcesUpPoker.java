@@ -14,6 +14,8 @@ public class AcesUpPoker {
 	
 	private String name = null;
 	
+	private int turn = 1;
+	
 	public static void main(String [] args) {
 		
 		AcesUpPoker poker = new AcesUpPoker("1");
@@ -36,7 +38,7 @@ public class AcesUpPoker {
 	public void begin() {
 		
 		System.out.println("GAME [" + name + "] BEGIN");
-		
+
 		while (deck.size() > 0) {
 			
 			deal();
@@ -46,6 +48,8 @@ public class AcesUpPoker {
 			while (discard() == true || move() == true);
 			
 			print();
+			
+			turn++;
 		}
 		
 		System.out.println("GAME [" + name + "] OVER");
@@ -126,11 +130,13 @@ public class AcesUpPoker {
 			List<Card> pie = pies.get(i);
 			
 			for (Card card : pie) {
-				System.out.println("Game[" + name + "]:   Pie[" + (i + 1) + "] ==> " + card);
+				System.out.println("Game[" + name + "] Turn[" + turn + "]:    Pie[" + 
+							(i + 1) + "] ==> " + card);
 			}
 			
 			if (pie.size() <= 0) {
-				System.out.println("Game[" + name + "]:   Pie[" + (i + 1) + "] ==> EMPTY");
+				System.out.println("Game[" + name + "] Turn[ " + turn + "]:   Pie[" + 
+							(i + 1) + "] ==> EMPTY");
 			}
 		}
 		
@@ -218,6 +224,7 @@ public class AcesUpPoker {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private static class Card {
 		
 		public static final int CARD_2 = 0;
