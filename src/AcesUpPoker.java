@@ -43,11 +43,11 @@ public class AcesUpPoker {
 			
 			deal();
 			
-			print();
+			print("Deal 4 cards");
 			
 			while (discard() == true || move() == true);
 			
-			print();
+			print("Discard and Move");
 			
 			turn++;
 		}
@@ -123,7 +123,9 @@ public class AcesUpPoker {
 		return moved;
 	}
 	
-	public void print() {
+	public void print(String title) {
+		
+		System.out.println("=============== " + title + " =================");
 		
 		for (int i = 0;i < pies.size(); i++) {
 			
@@ -138,10 +140,7 @@ public class AcesUpPoker {
 				System.out.println("Game[" + name + "] Turn[ " + turn + "]:   Pie[" + 
 							(i + 1) + "] ==> EMPTY");
 			}
-		}
-		
-		System.out.println("================================");
-		
+		}	
 	}
 	
 	public boolean discard() {
