@@ -21,7 +21,6 @@ public class AcesUpPoker {
 		AcesUpPoker poker = new AcesUpPoker("1");
 		
 		poker.begin();
-		
 	}
 	
 	public AcesUpPoker(String name) {
@@ -35,6 +34,31 @@ public class AcesUpPoker {
 		setup();
 	}
 	
+	public void debug(List<List<Card>> samples) {
+		
+		int index = 0;
+		for (List<Card> sample : samples) {
+			
+			List<Card> pie = pies.get(index++);
+			
+			pie.clear();
+			
+			pie.addAll(sample);
+		}
+		
+		
+		print("Initial");
+		
+		while (discard() == true);
+		
+		print("Dicard");
+		
+		move();
+		
+		print("Move");
+		
+	}
+	
 	public void begin() {
 		
 		System.out.println("GAME [" + name + "] BEGIN");
@@ -43,7 +67,7 @@ public class AcesUpPoker {
 			
 			deal();
 			
-			print("Deal 4 cards");
+			print("Deal four cards");
 			
 			while (discard() == true || move() == true);
 			
@@ -75,8 +99,14 @@ public class AcesUpPoker {
 				
 				int rindex = 0;
 				for (List<Card> right : pies) {
-					if (right.size() > 0 && lindex != rindex) {
-						Card candiate = right.get(right.size() - 1);
+					if (right.size() > 0) {
+						
+						Card candiate = null;
+						if (lindex != rindex)
+							candiate = right.get(right.size() - 1);
+						else
+							candiate = primary;
+						
 						if (candiate.getSuit() == second.getSuit()) {
 							Integer weight = map.get(lindex);
 							if (candiate.getNum() >= second.getNum()) {
@@ -125,7 +155,7 @@ public class AcesUpPoker {
 	
 	public void print(String title) {
 		
-		System.out.println("=============== " + title + " =================");
+		System.out.println("=============== " + title + "[" + turn + "] =================");
 		
 		for (int i = 0;i < pies.size(); i++) {
 			
@@ -137,7 +167,7 @@ public class AcesUpPoker {
 			}
 			
 			if (pie.size() <= 0) {
-				System.out.println("Game[" + name + "] Turn[ " + turn + "]:   Pie[" + 
+				System.out.println("Game[" + name + "] Turn[" + turn + "]:    Pie[" + 
 							(i + 1) + "] ==> EMPTY");
 			}
 		}	
