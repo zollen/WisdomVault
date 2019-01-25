@@ -20,7 +20,30 @@ public class AcesUpPoker {
 		
 		AcesUpPoker poker = new AcesUpPoker("1");
 		
-		poker.begin();
+	//	poker.begin();
+		
+		List<List<Card>> samples = new ArrayList<List<Card>>();
+		
+		samples.add(new ArrayList<Card>());
+		samples.add(new ArrayList<Card>());
+		samples.add(new ArrayList<Card>());
+		samples.add(new ArrayList<Card>());
+		
+		samples.get(0).add(new Card(Card.CARD_HEART, Card.CARD_7));
+		samples.get(0).add(new Card(Card.CARD_SPADE, Card.CARD_10));
+		
+		samples.get(1).add(new Card(Card.CARD_SPADE, Card.CARD_8));
+		samples.get(1).add(new Card(Card.CARD_SPADE, Card.CARD_6));
+		
+		samples.get(2).add(new Card(Card.CARD_CLUB, Card.CARD_A));
+		samples.get(2).add(new Card(Card.CARD_HEART, Card.CARD_4));
+		
+		samples.get(3).add(new Card(Card.CARD_DIAMOND, Card.CARD_K));
+		samples.get(3).add(new Card(Card.CARD_CLUB, Card.CARD_Q));
+		
+		// Heart 4 was chosen instead of Spade 10. Spade 10 should have been chosen.
+		
+		poker.debug(samples);
 	}
 	
 	public AcesUpPoker(String name) {
