@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ejml.data.DMatrixRMaj;
 
 public class AcesUpPoker2 {
@@ -35,15 +38,113 @@ public class AcesUpPoker2 {
 		M.set(1, 2, card(CARD_HEART, CARD_4));
 		M.set(1, 3, card(CARD_CLUB, CARD_Q));
 	
-		print(M);
-		
-		discard(M);
+		move(M);
 		
 		print(M);
+	}
+	
+	public static boolean move(DMatrixRMaj M) {
 		
-		discard(M);
+		boolean moved = false;
 		
-		print(M);
+		
+		DMatrixRMaj N = _move(M);
+		
+		if (count(M) > count(N)) {
+			copy(N, M);
+			moved = true;
+		}
+		
+		return moved;	
+	}
+	
+	public static DMatrixRMaj _move(DMatrixRMaj M) {
+		
+		List<Integer> empties = new ArrayList<Integer>();
+		
+		while(discard(M));
+		
+		for (int i = 0; i < M.numCols; i++) {
+			if (empty(M, i)) {
+				empties.add(i);
+			}
+		}
+		
+		if (empties.size() <= 0)
+			return M;
+		
+		List<DMatrixRMaj> list = new ArrayList<DMatrixRMaj>();
+		for (int i = 0; i < M.numCols; i++) {
+			if (count(M, i) >= 2) {
+				DMatrixRMaj N = M.copy();
+				int val = pop(N, i);
+				push(N, empties.get(0), val);
+				list.add(_move(N));
+			}
+		}
+		
+		int max = 9999;
+		DMatrixRMaj chosen = null;
+		for (DMatrixRMaj N : list) {
+			int weight = count(N);
+			if (weight < max) {
+				max = weight;
+				chosen = N;
+			}
+		}
+		
+		if (chosen != null) {
+			return chosen;
+		}
+		
+		return M;
+	}
+	
+	public static void copy(DMatrixRMaj src, DMatrixRMaj dest) {
+		
+		for (int i = 0; i < src.numRows; i++) {
+			for (int j = 0; j < src.numCols; j++) {
+				dest.set(i, j, src.get(i, j));
+			}
+		}
+	}
+	
+	public static int count(DMatrixRMaj M, int column) {
+		
+		int count = 0;
+		
+		for (int i = 0; i < M.numRows; i++) {
+			
+			if (M.get(i, column) != 0)
+				count++;
+		}
+		
+		return count;
+	}
+	
+	public static int count(DMatrixRMaj M) {
+		
+		int count = 0;
+		for (int i = 0; i < M.numRows; i++) {
+			for (int j = 0; j < M.numCols; j++) {
+				if (M.get(i, j) != 0) {
+					count++;
+				}
+			}
+		}
+		
+		return count;
+	}
+	
+	public static boolean empty(DMatrixRMaj M, int column) {
+		
+		for (int i = 0; i < M.numRows; i++) {
+			if (M.get(i, column) != 0) {
+				return false;
+			}
+		}
+		
+		return true;
 	}
 	
 	public static void print(DMatrixRMaj M) {
@@ -61,18 +162,16 @@ public class AcesUpPoker2 {
 			}
 			
 			if (!empty) {
-				builder.append("| ");
+				builder.append("|  ");
 			}
 			
             for (int col = 0; !empty && col < M.numCols; col++) {     
             	int val = (int) M.get(row, col);
-                builder.append(val != 0 ? card(val) : "    ");
-                if (col < M.numCols - 1)
-                	builder.append("  ");
+                builder.append(val != 0 ? card(val) : "     ");
             }
             
             if (!empty) {
-            	builder.append(" |");
+            	builder.append("|");
             	builder.append("\n");
             }
         }
@@ -86,14 +185,14 @@ public class AcesUpPoker2 {
 	
 	public static String card(int n) {
 			
-		final String [] NUMBER = { "2", "3", "4", "5", "6", "7", "8", "9",
-							"10", "J", "Q", "K", "A" };
+		final String [] NUMBER = { " 2  ", " 3  ", " 4  ", " 5  ", " 6  ", " 7  ", " 8  ", " 9  ",
+							"10  ", " J  ", " Q  ", " K  ", " A  " };
 		
 		int suit = (int) Math.floor(n / 100);
 		int num = n % 100;
 		
 		
-		return String.format("%4s", suit(suit) + ":" + NUMBER[(num - 2)]);
+		return String.format("%4s", suit(suit) + NUMBER[(num - 2)]);
 	}
 	
 	public static String suit(int i) {
@@ -140,6 +239,17 @@ public class AcesUpPoker2 {
 		return false;
 	}
 	
+	public static void push(DMatrixRMaj M, int column, int val) {
+		
+		for (int i = 0; i < M.numRows; i++) {
+			
+			if (M.get(i, column) == 0) {
+				M.set(i, column, val);
+				break;
+			}	
+		}
+	}
+	
 	public static int pop(DMatrixRMaj M, int column) {
 		
 		int row = M.numRows - 1;
@@ -157,9 +267,9 @@ public class AcesUpPoker2 {
 		
 	}
 	
-	public static int discard(DMatrixRMaj M) {
+	public static boolean discard(DMatrixRMaj M) {
 		
-		int count = 0;
+		boolean removed = false;
 		
 		for (int i = 0; i < M.numCols; i++) {
 			
@@ -173,12 +283,13 @@ public class AcesUpPoker2 {
 						
 					if (suit(left, right) && right > left) {
 						pop(M, j);
+						removed = true;
 					}				
 				}
 			}
 		}
 		
-		return count;
+		return removed;
 	}
 
 }
