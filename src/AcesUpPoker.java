@@ -20,8 +20,8 @@ public class AcesUpPoker {
 		
 		AcesUpPoker poker = new AcesUpPoker("1");
 		
-	//	poker.begin();
-		
+		poker.begin();
+	/*	
 		List<List<Card>> samples = new ArrayList<List<Card>>();
 		
 		samples.add(new ArrayList<Card>());
@@ -44,6 +44,7 @@ public class AcesUpPoker {
 		// Heart 4 was chosen instead of Spade 10. Spade 10 should have been chosen.
 		
 		poker.debug(samples);
+	*/
 	}
 	
 	public AcesUpPoker(String name) {
