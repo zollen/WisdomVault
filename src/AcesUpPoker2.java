@@ -28,11 +28,13 @@ public class AcesUpPoker2 {
 	
 	private List<Integer> deck = new ArrayList<Integer>();
 	private int turn = 1;
+	private int discards = 0;
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
 		int count = 0;
+		double total = 0d;
 		for (int i = 0; i < 1000; i++) {
 			
 			AcesUpPoker2 poker = new AcesUpPoker2();
@@ -43,9 +45,12 @@ public class AcesUpPoker2 {
 			
 			if (poker.win(M))
 				count++;
+			
+			total += poker.discards();
 		}
 		
 		System.out.println("TOTAL WINS: " + count + " games out of 1000 games");
+		System.out.println("AVERAGE DISCARDS PER GAME: " + (double) total / 1000);
 	}
 	
 	public AcesUpPoker2() {
@@ -192,6 +197,7 @@ public class AcesUpPoker2 {
 						
 					if (suit(left, right) && right > left) {
 						pop(M, j);
+						discards++;
 						removed = true;
 					}				
 				}
@@ -210,6 +216,10 @@ public class AcesUpPoker2 {
 		}
 		
 		return true;
+	}
+	
+	public int discards() {
+		return discards;
 	}
 	
 	private DMatrixRMaj _move(DMatrixRMaj M) {

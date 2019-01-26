@@ -16,9 +16,12 @@ public class AcesUpPoker {
 	
 	private int turn = 1;
 	
+	private int discards = 0;
+	
 	public static void main(String [] args) {
 		
 		int count = 0;
+		double total = 0d;
 		for (int i = 1; i <= 1000; i++) {
 		
 			AcesUpPoker poker = new AcesUpPoker(String.valueOf(i));
@@ -27,9 +30,12 @@ public class AcesUpPoker {
 			
 			if (poker.win())
 				count++;
+			
+			total += poker.discards();
 		}
 		
 		System.out.println("TOTAL WINS: " + count + " games out of 1000 games");
+		System.out.println("AVERAGE DISCARDS PER GAME: " + (double) total / 1000);
 	}
 	
 	public AcesUpPoker(String name) {
@@ -211,12 +217,17 @@ public class AcesUpPoker {
 				Integer big = biggest.get(card.getSuit());
 				if (big != null && card.getNum() < big) {
 					pie.remove(card);
+					discards++;
 					removed = true;
 				}
 			}
 		}
 		
 		return removed;
+	}
+	
+	public int discards() {
+		return discards;
 	}
 	
 	public void draw() {
