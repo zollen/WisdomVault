@@ -89,9 +89,9 @@ public class AcesUpPoker {
 
 		while (deck.size() > 0) {
 			
-			deal();
+			draw();
 			
-			print("Deal four cards");
+			print("Draw four cards");
 			
 			while (discard() == true || move() == true);
 			
@@ -234,7 +234,7 @@ public class AcesUpPoker {
 		return removed;
 	}
 	
-	public void deal() {
+	public void draw() {
 		
 		for (List<Card> pie : pies) {
 			

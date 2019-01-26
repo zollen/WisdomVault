@@ -1,5 +1,7 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import org.ejml.data.DMatrixRMaj;
 
@@ -23,27 +25,73 @@ public class AcesUpPoker2 {
 	public static final int CARD_HEART = 2;
 	public static final int CARD_DIAMOND = 3;
 	public static final int CARD_CLUB = 4;
-
+	
+	private List<Integer> deck = new ArrayList<Integer>();
+	private int turn = 1;
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		AcesUpPoker2 poker = new AcesUpPoker2();
+		
 		DMatrixRMaj M = new DMatrixRMaj(20, 4);
 		
-		M.set(0, 0, card(CARD_HEART, CARD_7)); 
-		M.set(0, 1, card(CARD_SPADE, CARD_8)); 
-		M.set(0, 2, card(CARD_CLUB, CARD_A));
-		M.set(0, 3, card(CARD_DIAMOND, CARD_K));
-		
-		M.set(1, 0, card(CARD_SPADE, CARD_10)); 
-		M.set(1, 1, card(CARD_SPADE, CARD_6)); 
-		M.set(1, 2, card(CARD_HEART, CARD_4));
-		M.set(1, 3, card(CARD_CLUB, CARD_Q));
-	
-		move(M);
-		
-		print(M);
+		poker.begin(M);
 	}
 	
-	public static boolean move(DMatrixRMaj M) {
+	public AcesUpPoker2() {
+		prepare();
+	}
+	
+	public void begin(DMatrixRMaj M) {
+		
+		while (deck.size() > 0) {
+			
+			draw(M);
+			
+			System.out.println("= [Turn " + (turn) + " Draw] =======");
+			
+			print(M);
+			
+			while (move(M));
+		
+			System.out.println("= [Turn " + (turn) + " Move] =======");
+			
+			print(M);
+			
+			turn++;
+		}
+		
+		System.out.println("GAME OVER");
+	}
+	
+	public void prepare() {
+		
+		Random rand = new Random(System.nanoTime());
+		
+		for (int i = 1; i <= 4; i++) {
+			for (int j = 2; j <= 14; j++) {
+				deck.add(i * 100 + j);
+			}
+		}
+		
+		for (int i = 0; i < 52; i++) {
+			int pos1 = rand.nextInt(52);
+			int pos2 = rand.nextInt(52);
+			
+			Collections.swap(deck, pos1, pos2);
+		}
+	}
+	
+	public void draw(DMatrixRMaj M) {
+		
+		for (int i = 0; i < M.numCols; i++) {
+			if (deck.size() > 0) {
+				push(M, i, deck.remove(0));
+			}
+		}
+	}
+	
+	public boolean move(DMatrixRMaj M) {
 		
 		boolean moved = false;
 		
@@ -58,7 +106,92 @@ public class AcesUpPoker2 {
 		return moved;	
 	}
 	
-	public static DMatrixRMaj _move(DMatrixRMaj M) {
+	public void print(DMatrixRMaj M) {
+		
+		StringBuilder builder = new StringBuilder();
+		
+		for (int row = 0; row < M.numRows; row++) {	
+			
+			boolean empty = true;
+			for (int col = 0; col < M.numCols; col++) {
+				if (M.get(row, col) != 0) {
+					empty = false;
+					break;
+				}
+			}
+			
+			if (!empty) {
+				builder.append("|  ");
+			}
+			
+            for (int col = 0; !empty && col < M.numCols; col++) {     
+            	int val = (int) M.get(row, col);
+                builder.append(val != 0 ? card(val) : "     ");
+            }
+            
+            if (!empty) {
+            	builder.append("|");
+            	builder.append("\n");
+            }
+        }
+		
+		System.out.println(builder.toString());
+	}
+	
+	public void push(DMatrixRMaj M, int column, int val) {
+		
+		for (int i = 0; i < M.numRows; i++) {
+			
+			if (M.get(i, column) == 0) {
+				M.set(i, column, val);
+				break;
+			}	
+		}
+	}
+	
+	public int pop(DMatrixRMaj M, int column) {
+		
+		int row = M.numRows - 1;
+		while (row >= 0 && M.get(row, column) == 0) {
+			row--;
+		}
+		
+		if (row >= 0) {
+			int val = (int) M.get(row, column);
+			M.set(row, column, 0d);		
+			return val;
+		}
+		
+		return 0;
+		
+	}
+	
+	public boolean discard(DMatrixRMaj M) {
+		
+		boolean removed = false;
+		
+		for (int i = 0; i < M.numCols; i++) {
+			
+			int right = top(M, i);
+			
+			for (int j = 0; j < M.numCols; j++) {
+				
+				if (i != j) {
+						
+					int left = top(M, j);
+						
+					if (suit(left, right) && right > left) {
+						pop(M, j);
+						removed = true;
+					}				
+				}
+			}
+		}
+		
+		return removed;
+	}
+	
+	private DMatrixRMaj _move(DMatrixRMaj M) {
 		
 		List<Integer> empties = new ArrayList<Integer>();
 		
@@ -100,7 +233,7 @@ public class AcesUpPoker2 {
 		return M;
 	}
 	
-	public static void copy(DMatrixRMaj src, DMatrixRMaj dest) {
+	private void copy(DMatrixRMaj src, DMatrixRMaj dest) {
 		
 		for (int i = 0; i < src.numRows; i++) {
 			for (int j = 0; j < src.numCols; j++) {
@@ -109,7 +242,7 @@ public class AcesUpPoker2 {
 		}
 	}
 	
-	public static int count(DMatrixRMaj M, int column) {
+	private int count(DMatrixRMaj M, int column) {
 		
 		int count = 0;
 		
@@ -122,7 +255,7 @@ public class AcesUpPoker2 {
 		return count;
 	}
 	
-	public static int count(DMatrixRMaj M) {
+	private int count(DMatrixRMaj M) {
 		
 		int count = 0;
 		for (int i = 0; i < M.numRows; i++) {
@@ -136,7 +269,7 @@ public class AcesUpPoker2 {
 		return count;
 	}
 	
-	public static boolean empty(DMatrixRMaj M, int column) {
+	private boolean empty(DMatrixRMaj M, int column) {
 		
 		for (int i = 0; i < M.numRows; i++) {
 			if (M.get(i, column) != 0) {
@@ -147,44 +280,8 @@ public class AcesUpPoker2 {
 		return true;
 	}
 	
-	public static void print(DMatrixRMaj M) {
+	private String card(int n) {
 		
-		StringBuilder builder = new StringBuilder();
-		
-		for (int row = 0; row < M.numRows; row++) {	
-			
-			boolean empty = true;
-			for (int col = 0; col < M.numCols; col++) {
-				if (M.get(row, col) != 0) {
-					empty = false;
-					break;
-				}
-			}
-			
-			if (!empty) {
-				builder.append("|  ");
-			}
-			
-            for (int col = 0; !empty && col < M.numCols; col++) {     
-            	int val = (int) M.get(row, col);
-                builder.append(val != 0 ? card(val) : "     ");
-            }
-            
-            if (!empty) {
-            	builder.append("|");
-            	builder.append("\n");
-            }
-        }
-		
-		System.out.println(builder.toString());
-	}
-	
-	public static int card(int suit, int num) {
-		return suit * 100 + num;
-	}
-	
-	public static String card(int n) {
-			
 		final String [] NUMBER = { " 2  ", " 3  ", " 4  ", " 5  ", " 6  ", " 7  ", " 8  ", " 9  ",
 							"10  ", " J  ", " Q  ", " K  ", " A  " };
 		
@@ -195,7 +292,7 @@ public class AcesUpPoker2 {
 		return String.format("%4s", suit(suit) + NUMBER[(num - 2)]);
 	}
 	
-	public static String suit(int i) {
+	private String suit(int i) {
 
 		StringBuilder builder = new StringBuilder();
 
@@ -218,7 +315,7 @@ public class AcesUpPoker2 {
 
 	}
 	
-	public static int top(DMatrixRMaj M, int column) {
+	private int top(DMatrixRMaj M, int column) {
 		
 		int row = M.numRows - 1;
 		while (row >= 0 && M.get(row, column) == 0) {
@@ -231,65 +328,12 @@ public class AcesUpPoker2 {
 		return 0;
 	}
 	
-	public static boolean suit(int left, int right) {
+	private boolean suit(int left, int right) {
 		
 		if (Math.floor(left / 100) == Math.floor(right / 100))
 			return true;
 		
 		return false;
-	}
-	
-	public static void push(DMatrixRMaj M, int column, int val) {
-		
-		for (int i = 0; i < M.numRows; i++) {
-			
-			if (M.get(i, column) == 0) {
-				M.set(i, column, val);
-				break;
-			}	
-		}
-	}
-	
-	public static int pop(DMatrixRMaj M, int column) {
-		
-		int row = M.numRows - 1;
-		while (row >= 0 && M.get(row, column) == 0) {
-			row--;
-		}
-		
-		if (row >= 0) {
-			int val = (int) M.get(row, column);
-			M.set(row, column, 0d);		
-			return val;
-		}
-		
-		return 0;
-		
-	}
-	
-	public static boolean discard(DMatrixRMaj M) {
-		
-		boolean removed = false;
-		
-		for (int i = 0; i < M.numCols; i++) {
-			
-			int right = top(M, i);
-			
-			for (int j = 0; j < M.numCols; j++) {
-				
-				if (i != j) {
-						
-					int left = top(M, j);
-						
-					if (suit(left, right) && right > left) {
-						pop(M, j);
-						removed = true;
-					}				
-				}
-			}
-		}
-		
-		return removed;
 	}
 
 }
