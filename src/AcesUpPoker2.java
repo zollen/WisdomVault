@@ -31,11 +31,21 @@ public class AcesUpPoker2 {
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		AcesUpPoker2 poker = new AcesUpPoker2();
 		
-		DMatrixRMaj M = new DMatrixRMaj(20, 4);
+		int count = 0;
+		for (int i = 0; i < 1000; i++) {
+			
+			AcesUpPoker2 poker = new AcesUpPoker2();
 		
-		poker.begin(M);
+			DMatrixRMaj M = new DMatrixRMaj(20, 4);
+		
+			poker.begin(M);
+			
+			if (poker.win(M))
+				count++;
+		}
+		
+		System.out.println("TOTAL WINS: " + count + " games out of 1000 games");
 	}
 	
 	public AcesUpPoker2() {
@@ -44,7 +54,7 @@ public class AcesUpPoker2 {
 	
 	public void begin(DMatrixRMaj M) {
 		
-		while (deck.size() > 0) {
+		while (deck.size() > 0 && !win(M)) {
 			
 			draw(M);
 			
@@ -191,6 +201,17 @@ public class AcesUpPoker2 {
 		return removed;
 	}
 	
+	public boolean win(DMatrixRMaj M) {
+		
+		for (int i = 0;i < M.numCols; i++) {
+			if (count(M, i) != 1 || num((int) M.get(0, i)) != CARD_A) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
 	private DMatrixRMaj _move(DMatrixRMaj M) {
 		
 		List<Integer> empties = new ArrayList<Integer>();
@@ -334,6 +355,11 @@ public class AcesUpPoker2 {
 			return true;
 		
 		return false;
+	}
+	
+	private int num(int card) {
+		
+		return card % 100;
 	}
 
 }

@@ -18,33 +18,18 @@ public class AcesUpPoker {
 	
 	public static void main(String [] args) {
 		
-		AcesUpPoker poker = new AcesUpPoker("1");
+		int count = 0;
+		for (int i = 1; i <= 1000; i++) {
 		
-		poker.begin();
-	/*	
-		List<List<Card>> samples = new ArrayList<List<Card>>();
+			AcesUpPoker poker = new AcesUpPoker(String.valueOf(i));
 		
-		samples.add(new ArrayList<Card>());
-		samples.add(new ArrayList<Card>());
-		samples.add(new ArrayList<Card>());
-		samples.add(new ArrayList<Card>());
+			poker.begin();
+			
+			if (poker.win())
+				count++;
+		}
 		
-		samples.get(0).add(new Card(Card.CARD_HEART, Card.CARD_7));
-		samples.get(0).add(new Card(Card.CARD_SPADE, Card.CARD_10));
-		
-		samples.get(1).add(new Card(Card.CARD_SPADE, Card.CARD_8));
-		samples.get(1).add(new Card(Card.CARD_SPADE, Card.CARD_6));
-		
-		samples.get(2).add(new Card(Card.CARD_CLUB, Card.CARD_A));
-		samples.get(2).add(new Card(Card.CARD_HEART, Card.CARD_4));
-		
-		samples.get(3).add(new Card(Card.CARD_DIAMOND, Card.CARD_K));
-		samples.get(3).add(new Card(Card.CARD_CLUB, Card.CARD_Q));
-		
-		// Heart 4 was chosen instead of Spade 10. Spade 10 should have been chosen.
-		
-		poker.debug(samples);
-	*/
+		System.out.println("TOTAL WINS: " + count + " games out of 1000 games");
 	}
 	
 	public AcesUpPoker(String name) {
@@ -87,7 +72,7 @@ public class AcesUpPoker {
 		
 		System.out.println("GAME [" + name + "] BEGIN");
 
-		while (deck.size() > 0) {
+		while (deck.size() > 0 && !win()) {
 			
 			draw();
 			
@@ -165,7 +150,7 @@ public class AcesUpPoker {
 				}
 				
 				
-				if (indd >= 0) {
+				if (indd >= 0 && pies.get(indd).size() >= 2) {
 					Card last = pies.get(indd).remove(pies.get(indd).size() - 1);
 					pie.add(last);
 					
@@ -275,6 +260,17 @@ public class AcesUpPoker {
 			
 			Collections.swap(deck, pos1, pos2);
 		}
+	}
+	
+	public boolean win() {
+		
+		for (List<Card> pie : pies) {
+			if (pie.size() != 1 || pie.get(0).getNum() != Card.CARD_A) {
+				return false;
+			}
+		}
+		
+		return true;
 	}
 	
 	@SuppressWarnings("unused")
