@@ -17,11 +17,12 @@ public class CheckConnectedGraph {
 		// 0 - 1
 		//      1 - 2
 		//      1 - 3
+		//          3 - 0
 		eq.process("A = [" +
-							" 0, 1, 0, 0;" +
+							" 0, 1, 0, 1;" +
 							" 1, 0, 1, 1;" +
 							" 0, 1, 0, 0;" +
-							" 0, 1, 0, 0 " +
+							" 1, 1, 0, 0 " +
 						"]");
 				
 		DMatrixRMaj A = eq.lookupDDRM("A");	
