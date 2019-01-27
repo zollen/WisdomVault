@@ -57,7 +57,7 @@ public class FiveCardsPoker {
 			}
 		}
 
-		System.out.println("TOTAL WINS: " + won + " +/- Error games out of 1000 games");
+		System.out.println("TOTAL WINS: " + won + "+/-error games out of 1000 games");
 		
 	}
 	
@@ -181,11 +181,11 @@ public class FiveCardsPoker {
 			if (i > 0)
 				name = "PLAYER" + (i + 1);
 			
-			System.out.println(name + " ====> PAIRS: " + score1 + ", STRAIGHT: " + score2 + 
-					", FLUSH: " + score3);
-			
 			if (score == 0)
 				score = this.highCard(M, i);
+			
+			System.out.println(name + " ====> PAIRS: " + score1 + ", STRAIGHT: " + score2 + 
+					", FLUSH: " + score3 + ", TOTAL: " + score);
 			
 			if (max < score) {
 				max = score;
@@ -251,8 +251,8 @@ public class FiveCardsPoker {
 		
 		int max = -1;
 		for (int i = 0; i < M.numRows; i++) {
-			if (max < M.get(i, player)) {
-				max = (int) M.get(i, player);
+			if (max < M.get(i, player) % 100) {
+				max = (int) M.get(i, player) % 100;
 			}
 		}
 		

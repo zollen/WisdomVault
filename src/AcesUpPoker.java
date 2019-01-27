@@ -34,8 +34,8 @@ public class AcesUpPoker {
 			total += poker.discards();
 		}
 		
-		System.out.println("TOTAL WINS: " + count + " +/- Error games out of 1000 games");
-		System.out.println("AVERAGE DISCARDS PER GAME: " + (double) total / 1000 + " +/- Error");
+		System.out.println("TOTAL WINS: " + count + "+/-error games out of 1000 games");
+		System.out.println("AVERAGE DISCARDS PER GAME: " + (double) total / 1000 + "+/-error");
 	}
 	
 	public AcesUpPoker(String name) {
