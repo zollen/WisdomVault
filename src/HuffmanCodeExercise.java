@@ -8,7 +8,6 @@ public class HuffmanCodeExercise {
 		// TODO Auto-generated method stub
 
 		// P(A)= 0.3,  P(B)=0.27, P(C)=0.21, P(D)=0.17, P(E)=0.05
-		// L(A)=2,     L(B)=2,    L(C)=3,    L(D)=3,    L(E)=5
 		
 		List<Node<String>> pool = new ArrayList<Node<String>>();
 		pool.add(new Node<String>("A", 0.3d));
@@ -43,7 +42,7 @@ public class HuffmanCodeExercise {
 			pool.add(node);
 		}
 		
-		return pool.parallelStream().filter(p -> p.getWeight() == 1).distinct().findFirst().orElse(null);
+		return pool.remove(0);
 	}
 		
 	
