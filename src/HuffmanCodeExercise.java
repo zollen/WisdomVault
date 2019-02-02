@@ -20,6 +20,8 @@ public class HuffmanCodeExercise {
 		
 		System.out.println(root);
 		
+		printCodes(root);
+		
 	}
 	
 	public static Node<String> huffmanCode(List<Node<String>> pool) {
@@ -43,6 +45,33 @@ public class HuffmanCodeExercise {
 		}
 		
 		return pool.remove(0);
+	}
+	
+	public static void printCodes(Node<String> node) {
+		
+		StringBuilder builder = new StringBuilder();
+		
+		_printCodes(node, builder);
+	}
+	
+	public static void _printCodes(Node<String> node, StringBuilder builder) {
+		
+		if (node.getLeft() == null && node.getRight() == null) {
+			System.out.println(String.format("%-5s ====> %s", builder.toString(), node.getValue()));
+			return;
+		}
+		
+		if (node.getLeft() != null) {
+			StringBuilder buf = new StringBuilder(builder);
+			buf.append("0");
+			_printCodes(node.getLeft(), buf);
+		}
+		
+		if (node.getRight() != null) {
+			StringBuilder buf = new StringBuilder(builder);
+			buf.append("1");
+			_printCodes(node.getRight(), buf);
+		}	
 	}
 		
 	
