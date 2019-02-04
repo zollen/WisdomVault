@@ -4,7 +4,7 @@ import java.util.List;
 
 public class HuffmanCodeExercise {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
 
 		// P(A)= 0.3,  P(B)=0.27, P(C)=0.21, P(D)=0.17, P(E)=0.05
@@ -21,6 +21,8 @@ public class HuffmanCodeExercise {
 		System.out.println(root);
 		
 		printCodes(root);
+		
+		System.out.println(scanCodes(root, "1001110101011"));
 		
 	}
 	
@@ -45,6 +47,39 @@ public class HuffmanCodeExercise {
 		}
 		
 		return pool.remove(0);
+	}
+	
+	public static String scanCodes(Node<String> node, String data) throws Exception {
+		
+		int i = 0;
+		StringBuilder builder = new StringBuilder();
+		while (i < data.length() && i >= 0) {
+			i = _scanCodes(node, data, i, builder);
+		}	
+		
+		if (i < 0)
+			throw new Exception("Invalid String: " + data);
+		
+		return builder.toString();
+	}
+	
+	public static int _scanCodes(Node<String> node, String data, int position, StringBuilder builder) {
+		
+		if (!node.getValue().equals("X")) {
+			
+			builder.append(node.getValue());
+			return position;
+		}
+		
+		if (position < data.length() && data.charAt(position) == '0' && node.getLeft() != null) {
+			return _scanCodes(node.getLeft(), data, position + 1, builder);
+		} 
+		else 
+		if (position < data.length() && data.charAt(position) == '1' && node.getRight() != null) {
+			return _scanCodes(node.getRight(), data, position + 1, builder);
+		}
+		
+		return -1;
 	}
 	
 	public static void printCodes(Node<String> node) {
