@@ -22,7 +22,7 @@ public class HuffmanCodeExercise {
 		
 		printCodes(root);
 		
-		System.out.println(scanCodes(root, "1001110101011"));
+		System.out.println(scanCodes(root, "100111010101101000"));
 		
 	}
 	
