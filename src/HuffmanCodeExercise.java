@@ -197,7 +197,7 @@ public class HuffmanCodeExercise {
 		@Override
 		public int compareTo(Node<T> o) {
 			// TODO Auto-generated method stub
-			return (int) (this.getWeight() * 100 - o.getWeight() * 100);
+			return (int) (this.getWeight() * 10000 - o.getWeight() * 10000);
 		}	
 		
 		private void _toString(Node node, StringBuilder builder, int indent) {
