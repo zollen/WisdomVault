@@ -52,7 +52,7 @@ public class LeastSquareApprox1 {
 		
 		System.out.println(eq.lookupDDRM("B"));
 		
-		// Calculating R^2 = 1 - Sigma( (measured[i] - compared[i])^2 ) / Sigma( (measured[i] - mean)^2 )
+		// Calculating R^2 = 1 - ∑( (measured[i] - compared[i])^2 ) / ∑( (measured[i] - mean)^2 )
 		// if R^2 close to 1, the compared curve is closely matched with the measured curve
 		// If R^2 close to 0, the compared curve is no resemble with the measured curve
 		double r_sq = 1 - (double) ((5 - 6) * (5 - 6) + (0 - 2) * (0 - 2) + (0 - -1) + (0 - -1)) /
