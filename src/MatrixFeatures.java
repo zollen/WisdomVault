@@ -71,8 +71,8 @@ public class MatrixFeatures extends MatrixFeatures_DDRM {
 		
 		double [][] arr = new double[A.numRows][A.numCols];
 		
-		for (int i = 0; i < A.numCols; i++) {
-			for (int j = 0; j < A.numRows; j++) {
+		for (int i = 0; i < A.numRows; i++) {
+			for (int j = 0; j < A.numCols; j++) {
 				arr[i][j] = A.get(i, j);
 			}
 		}
