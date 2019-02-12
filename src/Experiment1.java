@@ -1,41 +1,36 @@
+import java.text.DecimalFormat;
+
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.SingularValueDecomposition;
 import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.equation.Equation;
 
 public class Experiment1 {
+	
+	private static DecimalFormat formatter = new DecimalFormat("0.000");
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Equation eq = new Equation();
-		eq.process("A = [ " + 
+		eq.process("D = [ " + 
 							"  1,  1,  0;" + 
 							"  0,  1,  1 " +
 						"]");
 	
 		
-		DMatrixRMaj A = eq.lookupDDRM("A");
+		DMatrixRMaj D = eq.lookupDDRM("D");
 		
 		SingularValueDecomposition svd = new SingularValueDecomposition(
-				MatrixUtils.createRealMatrix(MatrixFeatures.array(A)));
+				MatrixUtils.createRealMatrix(MatrixFeatures.array(D)));
 		
 	
 		DMatrixRMaj U = new DMatrixRMaj(svd.getU().getData());
-		System.out.println(U);
+		System.out.println("The Axis with the correct slope: " + U);
 		
-		System.out.println(variance(A));
+		// The slope of PC1(U) is [ sqrt(2)/2; -sqrt(2)/2 ]
+		// The slope of PC2(U) is [ sqrt(2)/2;  sqrt(2)/2 ]
 		
-		DMatrixRMaj K = new DMatrixRMaj(2, 1);
-		K.set(0, 0, 1);
-		K.set(1, 0, 1);
-		System.out.println(perp(K));
-	
-		
-		// The slope of PC1 is [ sqrt(2)/2; -sqrt(2)/2 ]
-		// The slope of PC2 is [ sqrt(2)/2;  sqrt(2)/2 ]
-		
-		// since AVG(A) = [ 2/3; 2/3 ]
+		// since AVG(D) = [ 2/3; 2/3 ]
 		
 		// PC1: ax + b = y
 		// -1x + b = y
@@ -67,6 +62,25 @@ public class Experiment1 {
 		// The intersection point between L and L3: x − 1 = 4/3 − x
 		// The intersection point:(7/6, 1/6)
 		
+		// L1: x - 4/3 = y
+		DMatrixRMaj line1 = new DMatrixRMaj(2, 1);
+		line1.set(0, 0, (double) 4/3);
+		line1.set(1, 0, -1);
+		DMatrixRMaj p1 = proj(line1, D);
+		double v1 = variance(p1);
+		System.out.println("Var(Proj(D, L1): " + formatter.format(v1) + "\nProj(D, L1): " + p1);
+
+		// L2: x = y
+		DMatrixRMaj line2 = new DMatrixRMaj(2, 1);
+		line2.set(0, 0, 0);
+		line2.set(1, 0, 1);
+		DMatrixRMaj p2 = proj(line2, D);
+		double v2 = variance(p2);
+		System.out.println("Var(Proj(D, L2): " +  formatter.format(v2) + "\nProj(D, L2): " + p2);
+		
+		// Var(D) = Var(Proj(D), L1) + Var(Proj(D), L2)
+		System.out.println("Var(Proj(D) =  Var(Proj(D), L1) + Var(Proj(D), L2): " + formatter.format(v1 + v2));
+		
 	}
 	
 	public static double variance(DMatrixRMaj A) {
@@ -90,14 +104,25 @@ public class Experiment1 {
 	
 	public static DMatrixRMaj proj(DMatrixRMaj line, DMatrixRMaj points) {
 		
-		DMatrixRMaj p = new DMatrixRMaj(points.numRows, points.numCols);
-				
-		for (int col = 0; col < points.numCols; col++) {	
-				// d = y - ax 
-			double d = points.get(1, col) - (points.get(0, col) * line.get(0, 0) / line.get(1, 0));
-			
-		}
+		// line:  ax + b = y
+		// line: [ b; a ]
 		
+		DMatrixRMaj p = new DMatrixRMaj(points.numRows, points.numCols);
+		
+		DMatrixRMaj perp = perp(line);
+					
+		for (int col = 0; col < points.numCols; col++) {	
+			// d = y - ax 
+			double d = points.get(1, col) - (points.get(0, col) * perp.get(1, 0));
+			
+			double x = (line.get(0, 0) - d) / (perp.get(1, 0) - line.get(1, 0));
+			
+			// new y = a (new x) + b
+			double y = line.get(1, 0) * x + line.get(0, 0);
+			
+			p.set(0, col, x);
+			p.set(1, col, y);
+		}
 		
 		return p;
 	}
@@ -106,11 +131,8 @@ public class Experiment1 {
 		
 		DMatrixRMaj p = new DMatrixRMaj(A.numRows, A.numCols);
 		
-		p.set(0, 0, -1 * A.get(0, 0));
-		p.set(1, 0, A.get(1, 0));
-		
-		if (CommonOps_DDRM.dot(p, A) != 0)
-			return null;
+		p.set(0, 0, 0);
+		p.set(1, 0, -1 * A.get(1, 0));
 		
 		return p;
 	}
