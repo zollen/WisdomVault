@@ -5,7 +5,7 @@ import org.apache.commons.math3.linear.SingularValueDecomposition;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
 
-public class Experiment1 {
+public class PCAExperiment1 {
 	
 	private static DecimalFormat formatter = new DecimalFormat("0.000");
 
