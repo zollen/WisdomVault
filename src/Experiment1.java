@@ -1,6 +1,7 @@
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.SingularValueDecomposition;
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.equation.Equation;
 
 public class Experiment1 {
@@ -21,8 +22,14 @@ public class Experiment1 {
 		
 	
 		DMatrixRMaj U = new DMatrixRMaj(svd.getU().getData());
-	
+		System.out.println(U);
+		
 		System.out.println(variance(A));
+		
+		DMatrixRMaj K = new DMatrixRMaj(2, 1);
+		K.set(0, 0, 1);
+		K.set(1, 0, 1);
+		System.out.println(perp(K));
 	
 		
 		// The slope of PC1 is [ sqrt(2)/2; -sqrt(2)/2 ]
@@ -81,12 +88,29 @@ public class Experiment1 {
 		return sum / A.numCols;
 	}
 	
-	public static DMatrixRMaj proj(DMatrixRMaj U, DMatrixRMaj A) {
+	public static DMatrixRMaj proj(DMatrixRMaj line, DMatrixRMaj points) {
+		
+		DMatrixRMaj p = new DMatrixRMaj(points.numRows, points.numCols);
+				
+		for (int col = 0; col < points.numCols; col++) {	
+				// d = y - ax 
+			double d = points.get(1, col) - (points.get(0, col) * line.get(0, 0) / line.get(1, 0));
+			
+		}
+		
+		
+		return p;
+	}
+	
+	public static DMatrixRMaj perp(DMatrixRMaj A) {
 		
 		DMatrixRMaj p = new DMatrixRMaj(A.numRows, A.numCols);
-				
 		
+		p.set(0, 0, -1 * A.get(0, 0));
+		p.set(1, 0, A.get(1, 0));
 		
+		if (CommonOps_DDRM.dot(p, A) != 0)
+			return null;
 		
 		return p;
 	}
