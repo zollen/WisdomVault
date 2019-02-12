@@ -41,21 +41,21 @@ public class Experiment1 {
 		// The axis of PC2: x = y
 		
 		// A=(0,1)
-		// L:x+y=4/3
-		// ⊥(L):x=y
-		// Point A lies on ⊥(L): ax+b=c, (0)+b=1, b=1
+		// L: x + y = 4/3
+		// ⊥(L): x = y
+		// Point A lies on ⊥(L): ax + b = c, (0) + b = 1, b = 1
 		// L1: x + 1 = y
 		// The intersection point between L and L1: x + 1 = 4/3 − x
 		// The intersection point:(1/6, 7/6) 
 
 		// B=(1,1)
-		// Point B lies on ⊥(L):ax+b=c, (1)+b=1, b=0
+		// Point B lies on ⊥(L): ax + b = c, (1) + b = 1, b = 0
 		// L2: x = y
 		// The intersection point between L and L2: x = 4/3 − x
 		// The intersection point:(2/3, 2/3)
 
 		// C=(1,0)
-		// Point C lies on ⊥(L):ax+b=c, (1)+b=1, b=−1
+		// Point C lies on ⊥(L): ax + b = c, (1) + b = 0, b = −1
 		// L3: x − 1 = y
 		// The intersection point between L and L3: x − 1 = 4/3 − x
 		// The intersection point:(7/6, 1/6)
@@ -83,13 +83,12 @@ public class Experiment1 {
 	
 	public static DMatrixRMaj proj(DMatrixRMaj U, DMatrixRMaj A) {
 		
-		DMatrixRMaj UT = new DMatrixRMaj(U.numRows, U.numCols);
+		DMatrixRMaj p = new DMatrixRMaj(A.numRows, A.numCols);
 				
 		
 		
 		
-		return null;
-		
+		return p;
 	}
 	
 	public static DMatrixRMaj avg(DMatrixRMaj A) {
