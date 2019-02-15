@@ -1,3 +1,5 @@
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.SingularValueDecomposition;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.equation.Equation;
@@ -66,6 +68,7 @@ public class LeastSquareExercise3 {
 		// (0, 2, 1), (0, 4, 3), (1, 4, 5), (1, 8, 6), (1, 8, 10), (4, 8, 14), (5, 9, 13)
 		// A + Bx + Cy = z
 		// ==========
+		
 		// A + 2B + 1C = 0
 		// A + 4B + 3C = 0
 		// A + 4B + 5C = 1
@@ -86,6 +89,8 @@ public class LeastSquareExercise3 {
 
 		eq.process("BYZ = [ 0; 0; 1; 1; 1; 4; 5 ]");
 
+		
+		
 		DMatrixRMaj AYZ = eq.lookupDDRM("AYZ");
 		DMatrixRMaj yYZ = eq.lookupDDRM("BYZ");
 		DMatrixRMaj xYZ = new DMatrixRMaj(AYZ.numCols, 1);
@@ -110,12 +115,14 @@ public class LeastSquareExercise3 {
 		
 		System.out.println("PLANE#2: "  + Pln2);
 		
-		DMatrixRMaj avg = avg(A);
+		SingularValueDecomposition svd = new SingularValueDecomposition(
+				MatrixUtils.createRealMatrix(MatrixFeatures.array(A)));
 		
-		System.out.println(avg);
+		DMatrixRMaj U = new DMatrixRMaj(svd.getU().getData());
 		
-		System.out.println("Var(Proj(Avg, Pln1)): " + variance(avg, Pln1));
-		System.out.println("Var(Proj(Avg, Pln2)): " + variance(avg, Pln2));
+		System.out.println("EigenVectors: " + U);
+		
+		System.out.println("Best Fit Plane: 0.829x + 0.322y - 0.457z = 0");
 		
 	}
 	
