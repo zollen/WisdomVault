@@ -9,6 +9,13 @@ public class LeastSquareExercise3 {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		// Consider the following set of three-dimensional points
+		// D = {(0,2,1), (0,4,3), (1,4,5), (1,8,6), (1,8,10), (4,8,14), (5,9,13)}
+
+		// (a) Find the least squares estimate for z taken as a function of x and y.
+		// (b) Find the least squares estimate for x taken as a function of y and z.
+		// (c) Find the best fit plane, in term of principal component analysis. 
+		
 		Equation eq = new Equation();
 		// (0, 2, 1), (0, 4, 3), (1, 4, 5), (1, 8, 6), (1, 8, 10), (4, 8, 14), (5, 9, 13)
 		eq.process("A = [" +
