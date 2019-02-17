@@ -33,7 +33,9 @@ public class PCAExperiment3 {
 		SingularValueDecomposition svd = new SingularValueDecomposition(
 				MatrixUtils.createRealMatrix(MatrixFeatures.array(A)));
 		
+		DMatrixRMaj S = new DMatrixRMaj(svd.getS().getData());
 		DMatrixRMaj U = new DMatrixRMaj(svd.getU().getData());
+		DMatrixRMaj V = new DMatrixRMaj(svd.getVT().getData());
 		
 		System.out.println("EigenVectors: " + U);
 			
@@ -43,15 +45,44 @@ public class PCAExperiment3 {
 		
 		// PC1 = [ 0.304, 0.427, 0.852 ], PC2 = [-0.472, 0.844, -0.254 ]
 		
-		int [] rows = { 0, 1, 2 };
-		int [] cols = { 0, 1 };
-		DMatrixRMaj PC = copy(U, rows, cols);
-		
 		DMatrixRMaj c = new DMatrixRMaj(A.numRows - 1, A.numCols);
+		
+		DMatrixRMaj PC = null;
+		
+		{
+			int [] rows = { 0, 1, 2 };
+			int [] cols = { 0, 1 };
+			PC = copy(U, rows, cols);
+		
+			System.out.println("PC: " + PC);
+		}
+		
+		DMatrixRMaj SS = null;
+		
+		{
+			int [] rows = { 0, 1, 2 };
+			int [] cols = { 0, 1 };
+			
+			SS = copy(S, rows, cols);
+			
+			System.out.println("SS: " + SS);
+		}
+		
+		System.out.println("V: " + V);
+		CommonOps_DDRM.transpose(SS);
+		CommonOps_DDRM.mult(SS, V, c);
+		
+		System.out.println("S_3x2' * V' = " + c);
+		
+		
+		
+		
+		CommonOps_DDRM.fill(c, 0d);
+		
 		CommonOps_DDRM.transpose(PC);
 		CommonOps_DDRM.mult(PC, A, c);
 	
-		System.out.println(c);
+		System.out.println("U_3x2 * A = " + c);
 		
 	}
 	
