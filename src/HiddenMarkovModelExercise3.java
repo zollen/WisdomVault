@@ -177,6 +177,7 @@ public class HiddenMarkovModelExercise3 {
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	public static void forward(Map<Integer, Double> starts, String [] sequence) {
 
 		Map<String, Double> probs = new LinkedHashMap<String, Double>();
@@ -230,6 +231,7 @@ public class HiddenMarkovModelExercise3 {
 				ff.format(p.getValue())));
 	}
 	
+	@SuppressWarnings("deprecation")
 	public static void backward(Map<Integer, Double> ends, String [] sequence) {
 		
 		Map<String, Double> probs = new LinkedHashMap<String, Double>();

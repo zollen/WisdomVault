@@ -1,4 +1,3 @@
-import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
 
 public class TextRecogExercise {
@@ -52,8 +51,7 @@ public class TextRecogExercise {
 						" 1, 1, 0, 0, 1 " +
 					"]");
 		
-		DMatrixRMaj A = eq.lookupDDRM("A");
-		
+
 		// Freq(Personal) = #T(Personal) / #T                         = 9 / 14
 		// Freq(Personal, friend) = #T(Personal, friend) / #T(friend) = 4 / 4
 		// Freq(Personal, hello) = #T(Personal, hello) / #T(hello)    = 7 / 7		

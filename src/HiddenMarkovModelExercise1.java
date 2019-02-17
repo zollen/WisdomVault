@@ -20,6 +20,7 @@ public class HiddenMarkovModelExercise1 {
 	private static DMatrixRMaj T = null;
 	private static DMatrixRMaj E = null;
 
+	@SuppressWarnings("deprecation")
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		/**
@@ -181,6 +182,7 @@ public class HiddenMarkovModelExercise1 {
 		System.out.println("PP(ACTG) = F(G0) + F(G1) = " + ff.format(0.002118));
 	}
 	
+	@SuppressWarnings("deprecation")
 	public static void forward(Map<Integer, Double> starts, String [] sequence) {
 
 		Map<String, Double> probs = new LinkedHashMap<String, Double>();
@@ -234,6 +236,7 @@ public class HiddenMarkovModelExercise1 {
 				ff.format(p.getValue())));
 	}
 	
+	@SuppressWarnings("deprecation")
 	public static void backward(Map<Integer, Double> ends, String [] sequence) {
 		
 		Map<String, Double> probs = new LinkedHashMap<String, Double>();

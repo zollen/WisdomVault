@@ -8,6 +8,7 @@ public class MonteCarloExercise2 {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
+		@SuppressWarnings("unused")
 		Function<Boolean, Boolean, Boolean, Boolean, Boolean> df = (a, b, c, d) -> (a && b) || (c && !d);
 		// A,  B,  C,  D   RESULT
 		// ----------------------

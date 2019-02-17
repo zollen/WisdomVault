@@ -92,6 +92,7 @@ public class PositiveDefiniteExercise {
 		return new DMatrixRMaj(eigen.getD().getData());
 	}
 	
+	@SuppressWarnings("unused")
 	private static DMatrixRMaj getV(EigenDecomposition eigen) {
 		return new DMatrixRMaj(eigen.getV().getData());
 	}

@@ -138,7 +138,8 @@ public class CentralLimitTheoremDemo extends ApplicationFrame {
     	return list;
     }
     
-    private static Map<Double, Integer> generateDistribution(List<Integer> samples) {
+    @SuppressWarnings("deprecation")
+	private static Map<Double, Integer> generateDistribution(List<Integer> samples) {
     	
     	Random rand = new Random(System.nanoTime());
     	
