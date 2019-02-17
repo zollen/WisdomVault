@@ -99,7 +99,7 @@ public class PCAExperiment1 {
 			}
 		}
 		
-		return sum / A.numCols;
+		return sum / (A.numCols - 1);
 	}
 	
 	public static DMatrixRMaj proj(DMatrixRMaj line, DMatrixRMaj points) {

@@ -150,7 +150,7 @@ public class LeastSquareExercise3 {
 			sum += Math.abs(dist * dist);
 		}
 		
-		return sum / A.numCols;
+		return sum / (A.numCols - 1);
 	}
 	
 	public static double dist(DMatrixRMaj a, DMatrixRMaj b) {
