@@ -38,6 +38,7 @@ public class PCAExperiment2 {
 
 		// convert both A and U to 2 dimension
 		SingularValueDecomposition svd = new SingularValueDecomposition(
+		
 				MatrixUtils.createRealMatrix(MatrixFeatures.array(A)));
 		
 		DMatrixRMaj U = new DMatrixRMaj(svd.getU().getData());
@@ -54,6 +55,10 @@ public class PCAExperiment2 {
 		System.out.println("Proj(PC2, A): " + projpc2);
 		
 		DMatrixRMaj center = new DMatrixRMaj(2, 1);
+		// Caution: calculating SS and Variance only make sense with projected lines, *not* projected planes.
+		// Projected planes uses the normal as the plane's equation, which may confuse user
+		// perspective. The EignVectors are always vectors(lines), not planes!
+		
 		System.out.println("SS(proj1): " + ss(center, projpc1));
 		System.out.println("SS(proj2): " + ss(center, projpc2));
 		
