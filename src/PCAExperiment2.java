@@ -4,7 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.equation.Equation;
 
-public class LeastSquareExercise4 {
+public class PCAExperiment2 {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
