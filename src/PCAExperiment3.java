@@ -20,16 +20,11 @@ public class PCAExperiment3 {
 						" 2, 4, 4, 8,  8,  8,  9;" +
 						" 1, 3, 5, 6, 10, 14, 13 " +
 					"]");
-		
-		// scrattor plot SP(x, y), SP(x, z) and SP(y, z)
-		// SP(y, z) has more correlation between y and z than other SP's.
-		// Let's use the information of y and z!
-		
+				
 		DMatrixRMaj A = eq.lookupDDRM("A");
 	
 		A = translate(avg(A), A);
-					
-		// convert both A and U to 2 dimension
+				
 		SingularValueDecomposition svd = new SingularValueDecomposition(
 				MatrixUtils.createRealMatrix(MatrixFeatures.array(A)));
 		
@@ -50,6 +45,7 @@ public class PCAExperiment3 {
 		DMatrixRMaj PC = null;
 		
 		{
+			// Pick the first two EigenVectors as principle components
 			int [] rows = { 0, 1, 2 };
 			int [] cols = { 0, 1 };
 			PC = copy(U, rows, cols);
@@ -60,6 +56,7 @@ public class PCAExperiment3 {
 		DMatrixRMaj SS = null;
 		
 		{
+			// Pick the first two EigenValues as principle components 'stretch' factors
 			int [] rows = { 0, 1, 2 };
 			int [] cols = { 0, 1 };
 			
