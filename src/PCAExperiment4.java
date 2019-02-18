@@ -13,7 +13,9 @@ public class PCAExperiment4 {
 			"img/obama1.jpg", 
 			"img/obama2.jpg",
 			"img/obama3.jpg",
-			"img/obama4.jpg"
+			"img/obama4.jpg",
+			"img/obama6.jpg",
+			"img/obama7.jpg"
 			};
 	
 	public static DMatrixRMaj [] database = new DMatrixRMaj[obama.length];
@@ -60,6 +62,10 @@ public class PCAExperiment4 {
 		test(U, "img/donald1.jpg");
 		
 		test(U, "img/donald2.jpg");
+		
+		test(U, "img/bill1.jpg");
+		
+		test(U, "img/bill2.jpg");
 		
 		test(U, "img/businessman1.jpg");
 		
@@ -114,7 +120,7 @@ public class PCAExperiment4 {
 			sum2 += avgdiff * avgdiff;
 		}
 					
-		System.out.println(fileName + " comparing avg(obama)" + " r: " + ((double) 1 - sum1 / sum2));
+		System.out.println("[" + fileName + "] ==> r: " + ((double) 1 - sum1 / sum2));
 	}
 	
 	public static double [] load(String fileName) throws Exception {
