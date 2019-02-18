@@ -11,7 +11,7 @@ public class PCAExperiment4 {
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
-		BufferedImage image = getImage("img/obama1.jpg");
+		BufferedImage image = image("img/obama1.jpg");
 		
 		image = resize(image, 200, 200);
 		
@@ -29,7 +29,7 @@ public class PCAExperiment4 {
 
 	}
 
-	public static BufferedImage getImage(String imageName) throws Exception {
+	public static BufferedImage image(String imageName) throws Exception {
 
 		return ImageIO.read(new File(imageName));
 	}
