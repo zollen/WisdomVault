@@ -53,10 +53,17 @@ public class PCAExperiment4 {
 		
 		train(U);
 
-	
 		test(U, "img/obama8.jpg");
 		
+		test(U, "img/obama9.jpg");
+		
 		test(U, "img/donald1.jpg");
+		
+		test(U, "img/donald2.jpg");
+		
+		test(U, "img/businessman1.jpg");
+		
+		test(U, "img/businessman2.jpg");
 		
 
 		System.out.println("DONE");
