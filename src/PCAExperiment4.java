@@ -10,12 +10,12 @@ public class PCAExperiment4 {
 	public static final int WEIGHT = 1000;
 	
 	public static String [] obama = { 
-			"img/obama1.jpg", 
-			"img/obama2.jpg",
-			"img/obama3.jpg",
-			"img/obama4.jpg",
-			"img/obama6.jpg",
-			"img/obama7.jpg"
+			"img/training/obama1.jpg", 
+			"img/training/obama2.jpg",
+			"img/training/obama3.jpg",
+			"img/training/obama4.jpg",
+			"img/training/obama5.jpg",
+			"img/training/obama6.jpg"
 			};
 	
 	public static DMatrixRMaj [] database = new DMatrixRMaj[obama.length];
@@ -55,22 +55,27 @@ public class PCAExperiment4 {
 		
 		train(U);
 
-		test(U, "img/obama8.jpg");
+		test(U, "img/test/obama8.jpg");
 		
-		test(U, "img/obama9.jpg");
+		test(U, "img/test/obama9.jpg");
 		
-		test(U, "img/donald1.jpg");
+		test(U, "img/test/donald1.jpg");
 		
-		test(U, "img/donald2.jpg");
+		test(U, "img/test/donald2.jpg");
 		
-		test(U, "img/bill1.jpg");
+		test(U, "img/test/bill1.jpg");
 		
-		test(U, "img/bill2.jpg");
+		test(U, "img/test/bill2.jpg");
 		
-		test(U, "img/businessman1.jpg");
+		test(U, "img/test/businessman1.jpg");
 		
-		test(U, "img/businessman2.jpg");
+		test(U, "img/test/businessman2.jpg");
 		
+		test(U, "img/test/nixon.jpg");
+		
+		test(U, "img/test/nixon2.jpg");
+		
+		test(U, "img/test/nixon3.jpg");
 
 		System.out.println("DONE");
 
