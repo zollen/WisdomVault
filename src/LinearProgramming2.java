@@ -46,7 +46,7 @@ public class LinearProgramming2 {
 		              // derivative with respect to p0 = x center
 		              jacobian.setEntry(i, 0, (center.getX() - o.getX()) / modelI);
 		              // derivative with respect to p1 = y center
-		              jacobian.setEntry(i, 1, (center.getX() - o.getX()) / modelI);
+		              jacobian.setEntry(i, 1, (center.getY() - o.getY()) / modelI);
 		          }
 
 		          return new Pair<RealVector, RealMatrix>(value, jacobian);
