@@ -1,4 +1,6 @@
 import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.distribution.RealDistribution;
@@ -44,15 +46,14 @@ public class LinearProgramming2 {
         // 2. HarmonicCurveFitter
         // 3. GaussianCurveFitter (for curves of normal distribution)
         
-        final double[] best = fitter.fit(obs.toList());
+        double[] best = fitter.fit(obs.toList());
 		
-        for (int i = 0; coeff != null && i < coeff.length; i++) {
-        	System.out.println(ff.format(coeff[i]));
-        }
+       
+        System.out.println(Arrays.stream(coeff).mapToObj(p -> ff.format(p)).collect(Collectors.joining(", ")));
+ 
         System.out.println("Calculating the best fit should be equal to coeff!!");
-        for (int i = 0; best != null && i < best.length; i++) {
-        	System.out.println(ff.format(best[i]));
-        }
+        
+        System.out.println(Arrays.stream(best).mapToObj(p -> ff.format(p)).collect(Collectors.joining(", ")));
 
 	}
 
