@@ -51,7 +51,7 @@ public class LinearProgramming1 {
 						
 				for (int i = 0; i < points.length; i++) {
 					
-					Vector3D experiment = points[i];
+			//		Vector3D experiment = points[i];
 					
 					DerivativeStructure eq = f(test.getX(), test.getY(), test.getZ());
 					
