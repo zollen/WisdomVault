@@ -1,9 +1,9 @@
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class MapTest {
 
-	private static final Map<String, String> map = new HashMap<String, String>();
+	private static final Map<String, String> map = new LinkedHashMap<String, String>();
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -51,52 +51,80 @@ public class MapTest {
 		map.put("N:2400:551L", "L:API");
 
 		System.out.println("=================");
-		print("2400", "5", "5", "?", "0");
+		System.out.println(search("2400", "5", "5", "?", "0"));
 		System.out.println("=================");
-		print("2400", "?", "?", "?", "?");
+		System.out.println(search("2400", "?", "?", "?", "?"));
 		System.out.println("=================");
-		print("2400", "5", "5", "1", "L");
+		System.out.println(search("2400", "5", "5", "1", "L"));
 
+/*
+		add("2400", "5", "5", "0", "L", "API");
+		add("2400", "5", "5", "1", "L", "COPY");
+*/		
+//		map.entrySet().stream().forEach(p -> System.out.println(p.getKey() + " ==> " + p.getValue()));
 	}
-
-	public static void print(String code, String tp, String tpd, String ac, String as) {
-
-		String[] keys = new String[4];
-		keys[0] = tp;
-		keys[1] = tpd;
-		keys[2] = ac;
-		keys[3] = as;
-
+	
+	public static void add(String code, String tp, String tpd, String ac, String as, String mode) {
+		
+		String [] keys = { tp, tpd, ac, as };
+		
 		String tmp = "N:" + code + ":";
-		String val = null;
 		String prev = null;
-
-		for (int i = 0; i < 4; i++) {
-
+		
+		for (int i = 0; i < keys.length; i++) {
+			
 			prev = new String(tmp);
 			tmp += keys[i];
-
-			val = map.get(tmp);
-			if (val == null) {
-				tmp = prev + "?";
-				val = map.get(tmp);
+			
+			String val = map.get(tmp);
+			
+			if (val != null) {
+				if (val.indexOf(tmp + keys[i + 1]) < 0) {
+					val += "," + tmp + keys[i + 1];
+					map.put(tmp,  val);
+				}
 			}
-
-			if (val != null && val.startsWith("N:")) {
-				String [] children = val.split("[,]+");
-				
-				for (String child : children) {
-			//		System.out.println(child + " <==> " + keys[i + 1]);
-					
-					if (child.endsWith(keys[i + 1])) {
-						val = child;
-						break;
-					}
+			else {
+				if (i < keys.length - 1)
+					val = tmp + "?" + "," + tmp + keys[i + 1];
+				else
+					val = "L:" + mode;
+			}
+			
+			map.put(tmp,  val);
+		}
+	}
+	
+	public static String search(String code, String tp, String tpd, String ac, String as) {
+		
+		String[] keys = { tpd, ac, as };
+		
+		return _search("N:" + code + ":" + tp, 0, keys);
+	}
+	
+	public static String _search(String prefix, int index, String [] tokens) {	
+		
+		if (index > tokens.length)
+			return null;
+		
+		String val = map.get(prefix);
+		
+		if (val != null && val.startsWith("L:")) {
+			return val;
+		}
+		else 
+		if (index < tokens.length && val != null) {
+		
+			String [] children = val.split("[,]+");
+		
+			for (String child : children) {
+			
+				if (child.endsWith(tokens[index]) || child.endsWith("?")) {	
+					val = _search(child, index + 1, tokens);
 				}
 			}
 		}
 		
-		System.out.println(tmp + " ===> " + val);
+		return val;
 	}
-
 }
