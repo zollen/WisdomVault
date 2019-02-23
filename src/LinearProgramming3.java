@@ -26,13 +26,13 @@ public class LinearProgramming3 {
 		
 		
 		final double[] coeff = { 3, 5, 4, -3, 2 }; // 3 + 5 x + 4 x^2 - 3 x^3 + 2 x^4
-        final PolynomialFunction f = new PolynomialFunction(coeff);
+        final PolynomialFunction f = new PolynomialFunction(coeff); 
 
         // Collect data from a known polynomial.
         final WeightedObservedPoints obs = new WeightedObservedPoints();
         for (int i = 0; i < 100; i++) {
             final double x = rng.sample();
-            obs.add(x, f.value(x));
+            obs.add(x, f.value(x));  // It could be replaced with observed (x, y)
         }
 
         // Start fit from initial guesses that are far from the optimal values.

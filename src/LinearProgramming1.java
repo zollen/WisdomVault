@@ -62,7 +62,7 @@ public class LinearProgramming1 {
 
 		RealVector point = optimum.getPoint();
 
-		System.out.println("Point: [" + ff.format(point.getEntry(0)) + ", " +
+		System.out.println("Cofficients: [" + ff.format(point.getEntry(0)) + ", " +
 										ff.format(point.getEntry(1)) + ", " +
 										ff.format(point.getEntry(2)) + "]");
 	}
