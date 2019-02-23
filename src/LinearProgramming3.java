@@ -26,7 +26,7 @@ public class LinearProgramming3 {
 		
 		
 		final double[] coeff = { 3, 5, 4, -3, 2 }; // 3 + 5 x + 4 x^2 - 3 x^3 + 2 x^4
-        final PolynomialFunction f = new PolynomialFunction(coeff); 
+        final PolynomialFunction f = new PolynomialFunction(coeff); // or we have a collection of observed points
 
         // Collect data from a known polynomial.
         final WeightedObservedPoints obs = new WeightedObservedPoints();
