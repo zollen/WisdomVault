@@ -18,80 +18,58 @@ public class MapTest {
 		// action_code
 		// account_section
 
-		// merged both transaction and transaction_type together.
-
-		// ===========================================================
-		// code, tp, tpd, ac, rt, as | mode
-		// 2400,  ?,   ?,  ?,  ?,  ? | NONE
-		// 2400,  5,   5,  ?,  ?,  ? | COPY
-		// 2400,  ?,   ?,  0,  ?,  L | API
-		// 2400,  5,   5,  1,  ?,  L | API
-
-		// 1st record
-		map.put("N:2400:I", "L:NONE");
-		map.put("N:2400:?", "N:2400:??");
-		map.put("N:2400:??", "N:2400:???,N:2400:??0");
-		map.put("N:2400:???", "N:2400:????,N:2400:???0");
-		map.put("N:2400:????", "L:NONE");
-
-		// 2nd record
-		map.put("N:2400:5", "N:2400:55");
-		map.put("N:2400:55", "N:2400:55?,N:2400:551");
-		map.put("N:2400:55?", "N:2400:55??");
-		map.put("N:2400:55??", "L:COPY");
-
-		// 3rd record
-		map.put("N:2400:??0", "N:2400:??0L,N:2400:??0?");
-		map.put("N:2400:??0?", "L:COPY");
-		map.put("N:2400:??0L", "L:API");
+		register("2400", "*", "*", "*", "*", "NONE", "COPY");
+		register("2400", "5", "5", "0", "L", "NONE", "API");
+		register("2400", "5", "5", "1", "*", "NONE", "NONE");
+		register("2400", "5", "5", "1", "L", "NONE", "COPY");
 		
-		// 4th record
-		map.put("N:2400:551", "N:2400:551?,N:2400:551L");
-		map.put("N:2400:551?", "L:NONE");
-		map.put("N:2400:551L", "L:API");
+		
+		System.out.println(search("2400", "5", "8", "3", "K"));
 
-		System.out.println("=================");
-		System.out.println(search("2400", "5", "5", "?", "0"));
-		System.out.println("=================");
-		System.out.println(search("2400", "?", "?", "?", "?"));
-		System.out.println("=================");
-		System.out.println(search("2400", "5", "5", "1", "L"));
-
-/*
-		add("2400", "5", "5", "0", "L", "API");
-		add("2400", "5", "5", "1", "L", "COPY");
-*/		
-//		map.entrySet().stream().forEach(p -> System.out.println(p.getKey() + " ==> " + p.getValue()));
+		map.entrySet().stream().forEach(p -> System.out.println(p.getKey() + " ==> " + p.getValue()));
 	}
 	
-	public static void add(String code, String tp, String tpd, String ac, String as, String mode) {
+	public static void register(String code, String tp, String tpd, String ac, String as, String empty, String mode) {
 		
-		String [] keys = { tp, tpd, ac, as };
+		String[] keys = { tpd, ac, as };
 		
-		String tmp = "N:" + code + ":";
-		String prev = null;
+		_register("N:" + code + ":" + tp, "N:" + code + ":" + tp, 0, keys, empty, mode);
+	}
+	
+	public static void _register(String head, String prefix, int index, String [] tokens, String empty, String mode) {
 		
-		for (int i = 0; i < keys.length; i++) {
+		if (index == tokens.length) {
 			
-			prev = new String(tmp);
-			tmp += keys[i];
+			String tmp = head;
+			for (String token : tokens)
+				tmp += token;
 			
-			String val = map.get(tmp);
+			if (prefix.equals(tmp))
+				map.put(prefix, "L:" + mode);
+			else
+				map.put(prefix, "L:" + empty);
 			
-			if (val != null) {
-				if (val.indexOf(tmp + keys[i + 1]) < 0) {
-					val += "," + tmp + keys[i + 1];
-					map.put(tmp,  val);
-				}
-			}
-			else {
-				if (i < keys.length - 1)
-					val = tmp + "?" + "," + tmp + keys[i + 1];
-				else
-					val = "L:" + mode;
-			}
+			return;
+		}
+		
+		String val = map.get(prefix);
+		
+		if (val == null) {
 			
-			map.put(tmp,  val);
+			map.put(prefix, prefix + "*");
+			_register(head, prefix + "*", index + 1, tokens, empty, mode);
+			
+			if (!"*".equals(tokens[index])) {
+				map.put(prefix, prefix + "*" + "," + prefix + tokens[index]);
+				_register(head, prefix + tokens[index], index + 1, tokens, empty, mode);
+			}		
+		}
+		else {
+			
+			if (val.indexOf(prefix + tokens[index]) < 0)
+				map.put(prefix, val + "," + prefix + tokens[index]);
+			
+			_register(head, prefix + tokens[index], index + 1, tokens, empty, mode);	
 		}
 	}
 	
@@ -99,10 +77,10 @@ public class MapTest {
 		
 		String[] keys = { tpd, ac, as };
 		
-		return _search("N:" + code + ":" + tp, 0, keys);
+		return _search("N:" + code + ":", "N:" + code + ":" + tp, 0, keys);
 	}
 	
-	public static String _search(String prefix, int index, String [] tokens) {	
+	public static String _search(String head, String prefix, int index, String [] tokens) {	
 		
 		if (index > tokens.length)
 			return null;
@@ -119,10 +97,13 @@ public class MapTest {
 		
 			for (String child : children) {
 			
-				if (child.endsWith(tokens[index]) || child.endsWith("?")) {	
-					val = _search(child, index + 1, tokens);
+				if (child.endsWith(tokens[index]) || child.endsWith("*")) {	
+					val = _search(head, child, index + 1, tokens);
 				}
 			}
+		}
+		else {
+			val = map.get(head + "****");
 		}
 		
 		return val;
