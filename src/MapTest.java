@@ -18,17 +18,37 @@ public class MapTest {
 		// action_code
 		// account_section
 
-		register("2400", "*", "*", "*", "*", "COPY");
+		register("2400", "*", "*", "*", "*", "DAMN");
+		register("2400", "5", "*", "1", "*", "COOL");
 		register("2400", "5", "5", "0", "L", "API");
 		register("2400", "5", "5", "1", "*", "NONE");
 		register("2400", "5", "5", "1", "L", "COPY");
-		
+	
+		System.out.println(search("2400", "5", "9", "0", "*"));
 		System.out.println(search("2400", "5", "5", "0", "L"));
-		System.out.println(search("2400", "5", "5", "0", "K"));
 		System.out.println(search("2400", "5", "5", "1", "K"));
-		System.out.println(search("2400", "5", "5", "1", "L"));
-
+		System.out.println(search("2400", "5", "9", "1", "K"));
+		
 	//	map.entrySet().stream().forEach(p -> System.out.println(p.getKey() + " ==> " + p.getValue()));
+	}
+	
+	public static String query(int end, String [] tokens) {
+		
+		StringBuilder builder = new StringBuilder();
+		
+		end++;
+		
+		builder.append("N:" + tokens[0] + ":");
+		
+		for (int i = 1; i < end; i++) {
+			builder.append(tokens[i]);
+		}
+		
+		for (int i = end; i < tokens.length; i++) {
+			builder.append("*");
+		}
+		
+		return builder.toString();
 	}
 	
 	public static void register(String code, String tp, String tpd, String ac, String as, String mode) {
@@ -42,38 +62,22 @@ public class MapTest {
 		
 		if (index == tokens.length) {
 			
-			StringBuilder builder = new StringBuilder();
-			builder.append("N:" + tokens[0] + ":");
-			for (int i = 1; i < tokens.length; i++)
-				builder.append(tokens[i]);
-			
-			if (prefix.equals(builder.toString())) {
+			if (prefix.equals(query(tokens.length - 1, tokens))) {
 				map.put(prefix, "L:" + mode);
 			}
 			else {
+				
 				String val = null;
-				String vv = "N:" + tokens[0] + ":";
+				
 				for (int i = tokens.length - 2; i >= 1; i--) {
-					
-					builder = new StringBuilder();
-					builder.append(vv);
-					
-					for (int j = 1; j <= i; j++)
-						builder.append(tokens[j]);
-					
-					for (int j = tokens.length - 1; j > i; j--)
-						builder.append("*");
-					
-					val = map.get(builder.toString());
+				
+					val = map.get(query(i, tokens));
 					if (val != null)
 						break;
 				}
 				
 				if (val == null) {
-					builder = new StringBuilder();
-					for (int i = 1; i < tokens.length; i++)
-						builder.append("*");
-					val = map.get("N:" + tokens[0] + ":" + builder.toString());
+					val = map.get(query(0, tokens));
 				}
 				
 				if (val != null)
