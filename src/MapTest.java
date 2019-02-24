@@ -1,4 +1,6 @@
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MapTest {
@@ -21,34 +23,43 @@ public class MapTest {
 		register("2400", "*", "*", "*", "*", "DAMN");
 		register("2400", "5", "*", "1", "*", "COOL");
 		register("2400", "5", "5", "0", "L", "API");
-		register("2400", "5", "5", "1", "*", "NONE");
+//		register("2400", "5", "5", "1", "*", "NONE");
 		register("2400", "5", "5", "1", "L", "COPY");
 	
 		System.out.println(search("2400", "5", "9", "0", "*"));
 		System.out.println(search("2400", "5", "5", "0", "L"));
 		System.out.println(search("2400", "5", "5", "1", "K"));
-		System.out.println(search("2400", "5", "9", "1", "K"));
+		System.out.println(search("2400", "5", "5", "1", "L"));
 		
-	//	map.entrySet().stream().forEach(p -> System.out.println(p.getKey() + " ==> " + p.getValue()));
+//		map.entrySet().stream().forEach(p -> System.out.println(p.getKey() + " ==> " + p.getValue()));
 	}
 	
-	public static String query(int end, String [] tokens) {
+	private static String [] queries(String [] tokens) {
 		
-		StringBuilder builder = new StringBuilder();
+		List<String> combos = new ArrayList<String>();
 		
-		end++;
 		
-		builder.append("N:" + tokens[0] + ":");
+		combos.add("N:" + tokens[0] + ":" + tokens[1] + tokens[2] + tokens[3] + "*");
+		combos.add("N:" + tokens[0] + ":" + tokens[1] + tokens[2] + "*" + tokens[4]);
+		combos.add("N:" + tokens[0] + ":" + tokens[1] + tokens[2] + "*" + "*");
 		
-		for (int i = 1; i < end; i++) {
-			builder.append(tokens[i]);
-		}
+		combos.add("N:" + tokens[0] + ":" + tokens[1] + "*" + tokens[3] + tokens[4]);
+		combos.add("N:" + tokens[0] + ":" + tokens[1] + "*" + tokens[3] + "*");
+		combos.add("N:" + tokens[0] + ":" + tokens[1] + "*" + "*" + tokens[4]);
+		combos.add("N:" + tokens[0] + ":" + tokens[1] + "*" + "*" + "*");
 		
-		for (int i = end; i < tokens.length; i++) {
-			builder.append("*");
-		}
+		combos.add("N:" + tokens[0] + ":" + "*" + tokens[2] + tokens[3] + tokens[4]);
+		combos.add("N:" + tokens[0] + ":" + "*" + tokens[2] + "*" + tokens[4]);
+		combos.add("N:" + tokens[0] + ":" + "*" + tokens[2] + tokens[3] + "*");
+		combos.add("N:" + tokens[0] + ":" + "*" + tokens[2] + "*" + "*");
 		
-		return builder.toString();
+		combos.add("N:" + tokens[0] + ":" + "*" + "*" + tokens[3] + tokens[4]);
+		combos.add("N:" + tokens[0] + ":" + "*" + "*" + "*" + tokens[4]);
+		combos.add("N:" + tokens[0] + ":" + "*" + "*" + tokens[3] + "*");
+		combos.add("N:" + tokens[0] + ":" + "*" + "*" + "*" + "*");
+		
+		
+		return combos.toArray(new String[0]);
 	}
 	
 	public static void register(String code, String tp, String tpd, String ac, String as, String mode) {
@@ -62,30 +73,12 @@ public class MapTest {
 		
 		if (index == tokens.length) {
 			
-			if (prefix.equals(query(tokens.length - 1, tokens))) {
+			if (prefix.equals("N:" + tokens[0] + ":" + tokens[1] + tokens[2] + 
+					tokens[3] + tokens[4])) {
 				map.put(prefix, "L:" + mode);
 			}
-			else {
-				
-				String val = null;
-				
-				for (int i = tokens.length - 2; i >= 1; i--) {
-				
-					val = map.get(query(i, tokens));
-					if (val != null)
-						break;
-				}
-				
-				if (val == null) {
-					val = map.get(query(0, tokens));
-				}
-				
-				if (val != null)
-					map.put(prefix, val);
-				
-			}
-			
-			return;
+
+			return;		
 		}
 		
 		String val = map.get(prefix);
@@ -111,9 +104,9 @@ public class MapTest {
 	
 	public static String search(String code, String tp, String tpd, String ac, String as) {
 		
-		String[] keys = { tp, tpd, ac, as };
+		String[] keys = { code, tp, tpd, ac, as };
 		
-		return _search("N:" + code + ":", 0, keys);
+		return _search("N:" + code + ":", 1, keys);
 	}
 	
 	public static String _search(String prefix, int index, String [] tokens) {	
@@ -139,8 +132,16 @@ public class MapTest {
 			}
 		}
 		else {
-			if (val == null)
-				val = "L:NONE";		
+		
+			if (val == null) {
+				String [] keys = queries(tokens);
+				
+				for (int i = 0; i < keys.length; i++) {
+					val = map.get(keys[i]);	
+					if (val != null)
+						break;
+				}
+			}
 		}
 		
 		return val;
