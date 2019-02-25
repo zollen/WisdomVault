@@ -101,8 +101,10 @@ public class MapTest {
 			for (int i = 0; i < keys.length; i++) {
 				
 				val = map.get(keys[i]);
-				if (val != null)
+				if (val != null) {
+					map.put("N:" + code + ":" + rtyp + ":" + tp + tpd + ac + as, val);
 					break;	
+				}
 			}
 		}
 		
