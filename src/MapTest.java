@@ -39,43 +39,43 @@ public class MapTest {
 		List<String> combos = new ArrayList<String>();
 		
 		
-		combos.add("N:" + tokens[0] + ":O:" + tokens[1] + tokens[2] + tokens[3] + "*");
-		combos.add("N:" + tokens[0] + ":O:" + tokens[1] + tokens[2] + "*" + tokens[4]);
-		combos.add("N:" + tokens[0] + ":O:" + tokens[1] + tokens[2] + "*" + "*");
+		combos.add(tokens[0] + ":O:" + tokens[1] + tokens[2] + tokens[3] + "*");
+		combos.add(tokens[0] + ":O:" + tokens[1] + tokens[2] + "*" + tokens[4]);
+		combos.add(tokens[0] + ":O:" + tokens[1] + tokens[2] + "*" + "*");
 		
-		combos.add("N:" + tokens[0] + ":O:" + tokens[1] + "*" + tokens[3] + tokens[4]);
-		combos.add("N:" + tokens[0] + ":O:" + tokens[1] + "*" + tokens[3] + "*");
-		combos.add("N:" + tokens[0] + ":O:" + tokens[1] + "*" + "*" + tokens[4]);
-		combos.add("N:" + tokens[0] + ":O:" + tokens[1] + "*" + "*" + "*");
+		combos.add(tokens[0] + ":O:" + tokens[1] + "*" + tokens[3] + tokens[4]);
+		combos.add(tokens[0] + ":O:" + tokens[1] + "*" + tokens[3] + "*");
+		combos.add(tokens[0] + ":O:" + tokens[1] + "*" + "*" + tokens[4]);
+		combos.add(tokens[0] + ":O:" + tokens[1] + "*" + "*" + "*");
 		
-		combos.add("N:" + tokens[0] + ":O:" + "*" + tokens[2] + tokens[3] + tokens[4]);
-		combos.add("N:" + tokens[0] + ":O:" + "*" + tokens[2] + "*" + tokens[4]);
-		combos.add("N:" + tokens[0] + ":O:" + "*" + tokens[2] + tokens[3] + "*");
-		combos.add("N:" + tokens[0] + ":O:" + "*" + tokens[2] + "*" + "*");
+		combos.add(tokens[0] + ":O:" + "*" + tokens[2] + tokens[3] + tokens[4]);
+		combos.add(tokens[0] + ":O:" + "*" + tokens[2] + "*" + tokens[4]);
+		combos.add(tokens[0] + ":O:" + "*" + tokens[2] + tokens[3] + "*");
+		combos.add(tokens[0] + ":O:" + "*" + tokens[2] + "*" + "*");
 		
-		combos.add("N:" + tokens[0] + ":O:" + "*" + "*" + tokens[3] + tokens[4]);
-		combos.add("N:" + tokens[0] + ":O:" + "*" + "*" + "*" + tokens[4]);
-		combos.add("N:" + tokens[0] + ":O:" + "*" + "*" + tokens[3] + "*");
-		combos.add("N:" + tokens[0] + ":O:" + "*" + "*" + "*" + "*");
+		combos.add(tokens[0] + ":O:" + "*" + "*" + tokens[3] + tokens[4]);
+		combos.add(tokens[0] + ":O:" + "*" + "*" + "*" + tokens[4]);
+		combos.add(tokens[0] + ":O:" + "*" + "*" + tokens[3] + "*");
+		combos.add(tokens[0] + ":O:" + "*" + "*" + "*" + "*");
 		
-		combos.add("N:ALL:O:" + tokens[1] + tokens[2] + tokens[3] + "*");
-		combos.add("N:ALL:O:" + tokens[1] + tokens[2] + "*" + tokens[4]);
-		combos.add("N:ALL:O:" + tokens[1] + tokens[2] + "*" + "*");
+		combos.add("ALL:O:" + tokens[1] + tokens[2] + tokens[3] + "*");
+		combos.add("ALL:O:" + tokens[1] + tokens[2] + "*" + tokens[4]);
+		combos.add("ALL:O:" + tokens[1] + tokens[2] + "*" + "*");
 		
-		combos.add("N:ALL:O:" + tokens[1] + "*" + tokens[3] + tokens[4]);
-		combos.add("N:ALL:O:" + tokens[1] + "*" + tokens[3] + "*");
-		combos.add("N:ALL:O:" + tokens[1] + "*" + "*" + tokens[4]);
-		combos.add("N:ALL:O:" + tokens[1] + "*" + "*" + "*");
+		combos.add("ALL:O:" + tokens[1] + "*" + tokens[3] + tokens[4]);
+		combos.add("ALL:O:" + tokens[1] + "*" + tokens[3] + "*");
+		combos.add("ALL:O:" + tokens[1] + "*" + "*" + tokens[4]);
+		combos.add("ALL:O:" + tokens[1] + "*" + "*" + "*");
 		
-		combos.add("N:ALL:O:" + "*" + tokens[2] + tokens[3] + tokens[4]);
-		combos.add("N:ALL:O:" + "*" + tokens[2] + "*" + tokens[4]);
-		combos.add("N:ALL:O:" + "*" + tokens[2] + tokens[3] + "*");
-		combos.add("N:ALL:O:" + "*" + tokens[2] + "*" + "*");
+		combos.add("ALL:O:" + "*" + tokens[2] + tokens[3] + tokens[4]);
+		combos.add("ALL:O:" + "*" + tokens[2] + "*" + tokens[4]);
+		combos.add("ALL:O:" + "*" + tokens[2] + tokens[3] + "*");
+		combos.add("ALL:O:" + "*" + tokens[2] + "*" + "*");
 		
-		combos.add("N:ALL:O:" + "*" + "*" + tokens[3] + tokens[4]);
-		combos.add("N:ALL:O:" + "*" + "*" + "*" + tokens[4]);
-		combos.add("N:ALL:O:" + "*" + "*" + tokens[3] + "*");
-		combos.add("N:ALL:O:" + "*" + "*" + "*" + "*");
+		combos.add("ALL:O:" + "*" + "*" + tokens[3] + tokens[4]);
+		combos.add("ALL:O:" + "*" + "*" + "*" + tokens[4]);
+		combos.add("ALL:O:" + "*" + "*" + tokens[3] + "*");
+		combos.add("ALL:O:" + "*" + "*" + "*" + "*");
 		
 		
 		return combos.toArray(new String[0]);
@@ -83,7 +83,7 @@ public class MapTest {
 	
 	public static void register(String code, String rtyp, String tp, String tpd, String ac, String as, String mode) {
 		
-		map.put("N:" + code + ":" + rtyp + ":" + tp + tpd + ac + as, mode);
+		map.put(code + ":" + rtyp + ":" + tp + tpd + ac + as, mode);
 	}
 	
 	public static String search(String code, String rtyp, String tp, String tpd, String ac, String as) {
@@ -93,7 +93,7 @@ public class MapTest {
 		
 		String[] tokens = { code, tp, tpd, ac, as };
 		
-		String val = map.get("N:" + code + ":" + rtyp + ":" + tp + tpd + ac + as);
+		String val = map.get(code + ":" + rtyp + ":" + tp + tpd + ac + as);
 		
 		if (val == null) {
 			
@@ -102,7 +102,7 @@ public class MapTest {
 				
 				val = map.get(keys[i]);
 				if (val != null) {
-					map.put("N:" + code + ":" + rtyp + ":" + tp + tpd + ac + as, val);
+					map.put(code + ":" + rtyp + ":" + tp + tpd + ac + as, val);
 					break;	
 				}
 			}
