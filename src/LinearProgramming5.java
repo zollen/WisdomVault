@@ -25,7 +25,7 @@ public class LinearProgramming5 {
         PolynomialFunction polynomials[] = f.getPolynomials();
         
        for (int i = 0; i < polynomials.length; i++) {
-    	   System.out.println(i + " => " + (i + 1) + " : " + polynomials[i] + " = " + polynomials[i].value(5));  
+    	   System.out.println(i + " => " + (i + 1) + " of cubic splines : " + polynomials[i]);  
        }
  
 	}
