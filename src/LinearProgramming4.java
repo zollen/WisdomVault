@@ -23,7 +23,12 @@ public class LinearProgramming4 {
         UnivariateFunction  f = interpolator.interpolate(x, y);
         
         System.out.println("P(5) = 3 + 5(5) + 4(5)^2 - 3(5)^3 + 2(5)^4 = 1003");
-        System.out.println("f(5): " + f.value(5));
+        System.out.println("f(5): " + f.value(5.5));
+        
+        System.out.println("\nLet's predict an unknown point between measurements");
+        // Result between points x = 5 and x = 6
+        System.out.println("P(5.5) = 3 + 5(5.5) + 4(5.5)^2 - 3(5.5)^3 + 2(5.5)^4 = 1482.5");
+        System.out.println("f(5.5): " + f.value(5.5));
  
 	}
 
