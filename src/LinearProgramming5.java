@@ -15,7 +15,7 @@ public class LinearProgramming5 {
         double [] y = new double[10];
         for (int i = 0; i < 10; i++) {
             x[i] = i;
-            y[i] = P.value(x[i]);  // It could be replaced with observed (x, y)
+            y[i] = P.value(x[i]);  // It could be replaced with any observed (x, y)
         }
         
         SplineInterpolator interpolator = new SplineInterpolator();
@@ -25,7 +25,7 @@ public class LinearProgramming5 {
         PolynomialFunction polynomials[] = f.getPolynomials();
         
        for (int i = 0; i < polynomials.length; i++) {
-    	   System.out.println(polynomials[i]);  
+    	   System.out.println(i + " => " + (i + 1) + " : " + polynomials[i] + " = " + polynomials[i].value(5));  
        }
  
 	}

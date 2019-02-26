@@ -15,7 +15,7 @@ public class LinearProgramming4 {
         double [] y = new double[100];
         for (int i = 0; i < 100; i++) {
             x[i] = i;
-            y[i] = P.value(x[i]);  // It could be replaced with observed (x, y)
+            y[i] = P.value(x[i]);  // It could be replaced with any observed (x, y)
         }
         
         SplineInterpolator interpolator = new SplineInterpolator();
