@@ -7,6 +7,7 @@ public class LinearProgramming5 {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		// Unlike Linear Regression where y are approximate.
 		
         // The following polynomial function is for verify the interpolated result.
 		final double[] coeff = { 3, 5, 4, -3, 2 }; // 3 + 5 x + 4 x^2 - 3 x^3 + 2 x^4

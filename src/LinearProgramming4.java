@@ -6,6 +6,10 @@ public class LinearProgramming4 {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
+		// Unlike Linear Regression where y are approximated.
+		// Splines are common known as cubic splines go through all exact y points and 
+		// smooth out the curve between points. With n points, there are n - 1 splines.
+		
         // Using cubic splines to go through all points) and interpolate *between*
 		// x = 1 and x = 2 (without any actual measurements)
 		// we have three points (1, 2), (2, 3) and (3, 5)
