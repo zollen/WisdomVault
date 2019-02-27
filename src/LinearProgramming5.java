@@ -1,7 +1,6 @@
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
-import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
 public class LinearProgramming5 {
 
@@ -31,17 +30,6 @@ public class LinearProgramming5 {
         // Result between points x = 5 and x = 6
         System.out.println("P(5.5) = 3 + 5(5.5) + 4(5.5)^2 - 3(5.5)^3 + 2(5.5)^4 = 1482.5");
         System.out.println("f(5.5): " + f.value(5.5));
-        
-        
-        
-        PolynomialSplineFunction p = interpolator.interpolate(x, y);
-        
-        PolynomialFunction ff [] = p.getPolynomials();
-        
-        for (int i = 0; i < 10; i++) {
-        	System.out.println("[" + i + "] " + ff[i] + " = " + ff[i].value(0));
-        }
- 
 	}
 
 }
