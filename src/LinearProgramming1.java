@@ -11,6 +11,7 @@ import org.apache.commons.math3.fitting.leastsquares.MultivariateJacobianFunctio
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.util.Pair;
@@ -29,7 +30,8 @@ public class LinearProgramming1 {
 			new Vector2D(7, 478.0192260919),
 			new Vector2D(8, 608.1409492707),
 			new Vector2D(9, 754.5988686671),
-			new Vector2D(10, 916.1288180859)
+			new Vector2D(10, 916.1288180859),
+			new Vector2D(11, 9999.93)
 			
 	};
 
@@ -40,10 +42,20 @@ public class LinearProgramming1 {
 
 		
 		final double[] targets = new double[POINTS.length];
-		
+		double sum = 0;
 		for (int i = 0; i < POINTS.length; i++) {
 			model.addPoint(POINTS[i]);
 			targets[i] = POINTS[i].getY();
+			sum += POINTS[i].getY();
+		}
+		
+		double mean = sum / POINTS.length;
+		
+		final double [] weights = new double[POINTS.length];
+	
+		// weight = 1 / sd^2
+		for (int i = 0; i < POINTS.length; i++) {
+			weights[i] = (double) 1 / ((POINTS[i].getY() - mean) * (POINTS[i].getY() - mean));
 		}
 		
 
@@ -56,6 +68,7 @@ public class LinearProgramming1 {
 	            .lazyEvaluation(false)
 	            .maxEvaluations(1000)
 	            .maxIterations(1000)
+	            .weight(new DiagonalMatrix(weights))
 	            .build();
 
 		LeastSquaresOptimizer.Optimum optimum = optimizer.optimize(problem);
