@@ -31,7 +31,14 @@ public class HierarchicalClustering1 {
 			sets.add(set);
 		}
 		
+		print(sets);
+		
 		_clustering(sets, clusters);
+	}
+	
+	public static void print(Set<Set<Vector2D>> sets) {
+		
+		System.out.println("============================");
 		
 		sets.stream().forEach(p -> {
 			
@@ -72,6 +79,8 @@ public class HierarchicalClustering1 {
 		mleft.addAll(mright);
 		
 		sets.add(mleft);
+		
+		print(sets);
 		
 		_clustering(sets, clusters);
 	}
