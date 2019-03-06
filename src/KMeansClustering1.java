@@ -14,23 +14,23 @@ import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
 public class KMeansClustering1 {
 	
+	private static final Vector2D [] POINTS = {
+			new Vector2D(0, 4),
+			new Vector2D(3, -5),
+			new Vector2D(-2, -2),
+			new Vector2D(-4, -8),
+			new Vector2D(-2, 5),
+			new Vector2D(1, 7),
+	};
+	
 	private static final Random rand = new Random(0);
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		Vector2D [] points = {
-				new Vector2D(0, 4),
-				new Vector2D(3, -5),
-				new Vector2D(-2, -2),
-				new Vector2D(-4, -8),
-				new Vector2D(-2, 5),
-				new Vector2D(1, 7),
-		};
-		
-		clustering(points, 2);
+		// TODO Auto-generated method stub		
+		clustering(POINTS, 2);
 	}
 	
-	public static double variance (Set<Vector2D> points) {
+	public static double variance (Set<Vector2D> points, int k) {
 		
 		Vector2D center = centerofMass(points);
 		
@@ -45,7 +45,7 @@ public class KMeansClustering1 {
 		if (points.size() <= 0)
 			return 0d;
 		
-		return (sumX + sumY) / points.size();
+		return (sumX + sumY) / points.size() * POINTS.length / points.size() * 1 / (k * k);
 	}
 	
 	public static Vector2D centerofMass(Set<Vector2D> points) {
@@ -113,7 +113,7 @@ public class KMeansClustering1 {
 			
 			map.entrySet().stream().forEach(p -> {
 				
-				d.add(variance(p.getValue()) * 1 / k);
+				d.add(variance(p.getValue(), k));
 			});
 			
 			
@@ -176,10 +176,10 @@ public class KMeansClustering1 {
 		
 		map.entrySet().stream().forEach(p -> {
 			
-			d.add(variance(p.getValue()) * 1 / k);
+			d.add(variance(p.getValue(), k));
 		});
 		
-		System.out.println("****** k = " + k + ", Variance: " + d.doubleValue());
+		System.out.println("****** k = " + k + ", Variance = " + d.doubleValue());
 		
 		print(map);
 	}
