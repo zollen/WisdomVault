@@ -1,11 +1,15 @@
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.DoubleAdder;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
+
 
 public class KMeansClustering1 {
 	
@@ -25,48 +29,77 @@ public class KMeansClustering1 {
 		clustering(points, 2);
 	}
 	
-	public static void _clustering(Set<Vector2D> centers, Vector2D [] points, int k) {
+	public static double variance (Set<Vector2D> points) {
+		
+		Vector2D center = centerofMass(points);
+		
+		double sum = 0d;
+		for (Vector2D pt : points) {
+			
+			sum += Math.pow(pt.getX() - center.getX(), 2);	
+		}
+		
+		if (points.size() <= 0)
+			return 0d;
+		
+		return sum / points.size();
+	}
+	
+	public static Vector2D centerofMass(Set<Vector2D> points) {
+		
+		double sumX = 0d;
+		double sumY = 0d;
+		
+		for (Vector2D pt : points) {
+			sumX += pt.getX();
+			sumY += pt.getY();
+		}
+		
+		if (points.size() <= 0)
+			return null;
+		
+		return new Vector2D(sumX / points.size(), sumY / points.size());
+	}
+	
+	public static Map<Vector2D, Set<Vector2D>> _clustering(Set<Vector2D> centers, Vector2D [] points, int k, int i) {
 		
 		Map<Vector2D, Set<Vector2D>> map = new HashMap<Vector2D, Set<Vector2D>>();
 		
-		if (centers == null)
-			centers = random(points, k);
+		centers.stream().forEach(p -> map.put(p, new HashSet<Vector2D>()));
 		
-		for (Vector2D center : centers) {
-			map.put(center, new HashSet<Vector2D>());
-		}
-		
+		Arrays.stream(points).forEach(p -> {
 			
-		for (Vector2D pt : points) {
-			
-			double min = Double.MAX_VALUE;
-			Vector2D clostest = null;
-			for (Vector2D center : centers) {
-				
-				double dist = pt.distance(center);
-				if (dist < min) {
-					min = dist;
-					clostest = center;
-				}
-			}
-			
-			map.get(clostest).add(pt);
-		}
-
-		System.out.println("=============================");
-		map.entrySet().stream().forEach(p -> {
-
-			System.out.println( p.getKey() + " ==> " +
-			p.getValue().stream().map( Vector2D::toString ).collect(Collectors.joining(", ")));
+			Vector2D center = centers.stream().min(Comparator.comparing(c -> c.distance(p))).orElse(null);
+			if (center != null)
+				map.get(center).add(p);			
 		});
+
+		Set<Vector2D> next = new HashSet<Vector2D>();
 		
+		map.entrySet().stream().forEach(p -> { 
+						Vector2D center = centerofMass(p.getValue());
+						if (center != null)
+							next.add(center);
+						});
+		
+		if (i >= 3)
+			return map;
+		else	
+			return _clustering(next, points, k, i + 1);
 	}
 	
 	public static void clustering(Vector2D [] points, int k) {
-	
-		for (int i = 0; i < 3; i++)
-			_clustering(null, points, k);
+		
+		for (int i = 0; i < 10; i++) {
+			
+			Set<Vector2D> centers = random(points, k);
+			
+			Map<Vector2D, Set<Vector2D>> map = _clustering(centers, points, k, 0);
+			
+			print(map, k);
+		}
 	}
+	
 	
 	public static Set<Vector2D> random(Vector2D [] points, int k) {
 		
@@ -108,6 +141,29 @@ public class KMeansClustering1 {
 		}
 			
 		return clusters;
+	}
+	
+	public static void print(Map<Vector2D, Set<Vector2D>> map, int k) {
+		
+		DoubleAdder d = new DoubleAdder();
+		
+		map.entrySet().stream().forEach(p -> {
+			
+			d.add(variance(p.getValue()) * 1 / k);
+		});
+		
+		System.out.println("========== Variance: " + d.doubleValue() + " ===========");
+		
+		print(map);
+	}
+	
+	public static void print(Map<Vector2D, Set<Vector2D>> map) {
+		
+		map.entrySet().stream().forEach(p -> {
+
+			System.out.println( p.getKey() + " ==> " +
+					p.getValue().stream().map( Vector2D::toString ).collect(Collectors.joining(", ")));
+		});
 	}
 	
 	public static void print(Set<Set<Vector2D>> sets) {
