@@ -15,37 +15,48 @@ import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 public class KMeansClustering1 {
 	
 	private static final Vector2D [] POINTS = {
-			new Vector2D(0, 4),
-			new Vector2D(3, -5),
+			new Vector2D(1, 0),
+			new Vector2D(10, 12),
+			new Vector2D(8, 13),
+			new Vector2D(9, 10),
+			new Vector2D(12, 11),
+			new Vector2D(8, 10),
+			new Vector2D(1, 1),
+			new Vector2D(-1, -3),
 			new Vector2D(-2, -2),
-			new Vector2D(-4, -8),
-			new Vector2D(-2, 5),
-			new Vector2D(1, 7),
+			new Vector2D(5, -2),
+			new Vector2D(-10, 8),
+			new Vector2D(-12, 10),
+			new Vector2D(-8, 14),
+			new Vector2D(-12, 12),
+			new Vector2D(-9, 11)
 	};
 	
 	private static final Random rand = new Random(0);
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub		
-		clustering(POINTS, 2);
+		clustering(POINTS, 3);
 	}
 	
 	public static double variance (Set<Vector2D> points, int k) {
 		
 		Vector2D center = centerofMass(points);
 		
-		double sumX = 0d;
-		double sumY = 0d;
+		double sum = 0d;
 		for (Vector2D pt : points) {
 			
-			sumX += Math.pow(pt.getX() - center.getX(), 2);	
-			sumY += Math.pow(pt.getY() - center.getY(), 2);
+			pt.distance(center);
+			sum += Math.pow(pt.distance(center), 2);	
 		}
 		
 		if (points.size() <= 0)
 			return 0d;
 		
-		return (sumX + sumY) / points.size() * POINTS.length / points.size() * 1 / (k * k);
+		// probability = 1 / k
+		// weight = total number of points vs number of points in a cluster
+		// k-means variance of a cluster = variance of a cluster * weight * probability
+		return sum / points.size() * (Math.pow(POINTS.length / points.size(), 2)) * 1 / (k * k);
 	}
 	
 	public static Vector2D centerofMass(Set<Vector2D> points) {
