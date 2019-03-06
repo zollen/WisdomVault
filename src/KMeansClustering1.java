@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.stream.Collectors;
 
@@ -33,16 +34,18 @@ public class KMeansClustering1 {
 		
 		Vector2D center = centerofMass(points);
 		
-		double sum = 0d;
+		double sumX = 0d;
+		double sumY = 0d;
 		for (Vector2D pt : points) {
 			
-			sum += Math.pow(pt.getX() - center.getX(), 2);	
+			sumX += Math.pow(pt.getX() - center.getX(), 2);	
+			sumY += Math.pow(pt.getY() - center.getY(), 2);
 		}
 		
 		if (points.size() <= 0)
 			return 0d;
 		
-		return sum / points.size();
+		return (sumX + sumY) / points.size();
 	}
 	
 	public static Vector2D centerofMass(Set<Vector2D> points) {
@@ -90,14 +93,38 @@ public class KMeansClustering1 {
 	
 	public static void clustering(Vector2D [] points, int k) {
 		
+		Map<Double, Map<Vector2D, Set<Vector2D>>> library = new TreeMap<Double, Map<Vector2D, Set<Vector2D>>>(
+				new Comparator<Double>() {
+
+					@Override
+					public int compare(Double o1, Double o2) {
+						// TODO Auto-generated method stub
+						return o1.compareTo(o2) * -1;
+					}
+				});
+		
 		for (int i = 0; i < 10; i++) {
 			
 			Set<Vector2D> centers = random(points, k);
 			
 			Map<Vector2D, Set<Vector2D>> map = _clustering(centers, points, k, 0);
 			
-			print(map, k);
+			DoubleAdder d = new DoubleAdder();
+			
+			map.entrySet().stream().forEach(p -> {
+				
+				d.add(variance(p.getValue()) * 1 / k);
+			});
+			
+			
+			if (map.size() == k)
+				library.put(d.doubleValue(), map);
 		}
+		
+		library.entrySet().stream().forEach(p -> {
+			
+			print(p.getValue(), k);
+		});
 	}
 	
 	
@@ -152,7 +179,7 @@ public class KMeansClustering1 {
 			d.add(variance(p.getValue()) * 1 / k);
 		});
 		
-		System.out.println("========== Variance: " + d.doubleValue() + " ===========");
+		System.out.println("****** k = " + k + ", Variance: " + d.doubleValue());
 		
 		print(map);
 	}
@@ -164,33 +191,5 @@ public class KMeansClustering1 {
 			System.out.println( p.getKey() + " ==> " +
 					p.getValue().stream().map( Vector2D::toString ).collect(Collectors.joining(", ")));
 		});
-	}
-	
-	public static void print(Set<Set<Vector2D>> sets) {
-		
-		System.out.println("============================");
-		
-		sets.stream().forEach(p -> {
-			
-			System.out.println ("[" + 
-			p.stream().map( Vector2D::toString ).collect(Collectors.joining(", ")) + "]");
-		});
-	}	
-	
-	public static double distance(Set<Vector2D> lefts, Set<Vector2D> rights) {
-		
-		double sum = 0d;
-		int num = 0;
-		
-		for (Vector2D left : lefts) {
-			
-			for (Vector2D right : rights) {
-				
-					sum += left.distance(right);
-					num++;
-			}
-		}
-		
-		return (double) sum / num;
 	}
 }
