@@ -40,19 +40,17 @@ public class KMeansClustering1 {
 		clustering(3);
 	}
 	
-	public static double variance (Vector2D c, Set<Vector2D> points) {
+	public static double kvariance (Vector2D center, Set<Vector2D> points) {
 				
 		Set<Vector2D> pts = new HashSet<Vector2D>();
 		pts.addAll(Arrays.asList(POINTS));
 		
-		Vector2D center = centerofMass(new HashSet<Vector2D>(pts));
+		Vector2D aCenter = centerofMass(new HashSet<Vector2D>(pts));
 						
-		return Math.pow(c.distance(center), 2) * points.size() + variance(points);
+		return Math.pow(center.distance(aCenter), 2) * points.size() + variance(center, points);
 	}
 	
-	public static double variance (Set<Vector2D> points) {
-		
-		Vector2D center = centerofMass(points);
+	public static double variance (Vector2D center, Set<Vector2D> points) {
 		
 		double sum = 0d;
 		for (Vector2D pt : points) {
@@ -132,7 +130,7 @@ public class KMeansClustering1 {
 			
 			map.entrySet().stream().forEach(p -> {
 				
-				d.add(variance(p.getKey(), p.getValue()));
+				d.add(kvariance(p.getKey(), p.getValue()));
 			});
 			
 			
@@ -197,7 +195,7 @@ public class KMeansClustering1 {
 		
 		map.entrySet().stream().forEach(p -> {
 			
-			d.add(variance(p.getKey(), p.getValue()));
+			d.add(kvariance(p.getKey(), p.getValue()));
 		});
 		
 		System.out.println("****** k = " + k + ", Variance = " + d.doubleValue());
