@@ -126,15 +126,7 @@ public class KMeansClustering1 {
 	
 	public static void clustering(int k) {
 		
-		Map<Double, Map<Vector2D, Set<Vector2D>>> library = new TreeMap<Double, Map<Vector2D, Set<Vector2D>>>(
-				new Comparator<Double>() {
-
-					@Override
-					public int compare(Double o1, Double o2) {
-						// TODO Auto-generated method stub
-						return o1.compareTo(o2) * -1;
-					}
-				});
+		Map<Double, Map<Vector2D, Set<Vector2D>>> library = new TreeMap<Double, Map<Vector2D, Set<Vector2D>>>();
 		
 		for (int i = 0; i < 1000; i++) {
 			
