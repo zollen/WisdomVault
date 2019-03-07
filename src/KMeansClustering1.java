@@ -56,7 +56,7 @@ public class KMeansClustering1 {
 		// probability = 1 / k
 		// weight = total number of points vs number of points in a cluster
 		// k-means variance of a cluster = variance of a cluster * weight * probability
-		return sum / points.size() * (Math.pow(POINTS.length / points.size(), 2)) * 1 / (k * k);
+		return sum / points.size();
 	}
 	
 	public static Vector2D centerofMass(Set<Vector2D> points) {
@@ -96,7 +96,7 @@ public class KMeansClustering1 {
 							next.add(center);
 						});
 		
-		if (i >= 3)
+		if (i >= 1000)
 			return map;
 		else	
 			return _clustering(next, points, k, i + 1);
@@ -110,7 +110,7 @@ public class KMeansClustering1 {
 					@Override
 					public int compare(Double o1, Double o2) {
 						// TODO Auto-generated method stub
-						return o1.compareTo(o2) * -1;
+						return o1.compareTo(o2);
 					}
 				});
 		
