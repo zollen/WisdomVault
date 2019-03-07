@@ -1,8 +1,8 @@
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -14,6 +14,8 @@ import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
 
 public class KMeansClustering1 {
+	
+	private static final DecimalFormat ff = new DecimalFormat("#,##0.000");
 	
 	private static final Vector2D [] POINTS = {
 			new Vector2D(1, 0),
@@ -37,17 +39,31 @@ public class KMeansClustering1 {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub		
+		// k = 1, kvar = 0
+		// k = 2, kvar = 900
+		// k = 3, kvar = 1469.6  <-- Optimal k where anything beyonds have sudden drop of slope
+		// k = 4, kvar = 1492.9
+		// k = 5, kvar = 1510.1
+		// k = 6, kvar = 1525.0
+		// k = 7, lvar = 1533.5
 		clustering(3);
 	}
 	
-	public static double kvariance (Vector2D center, Set<Vector2D> points) {
+	public static double kvariance (Map<Vector2D, Set<Vector2D>> map) {
 				
 		Set<Vector2D> pts = new HashSet<Vector2D>();
 		pts.addAll(Arrays.asList(POINTS));
-		
 		Vector2D aCenter = centerofMass(new HashSet<Vector2D>(pts));
+		
+		DoubleAdder adder = new DoubleAdder();
+		
+		map.entrySet().stream().forEach(p -> {
+			
+			adder.add(Math.pow(p.getKey().distance(aCenter), 2) * p.getValue().size());
+		});
+		
 						
-		return Math.pow(center.distance(aCenter), 2) * points.size() + variance(center, points);
+		return adder.doubleValue();
 	}
 	
 	public static double variance (Vector2D center, Set<Vector2D> points) {
@@ -116,7 +132,7 @@ public class KMeansClustering1 {
 					@Override
 					public int compare(Double o1, Double o2) {
 						// TODO Auto-generated method stub
-						return o1.compareTo(o2);
+						return o1.compareTo(o2) * -1;
 					}
 				});
 		
@@ -126,22 +142,22 @@ public class KMeansClustering1 {
 			
 			Map<Vector2D, Set<Vector2D>> map = _clustering(centers, k, 0);
 			
-			DoubleAdder d = new DoubleAdder();
-			
-			map.entrySet().stream().forEach(p -> {
-				
-				d.add(kvariance(p.getKey(), p.getValue()));
-			});
-			
-			
-			if (map.size() == k)
-				library.put(d.doubleValue(), map);
+			if (map.size() == k) {
+				library.put(kvariance(map), map);
+			}
 		}
 		
 		// just get the first entry (smallest variance)
-		Iterator<Double> itr = library.keySet().iterator();
-		if (itr.hasNext()) {
-			print(library.get(itr.next()), k);
+		
+		if (library.size() > 0) {
+			
+			double kvar = library.entrySet().stream().findFirst().get().getKey();
+			Map<Vector2D, Set<Vector2D>> map = 
+					library.entrySet().stream().findFirst().get().getValue();
+		
+			System.out.println("======= k = " + k + ", VarBetweenClusters = " + 
+			ff.format(kvar) + " =======");
+			print(map);
 		}
 		
 	}
@@ -189,26 +205,13 @@ public class KMeansClustering1 {
 		return clusters;
 	}
 	
-	public static void print(Map<Vector2D, Set<Vector2D>> map, int k) {
-		
-		DoubleAdder d = new DoubleAdder();
-		
-		map.entrySet().stream().forEach(p -> {
-			
-			d.add(kvariance(p.getKey(), p.getValue()));
-		});
-		
-		System.out.println("****** k = " + k + ", Variance = " + d.doubleValue());
-		
-		print(map);
-	}
-	
 	public static void print(Map<Vector2D, Set<Vector2D>> map) {
-		
+	
 		map.entrySet().stream().forEach(p -> {
 
-			System.out.println( p.getKey() + " ==> " +
-					p.getValue().stream().map( Vector2D::toString ).collect(Collectors.joining(", ")));
+			System.out.println(p.getKey() + " ==> " +
+					p.getValue().stream().map( Vector2D::toString ).collect(Collectors.joining(", ")) +
+					" ==> VarInCluster: " + ff.format(variance(p.getKey(), p.getValue())));
 		});
 	}
 }
