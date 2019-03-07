@@ -56,7 +56,7 @@ public class KMeansClustering1 {
 		// probability = 1 / k
 		// weight = total number of points vs number of points in a cluster
 		// k-means variance of a cluster = variance of a cluster * weight * probability
-		return sum / points.size();
+		return sum;
 	}
 	
 	public static Vector2D centerofMass(Set<Vector2D> points) {
