@@ -37,18 +37,17 @@ public class KMeansClustering1 {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub		
-		clustering(POINTS, 3);
+		clustering(3);
 	}
 	
-	public static double variance (Map.Entry<Vector2D, Set<Vector2D>> entry) {
+	public static double variance (Vector2D c, Set<Vector2D> points) {
 				
 		Set<Vector2D> pts = new HashSet<Vector2D>();
 		pts.addAll(Arrays.asList(POINTS));
 		
 		Vector2D center = centerofMass(new HashSet<Vector2D>(pts));
 						
-		return entry.getKey().distance(center) * entry.getValue().size() + 
-				variance(entry.getValue());
+		return Math.pow(c.distance(center), 2) * points.size() + variance(points);
 	}
 	
 	public static double variance (Set<Vector2D> points) {
@@ -84,13 +83,13 @@ public class KMeansClustering1 {
 		return new Vector2D(sumX / points.size(), sumY / points.size());
 	}
 	
-	public static Map<Vector2D, Set<Vector2D>> _clustering(Set<Vector2D> centers, Vector2D [] points, int k, int i) {
+	public static Map<Vector2D, Set<Vector2D>> _clustering(Set<Vector2D> centers, int k, int i) {
 		
 		Map<Vector2D, Set<Vector2D>> map = new HashMap<Vector2D, Set<Vector2D>>();
 		
 		centers.stream().forEach(p -> map.put(p, new HashSet<Vector2D>()));
 		
-		Arrays.stream(points).forEach(p -> {
+		Arrays.stream(POINTS).forEach(p -> {
 			
 			Vector2D center = centers.stream().min(Comparator.comparing(c -> c.distance(p))).orElse(null);
 			if (center != null)
@@ -108,10 +107,10 @@ public class KMeansClustering1 {
 		if (i >= 10)
 			return map;
 		else	
-			return _clustering(next, points, k, i + 1);
+			return _clustering(next, k, i + 1);
 	}
 	
-	public static void clustering(Vector2D [] points, int k) {
+	public static void clustering(int k) {
 		
 		Map<Double, Map<Vector2D, Set<Vector2D>>> library = new TreeMap<Double, Map<Vector2D, Set<Vector2D>>>(
 				new Comparator<Double>() {
@@ -125,15 +124,15 @@ public class KMeansClustering1 {
 		
 		for (int i = 0; i < 1000; i++) {
 			
-			Set<Vector2D> centers = random(points, k);
+			Set<Vector2D> centers = random(POINTS, k);
 			
-			Map<Vector2D, Set<Vector2D>> map = _clustering(centers, points, k, 0);
+			Map<Vector2D, Set<Vector2D>> map = _clustering(centers, k, 0);
 			
 			DoubleAdder d = new DoubleAdder();
 			
 			map.entrySet().stream().forEach(p -> {
 				
-				d.add(variance(p));
+				d.add(variance(p.getKey(), p.getValue()));
 			});
 			
 			
@@ -198,7 +197,7 @@ public class KMeansClustering1 {
 		
 		map.entrySet().stream().forEach(p -> {
 			
-			d.add(variance(p));
+			d.add(variance(p.getKey(), p.getValue()));
 		});
 		
 		System.out.println("****** k = " + k + ", Variance = " + d.doubleValue());
