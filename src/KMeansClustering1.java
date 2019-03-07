@@ -118,7 +118,7 @@ public class KMeansClustering1 {
 							next.add(center);
 						});
 		
-		if (i >= 10)
+		if (i >= 100)
 			return map;
 		else	
 			return _clustering(next, k, i + 1);
