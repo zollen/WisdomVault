@@ -2,6 +2,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -96,7 +97,7 @@ public class KMeansClustering1 {
 							next.add(center);
 						});
 		
-		if (i >= 1000)
+		if (i >= 10)
 			return map;
 		else	
 			return _clustering(next, points, k, i + 1);
@@ -114,7 +115,7 @@ public class KMeansClustering1 {
 					}
 				});
 		
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 1000; i++) {
 			
 			Set<Vector2D> centers = random(points, k);
 			
@@ -132,10 +133,12 @@ public class KMeansClustering1 {
 				library.put(d.doubleValue(), map);
 		}
 		
-		library.entrySet().stream().forEach(p -> {
-			
-			print(p.getValue(), k);
-		});
+		// just get the first entry (smallest variance)
+		Iterator<Double> itr = library.keySet().iterator();
+		if (itr.hasNext()) {
+			print(library.get(itr.next()), k);
+		}
+		
 	}
 	
 	
