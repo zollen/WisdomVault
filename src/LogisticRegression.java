@@ -48,6 +48,7 @@ public class LogisticRegression {
 		System.out.println("x0 has positive & stongest influence of the outcome");
 		System.out.println("both x1 and x4 have negative(or reverse) influence of the outcome");
 		System.out.println("both x2 and x5 has positive influnce of the outcome, x2 is stronger than x5, but not as strong as x0");
+		System.out.println("x2 has three times the reverse effect comparing to x4");
 		System.out.println("================================");
 		
 		eq.process("TESTS = [" +
