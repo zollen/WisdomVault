@@ -21,6 +21,10 @@ public class LogisticRegression {
 		// Third Logistic Regression classifier: Fishes or Not Fishes
 		// Fourth Logistic Regression classifier: Elephants or Not Elephants
 		
+		// The advantages of using Logistic Regression over knn search (although knn search is 
+		// simpler to implement), The classification takes time to setup, but it is extremely 
+		// fast and efficient because it is just a evaluation of a math formula.
+		
 		Equation eq = new Equation();
 		eq.process("TRAININGS = [" +
 				//   x0,  x1,  x2,  x3,  x4         <-- features
