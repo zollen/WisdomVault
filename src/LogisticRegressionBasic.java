@@ -21,11 +21,11 @@ public class LogisticRegressionBasic {
 	public static void main(String... args) throws FileNotFoundException {
 
 		// y = b0 + b1 x
-		// |
-		// \|/
+		//  |
+		//   -----------------------\|/
 		// Sigmoid: p = 1 / ( 1 + e^(-y))
-		// |
-		// \|/
+		//          |
+		//          -\|/
 		// Logit: ln( p /( 1 - p)) = b0 + b1x
 
 		// inverse(Sigmoid) = Logit

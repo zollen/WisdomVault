@@ -51,7 +51,7 @@ public class LogisticRegression2 {
 			CommonOps_DDRM.subtract(weights, gradients, wweights);
 		
 			if (MatrixFeatures.isEquals(weights, wweights, tolerance)) {
-				break;
+				i = maxIterations;
 			}
 		
 			weights = wweights;
