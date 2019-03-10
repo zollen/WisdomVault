@@ -45,6 +45,10 @@ public class LogisticRegression {
 			
 		weights = training(trainings, weights, results, 0.01, 0.0001, 10000);
 		System.out.println("OPTIMAL WEIGHTS: " + weights);
+		System.out.println("x0 has positive & stongest influence of the outcome");
+		System.out.println("both x1 and x4 have negative(or reverse) influence of the outcome");
+		System.out.println("both x2 and x5 has positive influnce of the outcome, x2 is stronger than x5, but not as strong as x0");
+		System.out.println("================================");
 		
 		eq.process("TESTS = [" +
 			//   x0,  x1,  x2,  x3,  x4         <-- features
