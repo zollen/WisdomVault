@@ -7,6 +7,20 @@ public class LogisticRegression {
 
 	public static void main(String... args) {
 		// TODO Auto-generated method stub
+		// Unlikely Linear Regression, Logistic Regression is for multiple independent 
+		// inputs and one binary output (Yes or No). The binary output must be range
+		// between 0 and 1. This is why Linear Regression would not work because its output
+		// are usually beyond the range of 0 and 1.
+		// To achieve the range of 0 and 1. The sigmoid function is used to generated the 
+		// result between 0 and 1.
+		// For classifying data by multiple labels, then multiple classifiers could 
+		// be employed for the same dataset.
+		// For example: Dogs, Cats, Fishes, Elephants
+		// First Logistic Regression classifier: Dogs or Not Dogs
+		// Second Logistic Regression classifier: Cats or Not Cats
+		// Third Logistic Regression classifier: Fishes or Not Fishes
+		// Fourth Logistic Regression classifier: Elephants or Not Elephants
+		
 		Equation eq = new Equation();
 		eq.process("TRAININGS = [" +
 				//   x0,  x1,  x2,  x3,  x4         <-- features
@@ -44,9 +58,101 @@ public class LogisticRegression {
 		
 		DMatrixRMaj tests = eq.lookupDDRM("TESTS");
 		
-		DMatrixRMaj outcomes = classify(tests, weights);
+		DMatrixRMaj actual = classify(tests, weights);
 	
-		System.out.println("TEST RESULTS: " + outcomes);
+		System.out.println("TESTS_ACTUAL_RESULTS: " + actual);
+		
+		eq.process("TESTS_EXPECTED_RESULTS = [ 0; 1; 1; 1; 0; 1; 0; 1; 1; 1 ]");
+		
+		DMatrixRMaj expected = eq.lookupDDRM("TESTS_EXPECTED_RESULTS");
+		
+		
+		
+		DMatrixRMaj test = new DMatrixRMaj(tests.numRows, 1);
+		
+		// accuracy = number of correct predictions / number of predictions
+		CommonOps_DDRM.subtract(expected, actual, test);
+		System.out.println("NOT CORRECTS: " + MatrixFeatures.countNonZero(test));
+		System.out.println("CORRECTS: " + (tests.numRows - MatrixFeatures.countNonZero(test)));
+		System.out.println("Accuracy: " + 7.0 / 10.0);
+		
+	
+		
+		
+		
+		//      				  true positive 
+		// sensitivity = ---------------------------------
+		//                true positive + false negative
+		double sensitivity = 6.0 / (6.0 + 1.0);
+		
+		//      				  true negative
+		// specificity = ---------------------------------
+		//                true negative + false positive
+		double specificity = 1.0 / (1.0 + 2.0);
+		
+		//      								true positive
+		// positive predictive value = ---------------------------------
+		//                              true positive + false positive
+		double predictive_positive = 6.0 / (6.0 + 2.0);
+		
+		//                                       true negative
+		// negative predictive value = ---------------------------------
+		//                              true negative + false negative
+		double predictive_negative = 1.0 / (1.0 + 1.0);
+		
+		System.out.println("Sensitivity: " + sensitivity);
+		System.out.println("Specificity: " + specificity);
+		System.out.println("Predictive Positive: " + predictive_positive);
+		System.out.println("Predictive Negative: " + predictive_negative);
+		
+		
+		
+		// 	      LL(overall probability) - LL(fit)
+		// R^2 = ---------------------------------
+		//            LL(overall probability)
+		
+		// overall probability = number of 1's / total number of results
+		// overall probability = 7 / 10;
+		CommonOps_DDRM.fill(actual, 7.0 / 10.0);
+		
+		actual = sigmoid(actual);
+		actual.set(0, 0, 1.0 - actual.get(0, 0));  // first result: 0 - not approved
+		actual.set(7, 0, 1.0 - actual.get(7, 0));  // seventh result: 0 - not approved
+		
+		CommonOps_DDRM.elementLog(actual, actual);
+		
+		double overall = CommonOps_DDRM.elementSum(actual);
+		
+		
+		
+		
+		// best fit probability = ln(sigmoid(P0)) + ln(sigmoid(P1)) + .... ln(sigmoid(Pn))
+		CommonOps_DDRM.mult(tests, weights, actual);
+		
+		actual = sigmoid(actual);
+		actual.set(0, 0, 1.0 - actual.get(0, 0));  // first result: 0 - not approved
+		actual.set(7, 0, 1.0 - actual.get(7, 0));  // seventh result: 0 - not approved
+		
+		CommonOps_DDRM.elementLog(actual, actual);
+		
+		double fitted = CommonOps_DDRM.elementSum(actual);
+		
+		double r_squared = (overall - fitted) / overall;
+		
+		System.out.println("R^2 of the optimal weights: " + r_squared);
+		
+		
+		
+		
+		// 2 ( LL(best fitted) - LL(overall probability) )
+		// = Chi squared values of the degrees of freedom equal to the difference in the
+		//   number of parameters in the two models.
+		//   LL(best fitted) has two degree of freedom - actual results (y axis) and  the slope
+		//   LL(overall probability) has one degree of freedom - actual results(y axis)
+		//   Degrees of freedom = 2 - 1
+		
+		System.out.println("Chi Squared with one degree of freedom: " + (2 * (fitted - overall)));
+		
 	}
 	
 	public static DMatrixRMaj training(DMatrixRMaj trainings, DMatrixRMaj weights, 
@@ -60,7 +166,7 @@ public class LogisticRegression {
 			DMatrixRMaj res = new DMatrixRMaj(numOfTrainingData, 1);
 			CommonOps_DDRM.mult(trainings, weights, res);
 		
-			res = sigmoid(res);
+			res = classify(res);
 		
 			CommonOps_DDRM.subtract(res, results, res);
 		
@@ -87,10 +193,21 @@ public class LogisticRegression {
 		DMatrixRMaj output = new DMatrixRMaj(inputs.numRows, inputs.numCols);
 		
 		for (int i = 0; i < inputs.numRows; i++) {
-			output.set(i, 0, sigmoid.value(inputs.get(i, 0)) > 0.5 ? 1 : 0);
+			output.set(i, 0, sigmoid.value(inputs.get(i, 0)));
 		}
 		
 		return output;
+	}
+	
+	public static DMatrixRMaj classify(DMatrixRMaj tests) {
+		
+		DMatrixRMaj res = sigmoid(tests);
+		
+		for (int i = 0; i < tests.numRows; i++) {
+			res.set(i, 0, res.get(i, 0) > 0.5 ? 1 : 0);
+		}
+		
+		return res;
 	}
 	
 	public static DMatrixRMaj classify(DMatrixRMaj tests, DMatrixRMaj weights) {
@@ -99,7 +216,7 @@ public class LogisticRegression {
 		
 		CommonOps_DDRM.mult(tests, weights, res);
 		
-		return sigmoid(res);
+		return classify(res);
 		
 	}
 
