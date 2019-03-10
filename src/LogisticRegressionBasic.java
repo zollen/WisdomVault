@@ -12,20 +12,17 @@ public class LogisticRegressionBasic {
 
 	private static final double[] x = { 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9 };
 
-	private static final double[] y = {
-
-			func(0.0).getValue(), func(0.1).getValue(), func(0.2).getValue(), func(0.3).getValue(),
-			func(0.4).getValue(), func(0.5).getValue(), func(0.6).getValue(), func(0.7).getValue(),
-			func(0.8).getValue(), func(0.9).getValue() };
 
 	public static void main(String... args) throws FileNotFoundException {
 
 		// y = b0 + b1 x
-		//  |
-		//   -----------------------\|/
+		// |
+		// ---------------------------|
+		//                           \|/
 		// Sigmoid: p = 1 / ( 1 + e^(-y))
 		//          |
-		//          -\|/
+		//          --|--------|
+		//           \|/      \|/
 		// Logit: ln( p /( 1 - p)) = b0 + b1x
 
 		// inverse(Sigmoid) = Logit

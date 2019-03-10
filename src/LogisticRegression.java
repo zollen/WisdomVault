@@ -3,7 +3,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.equation.Equation;
 
-public class LogisticRegression2 {
+public class LogisticRegression {
 
 	public static void main(String... args) {
 		// TODO Auto-generated method stub
@@ -25,7 +25,28 @@ public class LogisticRegression2 {
 		DMatrixRMaj results = eq.lookupDDRM("RESULTS");
 		DMatrixRMaj weights = eq.lookupDDRM("WEIGHTS");
 			
-		System.out.println(training(trainings, weights, results, 0.01, 0.0001, 10000));
+		weights = training(trainings, weights, results, 0.01, 0.0001, 10000);
+		System.out.println("OPTIMAL WEIGHTS: " + weights);
+		
+		eq.process("TESTS = [" +
+			//   x0,  x1,  x2,  x3,  x4         <-- features
+				" 1, 7.2, 2.5, 1.0, 1.3;" +    // test data #1
+				" 1, 5.2, 1.9, 5.2, 2.2;" +    // test data #2
+				" 1, 4.3, 2.2, 3.8, 1.9;" +	   // test data #3
+				" 1, 6.2, 2.7, 4.8, 2.8;" +	   // test data #4
+				" 1, 4.5, 3.3, 4.5, 3.0;" +    // test data #5
+				" 1, 6.6, 1.8, 5.0, 3.2;" +    // test data #6
+				" 1, 5.2, 2.3, 3.9, 2.5;" +    // test data #7
+				" 1, 7.0, 3.3, 2.5, 1.4;" +    // test data #8
+				" 1, 4.9, 1.8, 3.2, 3.2;" +    // test data #9
+				" 1, 5.1, 2.5, 3.0, 2.7 " +    // test data #10
+				"]");
+		
+		DMatrixRMaj tests = eq.lookupDDRM("TESTS");
+		
+		DMatrixRMaj outcomes = classify(tests, weights);
+	
+		System.out.println("TEST RESULTS: " + outcomes);
 	}
 	
 	public static DMatrixRMaj training(DMatrixRMaj trainings, DMatrixRMaj weights, 
@@ -66,10 +87,20 @@ public class LogisticRegression2 {
 		DMatrixRMaj output = new DMatrixRMaj(inputs.numRows, inputs.numCols);
 		
 		for (int i = 0; i < inputs.numRows; i++) {
-			output.set(i, 0, sigmoid.value(inputs.get(i, 0)));
+			output.set(i, 0, sigmoid.value(inputs.get(i, 0)) > 0.5 ? 1 : 0);
 		}
 		
 		return output;
+	}
+	
+	public static DMatrixRMaj classify(DMatrixRMaj tests, DMatrixRMaj weights) {
+		
+		DMatrixRMaj res = new DMatrixRMaj(tests.numRows, 1);
+		
+		CommonOps_DDRM.mult(tests, weights, res);
+		
+		return sigmoid(res);
+		
 	}
 
 }
