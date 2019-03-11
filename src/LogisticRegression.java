@@ -49,10 +49,10 @@ public class LogisticRegression {
 			
 		weights = training(trainings, weights, results, 0.01, 0.0001, 10000);
 		System.out.println("OPTIMAL WEIGHTS: " + weights);
-		System.out.println("x0 has positive & stongest influence of the outcome");
-		System.out.println("both x1 and x4 have negative(or reverse) influence of the outcome");
-		System.out.println("both x2 and x5 has positive influnce of the outcome, x2 is stronger than x5, but not as strong as x0");
-		System.out.println("x2 has three times the reverse effect comparing to x4");
+		System.out.println("x0(0.800) has positive & stongest influence of the outcome");
+		System.out.println("both x1(-0.397) and x4(-0.156) have negative(or reverse) influence of the outcome");
+		System.out.println("both x2(0.450) and x5(0.621) has positive influnce of the outcome, x5(0.621) is stronger than x2(0.450), but not as strong as x0(0.800)");
+		System.out.println("x1(-0.397) has three times the reverse effect comparing to x4(-0.156)");
 		System.out.println("================================");
 		
 		eq.process("TESTS = [" +
