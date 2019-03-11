@@ -8,6 +8,8 @@ import org.ejml.equation.Equation;
 public class LogisticRegression {
 	
 	private static final DecimalFormat ff = new DecimalFormat("0.000");
+	
+	private static final double P = 0.5;  // default cut off point
 
 	public static void main(String... args) {
 		// TODO Auto-generated method stub
@@ -47,7 +49,7 @@ public class LogisticRegression {
 		DMatrixRMaj results = eq.lookupDDRM("RESULTS");
 		DMatrixRMaj weights = eq.lookupDDRM("WEIGHTS");
 			
-		weights = training(trainings, weights, results, 0.01, 0.0001, 10000, 0.5);
+		weights = training(trainings, weights, results, 0.01, 0.0001, 10000, P);
 		System.out.println("OPTIMAL WEIGHTS: " + weights);
 		System.out.println("x0(0.800) has positive & stongest influence of the outcome");
 		System.out.println("both x1(-0.397) and x4(-0.156) have negative(or reverse) influence of the outcome");
@@ -81,7 +83,7 @@ public class LogisticRegression {
 		
 		DMatrixRMaj tests = eq.lookupDDRM("TESTS");
 		
-		DMatrixRMaj actual = classify(tests, weights, 0.5);
+		DMatrixRMaj actual = classify(tests, weights, P);
 		
 		eq.process("TESTS_EXPECTED_RESULTS = [ 0; 1; 1; 1; 0; 1; 0; 1; 1; 1; 0; 0; 1; 1; 1; 0; 0; 1; 1; 1 ]");
 		
