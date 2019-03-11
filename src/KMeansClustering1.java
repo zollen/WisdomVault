@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.stream.Collectors;
 
@@ -61,13 +62,12 @@ public class KMeansClustering1 {
 		
 	
 		for (Vector2D pt : TESTS) {
-			List<Vector2D> list = classify(clusters, pt);
-			System.out.println("======== " + pt + " ========");
-			list.stream().forEach(p -> System.out.println(p));
+			Vector2D clus = classify(clusters, pt);
+			System.out.println("Test: " + pt + " ======> Cluster: " + clus);
 		}	
 	}
 	
-	public static List<Vector2D> classify(Map<Vector2D, Set<Vector2D>> map, Vector2D target) {
+	public static Vector2D classify(Map<Vector2D, Set<Vector2D>> map, Vector2D target) {
 		
 		Set<Vector2D> pts = new HashSet<Vector2D>();
 		
@@ -75,7 +75,37 @@ public class KMeansClustering1 {
 		
 		Vector2D [] points = pts.toArray(new Vector2D[pts.size()]);
 		
-		return knnsearch(points, target, 3);
+		List<Vector2D> clostest = knnsearch(points, target, 3);
+		
+		Map<Vector2D, Integer> counter = new HashMap<Vector2D, Integer>();
+		
+		Set<Vector2D> chosen = new HashSet<Vector2D>();
+		AtomicInteger max = new AtomicInteger(-1);
+		map.entrySet().stream().forEach(
+								p -> { 
+									
+									clostest.stream().forEach(q -> {
+										
+										if (p.getValue().contains(q)) {
+											
+											Integer curr = counter.get(p.getKey());
+											if (curr == null)
+												curr = Integer.valueOf(1);
+											else
+												curr = Integer.valueOf(curr + 1);
+										
+											counter.put(p.getKey(), curr);
+											if (curr > max.intValue()) {
+												max.set(curr);
+												chosen.clear();
+												chosen.add(p.getKey());
+											}
+										}
+									});
+								});
+		
+		
+		return chosen.iterator().next();
 	}
 	
 	public static List<Vector2D> knnsearch(Vector2D [] points, Vector2D target, int k) {
