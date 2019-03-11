@@ -35,18 +35,30 @@ public class KMeansClustering1 {
 			new Vector2D(-9, 11)
 	};
 	
+	private static final Vector2D [] TESTS = {
+			new Vector2D(8, 8),
+			new Vector2D(-4, -4),
+			new Vector2D(-10, 10)
+	};
+	
 	private static final Random rand = new Random(0);
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub		
 		// k = 1, kvar = 0
 		// k = 2, kvar = 900
-		// k = 3, kvar = 1469.6  <-- Optimal k where anything beyonds have sudden drop of slope
+		// k = 3, kvar = 1469.6  <-- Optimal k where anything beyond have sudden drop of slope
 		// k = 4, kvar = 1492.9
 		// k = 5, kvar = 1510.1
 		// k = 6, kvar = 1525.0
 		// k = 7, lvar = 1533.5
-		clustering(3);
+		Map<Vector2D, Set<Vector2D>> clusters = clustering(3);
+		
+		System.out.println("======= k = 3, VarBetweenClusters: " + ff.format(kvariance(clusters)) + " =======");
+		print(clusters);
+		
+		// classify(3);
+		
 	}
 	
 	public static double kvariance (Map<Vector2D, Set<Vector2D>> map) {
@@ -124,7 +136,7 @@ public class KMeansClustering1 {
 			return _clustering(next, k, i + 1);
 	}
 	
-	public static void clustering(int k) {
+	public static Map<Vector2D, Set<Vector2D>> clustering(int k) {
 		
 		Map<Double, Map<Vector2D, Set<Vector2D>>> library = new TreeMap<Double, Map<Vector2D, Set<Vector2D>>>(
 				new Comparator<Double>() {
@@ -151,16 +163,10 @@ public class KMeansClustering1 {
 		// just get the first entry (smallest variance)
 		
 		if (library.size() > 0) {
-			
-			double kvar = library.entrySet().stream().findFirst().get().getKey();
-			Map<Vector2D, Set<Vector2D>> map = 
-					library.entrySet().stream().findFirst().get().getValue();
-		
-			System.out.println("======= k = " + k + ", VarBetweenClusters = " + 
-			ff.format(kvar) + " =======");
-			print(map);
+			return library.entrySet().stream().findFirst().get().getValue();
 		}
 		
+		return null;
 	}
 	
 	
