@@ -47,7 +47,7 @@ public class LogisticRegression {
 		DMatrixRMaj results = eq.lookupDDRM("RESULTS");
 		DMatrixRMaj weights = eq.lookupDDRM("WEIGHTS");
 			
-		weights = training(trainings, weights, results, 0.01, 0.0001, 10000);
+		weights = training(trainings, weights, results, 0.01, 0.0001, 10000, 0.5);
 		System.out.println("OPTIMAL WEIGHTS: " + weights);
 		System.out.println("x0(0.800) has positive & stongest influence of the outcome");
 		System.out.println("both x1(-0.397) and x4(-0.156) have negative(or reverse) influence of the outcome");
@@ -66,18 +66,34 @@ public class LogisticRegression {
 				" 1, 5.2, 2.3, 3.9, 2.5;" +    // test data #7
 				" 1, 7.0, 3.3, 2.5, 1.4;" +    // test data #8
 				" 1, 4.9, 1.8, 3.2, 3.2;" +    // test data #9
-				" 1, 5.1, 2.5, 3.0, 2.7 " +    // test data #10
+				" 1, 5.1, 2.5, 3.0, 2.7;" +    // test data #10
+				" 1, 4.5, 3.1, 4.4, 2.1;" +    // test data #11
+				" 1, 5.3, 1.8, 4.1, 3.1;" +    // test data #12
+				" 1, 7.0, 2.9, 3.2, 2.9;" +    // test data #13
+				" 1, 6.4, 2.4, 3.9, 3.0;" +    // test data #14
+				" 1, 6.8, 3.3, 2.5, 1.5;" +    // test data #15
+				" 1, 7.0, 3.1, 2.1, 2.7;" +    // test data #16
+				" 1, 4.2, 2.3, 3.6, 1.8;" +    // test data #17
+				" 1, 6.6, 1.8, 4.8, 0.9;" +    // test data #18
+				" 1, 6.1, 1.2, 5.0, 2.1;" +    // test data #19
+				" 1, 4.7, 3.7, 1.8, 2.6 " +    // test data #20
 				"]");
 		
 		DMatrixRMaj tests = eq.lookupDDRM("TESTS");
 		
-		DMatrixRMaj actual = classify(tests, weights);
-	
-		System.out.println("TESTS_ACTUAL_RESULTS: " + actual);
+		DMatrixRMaj actual = classify(tests, weights, 0.5);
 		
-		eq.process("TESTS_EXPECTED_RESULTS = [ 0; 1; 1; 1; 0; 1; 0; 1; 1; 1 ]");
+		eq.process("TESTS_EXPECTED_RESULTS = [ 0; 1; 1; 1; 0; 1; 0; 1; 1; 1; 0; 0; 1; 1; 1; 0; 0; 1; 1; 1 ]");
 		
 		DMatrixRMaj expected = eq.lookupDDRM("TESTS_EXPECTED_RESULTS");
+		
+		DMatrixRMaj comparing = new DMatrixRMaj(tests.numRows, 2);
+		for (int i = 0; i < tests.numRows; i++) {
+			comparing.set(i, 0, actual.get(i, 0));
+			comparing.set(i, 1, expected.get(i, 0));
+		}
+		
+		System.out.println("ACTUAL, EXPECTED  " + comparing);
 		
 		
 		
@@ -161,7 +177,7 @@ public class LogisticRegression {
 	}
 	
 	public static DMatrixRMaj training(DMatrixRMaj trainings, DMatrixRMaj weights, 
-			DMatrixRMaj results, double learningRate, double tolerance, int maxIterations) {
+			DMatrixRMaj results, double learningRate, double tolerance, int maxIterations, double p) {
 		
 		int numOfTrainingData = trainings.numRows;
 		int numOfFeatures = trainings.numCols;
@@ -171,7 +187,7 @@ public class LogisticRegression {
 			DMatrixRMaj res = new DMatrixRMaj(numOfTrainingData, 1);
 			CommonOps_DDRM.mult(trainings, weights, res);
 		
-			res = classify(res);
+			res = classify(res, p);
 		
 			CommonOps_DDRM.subtract(res, results, res);
 		
@@ -204,25 +220,25 @@ public class LogisticRegression {
 		return output;
 	}
 	
-	public static DMatrixRMaj classify(DMatrixRMaj tests) {
+	public static DMatrixRMaj classify(DMatrixRMaj tests, double p) {
 		
 		DMatrixRMaj res = sigmoid(tests);
 		
 		// cut off point: 0.5
 		for (int i = 0; i < tests.numRows; i++) {
-			res.set(i, 0, res.get(i, 0) > 0.5 ? 1 : 0);
+			res.set(i, 0, res.get(i, 0) > p ? 1 : 0);
 		}
 		
 		return res;
 	}
 	
-	public static DMatrixRMaj classify(DMatrixRMaj tests, DMatrixRMaj weights) {
+	public static DMatrixRMaj classify(DMatrixRMaj tests, DMatrixRMaj weights, double p) {
 		
 		DMatrixRMaj res = new DMatrixRMaj(tests.numRows, 1);
 		
 		CommonOps_DDRM.mult(tests, weights, res);
 		
-		return classify(res);
+		return classify(res, p);
 		
 	}
 	
@@ -244,18 +260,14 @@ public class LogisticRegression {
 		// sensitivity = ---------------------------------
 		//                true positive + false negative
 		
-		DMatrixRMaj test = new DMatrixRMaj(expected.numRows, 1);
-		
-		CommonOps_DDRM.subtract(expected, actual, test);
-		
 		double truePositive = 0.0;
 		double falseNegative = 0.0;
 		for (int i = 0; i < expected.numRows; i++) {
 			
-			if (actual.get(i, 0) == 1 && test.get(i, 0) == 0)
+			if (actual.get(i, 0) == 1 && expected.get(i, 0) == 1)
 				truePositive++;
 			
-			if (actual.get(i, 0) == 0 && test.get(i, 0) == 1)
+			if (actual.get(i, 0) == 0 && expected.get(i, 0) == 1)
 				falseNegative++;
 		}
 		
@@ -272,21 +284,17 @@ public class LogisticRegression {
 		// specificity = ---------------------------------	
 		//                true negative + false positive
 		
-		DMatrixRMaj test = new DMatrixRMaj(expected.numRows, 1);
-		
-		CommonOps_DDRM.subtract(expected, actual, test);
-		
 		double trueNegative = 0.0;
 		double falsePositive = 0.0;
 		for (int i = 0; i < expected.numRows; i++) {
 			
-			if (actual.get(i, 0) == 0 && test.get(i, 0) == 0)
+			if (actual.get(i, 0) == 0 && expected.get(i, 0) == 0)
 				trueNegative++;
 			
-			if (actual.get(i, 0) == 1 && test.get(i, 0) == 1)
+			if (actual.get(i, 0) == 1 && expected.get(i, 0) == 0)
 				falsePositive++;
 		}
-		
+	
 		if (trueNegative + falsePositive == 0)
 			return 0;
 		
@@ -299,18 +307,14 @@ public class LogisticRegression {
 		// positive predictive value = ---------------------------------
 		//                              true positive + false positive	
 		
-		DMatrixRMaj test = new DMatrixRMaj(expected.numRows, 1);
-		
-		CommonOps_DDRM.subtract(expected, actual, test);
-		
 		double truePositive = 0.0;
 		double falsePositive = 0.0;
 		for (int i = 0; i < expected.numRows; i++) {
 			
-			if (actual.get(i, 0) == 1 && test.get(i, 0) == 0)
+			if (actual.get(i, 0) == 1 && expected.get(i, 0) == 1)
 				truePositive++;
 			
-			if (actual.get(i, 0) == 1 && test.get(i, 0) == 1)
+			if (actual.get(i, 0) == 1 && expected.get(i, 0) == 0)
 				falsePositive++;
 		}
 		
@@ -326,18 +330,14 @@ public class LogisticRegression {
 		// negative predictive value = ---------------------------------
 		//                              true negative + false negative
 		
-		DMatrixRMaj test = new DMatrixRMaj(expected.numRows, 1);
-		
-		CommonOps_DDRM.subtract(expected, actual, test);
-		
 		double trueNegative = 0.0;
 		double falseNegative = 0.0;
 		for (int i = 0; i < expected.numRows; i++) {
 			
-			if (actual.get(i, 0) == 0 && test.get(i, 0) == 0)
+			if (actual.get(i, 0) == 0 && expected.get(i, 0) == 0)
 				trueNegative++;
 			
-			if (actual.get(i, 0) == 0 && test.get(i, 0) == 1)
+			if (actual.get(i, 0) == 0 && expected.get(i, 0) == 1)
 				falseNegative++;
 		}
 		
