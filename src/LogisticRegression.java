@@ -86,7 +86,10 @@ public class LogisticRegression {
 		System.out.println("Accuracy: " + 7.0 / 10.0);
 		
 	
-		
+		// The cut off point (default 0.5) should be adjusted.
+		// Try the same dataset and same testset with various cut off point and attempt
+		// to get the optimal accuracy, sensitivity, specificity, positive predictive value
+		// and negative predictive value.
 		
 		
 		//      				  true positive 
@@ -212,6 +215,7 @@ public class LogisticRegression {
 		
 		DMatrixRMaj res = sigmoid(tests);
 		
+		// cut off point: 0.5
 		for (int i = 0; i < tests.numRows; i++) {
 			res.set(i, 0, res.get(i, 0) > 0.5 ? 1 : 0);
 		}
