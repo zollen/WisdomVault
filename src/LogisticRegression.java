@@ -1,9 +1,13 @@
+import java.text.DecimalFormat;
+
 import org.apache.commons.math3.analysis.function.Sigmoid;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.equation.Equation;
 
 public class LogisticRegression {
+	
+	private static final DecimalFormat ff = new DecimalFormat("0.000");
 
 	public static void main(String... args) {
 		// TODO Auto-generated method stub
@@ -77,13 +81,7 @@ public class LogisticRegression {
 		
 		
 		
-		DMatrixRMaj test = new DMatrixRMaj(tests.numRows, 1);
-		
-		// accuracy = number of correct predictions / number of predictions
-		CommonOps_DDRM.subtract(expected, actual, test);
-		System.out.println("NOT CORRECTS: " + MatrixFeatures.countNonZero(test));
-		System.out.println("CORRECTS: " + (tests.numRows - MatrixFeatures.countNonZero(test)));
-		System.out.println("Accuracy: " + 7.0 / 10.0);
+		System.out.println("Accuracy: " + ff.format(accuracy(expected, actual)));
 		
 	
 		// The cut off point (default 0.5) should be adjusted.
@@ -95,27 +93,22 @@ public class LogisticRegression {
 		//      				  true positive 
 		// sensitivity = ---------------------------------
 		//                true positive + false negative
-		double sensitivity = 6.0 / (6.0 + 1.0);
+		System.out.println("Sensitivity: " + ff.format(sensitivity(expected, actual)));
 		
 		//      				  true negative
 		// specificity = ---------------------------------
 		//                true negative + false positive
-		double specificity = 1.0 / (1.0 + 2.0);
+		System.out.println("Specificity: " + ff.format(specificity(expected, actual)));
 		
 		//      								true positive
 		// positive predictive value = ---------------------------------
 		//                              true positive + false positive
-		double predictive_positive = 6.0 / (6.0 + 2.0);
+		System.out.println("Predictive Positive: " + ff.format(predictivePositive(expected, actual)));
 		
 		//                                       true negative
 		// negative predictive value = ---------------------------------
 		//                              true negative + false negative
-		double predictive_negative = 1.0 / (1.0 + 1.0);
-		
-		System.out.println("Sensitivity: " + sensitivity);
-		System.out.println("Specificity: " + specificity);
-		System.out.println("Predictive Positive: " + predictive_positive);
-		System.out.println("Predictive Negative: " + predictive_negative);
+		System.out.println("Predictive Negative: " + ff.format(predictiveNegative(expected, actual)));
 		
 		
 		
@@ -151,7 +144,7 @@ public class LogisticRegression {
 		
 		double r_squared = (overall - fitted) / overall;
 		
-		System.out.println("R^2 of the optimal weights: " + r_squared);
+		System.out.println("R^2 of the optimal weights: " + ff.format(r_squared));
 		
 		
 		
@@ -163,7 +156,7 @@ public class LogisticRegression {
 		//   LL(overall probability) has one degree of freedom - actual results(y axis)
 		//   Degrees of freedom = 2 - 1
 		
-		System.out.println("Chi Squared with one degree of freedom: " + (2 * (fitted - overall)));
+		System.out.println("Chi Squared with one degree of freedom: " + ff.format((2 * (fitted - overall))));
 		
 	}
 	
@@ -232,5 +225,125 @@ public class LogisticRegression {
 		return classify(res);
 		
 	}
+	
+	public static double accuracy(DMatrixRMaj expected, DMatrixRMaj actual) {
+		
+		// accuracy = number of correct predictions / number of predictions	
+		DMatrixRMaj test = new DMatrixRMaj(expected.numRows, 1);
+		
+		CommonOps_DDRM.subtract(expected, actual, test);
+		double notcorrects = MatrixFeatures.countNonZero(test);
+		double corrects = expected.numRows - notcorrects;
+		
+		return corrects / expected.numRows;
+	}
+	
+	public static double sensitivity(DMatrixRMaj expected, DMatrixRMaj actual) {
+		
+		//	  					 true positive 
+		// sensitivity = ---------------------------------
+		//                true positive + false negative
+		
+		DMatrixRMaj test = new DMatrixRMaj(expected.numRows, 1);
+		
+		CommonOps_DDRM.subtract(expected, actual, test);
+		
+		double truePositive = 0.0;
+		double falseNegative = 0.0;
+		for (int i = 0; i < expected.numRows; i++) {
+			
+			if (actual.get(i, 0) == 1 && test.get(i, 0) == 0)
+				truePositive++;
+			
+			if (actual.get(i, 0) == 0 && test.get(i, 0) == 1)
+				falseNegative++;
+		}
+		
+		if (truePositive + falseNegative == 0)
+			return 0;
+		
+		return truePositive / (truePositive + falseNegative);
+		
+	}
+	
+	public static double specificity(DMatrixRMaj expected, DMatrixRMaj actual) {
+		
+		//	 					  true negative
+		// specificity = ---------------------------------	
+		//                true negative + false positive
+		
+		DMatrixRMaj test = new DMatrixRMaj(expected.numRows, 1);
+		
+		CommonOps_DDRM.subtract(expected, actual, test);
+		
+		double trueNegative = 0.0;
+		double falsePositive = 0.0;
+		for (int i = 0; i < expected.numRows; i++) {
+			
+			if (actual.get(i, 0) == 0 && test.get(i, 0) == 0)
+				trueNegative++;
+			
+			if (actual.get(i, 0) == 1 && test.get(i, 0) == 1)
+				falsePositive++;
+		}
+		
+		if (trueNegative + falsePositive == 0)
+			return 0;
+		
+		return trueNegative / (trueNegative + falsePositive);
+	}
+	
+	public static double predictivePositive(DMatrixRMaj expected, DMatrixRMaj actual) {
+		
+		//										true positive
+		// positive predictive value = ---------------------------------
+		//                              true positive + false positive	
+		
+		DMatrixRMaj test = new DMatrixRMaj(expected.numRows, 1);
+		
+		CommonOps_DDRM.subtract(expected, actual, test);
+		
+		double truePositive = 0.0;
+		double falsePositive = 0.0;
+		for (int i = 0; i < expected.numRows; i++) {
+			
+			if (actual.get(i, 0) == 1 && test.get(i, 0) == 0)
+				truePositive++;
+			
+			if (actual.get(i, 0) == 1 && test.get(i, 0) == 1)
+				falsePositive++;
+		}
+		
+		if (truePositive + falsePositive == 0)
+			return 0;
+		
+		return truePositive / (truePositive + falsePositive);
+	}
 
+	public static double predictiveNegative(DMatrixRMaj expected, DMatrixRMaj actual) {
+		
+		//      								true negative
+		// negative predictive value = ---------------------------------
+		//                              true negative + false negative
+		
+		DMatrixRMaj test = new DMatrixRMaj(expected.numRows, 1);
+		
+		CommonOps_DDRM.subtract(expected, actual, test);
+		
+		double trueNegative = 0.0;
+		double falseNegative = 0.0;
+		for (int i = 0; i < expected.numRows; i++) {
+			
+			if (actual.get(i, 0) == 0 && test.get(i, 0) == 0)
+				trueNegative++;
+			
+			if (actual.get(i, 0) == 0 && test.get(i, 0) == 1)
+				falseNegative++;
+		}
+		
+		if (trueNegative + falseNegative == 0)
+			return 0;
+		
+		return trueNegative / (trueNegative + falseNegative);
+	}
 }

@@ -1,8 +1,10 @@
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -57,10 +59,50 @@ public class KMeansClustering1 {
 		System.out.println("======= k = 3, VarBetweenClusters: " + ff.format(kvariance(clusters)) + " =======");
 		print(clusters);
 		
-		// classify(3);
-		
+	
+		for (Vector2D pt : TESTS) {
+			List<Vector2D> list = classify(clusters, pt);
+			System.out.println("======== " + pt + " ========");
+			list.stream().forEach(p -> System.out.println(p));
+		}	
 	}
 	
+	public static List<Vector2D> classify(Map<Vector2D, Set<Vector2D>> map, Vector2D target) {
+		
+		Set<Vector2D> pts = new HashSet<Vector2D>();
+		
+		map.entrySet().stream().forEach(p -> p.getValue().stream().forEach(q -> pts.add(q)));
+		
+		Vector2D [] points = pts.toArray(new Vector2D[pts.size()]);
+		
+		return knnsearch(points, target, 3);
+	}
+	
+	public static List<Vector2D> knnsearch(Vector2D [] points, Vector2D target, int k) {
+		
+		Map<Double, List<Vector2D>> map = new TreeMap<Double, List<Vector2D>>();
+		
+		for (Vector2D point : points) {
+			
+			double dist = target.distance(point);
+			
+			List<Vector2D> list = map.get(dist);
+			if (list == null) {
+				list = new ArrayList<Vector2D>();
+				map.put(dist, list);
+			}
+			
+			list.add(point);
+		}
+		
+		List<Vector2D> ll = new ArrayList<Vector2D>();
+		
+		map.entrySet().stream().forEach(p -> p.getValue().stream().forEach(q -> ll.add(q)));
+		
+		return ll.subList(0,  k);
+	}
+	
+
 	public static double kvariance (Map<Vector2D, Set<Vector2D>> map) {
 				
 		Set<Vector2D> pts = new HashSet<Vector2D>();
