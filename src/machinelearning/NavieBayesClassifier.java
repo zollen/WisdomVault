@@ -1,11 +1,15 @@
 package machinelearning;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class NavieBayesClassifier {
 	
+	private static final DecimalFormat ff = new DecimalFormat("0.000");
+	
+	private static final int TOTAL_POPULATION = 1000;
 	private static final double PROB_NOTSPAM_CHEAP = 0.66;
 	private static final double PROB_NOTSPAM_WORK = 0.82;
 	private static final double PROB_NOTSPAM_FREE = 0.71;
@@ -21,12 +25,43 @@ public class NavieBayesClassifier {
 		// TODO Auto-generated method stub
 		generateTrainingSpams();
 
-		count("Not Spam:", notspams);
-		count("Spam:", spams);
+		Stats ns = count(notspams);
+		Stats ss = count(spams);
 		
-		// NavieBayes class we assume the probabilty of the present of each word is independent
+		System.out.println("Not Spam: total: " + notspams.size());
+		System.out.println("Not Spam: number of Cheap: " + ns.numOfCheap);
+		System.out.println("Not Spam: number of Work: " + ns.numOfWork);
+		System.out.println("Not Spam: number of Free: " + ns.numOfFree);
+		System.out.println("Not Spam: number of Cheap And Work: " + ns.numOfCheapAndWork);
+		System.out.println("Not Spam: number of Work And Free: " + ns.numOfWorkAndFree);
+		System.out.println("Not Spam: number of Free And Cheap: " + ns.numOfFreeAndCheap);
+		System.out.println("Not Spam: number of Cheap And Free And Work: " + ns.numOfCheapAndFreeAndWork);
+		System.out.println("===========================================================");
+		
+		System.out.println("Spam: total: " + spams.size());
+		System.out.println("Spam: number of Cheap: " + ss.numOfCheap);
+		System.out.println("Spam: number of Work: " + ss.numOfWork);
+		System.out.println("Spam: number of Free: " + ss.numOfFree);
+		System.out.println("Spam: number of Cheap And Work: " + ss.numOfCheapAndWork);
+		System.out.println("Spam: number of Work And Free: " + ss.numOfWorkAndFree);
+		System.out.println("Spam: number of Free And Cheap: " + ss.numOfFreeAndCheap);
+		System.out.println("Spam: number of Cheap And Free And Work: " + ss.numOfCheapAndFreeAndWork);
+		System.out.println("===========================================================");
+		
+		// NavieBayes classifier we assume the probability of the present of each word is independent
 		// from each other in order to simplify the math. In reality, this is not always the case
-		// of course. This is why this method is called Navie Bayes Classifer
+		// of course. This is why this method is called NavieBayes Classifer
+		
+		
+		System.err.println("Test Data#1: P(SPAM|[Cheap=true, Work=false, Free=false]): " + (double)
+
+				(ss.numOfCheap / spams.size() *
+					(ss.numOfCheap + ns.numOfCheap) / TOTAL_POPULATION) * 
+				((spams.size() - ss.numOfWork) / spams.size() *
+					(TOTAL_POPULATION - ss.numOfWork - ns.numOfWork) / TOTAL_POPULATION) *
+				((spams.size() - ss.numOfFree) / spams.size() *
+					(TOTAL_POPULATION - ss.numOfFree - ns.numOfFree) / TOTAL_POPULATION));
+		
 		
 		System.out.print("Test Data#1: [Cheap: true, Work: false, Free: true] ");
 		System.out.print("Probability by counting: " + 4.0 / 100.0);		
@@ -44,7 +79,7 @@ public class NavieBayesClassifier {
 		System.out.println(", Probabilty by bayes law: " + (13.0 / 100.0) * (32.0 / 100.0) * (31.0 / 100.0));
 	}
 	
-	public static void count(String prefix, List<Letter> letters) {
+	public static Stats count(List<Letter> letters) {
 		
 		int numCheap = 0;
 		int numWork = 0;
@@ -86,22 +121,24 @@ public class NavieBayesClassifier {
 			}
 		}
 		
-		System.out.println(prefix + " number of Cheap: " + numCheap);
-		System.out.println(prefix + " number of Work: " + numWork);
-		System.out.println(prefix + " number of Free: " + numFree);
-		System.out.println(prefix + " number of Cheap And Work: " + numCheapAndWork);
-		System.out.println(prefix + " number of Work And Free: " + numWorkAndFree);
-		System.out.println(prefix + " number of Free And Cheap: " + numFreeAndCheap);
-		System.out.println(prefix + " number of Cheap And Free And Work: " + numCheapAndWorkAndFree);
-		System.out.println("===========================================================");
+		Stats stats = new Stats();
+		stats.numOfCheap = numCheap;
+		stats.numOfWork = numWork;
+		stats.numOfFree = numFree;
+		stats.numOfCheapAndWork = numCheapAndWork;
+		stats.numOfWorkAndFree = numWorkAndFree;
+		stats.numOfFreeAndCheap = numFreeAndCheap;
+		stats.numOfCheapAndFreeAndWork = numCheapAndWorkAndFree;
+		
+		return stats;
 	}
 
 	public static void generateTrainingSpams() {
 		Random rand = new Random(0);
 	
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < TOTAL_POPULATION; i++) {
 
-			boolean isSpam = rand.nextDouble() > PROB_SPAM ? true : false;
+			boolean isSpam = rand.nextDouble() > PROB_SPAM ? false : true;
 			double isCheap = PROB_NOTSPAM_CHEAP;
 			double isWork = PROB_NOTSPAM_WORK;
 			double isFree = PROB_NOTSPAM_FREE;
@@ -121,6 +158,17 @@ public class NavieBayesClassifier {
 			else
 				notspams.add(new Letter(hasCheap, hasWork, hasFree));
 		}
+	}
+	
+	public static class Stats {
+		
+		public int numOfCheap;
+		public int numOfWork;
+		public int numOfFree;
+		public int numOfCheapAndWork;
+		public int numOfWorkAndFree;
+		public int numOfFreeAndCheap;
+		public int numOfCheapAndFreeAndWork;
 	}
 
 	public static class Letter {
