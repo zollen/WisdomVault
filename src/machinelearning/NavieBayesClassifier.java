@@ -117,20 +117,6 @@ public class NavieBayesClassifier {
 		}
 	}
 	
-	public static class Stats {
-		
-		public int numOfCheap;
-		public int numOfCheapOnly;
-		public int numOfWork;
-		public int numOfWorkOnly;
-		public int numOfFree;
-		public int numOfFreeOnly;
-		public int numOfCheapAndWork;
-		public int numOfWorkAndFree;
-		public int numOfFreeAndCheap;
-		public int numOfCheapAndFreeAndWork;
-	}
-
 	public static class Letter {
 
 		private boolean hasCheap = false;
