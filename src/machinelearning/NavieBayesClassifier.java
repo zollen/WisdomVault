@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Predicate;
 
 public class NavieBayesClassifier {
 	
@@ -24,113 +25,66 @@ public class NavieBayesClassifier {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		generateTrainingSpams();
-
-		Stats ns = count(notspams);
-		Stats ss = count(spams);
 		
-		System.out.println("Not Spam: total: " + notspams.size());
-		System.out.println("Not Spam: number of Cheap: " + ns.numOfCheap);
-		System.out.println("Not Spam: number of Work: " + ns.numOfWork);
-		System.out.println("Not Spam: number of Free: " + ns.numOfFree);
-		System.out.println("Not Spam: number of Cheap And Work: " + ns.numOfCheapAndWork);
-		System.out.println("Not Spam: number of Work And Free: " + ns.numOfWorkAndFree);
-		System.out.println("Not Spam: number of Free And Cheap: " + ns.numOfFreeAndCheap);
-		System.out.println("Not Spam: number of Cheap And Free And Work: " + ns.numOfCheapAndFreeAndWork);
-		System.out.println("===========================================================");
+		Predicate<Letter> condCheap = p -> p.hasCheap == true;
+		Predicate<Letter> condCheapOnly = p -> p.hasCheap == true && p.hasFree == false && p.hasWork == false;
+		Predicate<Letter> condWork = p -> p.hasWork == true;
+		Predicate<Letter> condWorkOnly = p -> p.hasCheap == false && p.hasFree == false && p.hasWork == true;
+		Predicate<Letter> condFree = p -> p.hasFree == true;
+		Predicate<Letter> condFreeOnly = p -> p.hasCheap == false && p.hasFree == true && p.hasWork == false;
+		Predicate<Letter> condWorkAndFreeOnly = p -> p.hasCheap == false && p.hasFree == true && p.hasWork == true;
+		Predicate<Letter> condAll = p -> p.hasCheap == true && p.hasFree == true && p.hasWork == true;
 		
-		System.out.println("Spam: total: " + spams.size());
-		System.out.println("Spam: number of Cheap: " + ss.numOfCheap);
-		System.out.println("Spam: number of Work: " + ss.numOfWork);
-		System.out.println("Spam: number of Free: " + ss.numOfFree);
-		System.out.println("Spam: number of Cheap And Work: " + ss.numOfCheapAndWork);
-		System.out.println("Spam: number of Work And Free: " + ss.numOfWorkAndFree);
-		System.out.println("Spam: number of Free And Cheap: " + ss.numOfFreeAndCheap);
-		System.out.println("Spam: number of Cheap And Free And Work: " + ss.numOfCheapAndFreeAndWork);
-		System.out.println("===========================================================");
-		
-		// NavieBayes classifier we assume the probability of the present of each word is independent
-		// from each other in order to simplify the math. In reality, this is not always the case
-		// of course. This is why this method is called NavieBayes Classifer
-		
-		
-		System.err.println("Test Data#1: P(SPAM|[Cheap=true, Work=false, Free=false]): " + (double)
-
-				(ss.numOfCheap / spams.size() *
-					(ss.numOfCheap + ns.numOfCheap) / TOTAL_POPULATION) * 
-				((spams.size() - ss.numOfWork) / spams.size() *
-					(TOTAL_POPULATION - ss.numOfWork - ns.numOfWork) / TOTAL_POPULATION) *
-				((spams.size() - ss.numOfFree) / spams.size() *
-					(TOTAL_POPULATION - ss.numOfFree - ns.numOfFree) / TOTAL_POPULATION));
-		
-		
-		System.out.print("Test Data#1: [Cheap: true, Work: false, Free: true] ");
-		System.out.print("Probability by counting: " + 4.0 / 100.0);		
-		System.out.println(", Probabilty by bayes law: " + (13.0 / 100.0) * (31.0 / 100.0));
-		System.out.println("Given [Cheap: true, Work: false, Free: true]: What is the probability of spam");
-		System.out.println("P(S|TFT) = P(S and TFT) / P(TFT) = " );
-		System.out.println();
+		System.out.println("Not Spam: " + notspams.size());
+		System.out.println("	Number of Cheap: " + count(notspams, condCheap));
+		System.out.println("	Number of Cheap Only: " + count(notspams, condCheapOnly));
+		System.out.println("	Number of Work: " + count(notspams, condWork));
+		System.out.println("	Number of Work Only: " + count(notspams, condWorkOnly));
+		System.out.println("	Number of Free: " + count(notspams, condFree));
+		System.out.println("	Number of Free Only: " + count(notspams, condFreeOnly));
+		System.out.println("	Number of Work And Free Only: " + count(notspams, condWorkAndFreeOnly));
+		System.out.println("	Number of All Only: " + count(notspams, condAll));
 	
-		System.out.print("Test Data#2: [Cheap: false, Work: true, Free: true] ");
-		System.out.print("Probability by counting: " + 14.0 / 100.0);		
-		System.out.println(", Probabilty by bayes law: " + (32.0 / 100.0) * (31.0 / 100.0));
+		System.out.println("Spam:     " + spams.size());
+		System.out.println("	Number of Cheap: " + count(spams, condCheap));
+		System.out.println("	Number of Cheap Only: " + count(spams, condCheapOnly));
+		System.out.println("	Number of Work: " + count(spams, condWork));
+		System.out.println("	Number of Work Only: " + count(spams, condWorkOnly));
+		System.out.println("	Number of Free: " + count(spams, condFree));
+		System.out.println("	Number of Free Only: " + count(spams, condFreeOnly));
+		System.out.println("	Number of Work And Free Only: " + count(notspams, condWorkAndFreeOnly));
+		System.out.println("	Number of All Only: " + count(spams, condAll));
 		
-		System.out.print("Test Data#3: [Cheap: true, Work: true, Free: true] ");
-		System.out.print("Probability by counting: " + 2.0 / 100.0);		
-		System.out.println(", Probabilty by bayes law: " + (13.0 / 100.0) * (32.0 / 100.0) * (31.0 / 100.0));
+		
+		// NavieBayes classifier assumes when any one of the above count is 0, the classifier
+		// assumes the probabilities of each word is "independent" from each other. Let say
+		// Count(Spam|c=T,w=F,f=F) = 0, then we assume P(c=T), P(w=T) and P(f=T) are independent
+		// we "guess" the probability by using P(c=T) * P(w=T) * P(f=T) 
+		System.out.println();
+		
+		System.out.println("Test Data#1: P(SPAM|[Cheap=true, Work=false, Free=false]) = " + 
+				ff.format((double) count(spams, condCheapOnly) / (count(spams, condCheapOnly) + 
+						count(notspams, condCheapOnly))));
+			
+	
+		System.out.println("Test Data#2: P(SPAM|[Cheap: false, Work: true, Free: true]) = " +
+				ff.format((double) count(spams, condWorkAndFreeOnly) / 
+						(count(spams, condWorkAndFreeOnly) + count(notspams, condWorkAndFreeOnly))));
+		
+		
+		System.out.println("Test Data#3: P(SPAM|[Cheap: true, Work: true, Free: true]) = " +
+				ff.format((double) count(spams, condAll) / 
+						(count(spams, condAll) + count(notspams, condAll))) + " {{ OBVIOUSLY WRONG }}");
+		
+		System.err.println("Approximate: P(SPAM|[Cheap: true, Work: true, Free: true]) = " +
+					ff.format((double) count(spams, condCheap) / spams.size() *
+							count(spams, condWork) / spams.size() *
+							count(spams, condFree) / spams.size()));	
 	}
 	
-	public static Stats count(List<Letter> letters) {
+	public static long count(List<Letter> letters, Predicate<Letter> condition) {
 		
-		int numCheap = 0;
-		int numWork = 0;
-		int numFree = 0;
-		int numCheapAndWork = 0;
-		int numWorkAndFree = 0;
-		int numFreeAndCheap = 0;
-		int numCheapAndWorkAndFree = 0;
-		
-		for (Letter letter : letters) {
-			
-			boolean hasCheap = false;
-			boolean hasWork = false;
-			boolean hasFree = false;
-			
-			if (letter.isHasCheap()) {
-				numCheap++;
-				hasCheap = true;
-			}
-			if (letter.isHasWork()) {
-				numWork++;
-				hasWork = true;
-			}
-			if (letter.isHasFree()) {
-				numFree++;
-				hasFree = true;
-			}
-			if (hasCheap && hasWork) {
-				numCheapAndWork++;
-			}
-			if (hasWork && hasFree) {
-				numWorkAndFree++;
-			}
-			if (hasFree && hasCheap) {
-				numFreeAndCheap++;
-			}
-			if (hasFree && hasCheap && hasWork) {
-				numCheapAndWorkAndFree++;
-			}
-		}
-		
-		Stats stats = new Stats();
-		stats.numOfCheap = numCheap;
-		stats.numOfWork = numWork;
-		stats.numOfFree = numFree;
-		stats.numOfCheapAndWork = numCheapAndWork;
-		stats.numOfWorkAndFree = numWorkAndFree;
-		stats.numOfFreeAndCheap = numFreeAndCheap;
-		stats.numOfCheapAndFreeAndWork = numCheapAndWorkAndFree;
-		
-		return stats;
+		return letters.stream().filter(condition).count();
 	}
 
 	public static void generateTrainingSpams() {
@@ -153,6 +107,9 @@ public class NavieBayesClassifier {
 			boolean hasWork = rand.nextDouble() > isWork ? true : false;
 			boolean hasFree = rand.nextDouble() > isFree ? true : false;
 			
+			if (hasCheap && hasWork && hasFree)
+				isSpam = true;
+			
 			if (isSpam)
 				spams.add(new Letter(hasCheap, hasWork, hasFree));
 			else
@@ -163,8 +120,11 @@ public class NavieBayesClassifier {
 	public static class Stats {
 		
 		public int numOfCheap;
+		public int numOfCheapOnly;
 		public int numOfWork;
+		public int numOfWorkOnly;
 		public int numOfFree;
+		public int numOfFreeOnly;
 		public int numOfCheapAndWork;
 		public int numOfWorkAndFree;
 		public int numOfFreeAndCheap;
