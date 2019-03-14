@@ -30,6 +30,7 @@ public class NavieBayesClassifier {
 		Predicate<Letter> condWork = p -> p.hasWork == true;
 		Predicate<Letter> condFree = p -> p.hasFree == true;
 		
+		
 		System.out.println("Not Spam: " + notspams.size());
 		System.out.println("	Number of Cheap: " + count(notspams, condCheap) + 
 				", P(!Spam|Cheap) = " + ff.format((double) count(notspams, condCheap) / (count(notspams, condCheap) + count(spams, condCheap))));
@@ -39,6 +40,11 @@ public class NavieBayesClassifier {
 				", P(!Spam|Free) = " + ff.format((double) count(notspams, condFree) / (count(notspams, condFree) + count(spams, condFree))));
 		
 	
+		
+		// formula: P(Spam|cheap) = P(cheap|Spam)P(Spam) / P(cheap)
+		//             = P(cheap|Spam)P(Spam) / P(cheap and Spam) + P(cheap and !Spam)
+		//             = P(cheap|Spam)P(Spam) / P(cheap|Spam)P(spam) + P(cheap|!Spam)P(!Spam)
+					
 		System.out.println("Spam:    " + spams.size());
 		double pSpamCheap = (double) count(spams, condCheap) / (count(notspams, condCheap) + count(spams, condCheap));
 		double pSpamWork = (double) count(spams, condWork) / (count(notspams, condWork) + count(spams, condWork));
