@@ -45,22 +45,22 @@ public class NavieBayesClassifier {
 		System.out.println("	Number of Work And Free Only: " + count(notspams, condWorkAndFreeOnly));
 		System.out.println("	Number of All Only: " + count(notspams, condAll));
 	
-		System.out.println("Spam:     " + spams.size());
+		System.out.println("Spam:    " + spams.size());
 		System.out.println("	Number of Cheap: " + count(spams, condCheap));
 		System.out.println("	Number of Cheap Only: " + count(spams, condCheapOnly));
 		System.out.println("	Number of Work: " + count(spams, condWork));
 		System.out.println("	Number of Work Only: " + count(spams, condWorkOnly));
 		System.out.println("	Number of Free: " + count(spams, condFree));
 		System.out.println("	Number of Free Only: " + count(spams, condFreeOnly));
-		System.out.println("	Number of Work And Free Only: " + count(notspams, condWorkAndFreeOnly));
+		System.out.println("	Number of Work And Free Only: " + count(spams, condWorkAndFreeOnly));
 		System.out.println("	Number of All Only: " + count(spams, condAll));
 		
-		
+		System.out.println();
 		// NavieBayes classifier assumes when any one of the above count is 0, the classifier
 		// assumes the probabilities of each word is "independent" from each other. Let say
 		// Count(Spam|c=T,w=F,f=F) = 0, then we assume P(c=T), P(w=T) and P(f=T) are independent
 		// we "guess" the probability by using P(c=T) * P(w=T) * P(f=T) 
-		System.out.println();
+
 		
 		System.out.println("Test Data#1: P(SPAM|[Cheap=true, Work=false, Free=false]) = " + 
 				ff.format((double) count(spams, condCheapOnly) / (count(spams, condCheapOnly) + 
