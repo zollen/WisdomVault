@@ -2,6 +2,7 @@ package machinelearning;
 import java.util.ArrayList;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
 import weka.classifiers.lazy.IBk;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -107,6 +108,10 @@ public class KNNClassifier {
 	
 		Classifier ibk = new IBk();		
 		ibk.buildClassifier(training);
+		
+		Evaluation evaluation = new Evaluation(training);
+		evaluation.evaluateModel(ibk, test);
+		System.out.println(evaluation.toSummaryString());
  
 		int class1 = (int) ibk.classifyInstance(test.get(0));
 		int class2 = (int) ibk.classifyInstance(test.get(1));
