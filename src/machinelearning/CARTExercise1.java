@@ -398,29 +398,27 @@ public class CARTExercise1 {
 			return stats;
 		}
 		
-		public boolean classify(Instance instance) {
+		public Stats classify(Instance instance) {
 			
 			if (stats.classify(instance)) {
 				if (this.left != null)
 					return this.left.classify(instance);
 				else
-					return this.stats.getLeft().classify(instance);
+					return this.stats.getLeft();
 			}
 			else {
 				if (this.right != null)
 					return this.right.classify(instance);
 				else
-					return this.stats.getRight().classify(instance);
+					return this.stats.getRight();
 			}
 		}
 		
 		public void classify(List<Instance> instances) {
 			
 			for (Instance instance : instances) {
-				if (classify(instance)) 
-					System.out.println(instance + " --- TRUE");
-				else
-					System.out.println(instance + " --- FALSE");
+				Stats stats = classify(instance);
+				System.out.println(instance + " --- " + stats);
 			}
 		}
 		
