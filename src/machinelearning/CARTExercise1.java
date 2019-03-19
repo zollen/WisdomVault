@@ -81,7 +81,7 @@ public class CARTExercise1 {
 			data.setValue(ChestPainStats.attr, cp);
 			data.setValue(BlockedArteriesStats.attr, ba);
 		
-			double diag = rand.nextDouble() + (gc * -0.6 + cp * 0.2+ ba * 0.3);
+			double diag = rand.nextDouble() + (gc * -0.6 + cp * 0.2 + ba * 0.3);
 			
 			data.setValue(HeartDiseaseStats.attr, diag < 0.6 ? "0" : "1");
 		
