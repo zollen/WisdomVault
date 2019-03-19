@@ -73,10 +73,17 @@ public class CARTExercise1 {
 		for (int i = 0; i < size; i++) {
 			Instance data = new DenseInstance(5);
 			
-			data.setValue(GoodCirculationStats.attr, rand.nextInt() % 2 == 0 ? 0 : 1);
-			data.setValue(ChestPainStats.attr, rand.nextInt() % 2 == 0 ? 0 : 1);
-			data.setValue(BlockedArteriesStats.attr, rand.nextInt() % 2 == 0 ? 0 : 1);
-			data.setValue(HeartDiseaseStats.attr, rand.nextInt() % 2 == 0 ? "0" : "1");
+			double gc = rand.nextInt() % 2 == 0 ? 0 : 1;
+			double cp = rand.nextInt() % 2 == 0 ? 0 : 1;
+			double ba = rand.nextInt() % 2 == 0 ? 0 : 1;
+			
+			data.setValue(GoodCirculationStats.attr, gc);
+			data.setValue(ChestPainStats.attr, cp);
+			data.setValue(BlockedArteriesStats.attr, ba);
+		
+			double diag = rand.nextDouble() + (gc * -0.6 + cp * 0.2+ ba * 0.3);
+			
+			data.setValue(HeartDiseaseStats.attr, diag < 0.6 ? "0" : "1");
 		
 			training.add(data);
 		}
@@ -334,13 +341,13 @@ public class CARTExercise1 {
 		@Override
 		protected List<Instance> filterYes(List<Instance> instances) {
 			// TODO Auto-generated method stub
-			return instances.stream().filter(p -> "0".equals(p.stringValue(attr))).collect((Collectors.toList()));
+			return instances.stream().filter(p -> "1".equals(p.stringValue(attr))).collect((Collectors.toList()));
 		}
 
 		@Override
 		protected List<Instance> filterNo(List<Instance> instances) {
 			// TODO Auto-generated method stub
-			return instances.stream().filter(p -> "1".equals(p.stringValue(attr))).collect((Collectors.toList()));
+			return instances.stream().filter(p -> "0".equals(p.stringValue(attr))).collect((Collectors.toList()));
 		}
 		
 		@Override
@@ -373,12 +380,6 @@ public class CARTExercise1 {
 		public Node(double gini, Set<Integer> pool, List<Instance> instances) {
 			this.pool = new HashSet<Integer>(pool);
 			this.stats = choose(gini, instances);
-			
-			System.err.println(this.stats.getClass().getName() + " -- " + 
-					ff.format(this.stats.getGini()) + 
-					" Left: " + ff.format(this.stats.getLeft().getGini()) + 
-					" Right: " + ff.format(this.stats.getRight().getGini()) + 
-					" <-- " + gini);
 		}
 		
 		public void setLeft(Node left) {
