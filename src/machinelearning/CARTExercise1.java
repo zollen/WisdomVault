@@ -371,7 +371,7 @@ public class CARTExercise1 {
 		
 		private static final DecimalFormat ff = new DecimalFormat("0.000");
 
-		
+		private String prefix = "";
 		private Node left = null;
 		private Node right = null;
 		private Stats stats = null;
@@ -384,10 +384,14 @@ public class CARTExercise1 {
 		
 		public void setLeft(Node left) {
 			this.left = left;
+			if (this.left != null)
+				this.left.prefix = "(Y)";
 		}
 		
 		public void setRight(Node right) {
 			this.right = right;
+			if (this.right != null)
+				this.right.prefix = "(N)";
 		}
 		
 		public int getID() {
@@ -399,6 +403,8 @@ public class CARTExercise1 {
 		}
 		
 		public Stats classify(Instance instance) {
+			
+			System.err.println("DEBUG " + this.stats.getClass().getName() + " -- " + stats.classify(instance));
 			
 			if (stats.classify(instance)) {
 				if (this.left != null)
@@ -427,7 +433,7 @@ public class CARTExercise1 {
 			StringBuilder builder = new StringBuilder();
 			
 			builder.append(spaces(indent));
-			builder.append(this.toString());
+			builder.append(prefix + " " + this.toString());
 			builder.append("\n");
 			
 			if (left != null) {
@@ -435,7 +441,7 @@ public class CARTExercise1 {
 			}
 			else {
 				builder.append(spaces(indent + 3));
-				builder.append(stats.getLeft().toString());
+				builder.append("(Y) " + stats.getLeft().toString());
 				builder.append("\n");
 			}
 			
@@ -444,7 +450,7 @@ public class CARTExercise1 {
 			}
 			else {
 				builder.append(spaces(indent + 3));
-				builder.append(stats.getRight().toString());
+				builder.append("(N) " + stats.getRight().toString());
 				builder.append("\n");
 			}
 			
