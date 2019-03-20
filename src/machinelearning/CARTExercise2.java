@@ -77,13 +77,44 @@ public class CARTExercise2 {
 		return training;
 	}
 	
+	public static class Gini implements Strategy {
+
+		@Override
+		public Node<?> create(Attribute attr, List<Instance> instances) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public Attribute decide(List<Attribute> attrs, List<Instance> instances) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public double score(Node<?> node) {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+		
+	}
 	
-	public static class Node {
+	public static interface Strategy {
+		
+		public double score(Node<?> node);
+		
+		public Attribute decide(List<Attribute> attrs, List<Instance> instances);
+		
+		public Node<?> create(Attribute attr, List<Instance> instances);
+	}
+	
+	
+	public static class Node<T extends Strategy> {
 		
 		private static final DecimalFormat ff = new DecimalFormat("0.000");
 				
 		private Map<String, List<Instance>> data = new HashMap<String, List<Instance>>();
-		private Map<String, Node> children = new HashMap<String, Node>();
+		private Map<String, Node<T>> children = new HashMap<String, Node<T>>();
 		private List<Instance> inputs = null;
 		private Attribute attr = null;
 		private String label = null;
@@ -102,7 +133,7 @@ public class CARTExercise2 {
 			this.setInstances(instances);
 		}
 		
-		public void add(String value, Node child) {
+		public void add(String value, Node<T> child) {
 			child.setInstances(this.data.get(value));
 			this.children.put(value, child);
 		}
@@ -130,7 +161,7 @@ public class CARTExercise2 {
 			return label() + " ==> " +
 					this.values.stream().map(p -> "[" + p + "]: " + 
 							data.get(p).size()).collect(Collectors.joining(", ")) + 
-							"   Gini: " + ff.format(this.gini());
+							"   Score: " + ff.format(this.gini());
 		}
 		
 		private List<Instance> filter(String value, List<Instance> instances) {
