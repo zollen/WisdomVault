@@ -21,6 +21,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 	private String label = null;
 	private List<String> values = null;
 	private T strategy = null;
+	private CARTNode<T> parent = null;
 
 	public CARTNode(T strategy, Attribute attr, List<String> values) {
 		this(strategy, attr, values, new ArrayList<Instance>());
@@ -38,11 +39,20 @@ public class CARTNode<T extends CARTNode.Strategy> {
 
 	public void add(String value, CARTNode<T> child) {
 		child.setInstances(this.data.get(value));
+		child.parent(this);
 		this.children.put(value, child);
 	}
 
 	public String label() {
 		return label;
+	}
+	
+	public CARTNode<T> parent() {
+		return parent;
+	}
+	
+	public void parent(CARTNode<T> node) {
+		this.parent = node;
 	}
 
 	public double score() {
@@ -71,7 +81,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 	}
 
 	private List<Instance> filter(String value, List<Instance> instances) {
-		return instances.stream().filter(p -> value.equals(p.stringValue(attr))).collect(Collectors.toList());
+		return strategy.filter(this, value, instances);
 	}
 
 	private String indent(String value, int indent) {
@@ -108,6 +118,8 @@ public class CARTNode<T extends CARTNode.Strategy> {
 		public double score(CARTNode<?> node);
 
 		public CARTNode<?> create(List<Instance> instances);
+		
+		public List<Instance> filter(CARTNode<?> node, String value, List<Instance> instances);
 	}
 
 }

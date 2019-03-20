@@ -18,7 +18,6 @@ public class CARTExercise1 {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
-	
 		// defining data format
 
 		ArrayList<String> vals = new ArrayList<String>();
@@ -34,10 +33,9 @@ public class CARTExercise1 {
 		attrs.add(attr2);
 		attrs.add(attr3);
 		attrs.add(attr4);
-		
-		
+
 		// defining data dictionary
-		
+
 		Map<Attribute, List<String>> definition = new LinkedHashMap<Attribute, List<String>>();
 		definition.put(attr1, vals);
 		definition.put(attr2, vals);
@@ -45,13 +43,13 @@ public class CARTExercise1 {
 		definition.put(attr4, vals);
 
 		// training
-		
+
 		List<Instance> training = generateData(100, 0, attrs);
-		
+
 		Gini gini = new Gini(definition, attr4);
 
 		CARTNode<Gini> root = gini.create(training);
-		
+
 		System.out.println(root.toAll());
 
 	}
@@ -84,29 +82,29 @@ public class CARTExercise1 {
 	}
 
 	public static class Gini implements CARTNode.Strategy {
-		
+
 		private Map<Attribute, List<String>> definition = null;
 		private List<Attribute> attrs = null;
 		private Attribute cls = null;
-		
+
 		public Gini(Map<Attribute, List<String>> definition, Attribute cls) {
 			this.definition = definition;
 			this.attrs = definition.keySet().stream().collect(Collectors.toList());
-			
+
 			this.cls = cls;
 			this.attrs.remove(cls);
-		}	
+		}
 
 		@Override
 		public CARTNode<Gini> create(List<Instance> instances) {
 			// TODO Auto-generated method stub
 			return construct(Double.MAX_VALUE, this.attrs, instances);
 		}
-		
+
 		@Override
 		public double score(CARTNode<?> node) {
 			// TODO Auto-generated method stub
-			
+
 			// gini impurities
 			DoubleAdder sum = new DoubleAdder();
 
@@ -124,79 +122,82 @@ public class CARTExercise1 {
 
 				node.children.entrySet().stream().forEach(p -> {
 
-					sum.add((double) node.data.get(p.getKey()).size() /
-							node.inputs.size() * score(p.getValue()));
+					sum.add((double) node.data.get(p.getKey()).size() / node.inputs.size() * score(p.getValue()));
 				});
 
 				return sum.doubleValue();
 			}
 		}
-		
+
+		@Override
+		public List<Instance> filter(CARTNode<?> node, String value, List<Instance> instances) {
+			return instances.stream().filter(p -> value.equals(p.stringValue(node.attr))).collect(Collectors.toList());
+		}
+
 		private CARTNode<Gini> test(Attribute attr, Attribute cattr, List<Instance> instances) {
 			CARTNode<Gini> node = create(attr, instances);
-			
+
 			node.data.entrySet().stream().forEach(p -> {
-				
+
 				CARTNode<Gini> child = create(cattr);
 				node.add(p.getKey(), child);
 			});
-			
+
 			return node;
 		}
-		
+
 		private CARTNode<Gini> create(Attribute attr) {
 			return new CARTNode<Gini>(this, attr, definition.get(attr));
 		}
-		
+
 		private CARTNode<Gini> create(Attribute attr, List<Instance> instances) {
 			return new CARTNode<Gini>(this, attr, definition.get(attr), instances);
 		}
 
 		private CARTNode<Gini> construct(double ggini, List<Attribute> attrs, List<Instance> instances) {
-			
+
 			if (attrs.size() <= 0)
 				return this.create(cls);
-			
+
 			List<Attribute> list = new ArrayList<Attribute>(attrs);
-			
+
 			double min = ggini;
 			CARTNode<Gini> target = null;
-		
+
 			// determining the next attribute with the lowest gini score
 			for (Attribute attr : list) {
-				
+
 				CARTNode<Gini> node = test(attr, cls, instances);
 				double score = node.score();
-				
+
 				if (min > score) {
 					min = score;
 					target = node;
-				}			
+				}
 			}
-			
-	
+
 			// recursively constructing the tree
 			if (target != null) {
-				
+
 				final CARTNode<Gini> parent = target;
-			
+
 				list.remove(target.attr);
-				
+
 				CARTNode<Gini> node = create(target.attr, instances);
-						
+
 				node.data.entrySet().stream().forEach(p -> {
-					
+
 					final double score = score(parent.children.get(p.getKey()));
-				
+
 					CARTNode<Gini> child = construct(score, list, p.getValue());
 					if (child != null) {
 						node.add(p.getKey(), child);
 					}
 				});
-				
+
 				return node;
 			}
-			
+
 			return this.create(cls);
 		}
 	}
