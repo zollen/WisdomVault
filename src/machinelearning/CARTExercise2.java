@@ -163,7 +163,7 @@ public class CARTExercise2 {
 			}
 		}
 		
-		private String spaces(String value, int indent) {
+		private String indent(String value, int indent) {
 			
 			StringBuilder builder = new StringBuilder();
 			for (int i = 0; i < indent; i++) {
@@ -187,7 +187,7 @@ public class CARTExercise2 {
 			
 			StringBuilder builder = new StringBuilder();
 			
-			builder.append(spaces(value, indent));
+			builder.append(indent(value, indent));
 			builder.append(this);
 			builder.append("\n");
 			

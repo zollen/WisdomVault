@@ -368,9 +368,7 @@ public class CARTExercise1 {
 	}
 	
 	public static class Node {
-		
-		private static final DecimalFormat ff = new DecimalFormat("0.000");
-
+	
 		private String prefix = "";
 		private Node left = null;
 		private Node right = null;
