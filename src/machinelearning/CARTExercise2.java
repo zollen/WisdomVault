@@ -39,9 +39,9 @@ public class CARTExercise2 {
 	
 		List<Instance> training = generateData(100, 0, attrs);
 		
-		Node gc = new Node(attr1, vals, training);
-		Node hd1 = new Node(attr4, vals);
-		Node hd2 = new Node(attr4, vals);
+		Node<Gini> gc = new Node<Gini>(attr1, vals, training);
+		Node<Gini> hd1 = new Node<Gini>(attr4, vals);
+		Node<Gini> hd2 = new Node<Gini>(attr4, vals);
 		
 		gc.add("1", hd1);
 		gc.add("0", hd2);
