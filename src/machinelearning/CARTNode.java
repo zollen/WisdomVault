@@ -14,25 +14,27 @@ public class CARTNode<T extends CARTNode.Strategy> {
 
 	private static final DecimalFormat ff = new DecimalFormat("0.000");
 
-	Map<String, List<Instance>> data = new HashMap<String, List<Instance>>();
-	Map<String, CARTNode<T>> children = new HashMap<String, CARTNode<T>>();
-	List<Instance> inputs = null;
-	Attribute attr = null;
+	private Map<String, List<Instance>> data = new HashMap<String, List<Instance>>();
+	private Map<String, CARTNode<T>> children = new HashMap<String, CARTNode<T>>();
+	private List<Instance> inputs = null;
+	private Attribute attr = null;
 	private String label = null;
 	private List<String> values = null;
+	private String value = null;
 	private T strategy = null;
 	private CARTNode<T> parent = null;
 
-	public CARTNode(T strategy, Attribute attr, List<String> values) {
-		this(strategy, attr, values, new ArrayList<Instance>());
+	public CARTNode(T strategy, Attribute attr, String value) {
+		this(strategy, attr, value, new ArrayList<Instance>());
 	}
 
-	public CARTNode(T strategy, Attribute attr, List<String> values, List<Instance> instances) {
+	public CARTNode(T strategy, Attribute attr, String value, List<Instance> instances) {
 
 		this.attr = attr;
 		this.label = this.attr.name();
-		this.values = values;
 		this.strategy = strategy;
+		this.values = strategy.definition().get(attr);
+		this.value = value;
 
 		this.setInstances(instances);
 	}
@@ -47,14 +49,34 @@ public class CARTNode<T extends CARTNode.Strategy> {
 		return label;
 	}
 	
+	public void parent(CARTNode<T> node) {
+		this.parent = node;
+	}
+	
 	public CARTNode<T> parent() {
 		return parent;
 	}
 	
-	public void parent(CARTNode<T> node) {
-		this.parent = node;
+	public List<Instance> inputs() {
+		return inputs;
 	}
-
+	
+	public String value() {
+		return value;
+	}
+	
+	public Attribute attr() {
+		return attr;
+	}
+	
+	public Map<String, List<Instance>> data() {
+		return data;
+	}
+	
+	public Map<String, CARTNode<T>> children() {
+		return children;
+	}
+	
 	public double score() {
 		return strategy.score(this);
 	}
@@ -114,6 +136,8 @@ public class CARTNode<T extends CARTNode.Strategy> {
 	}
 
 	public static interface Strategy {
+		
+		public Map<Attribute, List<String>> definition();
 
 		public double score(CARTNode<?> node);
 

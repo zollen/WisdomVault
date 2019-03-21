@@ -94,6 +94,11 @@ public class CARTExercise1 {
 			this.cls = cls;
 			this.attrs.remove(cls);
 		}
+		
+		@Override
+		public Map<Attribute, List<String>> definition() {
+			return definition;
+		}
 
 		@Override
 		public CARTNode<Gini> create(List<Instance> instances) {
@@ -108,21 +113,21 @@ public class CARTExercise1 {
 			// gini impurities
 			DoubleAdder sum = new DoubleAdder();
 
-			if (node.inputs.size() <= 0)
+			if (node.inputs().size() <= 0)
 				return 0.0;
 
-			if (node.children.size() <= 0) {
+			if (node.children().size() <= 0) {
 
-				node.data.entrySet().stream().forEach(p -> {
-					sum.add(Math.pow((double) p.getValue().size() / node.inputs.size(), 2));
+				node.data().entrySet().stream().forEach(p -> {
+					sum.add(Math.pow((double) p.getValue().size() / node.inputs().size(), 2));
 				});
 
 				return 1 - sum.doubleValue();
 			} else {
 
-				node.children.entrySet().stream().forEach(p -> {
+				node.children().entrySet().stream().forEach(p -> {
 
-					sum.add((double) node.data.get(p.getKey()).size() / node.inputs.size() * score(p.getValue()));
+					sum.add((double) node.data().get(p.getKey()).size() / node.inputs().size() * score(p.getValue()));
 				});
 
 				return sum.doubleValue();
@@ -131,27 +136,38 @@ public class CARTExercise1 {
 
 		@Override
 		public List<Instance> filter(CARTNode<?> node, String value, List<Instance> instances) {
-			return instances.stream().filter(p -> value.equals(p.stringValue(node.attr))).collect(Collectors.toList());
+			if (value.startsWith("!")) {
+				String val = value.substring(1, value.length());
+				return instances.stream().filter(p -> !val.equals(p.stringValue(node.attr()))).collect(Collectors.toList());
+			}
+			else {
+				return instances.stream().filter(p -> value.equals(p.stringValue(node.attr()))).collect(Collectors.toList());
+			}
 		}
 
-		private CARTNode<Gini> test(Attribute attr, Attribute cattr, List<Instance> instances) {
-			CARTNode<Gini> node = create(attr, instances);
+		private CARTNode<Gini> test(Attribute attr, String value, List<Instance> instances) {
+			CARTNode<Gini> node = create(attr, value, instances);
 
-			node.data.entrySet().stream().forEach(p -> {
+			node.data().entrySet().stream().forEach(p -> {
 
-				CARTNode<Gini> child = create(cattr);
+				CARTNode<Gini> child = create(cls);
 				node.add(p.getKey(), child);
 			});
 
 			return node;
 		}
-
+		
 		private CARTNode<Gini> create(Attribute attr) {
-			return new CARTNode<Gini>(this, attr, definition.get(attr));
+			return new CARTNode<Gini>(this, attr, null);
 		}
 
-		private CARTNode<Gini> create(Attribute attr, List<Instance> instances) {
-			return new CARTNode<Gini>(this, attr, definition.get(attr), instances);
+		@SuppressWarnings("unused")
+		private CARTNode<Gini> create(Attribute attr, String value) {
+			return new CARTNode<Gini>(this, attr, value);
+		}
+
+		private CARTNode<Gini> create(Attribute attr, String value, List<Instance> instances) {
+			return new CARTNode<Gini>(this, attr, value, instances);
 		}
 
 		private CARTNode<Gini> construct(double ggini, List<Attribute> attrs, List<Instance> instances) {
@@ -163,16 +179,21 @@ public class CARTExercise1 {
 
 			double min = ggini;
 			CARTNode<Gini> target = null;
-
-			// determining the next attribute with the lowest gini score
+			
+			// determining the next attribute and next value with the lowest gini score
 			for (Attribute attr : list) {
+				
+				List<String> values = definition().get(attr);
+				
+				for (String value : values) {
 
-				CARTNode<Gini> node = test(attr, cls, instances);
-				double score = node.score();
+					CARTNode<Gini> node = test(attr, value, instances);
+					double score = node.score();
 
-				if (min > score) {
-					min = score;
-					target = node;
+					if (min > score) {
+						min = score;
+						target = node;
+					}
 				}
 			}
 
@@ -181,13 +202,13 @@ public class CARTExercise1 {
 
 				final CARTNode<Gini> parent = target;
 
-				list.remove(target.attr);
+				list.remove(target.attr());
 
-				CARTNode<Gini> node = create(target.attr, instances);
+				CARTNode<Gini> node = create(target.attr(), target.value(), instances);
 
-				node.data.entrySet().stream().forEach(p -> {
+				node.data().entrySet().stream().forEach(p -> {
 
-					final double score = score(parent.children.get(p.getKey()));
+					final double score = score(parent.children().get(p.getKey()));
 
 					CARTNode<Gini> child = construct(score, list, p.getValue());
 					if (child != null) {
