@@ -47,8 +47,8 @@ public class CARTExercise2 {
 		
 
 		ArrayList<Attribute> attrs = new ArrayList<Attribute>();
-		Attribute attr1 = new Attribute("color", colorVals);
-		Attribute attr2 = new Attribute("diameter", diamVals);
+		Attribute attr1 = new Attribute("diameter", diamVals);
+		Attribute attr2 = new Attribute("color", colorVals);
 		Attribute attr3 = new Attribute("fruit", fruitVals);
 		attrs.add(attr1);
 		attrs.add(attr2);
@@ -58,8 +58,8 @@ public class CARTExercise2 {
 		// defining data dictionary
 
 		Map<Attribute, List<String>> definition = new LinkedHashMap<Attribute, List<String>>();
-		definition.put(attr1, colorVals);
-		definition.put(attr2, diamVals);
+		definition.put(attr1, diamVals);
+		definition.put(attr2, colorVals);
 		definition.put(attr3, fruitVals);
 		
 	
@@ -81,32 +81,32 @@ public class CARTExercise2 {
 		Instances training = new Instances("TRAINING", attrs, 5);
 		
 		Instance data1 = new DenseInstance(3);	
-		data1.setValue(attrs.get(0), VALUE_COLOR_GREEN);
-		data1.setValue(attrs.get(1), VALUE_DIAMETER_3);
+		data1.setValue(attrs.get(0), VALUE_DIAMETER_3);
+		data1.setValue(attrs.get(1), VALUE_COLOR_GREEN);
 		data1.setValue(attrs.get(2), VALUE_FRUIT_APPLE);
 		training.add(data1);
 		
 		Instance data2 = new DenseInstance(3);	
-		data2.setValue(attrs.get(0), VALUE_COLOR_YELLOW);
-		data2.setValue(attrs.get(1), VALUE_DIAMETER_3);
+		data2.setValue(attrs.get(0), VALUE_DIAMETER_3);
+		data2.setValue(attrs.get(1), VALUE_COLOR_YELLOW);
 		data2.setValue(attrs.get(2), VALUE_FRUIT_APPLE);
 		training.add(data2);
 		
 		Instance data3 = new DenseInstance(3);	
-		data3.setValue(attrs.get(0), VALUE_COLOR_RED);
-		data3.setValue(attrs.get(1), VALUE_DIAMETER_1);
+		data3.setValue(attrs.get(0), VALUE_DIAMETER_1);
+		data3.setValue(attrs.get(1), VALUE_COLOR_RED);
 		data3.setValue(attrs.get(2), VALUE_FRUIT_GRAPH);
 		training.add(data3);
 		
 		Instance data4 = new DenseInstance(3);	
-		data4.setValue(attrs.get(0), VALUE_COLOR_RED);
-		data4.setValue(attrs.get(1), VALUE_DIAMETER_1);
+		data4.setValue(attrs.get(0), VALUE_DIAMETER_1);
+		data4.setValue(attrs.get(1), VALUE_COLOR_RED);
 		data4.setValue(attrs.get(2), VALUE_FRUIT_GRAPH);
 		training.add(data4);
 		
 		Instance data5 = new DenseInstance(3);	
-		data5.setValue(attrs.get(0), VALUE_COLOR_YELLOW);
-		data5.setValue(attrs.get(1), VALUE_DIAMETER_3);
+		data5.setValue(attrs.get(0), VALUE_DIAMETER_3);
+		data5.setValue(attrs.get(1), VALUE_COLOR_YELLOW);
 		data5.setValue(attrs.get(2), VALUE_FRUIT_LEMON);
 		training.add(data5);
 
@@ -158,7 +158,7 @@ public class CARTExercise2 {
 					
 						CARTNode<Gini> node = builder.test(p.getKey(), list, instances);
 						double score = node.score();
-					
+						
 						if (min.doubleValue() > score) {
 							min.reset();
 							min.add(score);
@@ -168,7 +168,6 @@ public class CARTExercise2 {
 					});
 				}
 			});
-			
 			
 			return holder.data();
 		}
