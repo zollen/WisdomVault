@@ -123,7 +123,7 @@ public class CARTExercise1 {
 			
 					p.getValue().stream().forEach(v -> {
 					
-					List<String> list = new ArrayList<String>();
+						List<String> list = new ArrayList<String>();
 						list.add(v);
 						list.add(v);
 					

@@ -69,7 +69,11 @@ public class CARTExercise2 {
 
 		Gini gini = new Gini(definition, attr3);
 
+		CARTNode.Strategy.Builder<Gini> builder = new CARTNode.Strategy.Builder<Gini>(gini);
 		
+		CARTNode<Gini> root = builder.build(training);
+		
+		System.out.println(root.toAll());
 	}
 
 	public static List<Instance> generateData(ArrayList<Attribute> attrs) {
@@ -136,6 +140,7 @@ public class CARTExercise2 {
 		@Override
 		public CARTNode<Gini> calculate(double ggini, List<Instance> instances) {
 			
+			CARTNode.Strategy.Builder<Gini> builder = new CARTNode.Strategy.Builder<Gini>(this);
 			DoubleAdder min = new DoubleAdder();
 			min.add(ggini);
 			
@@ -143,21 +148,25 @@ public class CARTExercise2 {
 			
 			this.definition.entrySet().stream().forEach(p -> {
 				
-				p.getValue().stream().forEach(v -> {
+				if (p.getKey() != this.cls) {
+				
+					p.getValue().stream().forEach(v -> {
 					
-					List<String> test = new ArrayList<String>();
-					test.add(v);
-					test.add(v);
+						List<String> list = new ArrayList<String>();
+						list.add(v);
+						list.add(v);
 					
-					CARTNode<Gini> node = test(p.getKey(), test, instances);
-					double score = node.score();
+						CARTNode<Gini> node = builder.test(p.getKey(), list, instances);
+						double score = node.score();
 					
-					if (min.doubleValue() > score) {
-						min.reset();
-						min.add(score);
-						holder.data(node);
-					}
-				});
+						if (min.doubleValue() > score) {
+							min.reset();
+							min.add(score);
+							node.value(v);
+							holder.data(node);
+						}
+					});
+				}
 			});
 			
 			
@@ -199,123 +208,20 @@ public class CARTExercise2 {
 			
 			switch(node.attr().name()) {
 			case "diameter":
-				res = instances.stream().filter(p -> p.value(node.attr()) >= Integer.valueOf(value)).collect(Collectors.toList());
+				if (binary)
+					res = instances.stream().filter(p -> p.value(node.attr()) < Integer.valueOf(value)).collect(Collectors.toList());
+				else
+					res = instances.stream().filter(p -> p.value(node.attr()) >= Integer.valueOf(value)).collect(Collectors.toList());
 			break;
 			case "color":
 			default:
-				res = instances.stream().filter(p -> value.equals(p.stringValue(node.attr()))).collect(Collectors.toList());
+				if (binary)
+					res = instances.stream().filter(p -> !value.equals(p.stringValue(node.attr()))).collect(Collectors.toList());
+				else
+					res = instances.stream().filter(p -> value.equals(p.stringValue(node.attr()))).collect(Collectors.toList());
 			}
 			
 			return res;
-		}
-		
-		private CARTNode<Gini> test(Attribute attr, List<String> values, List<Instance> instances) {
-			
-			CARTNode<Gini> node = new CARTNode<Gini>(this, attr, values, instances);
-			
-			for (int i = 0; i < values.size(); i++) {
-				
-				String val = values.get(i);
-					
-				node.add(val, new CARTNode<Gini>(this, cls, null));
-			}
-			
-			return node;
-		}
-
-		private CARTNode<Gini> test(Attribute attr, String value, List<Instance> instances) {
-			CARTNode<Gini> node = create(attr, value, instances);
-
-			node.data().entrySet().stream().forEach(p -> {
-
-				CARTNode<Gini> child = create(cls, "");
-				node.add(p.getKey(), child);
-			});
-
-			return node;
-		}
-
-		private CARTNode<Gini> create(Attribute attr, String value) {
-			return new CARTNode<Gini>(this, attr, value);
-		}
-
-		private CARTNode<Gini> create(Attribute attr, String value, List<Instance> instances) {
-			return new CARTNode<Gini>(this, attr, value, instances);
-		}
-
-		private CARTNode<Gini> construct(double ggini, List<Attribute> attrs, List<Instance> instances) {
-
-			if (attrs.size() <= 0)
-				return this.create(cls, "");
-
-			List<Attribute> list = new ArrayList<Attribute>(attrs);
-
-			DoubleAdder min = new DoubleAdder();
-			min.add(ggini);
-			PlaceHolder<CARTNode<Gini>> target = new PlaceHolder<CARTNode<Gini>>();
-			
-			// determining the next attribute with the lowest gini score
-			
-			definition.entrySet().stream().forEach(p -> {
-				
-				p.getValue().stream().forEach(v -> {
-					
-					CARTNode<Gini> node = test(p.getKey(), v, instances);
-					double score = node.score();
-
-					if (min.doubleValue() > score) {
-						min.reset();
-						min.add(score);
-						target.data(node);
-					}
-					
-				});
-			});
-
-			
-
-			// recursively constructing the tree
-			if (target.data() != null) {
-
-				final CARTNode<Gini> parent = target.data();
-
-				list.remove(target.data().attr());
-
-				CARTNode<Gini> node = create(target.data().attr(), 
-						target.data().value(), instances);
-
-				node.data().entrySet().stream().forEach(p -> {
-
-					final double score = score(parent.children().get(p.getKey()));
-
-					CARTNode<Gini> child = construct(score, list, p.getValue());
-					if (child != null) {
-						node.add(p.getKey(), child);
-					}
-				});
-
-				return node;
-			}
-
-			return this.create(cls, "");
-		}
-	}
-	
-	public static class PlaceHolder<T> {
-		
-		private T data;
-		public PlaceHolder(T data) {
-			this.data = data;
-		}
-		
-		public PlaceHolder() {}
-		
-		public T data() {
-			return data;
-		}
-		
-		public void data(T data) {
-			this.data = data;
 		}
 	}
 }
