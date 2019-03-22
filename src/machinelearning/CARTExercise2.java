@@ -69,10 +69,7 @@ public class CARTExercise2 {
 
 		Gini gini = new Gini(definition, attr3);
 
-		CARTNode<Gini> root = gini.create(training);
-
-		System.out.println(root.toAll());
-
+		
 	}
 
 	public static List<Instance> generateData(ArrayList<Attribute> attrs) {
@@ -130,11 +127,41 @@ public class CARTExercise2 {
 		public Map<Attribute, List<String>> definition() {
 			return definition;
 		}
-
+		
 		@Override
-		public CARTNode<Gini> create(List<Instance> instances) {
-			// TODO Auto-generated method stub
-			return construct(Double.MAX_VALUE, this.attrs, instances);
+		public Attribute cls() {
+			return cls;
+		}
+		
+		@Override
+		public CARTNode<Gini> calculate(double ggini, List<Instance> instances) {
+			
+			DoubleAdder min = new DoubleAdder();
+			min.add(ggini);
+			
+			PlaceHolder<CARTNode<Gini>> holder = new PlaceHolder<CARTNode<Gini>>();
+			
+			this.definition.entrySet().stream().forEach(p -> {
+				
+				p.getValue().stream().forEach(v -> {
+					
+					List<String> test = new ArrayList<String>();
+					test.add(v);
+					test.add(v);
+					
+					CARTNode<Gini> node = test(p.getKey(), test, instances);
+					double score = node.score();
+					
+					if (min.doubleValue() > score) {
+						min.reset();
+						min.add(score);
+						holder.data(node);
+					}
+				});
+			});
+			
+			
+			return holder.data();
 		}
 
 		@Override
@@ -166,7 +193,7 @@ public class CARTExercise2 {
 		}
 
 		@Override
-		public List<Instance> filter(CARTNode<?> node, String value, List<Instance> instances) {
+		public List<Instance> filter(boolean binary, CARTNode<?> node, String value, List<Instance> instances) {
 			
 			List<Instance> res = null;
 			
@@ -180,6 +207,20 @@ public class CARTExercise2 {
 			}
 			
 			return res;
+		}
+		
+		private CARTNode<Gini> test(Attribute attr, List<String> values, List<Instance> instances) {
+			
+			CARTNode<Gini> node = new CARTNode<Gini>(this, attr, values, instances);
+			
+			for (int i = 0; i < values.size(); i++) {
+				
+				String val = values.get(i);
+					
+				node.add(val, new CARTNode<Gini>(this, cls, null));
+			}
+			
+			return node;
 		}
 
 		private CARTNode<Gini> test(Attribute attr, String value, List<Instance> instances) {

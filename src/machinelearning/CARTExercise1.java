@@ -36,7 +36,8 @@ public class CARTExercise1 {
 
 		// defining data dictionary
 
-		Map<Attribute, List<String>> definition = new LinkedHashMap<Attribute, List<String>>();
+		Map<Attribute, List<String>> definition = new LinkedHashMap<Attribute, 
+						List<String>>();
 		definition.put(attr1, vals);
 		definition.put(attr2, vals);
 		definition.put(attr3, vals);
@@ -48,8 +49,10 @@ public class CARTExercise1 {
 
 		Gini gini = new Gini(definition, attr4);
 
-		CARTNode<Gini> root = gini.create(training);
-
+		CARTNode.Strategy.Builder<Gini> builder = new CARTNode.Strategy.Builder<Gini>(gini);
+		
+		CARTNode<Gini> root = builder.build(training);
+		
 		System.out.println(root.toAll());
 
 	}
@@ -96,14 +99,49 @@ public class CARTExercise1 {
 		}
 		
 		@Override
+		public Attribute cls() {
+			return cls;
+		}
+		
+		@Override
 		public Map<Attribute, List<String>> definition() {
 			return definition;
 		}
 
 		@Override
-		public CARTNode<Gini> create(List<Instance> instances) {
-			// TODO Auto-generated method stub
-			return construct(Double.MAX_VALUE, this.attrs, instances);
+		public CARTNode<Gini> calculate(double ggini, List<Instance> instances) {
+			
+			CARTNode.Strategy.Builder<Gini> builder = new CARTNode.Strategy.Builder<Gini>(this);
+			DoubleAdder min = new DoubleAdder();
+			min.add(ggini);
+			
+			PlaceHolder<CARTNode<Gini>> holder = new PlaceHolder<CARTNode<Gini>>();
+			
+			this.definition.entrySet().stream().forEach(p -> {
+				
+				if (p.getKey() != this.cls) {
+			
+					p.getValue().stream().forEach(v -> {
+					
+					List<String> list = new ArrayList<String>();
+						list.add(v);
+						list.add(v);
+					
+						CARTNode<Gini> node = builder.test(p.getKey(), list, instances);
+						double score = node.score();
+					
+						if (min.doubleValue() > score) {
+							min.reset();
+							min.add(score);
+							node.value(v);
+							holder.data(node);
+						}
+					});
+				}
+			});
+			
+			
+			return holder.data();
 		}
 
 		@Override
@@ -112,7 +150,7 @@ public class CARTExercise1 {
 
 			// gini impurities
 			DoubleAdder sum = new DoubleAdder();
-
+			
 			if (node.inputs().size() <= 0)
 				return 0.0;
 
@@ -135,91 +173,13 @@ public class CARTExercise1 {
 		}
 
 		@Override
-		public List<Instance> filter(CARTNode<?> node, String value, List<Instance> instances) {
-			if (value.startsWith("!")) {
-				String val = value.substring(1, value.length());
-				return instances.stream().filter(p -> !val.equals(p.stringValue(node.attr()))).collect(Collectors.toList());
+		public List<Instance> filter(boolean binary, CARTNode<?> node, String value, List<Instance> instances) {
+			if (binary) {
+				return instances.stream().filter(p -> !value.equals(p.stringValue(node.attr()))).collect(Collectors.toList());
 			}
 			else {
-				return instances.stream().filter(p -> value.equals(p.stringValue(node.attr()))).collect(Collectors.toList());
+				return instances.stream().filter(p ->  value.equals(p.stringValue(node.attr()))).collect(Collectors.toList());
 			}
-		}
-
-		private CARTNode<Gini> test(Attribute attr, String value, List<Instance> instances) {
-			CARTNode<Gini> node = create(attr, value, instances);
-
-			node.data().entrySet().stream().forEach(p -> {
-
-				CARTNode<Gini> child = create(cls);
-				node.add(p.getKey(), child);
-			});
-
-			return node;
-		}
-		
-		private CARTNode<Gini> create(Attribute attr) {
-			return new CARTNode<Gini>(this, attr, null);
-		}
-
-		@SuppressWarnings("unused")
-		private CARTNode<Gini> create(Attribute attr, String value) {
-			return new CARTNode<Gini>(this, attr, value);
-		}
-
-		private CARTNode<Gini> create(Attribute attr, String value, List<Instance> instances) {
-			return new CARTNode<Gini>(this, attr, value, instances);
-		}
-
-		private CARTNode<Gini> construct(double ggini, List<Attribute> attrs, List<Instance> instances) {
-
-			if (attrs.size() <= 0)
-				return this.create(cls);
-
-			List<Attribute> list = new ArrayList<Attribute>(attrs);
-
-			double min = ggini;
-			CARTNode<Gini> target = null;
-			
-			// determining the next attribute and next value with the lowest gini score
-			for (Attribute attr : list) {
-				
-				List<String> values = definition().get(attr);
-				
-				for (String value : values) {
-
-					CARTNode<Gini> node = test(attr, value, instances);
-					double score = node.score();
-
-					if (min > score) {
-						min = score;
-						target = node;
-					}
-				}
-			}
-
-			// recursively constructing the tree
-			if (target != null) {
-
-				final CARTNode<Gini> parent = target;
-
-				list.remove(target.attr());
-
-				CARTNode<Gini> node = create(target.attr(), target.value(), instances);
-
-				node.data().entrySet().stream().forEach(p -> {
-
-					final double score = score(parent.children().get(p.getKey()));
-
-					CARTNode<Gini> child = construct(score, list, p.getValue());
-					if (child != null) {
-						node.add(p.getKey(), child);
-					}
-				});
-
-				return node;
-			}
-
-			return this.create(cls);
 		}
 	}
 }
