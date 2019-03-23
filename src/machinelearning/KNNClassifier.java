@@ -109,6 +109,8 @@ public class KNNClassifier {
 		Classifier ibk = new IBk();		
 		ibk.buildClassifier(training);
 		
+		System.out.println(((IBk)ibk).globalInfo());
+		
 		Evaluation evaluation = new Evaluation(training);
 		evaluation.evaluateModel(ibk, test);
 		System.out.println(evaluation.toSummaryString());

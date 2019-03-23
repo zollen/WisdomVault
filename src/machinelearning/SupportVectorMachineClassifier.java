@@ -81,6 +81,8 @@ public class SupportVectorMachineClassifier {
 		
 		smo.buildClassifier(training);
 		
+		System.out.println(((SMO)smo).globalInfo());
+		
 		Evaluation evaluation = new Evaluation(training);
 		evaluation.evaluateModel(smo, test);
 		System.out.println(evaluation.toSummaryString());
