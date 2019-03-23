@@ -110,7 +110,7 @@ public class GiniExercise1 {
 		
 		@Override
 		public String op() {
-			return " = ";
+			return " == ";
 		}
 
 		@Override
