@@ -14,7 +14,7 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class CARTExercise2 {
+public class GiniExercise2 {
 		
 	private static final String VALUE_CLASS_DOG = "Dog";
 	private static final String VALUE_CLASS_CAT = "Cat";

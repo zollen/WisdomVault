@@ -13,7 +13,7 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class CARTExercise1 {
+public class GiniExercise1 {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
