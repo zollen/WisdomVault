@@ -107,6 +107,11 @@ public class GiniExercise1 {
 		public Map<Attribute, List<String>> definition() {
 			return definition;
 		}
+		
+		@Override
+		public String op() {
+			return " = ";
+		}
 
 		@Override
 		public CARTNode<Gini> calculate(double ggini, List<Instance> instances) {

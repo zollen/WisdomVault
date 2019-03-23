@@ -111,7 +111,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 			}
 			
 			if (this.isBinaryChoices && index == 1) {
-				postfix = ":N";
+				postfix = ":F";
 				choice = true;
 			}
 			
@@ -163,8 +163,8 @@ public class CARTNode<T extends CARTNode.Strategy> {
 		builder.append("\n");
 
 		children.entrySet().forEach(p -> {
-
-			builder.append(p.getValue().toAll(p.getKey(), indent + 10));
+			
+			builder.append(p.getValue().toAll(label() + this.strategy.op() + p.getKey(), indent + 10));
 		});
 
 		return builder.toString();
@@ -251,6 +251,8 @@ public class CARTNode<T extends CARTNode.Strategy> {
 		public Map<Attribute, List<String>> definition();
 		
 		public Attribute cls();
+		
+		public String op();
 		
 		public CARTNode<?> calculate(double ggini, List<Instance> instances);
 

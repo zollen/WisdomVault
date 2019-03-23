@@ -130,6 +130,11 @@ public class GiniExercise2 {
 		}
 		
 		@Override
+		public String op() {
+			return " >= ";
+		}
+		
+		@Override
 		public Attribute cls() {
 			return cls;
 		}
