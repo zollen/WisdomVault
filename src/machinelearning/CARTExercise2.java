@@ -1,6 +1,8 @@
 package machinelearning;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -144,8 +146,10 @@ public class CARTExercise2 {
 			this.definition.entrySet().stream().forEach(p -> {
 				
 				if (p.getKey() != this.cls) {
+					
+					List<String> vals = values(p.getValue());
 				
-					p.getValue().stream().forEach(v -> {
+					vals.stream().forEach(v -> {
 								
 						List<String> list = new ArrayList<String>();
 						list.add(v);
@@ -154,8 +158,6 @@ public class CARTExercise2 {
 						CARTNode<Gini> node = builder.test(p.getKey(), list, v, instances);
 						double score = node.score();
 							
-		System.err.println("   		" + score + " : " + node.toAll());
-						
 						if (min.doubleValue() > score) {
 							min.reset();
 							min.add(score);
@@ -164,9 +166,7 @@ public class CARTExercise2 {
 					});
 				}
 			});
-			
-		System.err.println("RETURN: " + holder.data());
-			
+				
 			return holder.data();
 		}
 
@@ -201,14 +201,41 @@ public class CARTExercise2 {
 		@Override
 		public List<Instance> filter(boolean binary, CARTNode<?> node, String value, List<Instance> instances) {
 			
-			if ("animal".equals(node.label())) {
+			if (node.attr() == this.cls) {
 				return instances.stream().filter(p ->  value.equals(p.stringValue(node.attr()))).collect(Collectors.toList());
 			}
+		
 			
 			if (binary)
-				return instances.stream().filter(p -> p.value(node.attr()) < Integer.valueOf(value)).collect(Collectors.toList());
+				return instances.stream().filter(p -> { 
+					return Integer.valueOf(p.stringValue(node.attr())) < Integer.valueOf(value);
+				}).collect(Collectors.toList());
 			else
-				return instances.stream().filter(p -> p.value(node.attr()) >= Integer.valueOf(value)).collect(Collectors.toList());
+				return instances.stream().filter(p ->  {
+					return Integer.valueOf(p.stringValue(node.attr())) >= Integer.valueOf(value);
+				}).collect(Collectors.toList());
+		}
+		
+		private List<String> values(List<String> vals) {
+			
+			Collections.sort(vals, new Comparator<String>() {
+
+				@Override
+				public int compare(String o1, String o2) {
+					// TODO Auto-generated method stub
+					return Integer.valueOf(o1).compareTo(Integer.valueOf(o2));
+				}
+			});
+			
+			List<String> nList = new ArrayList<String>();
+			
+			int first = Integer.valueOf(vals.get(0));
+			int last = Integer.valueOf(vals.get(vals.size() - 2 > 0 ? vals.size() - 2 : 0));
+			
+			for (int i = first; i <= last; i++)
+				nList.add(String.valueOf(i));
+		
+			return nList;
 		}
 	}
 }
