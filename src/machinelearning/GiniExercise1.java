@@ -84,7 +84,7 @@ public class GiniExercise1 {
 		return training;
 	}
 
-	public static class Gini implements CARTNode.Strategy {
+	private static class Gini implements CARTNode.Strategy {
 
 		private Map<Attribute, List<String>> definition = null;
 		private List<Attribute> attrs = null;
@@ -129,13 +129,13 @@ public class GiniExercise1 {
 					p.getValue().stream().forEach(v -> {
 						
 						List<String> list = new ArrayList<String>();
-						list.add(v);
-						list.add(v);
+						list.add("1");
+						list.add("1");
 					
-						CARTNode<Gini> node = builder.test(p.getKey(), list, v, instances);
+						CARTNode<Gini> node = builder.test(p.getKey(), list, instances);
 						double score = node.score();
 					
-						if (min.doubleValue() > score) {
+						if (min.doubleValue() >= score) {
 							min.reset();
 							min.add(score);
 							holder.data(node);

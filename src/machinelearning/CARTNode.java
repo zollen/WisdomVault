@@ -232,8 +232,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 				return new CARTNode<T>(this.strategy, attr, values, instances);
 			}
 					
-			public CARTNode<T> test(Attribute attr, List<String> values, String value, 
-					List<Instance> instances) {
+			public CARTNode<T> test(Attribute attr, List<String> values, List<Instance> instances) {
 				
 				CARTNode<T> node = create(attr, values, instances);
 				
@@ -251,11 +250,12 @@ public class CARTNode<T extends CARTNode.Strategy> {
 			}
 			
 			private CARTNode<T> construct(double ggini, Collection<Attribute> attrs, List<Instance> instances) {
+					
 				Strategy.Builder<T> builder = new Strategy.Builder<T>(this.strategy);
 				
-				if (attrs.size() <= 0)
+				if (attrs.size() <= 0 || ggini <= 0)
 					return builder.create(this.strategy.cls());
-
+	
 				List<Attribute> list = new ArrayList<Attribute>(attrs);
 
 				CARTNode<?> target = this.strategy.calculate(ggini, instances);
@@ -269,11 +269,15 @@ public class CARTNode<T extends CARTNode.Strategy> {
 
 					node.data().entrySet().stream().forEach(p -> {
 
-						final double score = this.strategy.score(target.children().get(p.getKey()));
-
+						double score = this.strategy.score(target.children().get(p.getKey()));
+						
+						if (score == ggini) {
+							score = -1;
+						}
+						
 						CARTNode<T> child = construct(score, list, p.getValue());
 						if (child != null) {
-							node.add(p.getKey(), child);
+								node.add(p.getKey(), child);
 						}
 					});
 
