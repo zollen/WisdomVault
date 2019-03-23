@@ -13,43 +13,38 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 public class CARTExercise2 {
-	
-	private static final String VALUE_COLOR_GREEN = "Green";
-	private static final String VALUE_COLOR_RED = "Red";
-	private static final String VALUE_COLOR_YELLOW = "Yellow";
-	
-	private static final String VALUE_FRUIT_APPLE = "Apple";
-	private static final String VALUE_FRUIT_GRAPH = "Graph";
-	private static final String VALUE_FRUIT_LEMON = "Lemon";
-	
-	private static final String VALUE_DIAMETER_1 = "1";
-	private static final String VALUE_DIAMETER_3 = "3";
-	
+		
+	private static final String VALUE_CLASS_DOG = "Dog";
+	private static final String VALUE_CLASS_CAT = "Cat";
+
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
 		// defining data format
 
-		ArrayList<String> colorVals = new ArrayList<String>();
-		colorVals.add(VALUE_COLOR_GREEN);
-		colorVals.add(VALUE_COLOR_RED);
-		colorVals.add(VALUE_COLOR_YELLOW);
+		ArrayList<String> weightVals = new ArrayList<String>();
+		weightVals.add("8");
+		weightVals.add("9");
+		weightVals.add("15");
+		weightVals.add("50");
 		
-		ArrayList<String> diamVals = new ArrayList<String>();
-		diamVals.add(VALUE_DIAMETER_1);
-		diamVals.add(VALUE_DIAMETER_3);
+		ArrayList<String> heightVals = new ArrayList<String>();
+		heightVals.add("8");
+		heightVals.add("9");
+		heightVals.add("10");
+		heightVals.add("12");
+		heightVals.add("40");
 		
-		ArrayList<String> fruitVals = new ArrayList<String>();
-		fruitVals.add(VALUE_FRUIT_APPLE);
-		fruitVals.add(VALUE_FRUIT_GRAPH);
-		fruitVals.add(VALUE_FRUIT_LEMON);
+		ArrayList<String> clsVals = new ArrayList<String>();
+		clsVals.add(VALUE_CLASS_DOG);
+		clsVals.add(VALUE_CLASS_CAT);
 		
 
 		ArrayList<Attribute> attrs = new ArrayList<Attribute>();
-		Attribute attr1 = new Attribute("diameter", diamVals);
-		Attribute attr2 = new Attribute("color", colorVals);
-		Attribute attr3 = new Attribute("fruit", fruitVals);
+		Attribute attr1 = new Attribute("weight", weightVals);
+		Attribute attr2 = new Attribute("height", heightVals);
+		Attribute attr3 = new Attribute("animal", clsVals);
 		attrs.add(attr1);
 		attrs.add(attr2);
 		attrs.add(attr3);
@@ -58,9 +53,9 @@ public class CARTExercise2 {
 		// defining data dictionary
 
 		Map<Attribute, List<String>> definition = new LinkedHashMap<Attribute, List<String>>();
-		definition.put(attr1, diamVals);
-		definition.put(attr2, colorVals);
-		definition.put(attr3, fruitVals);
+		definition.put(attr1, weightVals);
+		definition.put(attr2, heightVals);
+		definition.put(attr3, clsVals);
 		
 	
 		// training
@@ -81,33 +76,33 @@ public class CARTExercise2 {
 		Instances training = new Instances("TRAINING", attrs, 5);
 		
 		Instance data1 = new DenseInstance(3);	
-		data1.setValue(attrs.get(0), VALUE_DIAMETER_3);
-		data1.setValue(attrs.get(1), VALUE_COLOR_GREEN);
-		data1.setValue(attrs.get(2), VALUE_FRUIT_APPLE);
+		data1.setValue(attrs.get(0), "8");
+		data1.setValue(attrs.get(1), "8");
+		data1.setValue(attrs.get(2), VALUE_CLASS_DOG);
 		training.add(data1);
 		
 		Instance data2 = new DenseInstance(3);	
-		data2.setValue(attrs.get(0), VALUE_DIAMETER_3);
-		data2.setValue(attrs.get(1), VALUE_COLOR_YELLOW);
-		data2.setValue(attrs.get(2), VALUE_FRUIT_APPLE);
+		data2.setValue(attrs.get(0), "50");
+		data2.setValue(attrs.get(1), "40");
+		data2.setValue(attrs.get(2), VALUE_CLASS_DOG);
 		training.add(data2);
 		
 		Instance data3 = new DenseInstance(3);	
-		data3.setValue(attrs.get(0), VALUE_DIAMETER_1);
-		data3.setValue(attrs.get(1), VALUE_COLOR_RED);
-		data3.setValue(attrs.get(2), VALUE_FRUIT_GRAPH);
+		data3.setValue(attrs.get(0), "8");
+		data3.setValue(attrs.get(1), "9");
+		data3.setValue(attrs.get(2), VALUE_CLASS_CAT);
 		training.add(data3);
 		
 		Instance data4 = new DenseInstance(3);	
-		data4.setValue(attrs.get(0), VALUE_DIAMETER_1);
-		data4.setValue(attrs.get(1), VALUE_COLOR_RED);
-		data4.setValue(attrs.get(2), VALUE_FRUIT_GRAPH);
+		data4.setValue(attrs.get(0), "15");
+		data4.setValue(attrs.get(1), "12");
+		data4.setValue(attrs.get(2), VALUE_CLASS_DOG);
 		training.add(data4);
 		
 		Instance data5 = new DenseInstance(3);	
-		data5.setValue(attrs.get(0), VALUE_DIAMETER_3);
-		data5.setValue(attrs.get(1), VALUE_COLOR_YELLOW);
-		data5.setValue(attrs.get(2), VALUE_FRUIT_LEMON);
+		data5.setValue(attrs.get(0), "9");
+		data5.setValue(attrs.get(1), "10");
+		data5.setValue(attrs.get(2), VALUE_CLASS_CAT);
 		training.add(data5);
 
 		return training;
@@ -145,29 +140,32 @@ public class CARTExercise2 {
 			min.add(ggini);
 			
 			PlaceHolder<CARTNode<Gini>> holder = new PlaceHolder<CARTNode<Gini>>();
-			
+				
 			this.definition.entrySet().stream().forEach(p -> {
 				
 				if (p.getKey() != this.cls) {
 				
 					p.getValue().stream().forEach(v -> {
-					
+								
 						List<String> list = new ArrayList<String>();
 						list.add(v);
 						list.add(v);
 					
-						CARTNode<Gini> node = builder.test(p.getKey(), list, instances);
+						CARTNode<Gini> node = builder.test(p.getKey(), list, v, instances);
 						double score = node.score();
+							
+		System.err.println("   		" + score + " : " + node.toAll());
 						
 						if (min.doubleValue() > score) {
 							min.reset();
 							min.add(score);
-							node.value(v);
 							holder.data(node);
 						}
 					});
 				}
 			});
+			
+		System.err.println("RETURN: " + holder.data());
 			
 			return holder.data();
 		}
@@ -203,24 +201,14 @@ public class CARTExercise2 {
 		@Override
 		public List<Instance> filter(boolean binary, CARTNode<?> node, String value, List<Instance> instances) {
 			
-			List<Instance> res = null;
-			
-			switch(node.attr().name()) {
-			case "diameter":
-				if (binary)
-					res = instances.stream().filter(p -> p.value(node.attr()) < Integer.valueOf(value)).collect(Collectors.toList());
-				else
-					res = instances.stream().filter(p -> p.value(node.attr()) >= Integer.valueOf(value)).collect(Collectors.toList());
-			break;
-			case "color":
-			default:
-				if (binary)
-					res = instances.stream().filter(p -> !value.equals(p.stringValue(node.attr()))).collect(Collectors.toList());
-				else
-					res = instances.stream().filter(p -> value.equals(p.stringValue(node.attr()))).collect(Collectors.toList());
+			if ("animal".equals(node.label())) {
+				return instances.stream().filter(p ->  value.equals(p.stringValue(node.attr()))).collect(Collectors.toList());
 			}
 			
-			return res;
+			if (binary)
+				return instances.stream().filter(p -> p.value(node.attr()) < Integer.valueOf(value)).collect(Collectors.toList());
+			else
+				return instances.stream().filter(p -> p.value(node.attr()) >= Integer.valueOf(value)).collect(Collectors.toList());
 		}
 	}
 }

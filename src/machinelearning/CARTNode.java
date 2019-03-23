@@ -21,30 +21,24 @@ public class CARTNode<T extends CARTNode.Strategy> {
 	private Attribute attr = null;
 	private String label = null;
 	private List<String> values = null;
-	private String value = null;
 	private T strategy = null;
 	private CARTNode<T> parent = null;
 	private boolean isBinaryChoices = false;
 
-	public CARTNode(T strategy, Attribute attr, String value) {
-		this(strategy, attr, value, new ArrayList<Instance>());
+	public CARTNode(T strategy, Attribute attr) {
+		this(strategy, attr, null, new ArrayList<Instance>());
+	}
+
+	public CARTNode(T strategy, Attribute attr, List<String> values) {
+		this(strategy, attr, values, new ArrayList<Instance>());
 	}
 	
 	public CARTNode(T strategy, Attribute attr, List<String> values, List<Instance> instances) {
-		this(strategy, attr, values, null, instances);
-	}
-
-	public CARTNode(T strategy, Attribute attr, String value, List<Instance> instances) {
-		this(strategy, attr, null, value, instances);
-	}
 	
-	public CARTNode(T strategy, Attribute attr, List<String> values, String value, List<Instance> instances) {
-
 		this.attr = attr;
 		this.label = this.attr.name();
 		this.strategy = strategy;
 		this.values = values != null ? values : strategy.definition().get(attr);
-		this.value = value;
 		this.isBinaryChoices = (this.values.size() == 2 && 
 				this.values.get(0).equals(this.values.get(1)));
 
@@ -54,7 +48,6 @@ public class CARTNode<T extends CARTNode.Strategy> {
 	public void add(String value, CARTNode<T> child) {
 		
 		child.setInstances(this.data.get(value));
-		child.value(value);
 		child.parent(this);
 		this.children.put(value, child);
 	}
@@ -74,7 +67,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 	public List<Instance> inputs() {
 		return inputs;
 	}
-	
+/*	
 	public void value(String val) {
 		this.value = val;
 	}
@@ -82,7 +75,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 	public String value() {
 		return value;
 	}
-	
+*/	
 	public List<String> values() {
 		return values;
 	}
@@ -190,30 +183,24 @@ public class CARTNode<T extends CARTNode.Strategy> {
 			public Builder(T strategy) {
 				this.strategy = strategy;
 			}
-			
+		
 			public CARTNode<T> create(Attribute attr) {
-				return new CARTNode<T>(this.strategy, attr, null);
+				return new CARTNode<T>(this.strategy, attr);
 			}
-
-			public CARTNode<T> create(Attribute attr, String value) {
-				return new CARTNode<T>(this.strategy, attr, value);
-			}
-
-			public CARTNode<T> create(Attribute attr, String value, List<Instance> instances) {
-				return new CARTNode<T>(this.strategy, attr, value, instances);
+			
+			public CARTNode<T> create(Attribute attr, List<String> values) {
+				return new CARTNode<T>(this.strategy, attr, values);
 			}
 			
 			public CARTNode<T> create(Attribute attr, List<String> values, List<Instance> instances) {
 				return new CARTNode<T>(this.strategy, attr, values, instances);
 			}
-			
-			public CARTNode<T> create(Attribute attr, List<String> values, String value, List<Instance> instances) {
-				return new CARTNode<T>(this.strategy, attr, values, value, instances);
-			}
 					
-			public CARTNode<T> test(Attribute attr, List<String> value, List<Instance> instances) {
-				CARTNode<T> node = create(attr, value, instances);
-
+			public CARTNode<T> test(Attribute attr, List<String> values, String value, 
+					List<Instance> instances) {
+				
+				CARTNode<T> node = create(attr, values, instances);
+				
 				node.data().entrySet().stream().forEach(p -> {
 
 					CARTNode<T> child = create(this.strategy.cls());
@@ -242,7 +229,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 
 					list.remove(target.attr());
 
-					CARTNode<T> node = builder.create(target.attr(), target.values(), target.value(), instances);
+					CARTNode<T> node = builder.create(target.attr(), target.values(), instances);
 
 					node.data().entrySet().stream().forEach(p -> {
 

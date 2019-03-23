@@ -122,18 +122,17 @@ public class CARTExercise1 {
 				if (p.getKey() != this.cls) {
 			
 					p.getValue().stream().forEach(v -> {
-					
+						
 						List<String> list = new ArrayList<String>();
 						list.add(v);
 						list.add(v);
 					
-						CARTNode<Gini> node = builder.test(p.getKey(), list, instances);
+						CARTNode<Gini> node = builder.test(p.getKey(), list, v, instances);
 						double score = node.score();
 					
 						if (min.doubleValue() > score) {
 							min.reset();
 							min.add(score);
-							node.value(v);
 							holder.data(node);
 						}
 					});
