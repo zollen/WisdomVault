@@ -51,6 +51,50 @@ public class CARTNode<T extends CARTNode.Strategy> {
 		child.parent(this);
 		this.children.put(value, child);
 	}
+	
+	public void classify(Instance instance) {
+		
+		List<Instance> instances = new ArrayList<Instance>();
+		instances.add(instance);
+		
+		if (this.attr() == this.strategy.cls()) {
+			System.out.println(instance + "|  RESULT: " + this);
+			return;
+		}
+		
+		this.data.entrySet().stream().forEach(p -> {
+			
+			String value = p.getKey();
+			boolean isChoice = this.isBinaryChoices;
+			int pos = value.indexOf(":");
+			if (pos > 0) {
+				
+				if (value.endsWith("T"))
+					isChoice = false;
+				else
+				if (value.endsWith("F"))
+					isChoice = true;
+				
+				value = value.substring(0, pos);
+			}
+			
+			List<Instance> list = this.filter(isChoice, value, instances);
+			if (list.size() > 0) {
+				CARTNode<T> child = this.children.get(p.getKey());
+				if (child != null) {
+					child.classify(instances);
+				}
+			}
+		});
+		
+	}
+	
+	public void classify(List<Instance> instances) {
+		
+		for (Instance instance : instances) {
+			classify(instance);
+		}
+	}
 
 	public String label() {
 		return label;
@@ -67,15 +111,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 	public List<Instance> inputs() {
 		return inputs;
 	}
-/*	
-	public void value(String val) {
-		this.value = val;
-	}
-	
-	public String value() {
-		return value;
-	}
-*/	
+
 	public List<String> values() {
 		return values;
 	}

@@ -45,7 +45,7 @@ public class GiniExercise1 {
 
 		// training
 
-		List<Instance> training = generateData(100, 0, attrs);
+		List<Instance> training = generateTrainingData(100, 0, attrs);
 
 		Gini gini = new Gini(definition, attr4);
 
@@ -57,7 +57,7 @@ public class GiniExercise1 {
 
 	}
 
-	public static List<Instance> generateData(int size, int seed, ArrayList<Attribute> attrs) {
+	public static List<Instance> generateTrainingData(int size, int seed, ArrayList<Attribute> attrs) {
 
 		Random rand = new Random(seed);
 

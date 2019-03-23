@@ -62,7 +62,7 @@ public class GiniExercise2 {
 	
 		// training
 
-		List<Instance> training = generateData(attrs);
+		List<Instance> training = generateTrainingData(attrs);
 
 		Gini gini = new Gini(definition, attr3);
 
@@ -71,9 +71,33 @@ public class GiniExercise2 {
 		CARTNode<Gini> root = builder.build(training);
 		
 		System.out.println(root.toAll());
+		
+		List<Instance> testing = generateTestData(attrs);
+		
+		for (Instance instance : testing)
+			root.classify(instance);
+	}
+	
+	public static List<Instance> generateTestData(ArrayList<Attribute> attrs) {
+		
+		Instances testing = new Instances("TESTING", attrs, 2);
+		
+		Instance data1 = new DenseInstance(3);	
+		data1.setValue(attrs.get(0), "8");
+		data1.setValue(attrs.get(1), "10");
+	//	data1.setValue(attrs.get(2), VALUE_CLASS_CAT);
+		testing.add(data1);
+		
+		Instance data2 = new DenseInstance(3);	
+		data2.setValue(attrs.get(0), "9");
+		data2.setValue(attrs.get(1), "8");
+	//	data2.setValue(attrs.get(2), VALUE_CLASS_DOG);
+		testing.add(data2);
+		
+		return testing;
 	}
 
-	public static List<Instance> generateData(ArrayList<Attribute> attrs) {
+	public static List<Instance> generateTrainingData(ArrayList<Attribute> attrs) {
 
 		Instances training = new Instances("TRAINING", attrs, 5);
 		
