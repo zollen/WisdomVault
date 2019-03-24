@@ -133,7 +133,7 @@ public class GiniExercise1 {
 					CARTNode<Gini> node = builder.test(p, list, instances);
 					double score = node.score();
 					
-					if (min.doubleValue() >= score) {
+					if (min.doubleValue() > score) {
 						min.reset();
 						min.add(score);
 						holder.data(node);

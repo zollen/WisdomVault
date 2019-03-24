@@ -19,9 +19,6 @@ public class GiniExercise2 {
 	private static final String VALUE_CLASS_DOG = "Dog";
 	private static final String VALUE_CLASS_CAT = "Cat";
 	
-	private static final boolean numericData = false;
-
-
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
@@ -183,11 +180,8 @@ public class GiniExercise2 {
 				
 			attrs.stream().forEach(p -> {
 					
-				List<String> vals = values1(this.definition().get(p));
+				List<String> vals = values2(this.definition().get(p));
 					
-				if (numericData)
-					vals = values2(this.definition().get(p));
-		
 				vals.stream().forEach(v -> {
 								
 					List<String> list = new ArrayList<String>();
@@ -197,9 +191,7 @@ public class GiniExercise2 {
 					CARTNode<Gini> node = builder.test(p, list, instances);
 					double score = node.score();
 					
-					System.err.println(node + " ---- " + score + ", " + ggini);
-							
-					if (min.doubleValue() >= score) {
+					if (min.doubleValue() > score) {
 						min.reset();
 						min.add(score);
 						holder.data(node);
@@ -254,29 +246,6 @@ public class GiniExercise2 {
 				return instances.stream().filter(p ->  {
 					return Double.valueOf(p.stringValue(node.attr())) >= Double.valueOf(value);
 				}).collect(Collectors.toList());
-		}
-		
-		// treat the possible values as ranked data
-		private List<String> values1(List<String> vals) {
-			
-			Collections.sort(vals, new Comparator<String>() {
-
-				@Override
-				public int compare(String o1, String o2) {
-					// TODO Auto-generated method stub
-					return Integer.valueOf(o1).compareTo(Integer.valueOf(o2));
-				}
-			});
-			
-			List<String> nList = new ArrayList<String>();
-			
-			int first = Integer.valueOf(vals.get(0));
-			int last = Integer.valueOf(vals.get(vals.size() - 1 > 0 ? vals.size() - 1 : 0)) - 1;
-			
-			for (int i = first; i <= last; i++)
-				nList.add(String.valueOf(i));
-		
-			return nList;
 		}
 		
 		// treat the possible values as numeric data
