@@ -18,6 +18,8 @@ public class GiniExercise2 {
 		
 	private static final String VALUE_CLASS_DOG = "Dog";
 	private static final String VALUE_CLASS_CAT = "Cat";
+	
+	private static final boolean numericData = false;
 
 
 	public static void main(String[] args) {
@@ -176,8 +178,11 @@ public class GiniExercise2 {
 				
 				if (p.getKey() != this.cls) {
 					
-					List<String> vals = values(p.getValue());
-				
+					List<String> vals = values1(p.getValue());;
+					
+					if (numericData)
+						vals = values2(p.getValue());
+		
 					vals.stream().forEach(v -> {
 								
 						List<String> list = new ArrayList<String>();
@@ -237,15 +242,16 @@ public class GiniExercise2 {
 			
 			if (binary)
 				return instances.stream().filter(p -> { 
-					return Integer.valueOf(p.stringValue(node.attr())) < Integer.valueOf(value);
+					return Double.valueOf(p.stringValue(node.attr())) < Double.valueOf(value);
 				}).collect(Collectors.toList());
 			else
 				return instances.stream().filter(p ->  {
-					return Integer.valueOf(p.stringValue(node.attr())) >= Integer.valueOf(value);
+					return Double.valueOf(p.stringValue(node.attr())) >= Double.valueOf(value);
 				}).collect(Collectors.toList());
 		}
 		
-		private List<String> values(List<String> vals) {
+		// treat the possible values as ranked data
+		private List<String> values1(List<String> vals) {
 			
 			Collections.sort(vals, new Comparator<String>() {
 
@@ -259,10 +265,33 @@ public class GiniExercise2 {
 			List<String> nList = new ArrayList<String>();
 			
 			int first = Integer.valueOf(vals.get(0));
-			int last = Integer.valueOf(vals.get(vals.size() - 2 > 0 ? vals.size() - 2 : 0));
+			int last = Integer.valueOf(vals.get(vals.size() - 1 > 0 ? vals.size() - 1 : 0)) - 1;
 			
 			for (int i = first; i <= last; i++)
 				nList.add(String.valueOf(i));
+		
+			return nList;
+		}
+		
+		// treat the possible values as numeric data
+		private List<String> values2(List<String> vals) {
+			
+			Collections.sort(vals, new Comparator<String>() {
+
+				@Override
+				public int compare(String o1, String o2) {
+					// TODO Auto-generated method stub
+					return Integer.valueOf(o1).compareTo(Integer.valueOf(o2));
+				}
+			});
+			
+			List<String> nList = new ArrayList<String>();
+			
+			for (int i = 0; vals.size() > 0 && i < vals.size() - 1; i++) {
+				double d1 = Double.valueOf(vals.get(i + 1));
+				double d2 = Double.valueOf(vals.get(i));
+				nList.add(String.valueOf((double) (d1 + d2) / 2));
+			}
 		
 			return nList;
 		}
