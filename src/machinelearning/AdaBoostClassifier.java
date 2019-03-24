@@ -12,6 +12,16 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 public class AdaBoostClassifier {
+	
+	// Ada Boost 
+	// 1. Round #1: Classify the training data
+	// 2. Round #1: Identify the incorrectly classified data
+	// 3. Round #2: Recreate a set of new training data of the same size but 
+	//							randomly pick from the original training data
+	//							however last incorrectly classified data has more weight and
+	//							therefore get picked more frequently and repeatly.
+	// 4. Round #2 Classify the training data again and repeat step #2.
+	// 
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
