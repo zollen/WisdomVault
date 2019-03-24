@@ -2,7 +2,6 @@ package machinelearning;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -246,10 +245,14 @@ public class CARTNode<T extends CARTNode.Strategy> {
 			}
 			
 			public CARTNode<T> build(List<Instance> instances) {
-				return construct(Double.MAX_VALUE, this.strategy.definition().keySet(), instances);
+				
+				List<Attribute> list = new ArrayList<Attribute>(this.strategy.definition().keySet());
+				list.remove(this.strategy.cls());
+				
+				return construct(Double.MAX_VALUE, list, instances);
 			}
 			
-			private CARTNode<T> construct(double ggini, Collection<Attribute> attrs, List<Instance> instances) {
+			private CARTNode<T> construct(double ggini, List<Attribute> attrs, List<Instance> instances) {
 					
 				Strategy.Builder<T> builder = new Strategy.Builder<T>(this.strategy);
 				
@@ -258,12 +261,13 @@ public class CARTNode<T extends CARTNode.Strategy> {
 	
 				List<Attribute> list = new ArrayList<Attribute>(attrs);
 
-				CARTNode<?> target = this.strategy.calculate(ggini, instances);
+				CARTNode<?> target = this.strategy.calculate(ggini, attrs, instances);
 				
 				// recursively constructing the tree
 				if (target != null) {
 
 					list.remove(target.attr());
+					attrs.remove(target.attr());
 
 					CARTNode<T> node = builder.create(target.attr(), target.values(), instances);
 
@@ -294,7 +298,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 		
 		public String op();
 		
-		public CARTNode<?> calculate(double ggini, List<Instance> instances);
+		public CARTNode<?> calculate(double ggini, List<Attribute> attrs, List<Instance> instances);
 
 		public double score(CARTNode<?> node);
 

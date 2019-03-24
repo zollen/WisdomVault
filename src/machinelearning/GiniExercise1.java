@@ -114,7 +114,7 @@ public class GiniExercise1 {
 		}
 
 		@Override
-		public CARTNode<Gini> calculate(double ggini, List<Instance> instances) {
+		public CARTNode<Gini> calculate(double ggini, List<Attribute> attrs, List<Instance> instances) {
 			
 			CARTNode.Strategy.Builder<Gini> builder = new CARTNode.Strategy.Builder<Gini>(this);
 			DoubleAdder min = new DoubleAdder();
@@ -122,29 +122,25 @@ public class GiniExercise1 {
 			
 			PlaceHolder<CARTNode<Gini>> holder = new PlaceHolder<CARTNode<Gini>>();
 			
-			this.definition.entrySet().stream().forEach(p -> {
-				
-				if (p.getKey() != this.cls) {
-			
-					p.getValue().stream().forEach(v -> {
+			attrs.stream().forEach(p -> {
 						
-						List<String> list = new ArrayList<String>();
-						list.add("1");
-						list.add("1");
+				this.definition().get(p).stream().forEach(v -> {
+						
+					List<String> list = new ArrayList<String>();
+					list.add("1");
+					list.add("1");
 					
-						CARTNode<Gini> node = builder.test(p.getKey(), list, instances);
-						double score = node.score();
+					CARTNode<Gini> node = builder.test(p, list, instances);
+					double score = node.score();
 					
-						if (min.doubleValue() >= score) {
-							min.reset();
-							min.add(score);
-							holder.data(node);
-						}
-					});
-				}
+					if (min.doubleValue() >= score) {
+						min.reset();
+						min.add(score);
+						holder.data(node);
+					}
+				});
 			});
-			
-			
+		
 			return holder.data();
 		}
 

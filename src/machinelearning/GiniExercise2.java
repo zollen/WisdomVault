@@ -103,6 +103,13 @@ public class GiniExercise2 {
 
 		Instances training = new Instances("TRAINING", attrs, 5);
 		
+		// ANSWERS:
+		// weight <= 12.0
+		//    + - true  - height <= 8.5
+		//					+ - dog (1)
+		//					+ - cat (2)
+		//    + - false - dog (2)
+		
 		Instance data1 = new DenseInstance(3);	
 		data1.setValue(attrs.get(0), "8");
 		data1.setValue(attrs.get(1), "8");
@@ -166,7 +173,7 @@ public class GiniExercise2 {
 		}
 		
 		@Override
-		public CARTNode<Gini> calculate(double ggini, List<Instance> instances) {
+		public CARTNode<Gini> calculate(double ggini, List<Attribute> attrs, List<Instance> instances) {
 			
 			CARTNode.Strategy.Builder<Gini> builder = new CARTNode.Strategy.Builder<Gini>(this);
 			DoubleAdder min = new DoubleAdder();
@@ -174,31 +181,30 @@ public class GiniExercise2 {
 			
 			PlaceHolder<CARTNode<Gini>> holder = new PlaceHolder<CARTNode<Gini>>();
 				
-			this.definition.entrySet().stream().forEach(p -> {
-				
-				if (p.getKey() != this.cls) {
+			attrs.stream().forEach(p -> {
 					
-					List<String> vals = values1(p.getValue());;
+				List<String> vals = values1(this.definition().get(p));
 					
-					if (numericData)
-						vals = values2(p.getValue());
+				if (numericData)
+					vals = values2(this.definition().get(p));
 		
-					vals.stream().forEach(v -> {
+				vals.stream().forEach(v -> {
 								
-						List<String> list = new ArrayList<String>();
-						list.add(v);
-						list.add(v);
+					List<String> list = new ArrayList<String>();
+					list.add(v);
+					list.add(v);
 					
-						CARTNode<Gini> node = builder.test(p.getKey(), list, instances);
-						double score = node.score();
+					CARTNode<Gini> node = builder.test(p, list, instances);
+					double score = node.score();
+					
+					System.err.println(node + " ---- " + score + ", " + ggini);
 							
-						if (min.doubleValue() >= score) {
-							min.reset();
-							min.add(score);
-							holder.data(node);
-						}
-					});
-				}
+					if (min.doubleValue() >= score) {
+						min.reset();
+						min.add(score);
+						holder.data(node);
+					}
+				});
 			});
 				
 			return holder.data();
