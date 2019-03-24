@@ -75,14 +75,16 @@ public class EntropyExercise1 {
 
 		List<Instance> training = generateTrainingData(attrs);	
 
-		Gini gini = new Gini(definition, attr4);
-
-		CARTNode.Strategy.Builder<Gini> builder = new CARTNode.Strategy.Builder<Gini>(gini);
+		Entropy entropy = new Entropy(definition, attr4);
 		
-		CARTNode<Gini> root = builder.build(training);
+		System.out.println("RESULT: " + entropy.entropy(training));
+/*
+		CARTNode.Strategy.Builder<Entropy> builder = new CARTNode.Strategy.Builder<Entropy>(gini);
+		
+		CARTNode<Entropy> root = builder.build(training);
 		
 		System.out.println(root.toAll());
-
+*/
 	}
 	
 	public static List<Instance> generateTrainingData(ArrayList<Attribute> attrs) {
@@ -171,13 +173,13 @@ public class EntropyExercise1 {
 		return training;
 	}
 
-	private static class Gini implements CARTNode.Strategy {
+	private static class Entropy implements CARTNode.Strategy {
 
 		private Map<Attribute, List<String>> definition = null;
 		private List<Attribute> attrs = null;
 		private Attribute cls = null;
-
-		public Gini(Map<Attribute, List<String>> definition, Attribute cls) {
+		
+		public Entropy(Map<Attribute, List<String>> definition, Attribute cls) {
 			this.definition = definition;
 			this.attrs = definition.keySet().stream().collect(Collectors.toList());
 
@@ -201,17 +203,17 @@ public class EntropyExercise1 {
 		}
 		
 		@Override
-		public CARTNode<Gini> calculate(double ggini, List<Attribute> attrs, List<Instance> instances) {
+		public CARTNode<Entropy> calculate(double ggini, List<Attribute> attrs, List<Instance> instances) {
 			
-			CARTNode.Strategy.Builder<Gini> builder = new CARTNode.Strategy.Builder<Gini>(this);
+			CARTNode.Strategy.Builder<Entropy> builder = new CARTNode.Strategy.Builder<Entropy>(this);
 			DoubleAdder min = new DoubleAdder();
 			min.add(ggini);
 			
-			PlaceHolder<CARTNode<Gini>> holder = new PlaceHolder<CARTNode<Gini>>();
+			PlaceHolder<CARTNode<Entropy>> holder = new PlaceHolder<CARTNode<Entropy>>();
 				
 			attrs.stream().forEach(p -> {
 										
-				CARTNode<Gini> node = builder.test(p, this.definition().get(p), instances);
+				CARTNode<Entropy> node = builder.test(p, this.definition().get(p), instances);
 				double score = node.score();
 					
 				if (min.doubleValue() > score) {
@@ -256,6 +258,73 @@ public class EntropyExercise1 {
 		public List<Instance> filter(boolean binary, CARTNode<?> node, String value, List<Instance> instances) {
 			
 			return instances.stream().filter(p ->  value.equals(p.stringValue(node.attr()))).collect(Collectors.toList());
+		}
+		
+		private double entropy(List<Instance> instances) {
+			
+			Map<String, List<Instance>> profitCategory = this.spreads(cls, instances);
+			DoubleAdder total = new DoubleAdder();
+			DoubleAdder infoGain = new DoubleAdder();
+			
+			{
+				List<Integer> terms = new ArrayList<Integer>();
+		
+				profitCategory.entrySet().stream().forEach(p -> {			
+					total.add(p.getValue().size());
+					terms.add(p.getValue().size());
+				});
+			
+				terms.stream().forEach(p -> {
+					infoGain.add(-1 * p.doubleValue() / total.doubleValue() * 
+							Math.log(p.doubleValue() / total.doubleValue()) / Math.log(2));	
+				});
+			}
+			
+			
+			List<Double> all = new ArrayList<Double>();
+			
+			this.attrs.stream().forEach(p -> {
+				
+				DoubleAdder entropies = new DoubleAdder();
+				
+				this.definition().get(p).stream().forEach(v -> {
+					
+					DoubleAdder entropy = new DoubleAdder();
+					DoubleAdder subtotal = new DoubleAdder();
+					List<Integer> terms = new ArrayList<Integer>();
+					
+					profitCategory.entrySet().stream().forEach(c -> {
+						
+						List<Instance> list = this.spreads(p, c.getValue()).get(v);
+						int size = 0;
+						if (list != null)
+							size = list.size();
+						
+						subtotal.add(size);
+						terms.add(size);	
+					});
+					
+			
+					terms.stream().forEach(e -> {
+						if (e != 0) {
+							entropy.add(-1 * e.doubleValue() / subtotal.doubleValue() * 
+								Math.log(e.doubleValue() / subtotal.doubleValue()) / Math.log(2));	
+						}
+					});
+
+					entropies.add(entropy.doubleValue() * subtotal.doubleValue() / total.doubleValue());
+				});
+				
+				all.add(1.0 - entropies.doubleValue());
+			});
+	
+			
+			return all.stream().mapToDouble(p -> p).max().orElse(0.0);
+		}
+		
+		private Map<String, List<Instance>> spreads(Attribute attr, List<Instance> instances) {
+			
+			return instances.stream().collect(Collectors.groupingBy(p -> p.stringValue(attr)));
 		}
 	}
 }
