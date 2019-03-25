@@ -12,7 +12,7 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class StandardDeviationClassifier1 {
+public class StdDevClassifier1 {
 
 	private static final String VALUE_OUTLOOK_SUNNY = "sunny";
 	private static final String VALUE_OUTLOOK_OVERCAST = "overcast";
@@ -94,12 +94,12 @@ public class StandardDeviationClassifier1 {
 		List<Instance> training = generateTrainingData(attrs);
 		
 		
-		StandardDeviation sd = new StandardDeviation(definition, attr5);
+		StdDev sd = new StdDev(definition, attr5);
 
-		CARTNode.Strategy.Builder<StandardDeviation> builder = 
-				new CARTNode.Strategy.Builder<StandardDeviation>(sd);
+		CARTNode.Strategy.Builder<StdDev> builder = 
+				new CARTNode.Strategy.Builder<StdDev>(sd);
 
-		CARTNode<StandardDeviation> root = builder.build(training);
+		CARTNode<StdDev> root = builder.build(training);
 
 		System.out.println(root.toAll());
 	}
@@ -234,13 +234,13 @@ public class StandardDeviationClassifier1 {
 		return training;
 	}
 
-	private static class StandardDeviation implements CARTNode.Strategy {
+	private static class StdDev implements CARTNode.Strategy {
 
 		private Map<Attribute, List<String>> definition = null;
 		private List<Attribute> attrs = null;
 		private Attribute cls = null;
 
-		public StandardDeviation(Map<Attribute, List<String>> definition, Attribute cls) {
+		public StdDev(Map<Attribute, List<String>> definition, Attribute cls) {
 			this.definition = definition;
 			this.attrs = definition.keySet().stream().collect(Collectors.toList());
 
@@ -264,18 +264,18 @@ public class StandardDeviationClassifier1 {
 		}
 
 		@Override
-		public CARTNode<StandardDeviation> calculate(double last, List<Attribute> attrs, List<Instance> instances) {
+		public CARTNode<StdDev> calculate(double last, List<Attribute> attrs, List<Instance> instances) {
 
-			CARTNode.Strategy.Builder<StandardDeviation> builder = 
-					new CARTNode.Strategy.Builder<StandardDeviation>(this);
+			CARTNode.Strategy.Builder<StdDev> builder = 
+					new CARTNode.Strategy.Builder<StdDev>(this);
 			DoubleAdder max = new DoubleAdder();
 			max.add(Double.MIN_VALUE);
 
-			PlaceHolder<CARTNode<StandardDeviation>> holder = new PlaceHolder<CARTNode<StandardDeviation>>();
+			PlaceHolder<CARTNode<StdDev>> holder = new PlaceHolder<CARTNode<StdDev>>();
 
 			attrs.stream().forEach(p -> {
 
-				CARTNode<StandardDeviation> node = builder.test(p, this.definition().get(p), instances);
+				CARTNode<StdDev> node = builder.test(p, this.definition().get(p), instances);
 				double score = node.score();
 				
 				if (max.doubleValue() < score) {
