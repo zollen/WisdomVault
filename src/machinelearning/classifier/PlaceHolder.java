@@ -1,4 +1,4 @@
-package machinelearning;
+package machinelearning.classifier;
 
 public class PlaceHolder<T> {
 

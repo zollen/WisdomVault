@@ -1,4 +1,4 @@
-package machinelearning;
+package machinelearning.classifier;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -12,7 +12,7 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class EntropyExercise1 {
+public class EntropyClassifier1 {
 
 	private static final String VALUE_AGE_OLD = "old";
 	private static final String VALUE_AGE_MILD = "mild";

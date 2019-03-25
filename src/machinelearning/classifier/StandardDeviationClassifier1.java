@@ -1,4 +1,4 @@
-package machinelearning;
+package machinelearning.classifier;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -12,8 +12,8 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class GiniExercise3 {
-		
+public class StandardDeviationClassifier1 {
+
 	private static final String VALUE_OUTLOOK_SUNNY = "sunny";
 	private static final String VALUE_OUTLOOK_OVERCAST = "overcast";
 	private static final String VALUE_OUTLOOK_RAINY = "rainy";
@@ -30,8 +30,7 @@ public class GiniExercise3 {
 	
 	private static final String VALUE_PLAY_YES = "Yes";
 	private static final String VALUE_PLAY_NO = "No";
-	
-	
+
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
@@ -82,20 +81,21 @@ public class GiniExercise3 {
 		definition.put(attr4, windyVals);
 		definition.put(attr5, playVals);
 		
-	
+		
 		// training
 
-		List<Instance> training = generateTrainingData(attrs);		
+		List<Instance> training = generateTrainingData(attrs);
 
-		Gini gini = new Gini(definition, attr5);
+		StandardDeviation sd = new StandardDeviation(definition, attr5);
 
-		CARTNode.Strategy.Builder<Gini> builder = new CARTNode.Strategy.Builder<Gini>(gini);
-		
-		CARTNode<Gini> root = builder.build(training);
-		
+		CARTNode.Strategy.Builder<StandardDeviation> builder = 
+				new CARTNode.Strategy.Builder<StandardDeviation>(sd);
+
+		CARTNode<StandardDeviation> root = builder.build(training);
+
 		System.out.println(root.toAll());
 	}
-	
+
 	public static List<Instance> generateTrainingData(ArrayList<Attribute> attrs) {
 
 		Instances training = new Instances("TRAINING", attrs, 14);
@@ -225,91 +225,135 @@ public class GiniExercise3 {
 		return training;
 	}
 
-	private static class Gini implements CARTNode.Strategy {
+	private static class StandardDeviation implements CARTNode.Strategy {
 
 		private Map<Attribute, List<String>> definition = null;
 		private List<Attribute> attrs = null;
 		private Attribute cls = null;
 
-		public Gini(Map<Attribute, List<String>> definition, Attribute cls) {
+		public StandardDeviation(Map<Attribute, List<String>> definition, Attribute cls) {
 			this.definition = definition;
 			this.attrs = definition.keySet().stream().collect(Collectors.toList());
 
 			this.cls = cls;
 			this.attrs.remove(cls);
 		}
-		
+
 		@Override
 		public Map<Attribute, List<String>> definition() {
 			return definition;
 		}
-		
+
 		@Override
 		public String op() {
 			return " == ";
 		}
-		
+
 		@Override
 		public Attribute cls() {
 			return cls;
 		}
-		
+
 		@Override
-		public CARTNode<Gini> calculate(double last, List<Attribute> attrs, List<Instance> instances) {
-			
-			CARTNode.Strategy.Builder<Gini> builder = new CARTNode.Strategy.Builder<Gini>(this);
-			DoubleAdder min = new DoubleAdder();
-			min.add(last);
-			
-			PlaceHolder<CARTNode<Gini>> holder = new PlaceHolder<CARTNode<Gini>>();
-				
+		public CARTNode<StandardDeviation> calculate(double last, List<Attribute> attrs, List<Instance> instances) {
+
+			CARTNode.Strategy.Builder<StandardDeviation> builder = 
+					new CARTNode.Strategy.Builder<StandardDeviation>(this);
+			DoubleAdder max = new DoubleAdder();
+			max.add(Double.MIN_VALUE);
+
+			PlaceHolder<CARTNode<StandardDeviation>> holder = new PlaceHolder<CARTNode<StandardDeviation>>();
+
 			attrs.stream().forEach(p -> {
-										
-				CARTNode<Gini> node = builder.test(p, this.definition().get(p), instances);
+
+				CARTNode<StandardDeviation> node = builder.test(p, this.definition().get(p), instances);
 				double score = node.score();
-					
-				if (min.doubleValue() > score) {
-					min.reset();
-					min.add(score);
+				
+				if (max.doubleValue() < score) {
+					max.reset();
+					max.add(score);
 					holder.data(node);
 				}
 			});
-				
+
 			return holder.data();
 		}
 
 		@Override
 		public double score(CARTNode<?> node) {
 			// TODO Auto-generated method stub
-
-			// gini impurities
-			DoubleAdder sum = new DoubleAdder();
-
-			if (node.inputs().size() <= 0)
-				return 0.0;
-
-			if (node.children().size() <= 0) {
-
-				node.data().entrySet().stream().forEach(p -> {
-					sum.add(Math.pow((double) p.getValue().size() / node.inputs().size(), 2));
-				});
-
-				return 1 - sum.doubleValue();
-			} else {
-
-				node.children().entrySet().stream().forEach(p -> {
-
-					sum.add((double) node.data().get(p.getKey()).size() / node.inputs().size() * score(p.getValue()));
-				});
-
-				return sum.doubleValue();
-			}
+			return entropy(node.attr(), node.inputs());
 		}
 
 		@Override
 		public List<Instance> filter(boolean binary, CARTNode<?> node, String value, List<Instance> instances) {
+
+			return instances.stream().filter(p -> value.equals(p.stringValue(node.attr())))
+					.collect(Collectors.toList());
+		}
+		
+		private double gain(Attribute attr, List<Instance> instances) {
 			
-			return instances.stream().filter(p ->  value.equals(p.stringValue(node.attr()))).collect(Collectors.toList());
+			Map<String, List<Instance>> profitCategory = this.spreads(cls, instances);
+			DoubleAdder info = new DoubleAdder();
+
+			List<Integer> terms = new ArrayList<Integer>();
+
+			profitCategory.entrySet().stream().forEach(p -> {
+				terms.add(p.getValue().size());
+			});
+
+			terms.stream().forEach(p -> {
+				if (p.doubleValue() != 0)
+					info.add(-1 * p.doubleValue() / instances.size()
+							* Math.log(p.doubleValue() / instances.size()) / Math.log(2));
+			});
+				
+			return info.doubleValue();
+		}
+
+		private double entropy(Attribute attr, List<Instance> instances) {
+
+			Map<String, List<Instance>> profitCategory = this.spreads(cls, instances);
+			double gain = gain(attr, instances);
+
+
+			DoubleAdder entropies = new DoubleAdder();
+
+			this.definition().get(attr).stream().forEach(v -> {
+
+				DoubleAdder entropy = new DoubleAdder();
+				DoubleAdder subtotal = new DoubleAdder();
+				List<Integer> terms = new ArrayList<Integer>();
+
+				profitCategory.entrySet().stream().forEach(c -> {
+
+					List<Instance> list = this.spreads(attr, c.getValue()).get(v);
+					int size = 0;
+					if (list != null)
+						size = list.size();
+
+					subtotal.add(size);
+					terms.add(size);
+				});
+				
+				terms.stream().forEach(e -> {
+					if (e != 0) {
+						entropy.add(-1 * e.doubleValue() / subtotal.doubleValue()
+								* Math.log(e.doubleValue() / subtotal.doubleValue()) / Math.log(2));
+					}
+				});
+
+				if (entropy.doubleValue() != 0 && instances.size() != 0)
+					entropies.add(entropy.doubleValue() * subtotal.doubleValue() / instances.size());
+			});
+
+			return gain - entropies.doubleValue();
+		}
+
+		private Map<String, List<Instance>> spreads(Attribute attr, List<Instance> instances) {
+
+			return instances.stream().collect(Collectors.groupingBy(p -> p.stringValue(attr)));
 		}
 	}
 }

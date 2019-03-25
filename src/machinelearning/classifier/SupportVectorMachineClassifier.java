@@ -1,4 +1,4 @@
-package machinelearning;
+package machinelearning.classifier;
 import java.util.ArrayList;
 
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;

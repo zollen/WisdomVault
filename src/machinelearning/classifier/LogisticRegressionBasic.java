@@ -1,4 +1,4 @@
-package machinelearning;
+package machinelearning.classifier;
 import java.io.FileNotFoundException;
 import java.text.DecimalFormat;
 import java.util.Arrays;

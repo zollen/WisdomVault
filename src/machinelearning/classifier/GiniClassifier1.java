@@ -1,4 +1,4 @@
-package machinelearning;
+package machinelearning.classifier;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -13,7 +13,7 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class GiniExercise1 {
+public class GiniClassifier1 {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub

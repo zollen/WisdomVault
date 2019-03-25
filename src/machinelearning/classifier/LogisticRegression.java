@@ -1,4 +1,4 @@
-package machinelearning;
+package machinelearning.classifier;
 import java.text.DecimalFormat;
 
 import org.apache.commons.math3.analysis.function.Sigmoid;

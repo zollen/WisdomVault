@@ -1,4 +1,4 @@
-package machinelearning;
+package machinelearning.classifier;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,7 +14,7 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class GiniExercise2 {
+public class GiniClassifier2 {
 		
 	private static final String VALUE_CLASS_DOG = "Dog";
 	private static final String VALUE_CLASS_CAT = "Cat";

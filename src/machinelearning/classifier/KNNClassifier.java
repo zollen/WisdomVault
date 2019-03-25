@@ -1,4 +1,4 @@
-package machinelearning;
+package machinelearning.classifier;
 import java.util.ArrayList;
 
 import weka.classifiers.Classifier;
