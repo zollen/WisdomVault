@@ -170,11 +170,11 @@ public class GiniExercise2 {
 		}
 		
 		@Override
-		public CARTNode<Gini> calculate(double ggini, List<Attribute> attrs, List<Instance> instances) {
+		public CARTNode<Gini> calculate(double last, List<Attribute> attrs, List<Instance> instances) {
 			
 			CARTNode.Strategy.Builder<Gini> builder = new CARTNode.Strategy.Builder<Gini>(this);
 			DoubleAdder min = new DoubleAdder();
-			min.add(ggini);
+			min.add(last);
 			
 			PlaceHolder<CARTNode<Gini>> holder = new PlaceHolder<CARTNode<Gini>>();
 				

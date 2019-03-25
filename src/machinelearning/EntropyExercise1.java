@@ -203,11 +203,11 @@ public class EntropyExercise1 {
 		}
 		
 		@Override
-		public CARTNode<Entropy> calculate(double ggini, List<Attribute> attrs, List<Instance> instances) {
+		public CARTNode<Entropy> calculate(double last, List<Attribute> attrs, List<Instance> instances) {
 			
 			CARTNode.Strategy.Builder<Entropy> builder = new CARTNode.Strategy.Builder<Entropy>(this);
 			DoubleAdder min = new DoubleAdder();
-			min.add(ggini);
+			min.add(last);
 			
 			PlaceHolder<CARTNode<Entropy>> holder = new PlaceHolder<CARTNode<Entropy>>();
 				

@@ -252,16 +252,16 @@ public class CARTNode<T extends CARTNode.Strategy> {
 				return construct(Double.MAX_VALUE, list, instances);
 			}
 			
-			private CARTNode<T> construct(double ggini, List<Attribute> attrs, List<Instance> instances) {
+			private CARTNode<T> construct(double last, List<Attribute> attrs, List<Instance> instances) {
 					
 				Strategy.Builder<T> builder = new Strategy.Builder<T>(this.strategy);
 				
-				if (attrs.size() <= 0 || ggini <= 0)
+				if (attrs.size() <= 0 || last <= 0)
 					return builder.create(this.strategy.cls());
 	
 				List<Attribute> list = new ArrayList<Attribute>(attrs);
 
-				CARTNode<?> target = this.strategy.calculate(ggini, attrs, instances);
+				CARTNode<?> target = this.strategy.calculate(last, attrs, instances);
 				
 				// recursively constructing the tree
 				if (target != null) {
@@ -275,7 +275,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 
 						double score = this.strategy.score(target.children().get(p.getKey()));
 						
-						if (score == ggini) {
+						if (score == last) {
 							score = -1;
 						}
 						
