@@ -298,7 +298,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 		
 		public String op();
 		
-		public CARTNode<?> calculate(double ggini, List<Attribute> attrs, List<Instance> instances);
+		public CARTNode<?> calculate(double score, List<Attribute> attrs, List<Instance> instances);
 
 		public double score(CARTNode<?> node);
 
