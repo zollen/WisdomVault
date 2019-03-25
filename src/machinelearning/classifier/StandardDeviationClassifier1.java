@@ -28,8 +28,6 @@ public class StandardDeviationClassifier1 {
 	private static final String VALUE_WINDY_TRUE = "true";
 	private static final String VALUE_WINDY_FALSE = "false";
 	
-	private static final String VALUE_PLAY_YES = "Yes";
-	private static final String VALUE_PLAY_NO = "No";
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -55,8 +53,17 @@ public class StandardDeviationClassifier1 {
 		windyVals.add(VALUE_WINDY_FALSE);
 		
 		ArrayList<String> playVals = new ArrayList<String>();
-		playVals.add(VALUE_PLAY_YES);
-		playVals.add(VALUE_PLAY_NO);
+		playVals.add("23");
+		playVals.add("26");
+		playVals.add("30");
+		playVals.add("36");
+		playVals.add("38");
+		playVals.add("43");
+		playVals.add("44");
+		playVals.add("46");
+		playVals.add("48");
+		playVals.add("62");
+		
 		
 
 		ArrayList<Attribute> attrs = new ArrayList<Attribute>();
@@ -85,7 +92,8 @@ public class StandardDeviationClassifier1 {
 		// training
 
 		List<Instance> training = generateTrainingData(attrs);
-
+		
+		
 		StandardDeviation sd = new StandardDeviation(definition, attr5);
 
 		CARTNode.Strategy.Builder<StandardDeviation> builder = 
@@ -100,30 +108,31 @@ public class StandardDeviationClassifier1 {
 
 		Instances training = new Instances("TRAINING", attrs, 14);
 		
-		// AnswerS:
+		// Answers:
 		// outlook
-		//   +-<sunny>    - humidity
-		//						+-<high> - no
-		//						+-<normal> - yes
-		//   +-<overcast> - yes
-		//   +-<rainy>    - windy
-		//						+-<false> - yes
-		//						+-<true>  - no
+		//   +-<sunny>    - windy
+		//						+-<true>  - 26.5
+		//						+-<false> - 47.7
+		//   +-<overcast> - 46.3
+		//   +-<rainy>    - temp
+		//						+-<cool> - 38
+		//						+-<hot>  - 27.5
+		//						+-<mild> - 41.5
 		
 		Instance data1 = new DenseInstance(5);	
-		data1.setValue(attrs.get(0), VALUE_OUTLOOK_SUNNY);
+		data1.setValue(attrs.get(0), VALUE_OUTLOOK_RAINY);
 		data1.setValue(attrs.get(1), VALUE_TEMP_HOT);
 		data1.setValue(attrs.get(2), VALUE_HUMIDITY_HIGH);
 		data1.setValue(attrs.get(3), VALUE_WINDY_FALSE);
-		data1.setValue(attrs.get(4), VALUE_PLAY_NO);
+		data1.setValue(attrs.get(4), "26");
 		training.add(data1);
 		
 		Instance data2 = new DenseInstance(5);	
-		data2.setValue(attrs.get(0), VALUE_OUTLOOK_SUNNY);
+		data2.setValue(attrs.get(0), VALUE_OUTLOOK_RAINY);
 		data2.setValue(attrs.get(1), VALUE_TEMP_HOT);
 		data2.setValue(attrs.get(2), VALUE_HUMIDITY_HIGH);
 		data2.setValue(attrs.get(3), VALUE_WINDY_TRUE);
-		data2.setValue(attrs.get(4), VALUE_PLAY_NO);
+		data2.setValue(attrs.get(4), "30");
 		training.add(data2);
 		
 		Instance data3 = new DenseInstance(5);	
@@ -131,31 +140,31 @@ public class StandardDeviationClassifier1 {
 		data3.setValue(attrs.get(1), VALUE_TEMP_HOT);
 		data3.setValue(attrs.get(2), VALUE_HUMIDITY_HIGH);
 		data3.setValue(attrs.get(3), VALUE_WINDY_FALSE);
-		data3.setValue(attrs.get(4), VALUE_PLAY_YES);
+		data3.setValue(attrs.get(4), "48");
 		training.add(data3);
 		
 		Instance data4 = new DenseInstance(5);	
-		data4.setValue(attrs.get(0), VALUE_OUTLOOK_RAINY);
+		data4.setValue(attrs.get(0), VALUE_OUTLOOK_SUNNY);
 		data4.setValue(attrs.get(1), VALUE_TEMP_MILD);
 		data4.setValue(attrs.get(2), VALUE_HUMIDITY_HIGH);
 		data4.setValue(attrs.get(3), VALUE_WINDY_FALSE);
-		data4.setValue(attrs.get(4), VALUE_PLAY_YES);
+		data4.setValue(attrs.get(4), "46");
 		training.add(data4);
 		
 		Instance data5 = new DenseInstance(5);	
-		data5.setValue(attrs.get(0), VALUE_OUTLOOK_RAINY);
+		data5.setValue(attrs.get(0), VALUE_OUTLOOK_SUNNY);
 		data5.setValue(attrs.get(1), VALUE_TEMP_COOL);
 		data5.setValue(attrs.get(2), VALUE_HUMIDITY_NORMAL);
 		data5.setValue(attrs.get(3), VALUE_WINDY_FALSE);
-		data5.setValue(attrs.get(4), VALUE_PLAY_YES);
+		data5.setValue(attrs.get(4), "62");
 		training.add(data5);
 		
 		Instance data6 = new DenseInstance(5);	
-		data6.setValue(attrs.get(0), VALUE_OUTLOOK_RAINY);
+		data6.setValue(attrs.get(0), VALUE_OUTLOOK_SUNNY);
 		data6.setValue(attrs.get(1), VALUE_TEMP_COOL);
 		data6.setValue(attrs.get(2), VALUE_HUMIDITY_NORMAL);
 		data6.setValue(attrs.get(3), VALUE_WINDY_TRUE);
-		data6.setValue(attrs.get(4), VALUE_PLAY_NO);
+		data6.setValue(attrs.get(4), "23");
 		training.add(data6);
 		
 		Instance data7 = new DenseInstance(5);	
@@ -163,39 +172,39 @@ public class StandardDeviationClassifier1 {
 		data7.setValue(attrs.get(1), VALUE_TEMP_COOL);
 		data7.setValue(attrs.get(2), VALUE_HUMIDITY_NORMAL);
 		data7.setValue(attrs.get(3), VALUE_WINDY_TRUE);
-		data7.setValue(attrs.get(4), VALUE_PLAY_YES);
+		data7.setValue(attrs.get(4), "43");
 		training.add(data7);
 		
 		Instance data8 = new DenseInstance(5);	
-		data8.setValue(attrs.get(0), VALUE_OUTLOOK_SUNNY);
+		data8.setValue(attrs.get(0), VALUE_OUTLOOK_RAINY);
 		data8.setValue(attrs.get(1), VALUE_TEMP_MILD);
 		data8.setValue(attrs.get(2), VALUE_HUMIDITY_HIGH);
 		data8.setValue(attrs.get(3), VALUE_WINDY_FALSE);
-		data8.setValue(attrs.get(4), VALUE_PLAY_NO);
+		data8.setValue(attrs.get(4), "36");
 		training.add(data8);
 		
 		Instance data9 = new DenseInstance(5);	
-		data9.setValue(attrs.get(0), VALUE_OUTLOOK_SUNNY);
+		data9.setValue(attrs.get(0), VALUE_OUTLOOK_RAINY);
 		data9.setValue(attrs.get(1), VALUE_TEMP_COOL);
 		data9.setValue(attrs.get(2), VALUE_HUMIDITY_NORMAL);
 		data9.setValue(attrs.get(3), VALUE_WINDY_FALSE);
-		data9.setValue(attrs.get(4), VALUE_PLAY_YES);
+		data9.setValue(attrs.get(4), "38");
 		training.add(data9);
 		
 		Instance data10 = new DenseInstance(5);	
-		data10.setValue(attrs.get(0), VALUE_OUTLOOK_RAINY);
+		data10.setValue(attrs.get(0), VALUE_OUTLOOK_SUNNY);
 		data10.setValue(attrs.get(1), VALUE_TEMP_MILD);
 		data10.setValue(attrs.get(2), VALUE_HUMIDITY_NORMAL);
 		data10.setValue(attrs.get(3), VALUE_WINDY_FALSE);
-		data10.setValue(attrs.get(4), VALUE_PLAY_YES);
+		data10.setValue(attrs.get(4), "48");
 		training.add(data10);
 		
 		Instance data11 = new DenseInstance(5);	
-		data11.setValue(attrs.get(0), VALUE_OUTLOOK_SUNNY);
+		data11.setValue(attrs.get(0), VALUE_OUTLOOK_RAINY);
 		data11.setValue(attrs.get(1), VALUE_TEMP_MILD);
 		data11.setValue(attrs.get(2), VALUE_HUMIDITY_NORMAL);
 		data11.setValue(attrs.get(3), VALUE_WINDY_TRUE);
-		data11.setValue(attrs.get(4), VALUE_PLAY_YES);
+		data11.setValue(attrs.get(4), "48");
 		training.add(data11);
 		
 		Instance data12 = new DenseInstance(5);	
@@ -203,7 +212,7 @@ public class StandardDeviationClassifier1 {
 		data12.setValue(attrs.get(1), VALUE_TEMP_MILD);
 		data12.setValue(attrs.get(2), VALUE_HUMIDITY_HIGH);
 		data12.setValue(attrs.get(3), VALUE_WINDY_TRUE);
-		data12.setValue(attrs.get(4), VALUE_PLAY_YES);
+		data12.setValue(attrs.get(4), "62");
 		training.add(data12);
 		
 		Instance data13 = new DenseInstance(5);	
@@ -211,15 +220,15 @@ public class StandardDeviationClassifier1 {
 		data13.setValue(attrs.get(1), VALUE_TEMP_HOT);
 		data13.setValue(attrs.get(2), VALUE_HUMIDITY_NORMAL);
 		data13.setValue(attrs.get(3), VALUE_WINDY_FALSE);
-		data13.setValue(attrs.get(4), VALUE_PLAY_YES);
+		data13.setValue(attrs.get(4), "44");
 		training.add(data13);
 		
 		Instance data14 = new DenseInstance(5);	
-		data14.setValue(attrs.get(0), VALUE_OUTLOOK_RAINY);
+		data14.setValue(attrs.get(0), VALUE_OUTLOOK_SUNNY);
 		data14.setValue(attrs.get(1), VALUE_TEMP_MILD);
 		data14.setValue(attrs.get(2), VALUE_HUMIDITY_HIGH);
 		data14.setValue(attrs.get(3), VALUE_WINDY_TRUE);
-		data14.setValue(attrs.get(4), VALUE_PLAY_NO);
+		data14.setValue(attrs.get(4), "30");
 		training.add(data14);
 
 		return training;
