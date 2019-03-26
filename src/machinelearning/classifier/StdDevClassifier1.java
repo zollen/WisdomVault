@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.stream.Collectors;
 
+import org.apache.commons.math3.stat.StatUtils;
+
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -96,12 +98,21 @@ public class StdDevClassifier1 {
 		
 		StdDev sd = new StdDev(definition, attr5);
 
+		System.out.println("SDR(attr1): " + sd.sd(attr1, training));
+		System.out.println("SDR(attr2): " + sd.sd(attr2, training));
+		System.out.println("SDR(attr3): " + sd.sd(attr3, training));
+		System.out.println("SDR(attr4): " + sd.sd(attr4, training));
+		
+		System.out.println("Attribute with the largest SDR would be chosen as the node");
+		
+/*
 		CARTNode.Strategy.Builder<StdDev> builder = 
 				new CARTNode.Strategy.Builder<StdDev>(sd);
 
 		CARTNode<StdDev> root = builder.build(training);
 
 		System.out.println(root.toAll());
+*/
 	}
 
 	public static List<Instance> generateTrainingData(ArrayList<Attribute> attrs) {
@@ -291,7 +302,7 @@ public class StdDevClassifier1 {
 		@Override
 		public double score(CARTNode<?> node) {
 			// TODO Auto-generated method stub
-			return entropy(node.attr(), node.inputs());
+			return sd(node.attr(), node.inputs());
 		}
 
 		@Override
@@ -301,63 +312,36 @@ public class StdDevClassifier1 {
 					.collect(Collectors.toList());
 		}
 		
-		private double gain(Attribute attr, List<Instance> instances) {
+
+		private double sd(Attribute attr, List<Instance> instances) {
+
+			// calculating the standard deviation before the splits
+			double sd = 0.0;
+			{
+				double [] data = instances.stream().mapToDouble(
+						p -> Double.valueOf(p.stringValue(cls))).toArray();
+							
+				sd = Math.sqrt(StatUtils.variance(data));
+			}
 			
-			Map<String, List<Instance>> profitCategory = this.spreads(cls, instances);
-			DoubleAdder info = new DoubleAdder();
-
-			List<Integer> terms = new ArrayList<Integer>();
-
-			profitCategory.entrySet().stream().forEach(p -> {
-				terms.add(p.getValue().size());
-			});
-
-			terms.stream().forEach(p -> {
-				if (p.doubleValue() != 0)
-					info.add(-1 * p.doubleValue() / instances.size()
-							* Math.log(p.doubleValue() / instances.size()) / Math.log(2));
-			});
+			
+			// calculating the standard deviation after the splits
+			Map<String, List<Instance>> map = spreads(attr, instances);
+			
+			DoubleAdder sum = new DoubleAdder();
+			
+			map.entrySet().stream().forEach(p -> {
 				
-			return info.doubleValue();
-		}
-
-		private double entropy(Attribute attr, List<Instance> instances) {
-
-			Map<String, List<Instance>> profitCategory = this.spreads(cls, instances);
-			double gain = gain(attr, instances);
-
-
-			DoubleAdder entropies = new DoubleAdder();
-
-			this.definition().get(attr).stream().forEach(v -> {
-
-				DoubleAdder entropy = new DoubleAdder();
-				DoubleAdder subtotal = new DoubleAdder();
-				List<Integer> terms = new ArrayList<Integer>();
-
-				profitCategory.entrySet().stream().forEach(c -> {
-
-					List<Instance> list = this.spreads(attr, c.getValue()).get(v);
-					int size = 0;
-					if (list != null)
-						size = list.size();
-
-					subtotal.add(size);
-					terms.add(size);
-				});
+				double [] data = p.getValue().stream().mapToDouble(
+						v -> Double.valueOf(v.stringValue(cls))).toArray();
 				
-				terms.stream().forEach(e -> {
-					if (e != 0) {
-						entropy.add(-1 * e.doubleValue() / subtotal.doubleValue()
-								* Math.log(e.doubleValue() / subtotal.doubleValue()) / Math.log(2));
-					}
-				});
-
-				if (entropy.doubleValue() != 0 && instances.size() != 0)
-					entropies.add(entropy.doubleValue() * subtotal.doubleValue() / instances.size());
+				double ssd = Math.sqrt(StatUtils.variance(data));
+			
+				sum.add(ssd * data.length / instances.size());	
 			});
-
-			return gain - entropies.doubleValue();
+			
+			// calculating standard deviation reduction	
+			return sd - sum.doubleValue();
 		}
 
 		private Map<String, List<Instance>> spreads(Attribute attr, List<Instance> instances) {
