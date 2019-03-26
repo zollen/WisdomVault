@@ -135,7 +135,7 @@ public class StdDevClassifier2 {
 				double score = node.score();
 				double ratio = (double) instances.size() / this.total;
 				
-				if (max.doubleValue() < score && ratio > 0.1) {
+				if (max.doubleValue() < score && ratio > 0.3) {
 					max.reset();
 					max.add(score);
 					holder.data(node);
