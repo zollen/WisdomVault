@@ -96,23 +96,15 @@ public class StdDevClassifier1 {
 		List<Instance> training = generateTrainingData(attrs);
 		
 		
-		StdDev sd = new StdDev(definition, attr5);
-
-		System.out.println("SDR(attr1): " + sd.sd(attr1, training));
-		System.out.println("SDR(attr2): " + sd.sd(attr2, training));
-		System.out.println("SDR(attr3): " + sd.sd(attr3, training));
-		System.out.println("SDR(attr4): " + sd.sd(attr4, training));
+		StdDev sd = new StdDev(definition, attr5, training.size());
 		
-		System.out.println("Attribute with the largest SDR would be chosen as the node");
-		
-/*
 		CARTNode.Strategy.Builder<StdDev> builder = 
 				new CARTNode.Strategy.Builder<StdDev>(sd);
 
 		CARTNode<StdDev> root = builder.build(training);
 
 		System.out.println(root.toAll());
-*/
+
 	}
 
 	public static List<Instance> generateTrainingData(ArrayList<Attribute> attrs) {
@@ -250,10 +242,12 @@ public class StdDevClassifier1 {
 		private Map<Attribute, List<String>> definition = null;
 		private List<Attribute> attrs = null;
 		private Attribute cls = null;
+		private int total = 0;
 
-		public StdDev(Map<Attribute, List<String>> definition, Attribute cls) {
+		public StdDev(Map<Attribute, List<String>> definition, Attribute cls, int size) {
 			this.definition = definition;
 			this.attrs = definition.keySet().stream().collect(Collectors.toList());
+			this.total = size;
 
 			this.cls = cls;
 			this.attrs.remove(cls);
@@ -288,8 +282,9 @@ public class StdDevClassifier1 {
 
 				CARTNode<StdDev> node = builder.test(p, this.definition().get(p), instances);
 				double score = node.score();
+				double ratio = (double) instances.size() / this.total;
 				
-				if (max.doubleValue() < score) {
+				if (max.doubleValue() < score && ratio > 0.3) {
 					max.reset();
 					max.add(score);
 					holder.data(node);
@@ -312,20 +307,8 @@ public class StdDevClassifier1 {
 					.collect(Collectors.toList());
 		}
 		
-
 		private double sd(Attribute attr, List<Instance> instances) {
-
-			// calculating the standard deviation before the splits
-			double sd = 0.0;
-			{
-				double [] data = instances.stream().mapToDouble(
-						p -> Double.valueOf(p.stringValue(cls))).toArray();
-							
-				sd = Math.sqrt(StatUtils.variance(data));
-			}
 			
-			
-			// calculating the standard deviation after the splits
 			Map<String, List<Instance>> map = spreads(attr, instances);
 			
 			DoubleAdder sum = new DoubleAdder();
@@ -335,13 +318,34 @@ public class StdDevClassifier1 {
 				double [] data = p.getValue().stream().mapToDouble(
 						v -> Double.valueOf(v.stringValue(cls))).toArray();
 				
-				double ssd = Math.sqrt(StatUtils.variance(data));
+				if (data.length > 0) {
+					
+					double ssd = Math.sqrt(StatUtils.variance(data));
 			
-				sum.add(ssd * data.length / instances.size());	
+					sum.add(ssd * data.length / instances.size());	
+				}
 			});
-			
+				
 			// calculating standard deviation reduction	
-			return sd - sum.doubleValue();
+			double result = ssd(instances) - sum.doubleValue();
+			// calculating standard deviation reduction	
+			if (result < 0)
+				result = 0.00001;
+			
+			
+			return result;
+		}
+		
+		private double ssd(List<Instance> instances) {
+
+			// calculating the standard deviation before the splits
+			double [] data = instances.stream().mapToDouble(
+						p -> Double.valueOf(p.stringValue(cls))).toArray();
+						
+			if (data.length <= 0)
+				return 0;
+			
+			return Math.sqrt(StatUtils.variance(data));
 		}
 
 		private Map<String, List<Instance>> spreads(Attribute attr, List<Instance> instances) {
