@@ -267,8 +267,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 				if (target != null) {
 
 					list.remove(target.attr());
-					attrs.remove(target.attr());
-
+				
 					CARTNode<T> node = builder.create(target.attr(), target.values(), instances);
 
 					node.data().entrySet().stream().forEach(p -> {

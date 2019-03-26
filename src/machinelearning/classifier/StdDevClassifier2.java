@@ -134,6 +134,7 @@ public class StdDevClassifier2 {
 				CARTNode<StdDev> node = builder.test(p, this.definition().get(p), instances);
 				double score = node.score();
 				double ratio = (double) instances.size() / this.total;
+				
 				if (max.doubleValue() < score && ratio > 0.1) {
 					max.reset();
 					max.add(score);

@@ -94,10 +94,9 @@ public class StdDevClassifier1 {
 		// training
 
 		List<Instance> training = generateTrainingData(attrs);
-		
-		
+			
 		StdDev sd = new StdDev(definition, attr5, training.size());
-		
+
 		CARTNode.Strategy.Builder<StdDev> builder = 
 				new CARTNode.Strategy.Builder<StdDev>(sd);
 
@@ -282,15 +281,15 @@ public class StdDevClassifier1 {
 
 				CARTNode<StdDev> node = builder.test(p, this.definition().get(p), instances);
 				double score = node.score();
-				double ratio = (double) instances.size() / this.total;
-				
+				double ratio = (double) instances.size() / this.total;	
+		
 				if (max.doubleValue() < score && ratio > 0.3) {
 					max.reset();
 					max.add(score);
 					holder.data(node);
 				}
 			});
-
+		
 			return holder.data();
 		}
 
@@ -307,6 +306,20 @@ public class StdDevClassifier1 {
 					.collect(Collectors.toList());
 		}
 		
+		@SuppressWarnings("unused")
+		private double cv(List<Instance> instances) {
+			
+			double [] data = instances.stream().mapToDouble(
+					v -> Double.valueOf(v.stringValue(cls))).toArray();
+			
+			double mean = StatUtils.mean(data);
+			double sd = StatUtils.variance(data);
+			if (sd == 0)
+				return 0;
+			
+			return Math.sqrt(sd) / mean;
+		}
+		
 		private double sd(Attribute attr, List<Instance> instances) {
 			
 			Map<String, List<Instance>> map = spreads(attr, instances);
@@ -321,7 +334,7 @@ public class StdDevClassifier1 {
 				if (data.length > 0) {
 					
 					double ssd = Math.sqrt(StatUtils.variance(data));
-			
+					
 					sum.add(ssd * data.length / instances.size());	
 				}
 			});
@@ -331,7 +344,6 @@ public class StdDevClassifier1 {
 			// calculating standard deviation reduction	
 			if (result < 0)
 				result = 0.00001;
-			
 			
 			return result;
 		}
