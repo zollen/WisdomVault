@@ -1,6 +1,8 @@
 package machinelearning.classifier;
 import java.util.ArrayList;
 
+import weka.classifiers.Evaluation;
+import weka.classifiers.trees.RandomForest;
 import weka.classifiers.trees.RandomTree;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -64,16 +66,79 @@ public class RandomTreeClassifier {
 		attrs.add(attr4);
 		attrs.add(attr5);
 		
-		
 		Instances training = generateTrainingData(attrs);	
 		
-		
-		RandomTree tree = new RandomTree();		
+		RandomTree tree = new RandomTree();
 		tree.setKValue(2);
-		tree.buildClassifier(training);
-		System.out.println(tree.globalInfo());
-		System.out.println(tree);
 		
+		// Decision Trees in general are not good at classifying new data
+		// This is where RamdomForest comes in.
+		// It vastly improves the performance of classifying new data.
+		// 
+		// Creating a ramdom forest
+		// 1. Resample the training data with a same size data with replacement (duplicated data) 
+		// 2. Run the resampled data with Decision Tree (but randomly picked K number of attributes for building each node
+		// 3. repeat step 1 and step 2 until we have a large number of trees.
+		// 4. Input new test data to the forest, the majority result wins
+		
+		
+		RandomForest forest = new RandomForest();
+		forest.setClassifier(tree);
+		forest.setSeed(1);
+		forest.setNumIterations(50);  //  number of trees
+		forest.setBreakTiesRandomly(true);
+		forest.setDebug(true);
+		forest.setComputeAttributeImportance(true);
+		
+		forest.buildClassifier(training);
+		
+		
+		Instances testing = generateTestData(attrs);
+		
+		Evaluation eval = new Evaluation(testing);
+		eval.evaluateModel(forest, testing);
+		
+		System.out.println(forest.globalInfo());
+		System.out.println(eval.toSummaryString());
+		System.out.println(eval.toMatrixString());
+		System.out.println("Error Rate: " + eval.errorRate());
+		System.out.println("==================================");
+		System.out.println(forest);
+		
+	}
+	
+	public static Instances generateTestData(ArrayList<Attribute> attrs) {
+		
+		Instances testing = new Instances("TESTING", attrs, 3);
+		
+		Instance data1 = new DenseInstance(5);	
+		data1.setValue(attrs.get(0), VALUE_OUTLOOK_SUNNY);
+		data1.setValue(attrs.get(1), VALUE_TEMP_COOL);
+		data1.setValue(attrs.get(2), VALUE_HUMIDITY_HIGH);
+		data1.setValue(attrs.get(3), VALUE_WINDY_TRUE);
+		data1.setValue(attrs.get(4), VALUE_PLAY_NO);
+		testing.add(data1);
+		
+		Instance data2 = new DenseInstance(5);	
+		data2.setValue(attrs.get(0), VALUE_OUTLOOK_RAINY);
+		data2.setValue(attrs.get(1), VALUE_TEMP_COOL);
+		data2.setValue(attrs.get(2), VALUE_HUMIDITY_HIGH);
+		data2.setValue(attrs.get(3), VALUE_WINDY_TRUE);
+		data2.setValue(attrs.get(4), VALUE_PLAY_NO);
+		testing.add(data2);
+		
+		Instance data3 = new DenseInstance(5);	
+		data3.setValue(attrs.get(0), VALUE_OUTLOOK_RAINY);
+		data3.setValue(attrs.get(1), VALUE_TEMP_MILD);
+		data3.setValue(attrs.get(2), VALUE_HUMIDITY_HIGH);
+		data3.setValue(attrs.get(3), VALUE_WINDY_FALSE);
+		data3.setValue(attrs.get(4), VALUE_PLAY_YES);
+		testing.add(data3);
+		
+		testing.setClassIndex(testing.numAttributes() - 1);
+		
+		
+		return testing;
 	}
 	
 	public static Instances generateTrainingData(ArrayList<Attribute> attrs) {
