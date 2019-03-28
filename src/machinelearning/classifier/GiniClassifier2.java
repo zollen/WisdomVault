@@ -18,20 +18,6 @@ public class GiniClassifier2 {
 		// TODO Auto-generated method stub
 
 		// defining data format
-/*
-		ArrayList<String> weightVals = new ArrayList<String>();
-		weightVals.add("8");
-		weightVals.add("9");
-		weightVals.add("15");
-		weightVals.add("50");
-		
-		ArrayList<String> heightVals = new ArrayList<String>();
-		heightVals.add("8");
-		heightVals.add("9");
-		heightVals.add("10");
-		heightVals.add("12");
-		heightVals.add("40");
-*/		
 		ArrayList<String> clsVals = new ArrayList<String>();
 		clsVals.add(VALUE_CLASS_DOG);
 		clsVals.add(VALUE_CLASS_CAT);
@@ -179,7 +165,7 @@ public class GiniClassifier2 {
 			if (node.children().size() <= 0) {
 				
 				return 1 - node.data().entrySet().stream().mapToDouble(
-						p -> Math.pow(p.getValue().size() / node.inputs().size(), 2)).sum();
+						p -> Math.pow((double) p.getValue().size() / node.inputs().size(), 2)).sum();
 			} else {
 
 				DoubleAdder sum = new DoubleAdder();

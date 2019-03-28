@@ -2,7 +2,6 @@ package machinelearning.classifier;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.atomic.DoubleAdder;
 
 import weka.core.Attribute;
@@ -18,12 +17,12 @@ public class GiniClassifier1 {
 		// defining data format
 
 		ArrayList<String> vals = new ArrayList<String>();
-		vals.add("1");
-		vals.add("0");
+		vals.add("T");
+		vals.add("F");
 
 		ArrayList<Attribute> attrs = new ArrayList<Attribute>();
-		Attribute attr1 = new Attribute("goodCirculation", vals);
-		Attribute attr2 = new Attribute("chestPain", vals);
+		Attribute attr1 = new Attribute("chestPain", vals);
+		Attribute attr2 = new Attribute("goodCirculation", vals);
 		Attribute attr3 = new Attribute("blockedArteries", vals);
 		Attribute attr4 = new Attribute("heartDisease", vals);
 		attrs.add(attr1);
@@ -48,27 +47,66 @@ public class GiniClassifier1 {
 
 	public static List<Instance> generateTrainingData(int size, int seed, ArrayList<Attribute> attrs) {
 
-		Random rand = new Random(seed);
-
 		Instances training = new Instances("TRAINING", attrs, size);
 
-		for (int i = 0; i < size; i++) {
-			Instance data = new DenseInstance(5);
-
-			int gc = rand.nextInt() % 2 == 0 ? 0 : 1;
-			int cp = rand.nextInt() % 2 == 0 ? 0 : 1;
-			int ba = rand.nextInt() % 2 == 0 ? 0 : 1;
-
-			data.setValue(attrs.get(0), String.valueOf(gc));
-			data.setValue(attrs.get(1), String.valueOf(cp));
-			data.setValue(attrs.get(2), String.valueOf(ba));
-
-			double diag = rand.nextDouble() + (gc * -0.6 + cp * 0.2 + ba * 0.3);
-
-			data.setValue(attrs.get(3), diag < 0.6 ? "0" : "1");
-
-			training.add(data);
-		}
+		Instance data1 = new DenseInstance(4);	
+		data1.setValue(attrs.get(0), "F");
+		data1.setValue(attrs.get(1), "F");
+		data1.setValue(attrs.get(2), "F");
+		data1.setValue(attrs.get(3), "F");
+		training.add(data1);
+		
+		Instance data2 = new DenseInstance(4);	
+		data2.setValue(attrs.get(0), "T");
+		data2.setValue(attrs.get(1), "T");
+		data2.setValue(attrs.get(2), "T");
+		data2.setValue(attrs.get(3), "T");
+		training.add(data2);
+		
+		Instance data3 = new DenseInstance(4);	
+		data3.setValue(attrs.get(0), "T");
+		data3.setValue(attrs.get(1), "T");
+		data3.setValue(attrs.get(2), "F");
+		data3.setValue(attrs.get(3), "F");
+		training.add(data3);
+		
+		Instance data4 = new DenseInstance(4);	
+		data4.setValue(attrs.get(0), "T");
+		data4.setValue(attrs.get(1), "F");
+		data4.setValue(attrs.get(2), "T");
+		data4.setValue(attrs.get(3), "T");
+		training.add(data4);
+		
+		Instance data5 = new DenseInstance(4);	
+		data5.setValue(attrs.get(0), "F");
+		data5.setValue(attrs.get(1), "T");
+		data5.setValue(attrs.get(2), "F");
+		data5.setValue(attrs.get(3), "F");
+		training.add(data5);
+		
+		Instance data6 = new DenseInstance(4);	
+		data6.setValue(attrs.get(0), "F");
+		data6.setValue(attrs.get(1), "T");
+		data6.setValue(attrs.get(2), "T");
+		data6.setValue(attrs.get(3), "F");
+		training.add(data6);
+		
+		Instance data7 = new DenseInstance(4);	
+		data7.setValue(attrs.get(0), "T");
+		data7.setValue(attrs.get(1), "F");
+		data7.setValue(attrs.get(2), "F");
+		data7.setValue(attrs.get(3), "F");
+		training.add(data7);
+		
+		Instance data8 = new DenseInstance(4);	
+		data8.setValue(attrs.get(0), "T");
+		data8.setValue(attrs.get(1), "F");
+		data8.setValue(attrs.get(2), "T");
+		data8.setValue(attrs.get(3), "T");
+		training.add(data8);
+		
+	
+		training.setClassIndex(training.numAttributes() - 1);
 
 		return training;
 	}
@@ -93,12 +131,13 @@ public class GiniClassifier1 {
 				this.definition().get(p).stream().forEach(v -> {
 						
 					List<String> list = new ArrayList<String>();
-					list.add("1");
-					list.add("1");
+					list.add("T");
+					list.add("T");
 					
 					CARTNode<Gini> node = builder.test(p, list, instances);
 					double score = node.score();
 					
+
 					if (min.doubleValue() > score) {
 						min.reset();
 						min.add(score);
@@ -106,7 +145,7 @@ public class GiniClassifier1 {
 					}
 				});
 			});
-		
+			
 			return holder.data();
 		}
 
@@ -121,12 +160,9 @@ public class GiniClassifier1 {
 				return 0.0;
 
 			if (node.children().size() <= 0) {
-
-				node.data().entrySet().stream().forEach(p -> {
-					sum.add(Math.pow((double) p.getValue().size() / node.inputs().size(), 2));
-				});
-
-				return 1 - sum.doubleValue();
+				
+				return 1 - node.data().entrySet().stream().mapToDouble(
+						p -> Math.pow((double) p.getValue().size() / node.inputs().size(), 2)).sum();
 			} else {
 
 				node.children().entrySet().stream().forEach(p -> {
