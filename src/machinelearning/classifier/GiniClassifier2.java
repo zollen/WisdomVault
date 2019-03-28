@@ -1,6 +1,8 @@
 package machinelearning.classifier;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.atomic.DoubleAdder;
 
@@ -176,6 +178,41 @@ public class GiniClassifier2 {
 
 				return sum.doubleValue();
 			}
+		}
+		
+		public List<Object> possibleValues(Attribute attr, List<Instance> instances) {
+			
+			List<Object> vals = new ArrayList<Object>();
+			
+			if (attr.isNominal()) {
+				
+				Enumeration<Object> o = attr.enumerateValues();
+				while (o != null && o.hasMoreElements())
+					vals.add(o);
+			}
+			else
+			if (attr.isNumeric()) {
+				
+				List<Double> nums = new ArrayList<Double>();
+				
+				instances.stream().forEach(p -> nums.add(p.value(attr)));
+				
+				Collections.sort(nums);
+				
+				if (nums.size() == 1) {
+					vals.addAll(nums);
+					vals.addAll(nums);
+				}
+				else {
+					for (int i = 0; nums.size() > 0 && i < nums.size() - 1; i++) {
+						double d1 = nums.get(i + 1).doubleValue();
+						double d2 = nums.get(i).doubleValue();
+						vals.add(Double.valueOf((d1 + d2) / 2));
+					}	
+				}
+			}
+			
+			return vals;
 		}
 	}
 }

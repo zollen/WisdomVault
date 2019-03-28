@@ -34,11 +34,6 @@ public class GradientBoostClassifier {
 		colorVals.add(VALUE_COLOR_BLUE);
 		colorVals.add(VALUE_COLOR_RED);
 		
-		ArrayList<Double> heightVals = new ArrayList<Double>();
-		heightVals.add(1.4);
-		heightVals.add(1.5);
-		heightVals.add(1.6);
-		heightVals.add(1.8);
 		
 		ArrayList<Attribute> attrs = new ArrayList<Attribute>();
 		Attribute attr1 = new Attribute("height", 1);
@@ -58,6 +53,12 @@ public class GradientBoostClassifier {
 		print(training, attr4);
 
 		Gini gini = new Gini(attrs, attr4);
+		
+		CARTNode.Strategy.Builder<Gini> builder = new CARTNode.Strategy.Builder<Gini>(gini);
+	
+		CARTNode<Gini> root = builder.build(training);
+		
+		System.out.println(root.toAll());
 	}
 	
 	
@@ -77,17 +78,26 @@ public class GradientBoostClassifier {
 			PlaceHolder<CARTNode<Gini>> holder = new PlaceHolder<CARTNode<Gini>>();
 				
 			attrs.stream().forEach(p -> {
-										
-				CARTNode<Gini> node = builder.test(p, this.definition().get(p), instances);
-				double score = node.score();
-					
-				if (min.doubleValue() > score) {
-					min.reset();
-					min.add(score);
-					holder.data(node);
-				}
-			});
 				
+				List<Object> vals = possibleValues(p, instances);
+		
+				vals.stream().forEach(v -> {
+			
+					List<Object> list = new ArrayList<Object>();
+					list.add(v);
+					list.add(v);
+										
+					CARTNode<Gini> node = builder.test(p, list, instances);
+					double score = node.score();
+				System.err.println(node.toAll() + v + " , " + p + " , " + score);	
+					if (min.doubleValue() > score) {
+						min.reset();
+						min.add(score);
+						holder.data(node);
+					}
+				});
+			});
+		
 			return holder.data();
 		}
 

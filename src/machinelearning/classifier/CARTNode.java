@@ -412,7 +412,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 				
 				Enumeration<Object> o = attr.enumerateValues();
 				while (o != null && o.hasMoreElements())
-					vals.add(o);
+					vals.add(o.nextElement());
 			}
 			else
 			if (attr.isNumeric()) {
@@ -423,11 +423,16 @@ public class CARTNode<T extends CARTNode.Strategy> {
 				
 				Collections.sort(nums);
 				
-				for (int i = 0; nums.size() > 0 && i < nums.size() - 1; i++) {
-					double d1 = nums.get(i + 1).doubleValue();
+				if (nums.size() == 1) {
+					vals.addAll(nums);
+				}
+				else {
+					for (int i = 0; nums.size() > 0 && i < nums.size() - 1; i++) {
+						double d1 = nums.get(i + 1).doubleValue();
 					double d2 = nums.get(i).doubleValue();
-					vals.add(Double.valueOf((d1 + d2) / 2));
-				}	
+						vals.add(Double.valueOf((d1 + d2) / 2));
+					}	
+				}
 			}
 			
 			return vals;
