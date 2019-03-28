@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.DoubleAdder;
 import java.util.stream.Collectors;
 
 import weka.core.Attribute;
@@ -18,8 +19,8 @@ public class CARTNode<T extends CARTNode.Strategy> {
 
 	private static final DecimalFormat ff = new DecimalFormat("0.000");
 
-	private Map<String, List<Instance>> data = new LinkedHashMap<String, List<Instance>>();
-	private Map<String, CARTNode<T>> children = new LinkedHashMap<String, CARTNode<T>>();
+	private Map<CARTKey, List<Instance>> data = new LinkedHashMap<CARTKey, List<Instance>>();
+	private Map<CARTKey, CARTNode<T>> children = new LinkedHashMap<CARTKey, CARTNode<T>>();
 	private List<Instance> inputs = null;
 	private Attribute attr = null;
 	private String label = null;
@@ -48,7 +49,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 		this.setInstances(instances);
 	}
 
-	public void add(String value, CARTNode<T> child) {
+	public void add(CARTKey value, CARTNode<T> child) {
 		
 		child.setInstances(this.data.get(value));
 		child.parent(this);
@@ -65,31 +66,21 @@ public class CARTNode<T extends CARTNode.Strategy> {
 			return;
 		}
 		
+		DoubleAdder index = new DoubleAdder();
 		this.data.entrySet().stream().forEach(p -> {
 			
-			String value = p.getKey();
-			boolean isChoice = this.isBinaryChoices;
-			int pos = value.indexOf(":");
-			if (pos > 0) {
-				
-				if (value.endsWith("T"))
-					isChoice = false;
-				else
-				if (value.endsWith("F"))
-					isChoice = true;
-				
-				value = value.substring(0, pos);
-			}
-			
-	
-			
-			List<Instance> list = this.filter(isChoice, value, instances);
+			CARTKey value = p.getKey();
+		
+			List<Instance> list = this.filter(this.isBinaryChoices(), 
+											index.intValue(), value.get(), instances);
 			if (list.size() > 0) {
 				CARTNode<T> child = this.children.get(p.getKey());
 				if (child != null) {
 					child.classify(instances);
 				}
 			}
+			
+			index.add(1);
 		});
 		
 	}
@@ -125,11 +116,11 @@ public class CARTNode<T extends CARTNode.Strategy> {
 		return attr;
 	}
 	
-	public Map<String, List<Instance>> data() {
+	public Map<CARTKey, List<Instance>> data() {
 		return data;
 	}
 	
-	public Map<String, CARTNode<T>> children() {
+	public Map<CARTKey, CARTNode<T>> children() {
 		return children;
 	}
 	
@@ -144,19 +135,8 @@ public class CARTNode<T extends CARTNode.Strategy> {
 		int index = 0;
 		for (Object value : this.values) {
 			
-			boolean choice = this.isBinaryChoices;
-			String postfix = "";
-			if (this.isBinaryChoices && index == 0) {
-				postfix = ":T";
-				choice = false;
-			}
-			
-			if (this.isBinaryChoices && index == 1) {
-				postfix = ":F";
-				choice = true;
-			}
-			
-			data.put(value + postfix, filter(choice, value, this.inputs));
+			data.put(new CARTKey(value, index), filter(this.isBinaryChoices(), 
+													index, value, this.inputs));
 			
 			index++;
 		}
@@ -174,12 +154,45 @@ public class CARTNode<T extends CARTNode.Strategy> {
 	public String toString() {
 
 		return label() + " ==> "
-				+ this.data.entrySet().stream().map(p -> "[" + p.getKey() + "]: " + p.getValue().size()).collect(Collectors.joining(", "))
+				+ this.data.entrySet().stream().map(p -> "[" + p.getKey().get() + "]: " + p.getValue().size()).collect(Collectors.joining(", "))
 				+ "   Score: " + ff.format(this.score());
 	}
 
-	private List<Instance> filter(boolean binary, Object value, List<Instance> instances) {
-		return strategy.filter(binary, this, value, instances);
+	private List<Instance> filter(boolean binary, int index, Object value, List<Instance> instances) {
+
+		if (value instanceof String) {
+			
+			if (binary) {
+				if (index == 1) {
+					instances.stream().filter(p -> !value.equals(p.stringValue(this.attr())))
+						.collect(Collectors.toList());
+				}
+			}
+		}
+		else 
+		if (value instanceof Number) {
+			
+			if (binary) {
+				if (index == 0) {
+					return instances.stream().filter(p -> 
+						p.value(this.attr()) >= ((Number)value).doubleValue()
+							).collect(Collectors.toList());
+				}
+				else {
+					return instances.stream().filter(p -> 
+						p.value(this.attr()) < ((Number)value).doubleValue()
+							).collect(Collectors.toList());
+				}
+			}
+			else {
+				return instances.stream().filter(p -> 
+					p.value(this.attr()) == ((Number)value).doubleValue()
+						).collect(Collectors.toList());
+			}
+		}
+		
+		return instances.stream().filter(p -> value.equals(p.stringValue(this.attr())))
+				.collect(Collectors.toList());
 	}
 
 	private String indent(String value, int indent) {
@@ -222,14 +235,56 @@ public class CARTNode<T extends CARTNode.Strategy> {
 		AtomicInteger count = new AtomicInteger(0);
 		children.entrySet().forEach(p -> {
 			
-			builder.append(p.getValue().toAll(label() + op.get(count.getAndIncrement()) + p.getKey(), indent + 10));
+			builder.append(p.getValue().toAll(label() + op.get(count.getAndIncrement()) + p.getKey().get(), indent + 10));
 		});
 
 		return builder.toString();
 	}
 	
 	
-	
+	public static class CARTKey {
+		
+		private int seq;
+		private Object val;
+		
+		public CARTKey(Object val, int seq) {
+			this.val = val;
+			this.seq = seq;
+		}
+		
+		public Object get() {
+			return val;
+		}	
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + Integer.valueOf(seq).hashCode();
+			result = prime * result + ((val == null) ? 0 : val.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			CARTKey other = (CARTKey) obj;
+			if (seq != other.seq)
+				return false;
+			if (val == null) {
+				if (other.val != null)
+					return false;
+			} else if (!val.equals(other.val))
+				return false;
+			return true;
+		}
+		
+	}
 
 
 	public static abstract class Strategy {
@@ -381,8 +436,6 @@ public class CARTNode<T extends CARTNode.Strategy> {
 		public abstract CARTNode<?> calculate(double score, List<Attribute> attrs, List<Instance> instances);
 
 		public abstract double score(CARTNode<?> node);
-
-		public abstract List<Instance> filter(boolean binary, CARTNode<?> node, Object value, List<Instance> instances);
 	}
 	
 }

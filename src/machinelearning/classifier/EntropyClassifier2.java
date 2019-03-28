@@ -249,13 +249,6 @@ public class EntropyClassifier2 {
 			return entropy(node.attr(), node.inputs());
 		}
 
-		@Override
-		public List<Instance> filter(boolean binary, CARTNode<?> node, Object value, List<Instance> instances) {
-
-			return instances.stream().filter(p -> value.equals(p.stringValue(node.attr())))
-					.collect(Collectors.toList());
-		}
-		
 		private double gain(Attribute attr, List<Instance> instances) {
 			
 			Map<String, List<Instance>> profitCategory = this.spreads(cls, instances);

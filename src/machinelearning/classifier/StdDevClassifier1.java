@@ -266,13 +266,6 @@ public class StdDevClassifier1 {
 			return sd(node.attr(), node.inputs());
 		}
 
-		@Override
-		public List<Instance> filter(boolean binary, CARTNode<?> node, Object value, List<Instance> instances) {
-
-			return instances.stream().filter(p -> value.equals(p.stringValue(node.attr())))
-					.collect(Collectors.toList());
-		}
-		
 		@SuppressWarnings("unused")
 		private double cv(List<Instance> instances) {
 			

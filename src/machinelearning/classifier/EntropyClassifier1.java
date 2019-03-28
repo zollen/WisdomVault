@@ -193,13 +193,6 @@ public class EntropyClassifier1 {
 			// TODO Auto-generated method stub
 			return entropy(node.attr(), node.inputs());
 		}
-
-		@Override
-		public List<Instance> filter(boolean binary, CARTNode<?> node, Object value, List<Instance> instances) {
-
-			return instances.stream().filter(p -> value.equals(p.stringValue(node.attr())))
-					.collect(Collectors.toList());
-		}
 		
 		private double gain(Attribute attr, List<Instance> instances) {
 			

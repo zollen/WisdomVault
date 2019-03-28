@@ -118,12 +118,6 @@ public class GradientBoostClassifier {
 				return sum.doubleValue();
 			}
 		}
-
-		@Override
-		public List<Instance> filter(boolean binary, CARTNode<?> node, Object value, List<Instance> instances) {
-			
-			return instances.stream().filter(p ->  value.equals(p.stringValue(node.attr()))).collect(Collectors.toList());
-		}
 	}
 	
 	public static void avg(Instances instances, Attribute attr) {

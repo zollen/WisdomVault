@@ -3,7 +3,6 @@ package machinelearning.classifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.DoubleAdder;
-import java.util.stream.Collectors;
 
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -273,12 +272,6 @@ public class GiniClassifier3 {
 
 				return sum.doubleValue();
 			}
-		}
-
-		@Override
-		public List<Instance> filter(boolean binary, CARTNode<?> node, Object value, List<Instance> instances) {
-			
-			return instances.stream().filter(p ->  value.equals(p.stringValue(node.attr()))).collect(Collectors.toList());
 		}
 	}
 }

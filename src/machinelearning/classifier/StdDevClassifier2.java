@@ -120,13 +120,6 @@ public class StdDevClassifier2 {
 			// TODO Auto-generated method stub
 			return sd(node.attr(), node.inputs());
 		}
-
-		@Override
-		public List<Instance> filter(boolean binary, CARTNode<?> node, Object value, List<Instance> instances) {
-
-			return instances.stream().filter(p -> value.equals(p.stringValue(node.attr())))
-					.collect(Collectors.toList());
-		}
 		
 		private double sd(Attribute attr, List<Instance> instances) {
 			

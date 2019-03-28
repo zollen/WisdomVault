@@ -3,7 +3,6 @@ package machinelearning.classifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.DoubleAdder;
-import java.util.stream.Collectors;
 
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -71,14 +70,14 @@ public class GiniClassifier2 {
 		Instances testing = new Instances("TESTING", attrs, 2);
 		
 		Instance data1 = new DenseInstance(3);	
-		data1.setValue(attrs.get(0), 8);
-		data1.setValue(attrs.get(1), 10);
+		data1.setValue(attrs.get(0), 8.5);
+		data1.setValue(attrs.get(1), 13);
 	//	data1.setValue(attrs.get(2), VALUE_CLASS_CAT);
 		testing.add(data1);
 		
 		Instance data2 = new DenseInstance(3);	
-		data2.setValue(attrs.get(0), 9);
-		data2.setValue(attrs.get(1), 8);
+		data2.setValue(attrs.get(0), 11);
+		data2.setValue(attrs.get(1), 7.6);
 	//	data2.setValue(attrs.get(2), VALUE_CLASS_DOG);
 		testing.add(data2);
 		
@@ -173,20 +172,17 @@ public class GiniClassifier2 {
 			// TODO Auto-generated method stub
 
 			// gini impurities
-			DoubleAdder sum = new DoubleAdder();
-
+			
 			if (node.inputs().size() <= 0)
 				return 0.0;
 
 			if (node.children().size() <= 0) {
-
-				node.data().entrySet().stream().forEach(p -> {
-					sum.add(Math.pow((double) p.getValue().size() / node.inputs().size(), 2));
-				});
-
-				return 1 - sum.doubleValue();
+				
+				return 1 - node.data().entrySet().stream().mapToDouble(
+						p -> Math.pow(p.getValue().size() / node.inputs().size(), 2)).sum();
 			} else {
 
+				DoubleAdder sum = new DoubleAdder();
 				node.children().entrySet().stream().forEach(p -> {
 
 					sum.add((double) node.data().get(p.getKey()).size() / node.inputs().size() * score(p.getValue()));
@@ -195,26 +191,5 @@ public class GiniClassifier2 {
 				return sum.doubleValue();
 			}
 		}
-
-		@Override
-		public List<Instance> filter(boolean binary, CARTNode<?> node, Object value, List<Instance> instances) {
-			
-			if (node.attr() == this.cls) {
-				return instances.stream().filter(p ->  value.equals(p.stringValue(node.attr()))).collect(Collectors.toList());
-			}
-			
-			
-			if (binary)
-				return instances.stream().filter(p -> { 
-					System.out.println("KONGS: " + value);
-					return p.value(node.attr()) < ((Double)value).doubleValue();
-				}).collect(Collectors.toList());
-			else
-				return instances.stream().filter(p ->  {
-					System.out.println("KONGS: " + value);
-					return p.value(node.attr()) >= ((Double)value).doubleValue();
-				}).collect(Collectors.toList());
-		}
-		
 	}
 }

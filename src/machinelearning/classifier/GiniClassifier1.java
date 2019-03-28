@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.DoubleAdder;
-import java.util.stream.Collectors;
 
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -136,16 +135,6 @@ public class GiniClassifier1 {
 				});
 
 				return sum.doubleValue();
-			}
-		}
-
-		@Override
-		public List<Instance> filter(boolean binary, CARTNode<?> node, Object value, List<Instance> instances) {
-			if (binary) {
-				return instances.stream().filter(p -> !value.equals(p.stringValue(node.attr()))).collect(Collectors.toList());
-			}
-			else {
-				return instances.stream().filter(p ->  value.equals(p.stringValue(node.attr()))).collect(Collectors.toList());
 			}
 		}
 	}
