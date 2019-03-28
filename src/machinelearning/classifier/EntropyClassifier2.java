@@ -1,7 +1,6 @@
 package machinelearning.classifier;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.DoubleAdder;
@@ -71,22 +70,12 @@ public class EntropyClassifier2 {
 		attrs.add(attr4);
 		attrs.add(attr5);
 		
-
-		// defining data dictionary
-
-		Map<Attribute, List<?>> definition = new LinkedHashMap<Attribute, List<?>>();
-		definition.put(attr1, outlookVals);
-		definition.put(attr2, tempVals);
-		definition.put(attr3, humidityVals);
-		definition.put(attr4, windyVals);
-		definition.put(attr5, playVals);
-		
 		
 		// training
 
 		List<Instance> training = generateTrainingData(attrs);
 
-		Entropy entropy = new Entropy(definition, attr5);
+		Entropy entropy = new Entropy(attrs, attr5);
 
 		CARTNode.Strategy.Builder<Entropy> builder = new CARTNode.Strategy.Builder<Entropy>(entropy);
 
@@ -224,33 +213,10 @@ public class EntropyClassifier2 {
 		return training;
 	}
 
-	private static class Entropy implements CARTNode.Strategy {
+	private static class Entropy extends CARTNode.Strategy {
 
-		private Map<Attribute, List<?>> definition = null;
-		private List<Attribute> attrs = null;
-		private Attribute cls = null;
-
-		public Entropy(Map<Attribute, List<?>> definition, Attribute cls) {
-			this.definition = definition;
-			this.attrs = definition.keySet().stream().collect(Collectors.toList());
-
-			this.cls = cls;
-			this.attrs.remove(cls);
-		}
-
-		@Override
-		public Map<Attribute, List<?>> definition() {
-			return definition;
-		}
-
-		@Override
-		public String op() {
-			return " == ";
-		}
-
-		@Override
-		public Attribute cls() {
-			return cls;
+		public Entropy(List<Attribute> attrs, Attribute cls) {
+			super(attrs, cls);
 		}
 
 		@Override

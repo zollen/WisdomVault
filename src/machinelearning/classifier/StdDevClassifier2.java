@@ -1,7 +1,6 @@
 package machinelearning.classifier;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -36,20 +35,13 @@ public class StdDevClassifier2 {
 		attrs.add(attr3);
 		attrs.add(attr4);
 
-		// defining data dictionary
 
-		Map<Attribute, List<?>> definition = new LinkedHashMap<Attribute, 
-						List<?>>();
-		definition.put(attr1, vals);
-		definition.put(attr2, vals);
-		definition.put(attr3, vals);
-		definition.put(attr4, vals);
 
 		// training
 
 		List<Instance> training = generateTrainingData(100, 0, attrs);
 
-		StdDev sd = new StdDev(definition, attr4, training.size());
+		StdDev sd = new StdDev(attrs, attr4, training.size());
 		
 		CARTNode.Strategy.Builder<StdDev> builder = 
 				new CARTNode.Strategy.Builder<StdDev>(sd);
@@ -88,35 +80,13 @@ public class StdDevClassifier2 {
 		return training;
 	}
 
-	private static class StdDev implements CARTNode.Strategy {
+	private static class StdDev extends CARTNode.Strategy {
 
-		private Map<Attribute, List<?>> definition = null;
-		private List<Attribute> attrs = null;
-		private Attribute cls = null;
 		private int total = 0;
 
-		public StdDev(Map<Attribute, List<?>> definition, Attribute cls, int size) {
-			this.definition = definition;
-			this.attrs = definition.keySet().stream().collect(Collectors.toList());
+		public StdDev(List<Attribute> attrs, Attribute cls, int size) {
+			super(attrs, cls);
 			this.total = size;
-
-			this.cls = cls;
-			this.attrs.remove(cls);
-		}
-
-		@Override
-		public Map<Attribute, List<?>> definition() {
-			return definition;
-		}
-
-		@Override
-		public String op() {
-			return " == ";
-		}
-
-		@Override
-		public Attribute cls() {
-			return cls;
 		}
 
 		@Override

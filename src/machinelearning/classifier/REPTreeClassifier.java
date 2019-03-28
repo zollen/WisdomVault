@@ -1,20 +1,14 @@
 package machinelearning.classifier;
-
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.DoubleAdder;
-import java.util.stream.Collectors;
 
-import org.apache.commons.math3.stat.StatUtils;
-
+import weka.classifiers.trees.REPTree;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class StdDevClassifier1 {
-
+public class REPTreeClassifier {
+	
 	private static final String VALUE_OUTLOOK_SUNNY = "sunny";
 	private static final String VALUE_OUTLOOK_OVERCAST = "overcast";
 	private static final String VALUE_OUTLOOK_RAINY = "rainy";
@@ -29,12 +23,12 @@ public class StdDevClassifier1 {
 	private static final String VALUE_WINDY_TRUE = "true";
 	private static final String VALUE_WINDY_FALSE = "false";
 	
+	private static final String VALUE_PLAY_YES = "Yes";
+	private static final String VALUE_PLAY_NO = "No";
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
-
-		// defining data format
-
+		
 		ArrayList<String> outlookVals = new ArrayList<String>();
 		outlookVals.add(VALUE_OUTLOOK_SUNNY);
 		outlookVals.add(VALUE_OUTLOOK_OVERCAST);
@@ -54,17 +48,8 @@ public class StdDevClassifier1 {
 		windyVals.add(VALUE_WINDY_FALSE);
 		
 		ArrayList<String> playVals = new ArrayList<String>();
-		playVals.add("23");
-		playVals.add("26");
-		playVals.add("30");
-		playVals.add("36");
-		playVals.add("38");
-		playVals.add("43");
-		playVals.add("44");
-		playVals.add("46");
-		playVals.add("48");
-		playVals.add("62");
-		
+		playVals.add(VALUE_PLAY_YES);
+		playVals.add(VALUE_PLAY_NO);
 		
 
 		ArrayList<Attribute> attrs = new ArrayList<Attribute>();
@@ -79,51 +64,46 @@ public class StdDevClassifier1 {
 		attrs.add(attr4);
 		attrs.add(attr5);
 		
-
-		// training
-
-		List<Instance> training = generateTrainingData(attrs);
-			
-		StdDev sd = new StdDev(attrs, attr5, training.size());
-
-		CARTNode.Strategy.Builder<StdDev> builder = 
-				new CARTNode.Strategy.Builder<StdDev>(sd);
-
-		CARTNode<StdDev> root = builder.build(training);
-
-		System.out.println(root.toAll());
-
+		
+		Instances training = generateTrainingData(attrs);	
+		
+		
+		REPTree tree = new REPTree();	
+		tree.setDebug(true);
+		tree.buildClassifier(training);
+		System.out.println(tree.globalInfo());
+		System.out.println(tree);
+		
 	}
-
-	public static List<Instance> generateTrainingData(ArrayList<Attribute> attrs) {
+	
+	public static Instances generateTrainingData(ArrayList<Attribute> attrs) {
 
 		Instances training = new Instances("TRAINING", attrs, 14);
 		
-		// Answers:
+		// AnswerS:
 		// outlook
-		//   +-<sunny>    - windy
-		//						+-<true>  - 26.5
-		//						+-<false> - 47.7
-		//   +-<overcast> - 46.3
-		//   +-<rainy>    - temp
-		//						+-<cool> - 38
-		//						+-<hot>  - 27.5
-		//						+-<mild> - 41.5
+		//   +-<sunny>    - humidity
+		//						+-<high> - no
+		//						+-<normal> - yes
+		//   +-<overcast> - yes
+		//   +-<rainy>    - windy
+		//						+-<false> - yes
+		//						+-<true>  - no
 		
 		Instance data1 = new DenseInstance(5);	
-		data1.setValue(attrs.get(0), VALUE_OUTLOOK_RAINY);
+		data1.setValue(attrs.get(0), VALUE_OUTLOOK_SUNNY);
 		data1.setValue(attrs.get(1), VALUE_TEMP_HOT);
 		data1.setValue(attrs.get(2), VALUE_HUMIDITY_HIGH);
 		data1.setValue(attrs.get(3), VALUE_WINDY_FALSE);
-		data1.setValue(attrs.get(4), "26");
+		data1.setValue(attrs.get(4), VALUE_PLAY_NO);
 		training.add(data1);
 		
 		Instance data2 = new DenseInstance(5);	
-		data2.setValue(attrs.get(0), VALUE_OUTLOOK_RAINY);
+		data2.setValue(attrs.get(0), VALUE_OUTLOOK_SUNNY);
 		data2.setValue(attrs.get(1), VALUE_TEMP_HOT);
 		data2.setValue(attrs.get(2), VALUE_HUMIDITY_HIGH);
 		data2.setValue(attrs.get(3), VALUE_WINDY_TRUE);
-		data2.setValue(attrs.get(4), "30");
+		data2.setValue(attrs.get(4), VALUE_PLAY_NO);
 		training.add(data2);
 		
 		Instance data3 = new DenseInstance(5);	
@@ -131,31 +111,31 @@ public class StdDevClassifier1 {
 		data3.setValue(attrs.get(1), VALUE_TEMP_HOT);
 		data3.setValue(attrs.get(2), VALUE_HUMIDITY_HIGH);
 		data3.setValue(attrs.get(3), VALUE_WINDY_FALSE);
-		data3.setValue(attrs.get(4), "48");
+		data3.setValue(attrs.get(4), VALUE_PLAY_YES);
 		training.add(data3);
 		
 		Instance data4 = new DenseInstance(5);	
-		data4.setValue(attrs.get(0), VALUE_OUTLOOK_SUNNY);
+		data4.setValue(attrs.get(0), VALUE_OUTLOOK_RAINY);
 		data4.setValue(attrs.get(1), VALUE_TEMP_MILD);
 		data4.setValue(attrs.get(2), VALUE_HUMIDITY_HIGH);
 		data4.setValue(attrs.get(3), VALUE_WINDY_FALSE);
-		data4.setValue(attrs.get(4), "46");
+		data4.setValue(attrs.get(4), VALUE_PLAY_YES);
 		training.add(data4);
 		
 		Instance data5 = new DenseInstance(5);	
-		data5.setValue(attrs.get(0), VALUE_OUTLOOK_SUNNY);
+		data5.setValue(attrs.get(0), VALUE_OUTLOOK_RAINY);
 		data5.setValue(attrs.get(1), VALUE_TEMP_COOL);
 		data5.setValue(attrs.get(2), VALUE_HUMIDITY_NORMAL);
 		data5.setValue(attrs.get(3), VALUE_WINDY_FALSE);
-		data5.setValue(attrs.get(4), "62");
+		data5.setValue(attrs.get(4), VALUE_PLAY_YES);
 		training.add(data5);
 		
 		Instance data6 = new DenseInstance(5);	
-		data6.setValue(attrs.get(0), VALUE_OUTLOOK_SUNNY);
+		data6.setValue(attrs.get(0), VALUE_OUTLOOK_RAINY);
 		data6.setValue(attrs.get(1), VALUE_TEMP_COOL);
 		data6.setValue(attrs.get(2), VALUE_HUMIDITY_NORMAL);
 		data6.setValue(attrs.get(3), VALUE_WINDY_TRUE);
-		data6.setValue(attrs.get(4), "23");
+		data6.setValue(attrs.get(4), VALUE_PLAY_NO);
 		training.add(data6);
 		
 		Instance data7 = new DenseInstance(5);	
@@ -163,39 +143,39 @@ public class StdDevClassifier1 {
 		data7.setValue(attrs.get(1), VALUE_TEMP_COOL);
 		data7.setValue(attrs.get(2), VALUE_HUMIDITY_NORMAL);
 		data7.setValue(attrs.get(3), VALUE_WINDY_TRUE);
-		data7.setValue(attrs.get(4), "43");
+		data7.setValue(attrs.get(4), VALUE_PLAY_YES);
 		training.add(data7);
 		
 		Instance data8 = new DenseInstance(5);	
-		data8.setValue(attrs.get(0), VALUE_OUTLOOK_RAINY);
+		data8.setValue(attrs.get(0), VALUE_OUTLOOK_SUNNY);
 		data8.setValue(attrs.get(1), VALUE_TEMP_MILD);
 		data8.setValue(attrs.get(2), VALUE_HUMIDITY_HIGH);
 		data8.setValue(attrs.get(3), VALUE_WINDY_FALSE);
-		data8.setValue(attrs.get(4), "36");
+		data8.setValue(attrs.get(4), VALUE_PLAY_NO);
 		training.add(data8);
 		
 		Instance data9 = new DenseInstance(5);	
-		data9.setValue(attrs.get(0), VALUE_OUTLOOK_RAINY);
+		data9.setValue(attrs.get(0), VALUE_OUTLOOK_SUNNY);
 		data9.setValue(attrs.get(1), VALUE_TEMP_COOL);
 		data9.setValue(attrs.get(2), VALUE_HUMIDITY_NORMAL);
 		data9.setValue(attrs.get(3), VALUE_WINDY_FALSE);
-		data9.setValue(attrs.get(4), "38");
+		data9.setValue(attrs.get(4), VALUE_PLAY_YES);
 		training.add(data9);
 		
 		Instance data10 = new DenseInstance(5);	
-		data10.setValue(attrs.get(0), VALUE_OUTLOOK_SUNNY);
+		data10.setValue(attrs.get(0), VALUE_OUTLOOK_RAINY);
 		data10.setValue(attrs.get(1), VALUE_TEMP_MILD);
 		data10.setValue(attrs.get(2), VALUE_HUMIDITY_NORMAL);
 		data10.setValue(attrs.get(3), VALUE_WINDY_FALSE);
-		data10.setValue(attrs.get(4), "48");
+		data10.setValue(attrs.get(4), VALUE_PLAY_YES);
 		training.add(data10);
 		
 		Instance data11 = new DenseInstance(5);	
-		data11.setValue(attrs.get(0), VALUE_OUTLOOK_RAINY);
+		data11.setValue(attrs.get(0), VALUE_OUTLOOK_SUNNY);
 		data11.setValue(attrs.get(1), VALUE_TEMP_MILD);
 		data11.setValue(attrs.get(2), VALUE_HUMIDITY_NORMAL);
 		data11.setValue(attrs.get(3), VALUE_WINDY_TRUE);
-		data11.setValue(attrs.get(4), "48");
+		data11.setValue(attrs.get(4), VALUE_PLAY_YES);
 		training.add(data11);
 		
 		Instance data12 = new DenseInstance(5);	
@@ -203,7 +183,7 @@ public class StdDevClassifier1 {
 		data12.setValue(attrs.get(1), VALUE_TEMP_MILD);
 		data12.setValue(attrs.get(2), VALUE_HUMIDITY_HIGH);
 		data12.setValue(attrs.get(3), VALUE_WINDY_TRUE);
-		data12.setValue(attrs.get(4), "62");
+		data12.setValue(attrs.get(4), VALUE_PLAY_YES);
 		training.add(data12);
 		
 		Instance data13 = new DenseInstance(5);	
@@ -211,125 +191,20 @@ public class StdDevClassifier1 {
 		data13.setValue(attrs.get(1), VALUE_TEMP_HOT);
 		data13.setValue(attrs.get(2), VALUE_HUMIDITY_NORMAL);
 		data13.setValue(attrs.get(3), VALUE_WINDY_FALSE);
-		data13.setValue(attrs.get(4), "44");
+		data13.setValue(attrs.get(4), VALUE_PLAY_YES);
 		training.add(data13);
 		
 		Instance data14 = new DenseInstance(5);	
-		data14.setValue(attrs.get(0), VALUE_OUTLOOK_SUNNY);
+		data14.setValue(attrs.get(0), VALUE_OUTLOOK_RAINY);
 		data14.setValue(attrs.get(1), VALUE_TEMP_MILD);
 		data14.setValue(attrs.get(2), VALUE_HUMIDITY_HIGH);
 		data14.setValue(attrs.get(3), VALUE_WINDY_TRUE);
-		data14.setValue(attrs.get(4), "30");
+		data14.setValue(attrs.get(4), VALUE_PLAY_NO);
 		training.add(data14);
+		
+		training.setClassIndex(training.numAttributes() - 1);
 
 		return training;
 	}
 
-	private static class StdDev extends CARTNode.Strategy {
-
-		private int total = 0;
-
-		public StdDev(List<Attribute> attrs, Attribute cls, int size) {
-			super(attrs, cls);
-			this.total = size;
-		}
-
-		@Override
-		public CARTNode<StdDev> calculate(double last, List<Attribute> attrs, List<Instance> instances) {
-
-			CARTNode.Strategy.Builder<StdDev> builder = 
-					new CARTNode.Strategy.Builder<StdDev>(this);
-			DoubleAdder max = new DoubleAdder();
-			max.add(Double.MIN_VALUE);
-
-			PlaceHolder<CARTNode<StdDev>> holder = new PlaceHolder<CARTNode<StdDev>>();
-
-			attrs.stream().forEach(p -> {
-
-				CARTNode<StdDev> node = builder.test(p, this.definition().get(p), instances);
-				double score = node.score();
-				double ratio = (double) instances.size() / this.total;	
-		
-				if (max.doubleValue() < score && ratio > 0.3) {
-					max.reset();
-					max.add(score);
-					holder.data(node);
-				}
-			});
-		
-			return holder.data();
-		}
-
-		@Override
-		public double score(CARTNode<?> node) {
-			// TODO Auto-generated method stub
-			return sd(node.attr(), node.inputs());
-		}
-
-		@Override
-		public List<Instance> filter(boolean binary, CARTNode<?> node, Object value, List<Instance> instances) {
-
-			return instances.stream().filter(p -> value.equals(p.stringValue(node.attr())))
-					.collect(Collectors.toList());
-		}
-		
-		@SuppressWarnings("unused")
-		private double cv(List<Instance> instances) {
-			
-			double [] data = instances.stream().mapToDouble(
-					v -> Double.valueOf(v.stringValue(cls))).toArray();
-			
-			double mean = StatUtils.mean(data);
-			double sd = StatUtils.variance(data);
-			if (sd == 0)
-				return 0;
-			
-			return Math.sqrt(sd) / mean;
-		}
-		
-		private double sd(Attribute attr, List<Instance> instances) {
-			
-			Map<String, List<Instance>> map = spreads(attr, instances);
-			
-			DoubleAdder sum = new DoubleAdder();
-			
-			map.entrySet().stream().forEach(p -> {
-				
-				double [] data = p.getValue().stream().mapToDouble(
-						v -> Double.valueOf(v.stringValue(cls))).toArray();
-				
-				if (data.length > 0) {
-					
-					double ssd = Math.sqrt(StatUtils.variance(data));
-					
-					sum.add(ssd * data.length / instances.size());	
-				}
-			});
-				
-			// calculating standard deviation reduction	
-			double result = ssd(instances) - sum.doubleValue();
-			// calculating standard deviation reduction	
-			if (result < 0)
-				result = 0.00001;
-			
-			return result;
-		}
-		
-		private double ssd(List<Instance> instances) {
-
-			// calculating the standard deviation before the splits
-			double [] data = instances.stream().mapToDouble(
-						p -> Double.valueOf(p.stringValue(cls))).toArray();
-						
-			if (data.length <= 0)
-				return 0;
-			
-			return Math.sqrt(StatUtils.variance(data));
-		}
-
-		private Map<String, List<Instance>> spreads(Attribute attr, List<Instance> instances) {
-
-			return instances.stream().collect(Collectors.groupingBy(p -> p.stringValue(attr)));
-		}
-	}
 }

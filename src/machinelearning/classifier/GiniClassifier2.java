@@ -1,11 +1,7 @@
 package machinelearning.classifier;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.stream.Collectors;
 
@@ -23,7 +19,7 @@ public class GiniClassifier2 {
 		// TODO Auto-generated method stub
 
 		// defining data format
-
+/*
 		ArrayList<String> weightVals = new ArrayList<String>();
 		weightVals.add("8");
 		weightVals.add("9");
@@ -36,45 +32,38 @@ public class GiniClassifier2 {
 		heightVals.add("10");
 		heightVals.add("12");
 		heightVals.add("40");
-		
+*/		
 		ArrayList<String> clsVals = new ArrayList<String>();
 		clsVals.add(VALUE_CLASS_DOG);
 		clsVals.add(VALUE_CLASS_CAT);
 		
 
 		ArrayList<Attribute> attrs = new ArrayList<Attribute>();
-		Attribute attr1 = new Attribute("weight", weightVals);
-		Attribute attr2 = new Attribute("height", heightVals);
-		Attribute attr3 = new Attribute("animal", clsVals);
+		Attribute attr1 = new Attribute("weight", 1);
+		Attribute attr2 = new Attribute("height", 2);
+		Attribute attr3 = new Attribute("animal", clsVals, 3);
 		attrs.add(attr1);
 		attrs.add(attr2);
 		attrs.add(attr3);
-		
-
-		// defining data dictionary
-
-		Map<Attribute, List<?>> definition = new LinkedHashMap<Attribute, List<?>>();
-		definition.put(attr1, weightVals);
-		definition.put(attr2, heightVals);
-		definition.put(attr3, clsVals);
-		
+	
 	
 		// training
 
 		List<Instance> training = generateTrainingData(attrs);
 
-		Gini gini = new Gini(definition, attr3);
+		Gini gini = new Gini(attrs, attr3);
 
 		CARTNode.Strategy.Builder<Gini> builder = new CARTNode.Strategy.Builder<Gini>(gini);
 		
 		CARTNode<Gini> root = builder.build(training);
 		
 		System.out.println(root.toAll());
-		
+	
 		List<Instance> testing = generateTestData(attrs);
 		
 		for (Instance instance : testing)
 			root.classify(instance);
+
 	}
 	
 	public static List<Instance> generateTestData(ArrayList<Attribute> attrs) {
@@ -82,14 +71,14 @@ public class GiniClassifier2 {
 		Instances testing = new Instances("TESTING", attrs, 2);
 		
 		Instance data1 = new DenseInstance(3);	
-		data1.setValue(attrs.get(0), "8");
-		data1.setValue(attrs.get(1), "10");
+		data1.setValue(attrs.get(0), 8);
+		data1.setValue(attrs.get(1), 10);
 	//	data1.setValue(attrs.get(2), VALUE_CLASS_CAT);
 		testing.add(data1);
 		
 		Instance data2 = new DenseInstance(3);	
-		data2.setValue(attrs.get(0), "9");
-		data2.setValue(attrs.get(1), "8");
+		data2.setValue(attrs.get(0), 9);
+		data2.setValue(attrs.get(1), 8);
 	//	data2.setValue(attrs.get(2), VALUE_CLASS_DOG);
 		testing.add(data2);
 		
@@ -108,65 +97,42 @@ public class GiniClassifier2 {
 		//    + - false - dog (2)
 		
 		Instance data1 = new DenseInstance(3);	
-		data1.setValue(attrs.get(0), "8");
-		data1.setValue(attrs.get(1), "8");
+		data1.setValue(attrs.get(0), 8);
+		data1.setValue(attrs.get(1), 8);
 		data1.setValue(attrs.get(2), VALUE_CLASS_DOG);
 		training.add(data1);
 		
 		Instance data2 = new DenseInstance(3);	
-		data2.setValue(attrs.get(0), "50");
-		data2.setValue(attrs.get(1), "40");
+		data2.setValue(attrs.get(0), 50);
+		data2.setValue(attrs.get(1), 40);
 		data2.setValue(attrs.get(2), VALUE_CLASS_DOG);
 		training.add(data2);
 		
 		Instance data3 = new DenseInstance(3);	
-		data3.setValue(attrs.get(0), "8");
-		data3.setValue(attrs.get(1), "9");
+		data3.setValue(attrs.get(0), 8);
+		data3.setValue(attrs.get(1), 9);
 		data3.setValue(attrs.get(2), VALUE_CLASS_CAT);
 		training.add(data3);
 		
 		Instance data4 = new DenseInstance(3);	
-		data4.setValue(attrs.get(0), "15");
-		data4.setValue(attrs.get(1), "12");
+		data4.setValue(attrs.get(0), 15);
+		data4.setValue(attrs.get(1), 12);
 		data4.setValue(attrs.get(2), VALUE_CLASS_DOG);
 		training.add(data4);
 		
 		Instance data5 = new DenseInstance(3);	
-		data5.setValue(attrs.get(0), "9");
-		data5.setValue(attrs.get(1), "10");
+		data5.setValue(attrs.get(0), 9);
+		data5.setValue(attrs.get(1), 10);
 		data5.setValue(attrs.get(2), VALUE_CLASS_CAT);
 		training.add(data5);
 
 		return training;
 	}
 
-	private static class Gini implements CARTNode.Strategy {
+	private static class Gini extends CARTNode.Strategy {
 
-		private Map<Attribute, List<?>> definition = null;
-		private List<Attribute> attrs = null;
-		private Attribute cls = null;
-
-		public Gini(Map<Attribute, List<?>> definition, Attribute cls) {
-			this.definition = definition;
-			this.attrs = definition.keySet().stream().collect(Collectors.toList());
-
-			this.cls = cls;
-			this.attrs.remove(cls);
-		}
-		
-		@Override
-		public Map<Attribute, List<?>> definition() {
-			return definition;
-		}
-		
-		@Override
-		public String op() {
-			return " >= ";
-		}
-		
-		@Override
-		public Attribute cls() {
-			return cls;
+		public Gini(List<Attribute> attrs, Attribute cls) {
+			super(attrs, cls);
 		}
 		
 		@Override
@@ -180,11 +146,11 @@ public class GiniClassifier2 {
 				
 			attrs.stream().forEach(p -> {
 					
-				List<String> vals = values2(this.definition().get(p));
+				List<Object> vals = possibleValues(p, instances);
 					
 				vals.stream().forEach(v -> {
 								
-					List<String> list = new ArrayList<String>();
+					List<Object> list = new ArrayList<Object>();
 					list.add(v);
 					list.add(v);
 					
@@ -236,40 +202,19 @@ public class GiniClassifier2 {
 			if (node.attr() == this.cls) {
 				return instances.stream().filter(p ->  value.equals(p.stringValue(node.attr()))).collect(Collectors.toList());
 			}
-		
+			
 			
 			if (binary)
 				return instances.stream().filter(p -> { 
-					return Double.valueOf(p.stringValue(node.attr())) < Double.valueOf(value.toString());
+					System.out.println("KONGS: " + value);
+					return p.value(node.attr()) < ((Double)value).doubleValue();
 				}).collect(Collectors.toList());
 			else
 				return instances.stream().filter(p ->  {
-					return Double.valueOf(p.stringValue(node.attr())) >= Double.valueOf(value.toString());
+					System.out.println("KONGS: " + value);
+					return p.value(node.attr()) >= ((Double)value).doubleValue();
 				}).collect(Collectors.toList());
 		}
 		
-		// treat the possible values as numeric data
-		@SuppressWarnings("unchecked")
-		private List<String> values2(List<?> vals) {
-			
-			Collections.sort((List<String>) vals, new Comparator<String>() {
-
-				@Override
-				public int compare(String o1, String o2) {
-					// TODO Auto-generated method stub
-					return Integer.valueOf(o1).compareTo(Integer.valueOf(o2));
-				}
-			});
-			
-			List<String> nList = new ArrayList<String>();
-			
-			for (int i = 0; vals.size() > 0 && i < vals.size() - 1; i++) {
-				double d1 = Double.valueOf(vals.get(i + 1).toString());
-				double d2 = Double.valueOf(vals.get(i).toString());
-				nList.add(String.valueOf((double) (d1 + d2) / 2));
-			}
-		
-			return nList;
-		}
 	}
 }

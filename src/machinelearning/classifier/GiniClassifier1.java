@@ -1,9 +1,7 @@
 package machinelearning.classifier;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.stream.Collectors;
@@ -34,19 +32,12 @@ public class GiniClassifier1 {
 		attrs.add(attr3);
 		attrs.add(attr4);
 
-		// defining data dictionary
-
-		Map<Attribute, List<?>> definition = new LinkedHashMap<Attribute, List<?>>();
-		definition.put(attr1, vals);
-		definition.put(attr2, vals);
-		definition.put(attr3, vals);
-		definition.put(attr4, vals);
 
 		// training
 
 		List<Instance> training = generateTrainingData(100, 0, attrs);
 
-		Gini gini = new Gini(definition, attr4);
+		Gini gini = new Gini(attrs, attr4);
 
 		CARTNode.Strategy.Builder<Gini> builder = new CARTNode.Strategy.Builder<Gini>(gini);
 		
@@ -83,35 +74,12 @@ public class GiniClassifier1 {
 		return training;
 	}
 
-	private static class Gini implements CARTNode.Strategy {
+	private static class Gini extends CARTNode.Strategy {
 
-		private Map<Attribute, List<?>> definition = null;
-		private List<Attribute> attrs = null;
-		private Attribute cls = null;
-
-		public Gini(Map<Attribute, List<?>> definition, Attribute cls) {
-			this.definition = definition;
-			this.attrs = definition.keySet().stream().collect(Collectors.toList());
-
-			this.cls = cls;
-			this.attrs.remove(cls);
+		public Gini(List<Attribute> attrs, Attribute cls) {
+			super(attrs, cls);
 		}
-		
-		@Override
-		public Attribute cls() {
-			return cls;
-		}
-		
-		@Override
-		public Map<Attribute, List<?>> definition() {
-			return definition;
-		}
-		
-		@Override
-		public String op() {
-			return " == ";
-		}
-
+			
 		@Override
 		public CARTNode<Gini> calculate(double last, List<Attribute> attrs, List<Instance> instances) {
 			

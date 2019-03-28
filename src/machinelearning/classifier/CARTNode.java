@@ -2,9 +2,13 @@ package machinelearning.classifier;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import weka.core.Attribute;
@@ -76,6 +80,8 @@ public class CARTNode<T extends CARTNode.Strategy> {
 				
 				value = value.substring(0, pos);
 			}
+			
+	
 			
 			List<Instance> list = this.filter(isChoice, value, instances);
 			if (list.size() > 0) {
@@ -196,10 +202,27 @@ public class CARTNode<T extends CARTNode.Strategy> {
 		builder.append(indent(value, indent));
 		builder.append(this);
 		builder.append("\n");
+		
+		List<String> op =  new ArrayList<String>();
+		children.keySet().stream().forEach(p -> op.add(" == "));
+		
+		if (this.isBinaryChoices && children.size() == 2) {
+			if (this.attr.isNominal()) {
+				op.set(0, " == ");
+				op.set(1,  " <> ");
+			}
+			else
+			if (this.attr.isNumeric()) {
+				op.set(0, " >= ");
+				op.set(1,  " < ");
+			}
+		}
+			
 
+		AtomicInteger count = new AtomicInteger(0);
 		children.entrySet().forEach(p -> {
 			
-			builder.append(p.getValue().toAll(label() + this.strategy.op() + p.getKey(), indent + 10));
+			builder.append(p.getValue().toAll(label() + op.get(count.getAndIncrement()) + p.getKey(), indent + 10));
 		});
 
 		return builder.toString();
@@ -209,12 +232,12 @@ public class CARTNode<T extends CARTNode.Strategy> {
 	
 
 
-	public static interface Strategy {
+	public static abstract class Strategy {
 		
 		public static class Builder<T extends CARTNode.Strategy> {
 			
 			private T strategy;
-			
+		
 			public Builder(T strategy) {
 				this.strategy = strategy;
 			}
@@ -291,17 +314,75 @@ public class CARTNode<T extends CARTNode.Strategy> {
 			}
 		}
 		
-		public Map<Attribute, List<?>> definition();
+		protected List<Attribute> attrs = null;
+		protected Attribute cls = null;
+		protected Map<Attribute, List<?>> definition = null;
 		
-		public Attribute cls();
+		public Strategy(List<Attribute> attrs, Attribute cls) {
+			this.attrs = new ArrayList<Attribute>(attrs);	
+			this.cls = cls;
+			this.definition = new HashMap<Attribute, List<?>>();
+			
+			for (Attribute attr : attrs) {
+				
+				Enumeration<Object> vals = attr.enumerateValues();
+				List<Object> values = new ArrayList<Object>();
+				
+				while (vals != null && vals.hasMoreElements()) 
+					values.add(vals.nextElement());
+				
+				this.definition.put(attr, values);
+			}	
+			
+			this.attrs.remove(this.cls);
+		}
 		
-		public String op();
+		public Map<Attribute, List<?>> definition() {
+			return definition;
+		}
 		
-		public CARTNode<?> calculate(double score, List<Attribute> attrs, List<Instance> instances);
+		public List<Attribute> attrs() {
+			return attrs;
+		}
+	
+		public Attribute cls() {
+			return cls;
+		}
+		
+		public List<Object> possibleValues(Attribute attr, List<Instance> instances) {
+			
+			List<Object> vals = new ArrayList<Object>();
+			
+			if (attr.isNominal()) {
+				
+				Enumeration<Object> o = attr.enumerateValues();
+				while (o != null && o.hasMoreElements())
+					vals.add(o);
+			}
+			else
+			if (attr.isNumeric()) {
+				
+				List<Double> nums = new ArrayList<Double>();
+				
+				instances.stream().forEach(p -> nums.add(p.value(attr)));
+				
+				Collections.sort(nums);
+				
+				for (int i = 0; nums.size() > 0 && i < nums.size() - 1; i++) {
+					double d1 = nums.get(i + 1).doubleValue();
+					double d2 = nums.get(i).doubleValue();
+					vals.add(Double.valueOf((d1 + d2) / 2));
+				}	
+			}
+			
+			return vals;
+		}
+		
+		public abstract CARTNode<?> calculate(double score, List<Attribute> attrs, List<Instance> instances);
 
-		public double score(CARTNode<?> node);
+		public abstract double score(CARTNode<?> node);
 
-		public List<Instance> filter(boolean binary, CARTNode<?> node, Object value, List<Instance> instances);
+		public abstract List<Instance> filter(boolean binary, CARTNode<?> node, Object value, List<Instance> instances);
 	}
 	
 }

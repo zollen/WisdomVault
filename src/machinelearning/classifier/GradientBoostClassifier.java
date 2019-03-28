@@ -3,10 +3,10 @@ package machinelearning.classifier;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import weka.classifiers.trees.RandomTree;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -34,6 +34,12 @@ public class GradientBoostClassifier {
 		colorVals.add(VALUE_COLOR_BLUE);
 		colorVals.add(VALUE_COLOR_RED);
 		
+		ArrayList<Double> heightVals = new ArrayList<Double>();
+		heightVals.add(1.4);
+		heightVals.add(1.5);
+		heightVals.add(1.6);
+		heightVals.add(1.8);
+		
 		ArrayList<Attribute> attrs = new ArrayList<Attribute>();
 		Attribute attr1 = new Attribute("height", 1);
 		Attribute attr2 = new Attribute("color", colorVals, 2);
@@ -51,25 +57,74 @@ public class GradientBoostClassifier {
 		avg(training, attr4);
 		print(training, attr4);
 
-		RandomTree tree = new RandomTree();
-		tree.setKValue(3);
-		tree.buildClassifier(training);
-		
-		System.out.println(tree);
-		
-		double [][] res = tree.distributionsForInstances(training);
-		for (int i = 0; i < res.length; i++) {
-			for (int j = 0; j < res[i].length; j++) {
-				System.out.println(i + ", " + j + " --> " + res[i][j]);
-			}
-		}
-		
-		for (Instance instance : training) {
-			System.out.println(instance + " ===> " + tree.classifyInstance(instance));
-		}
-	
+		Gini gini = new Gini(attrs, attr4);
 	}
 	
+	
+	private static class Gini extends CARTNode.Strategy {
+
+		public Gini(List<Attribute> attrs, Attribute cls) {
+			super(attrs, cls);
+		}
+		
+		@Override
+		public CARTNode<Gini> calculate(double last, List<Attribute> attrs, List<Instance> instances) {
+			
+			CARTNode.Strategy.Builder<Gini> builder = new CARTNode.Strategy.Builder<Gini>(this);
+			DoubleAdder min = new DoubleAdder();
+			min.add(last);
+			
+			PlaceHolder<CARTNode<Gini>> holder = new PlaceHolder<CARTNode<Gini>>();
+				
+			attrs.stream().forEach(p -> {
+										
+				CARTNode<Gini> node = builder.test(p, this.definition().get(p), instances);
+				double score = node.score();
+					
+				if (min.doubleValue() > score) {
+					min.reset();
+					min.add(score);
+					holder.data(node);
+				}
+			});
+				
+			return holder.data();
+		}
+
+		@Override
+		public double score(CARTNode<?> node) {
+			// TODO Auto-generated method stub
+
+			// gini impurities
+			DoubleAdder sum = new DoubleAdder();
+
+			if (node.inputs().size() <= 0)
+				return 0.0;
+
+			if (node.children().size() <= 0) {
+
+				node.data().entrySet().stream().forEach(p -> {
+					sum.add(Math.pow((double) p.getValue().size() / node.inputs().size(), 2));
+				});
+
+				return 1 - sum.doubleValue();
+			} else {
+
+				node.children().entrySet().stream().forEach(p -> {
+
+					sum.add((double) node.data().get(p.getKey()).size() / node.inputs().size() * score(p.getValue()));
+				});
+
+				return sum.doubleValue();
+			}
+		}
+
+		@Override
+		public List<Instance> filter(boolean binary, CARTNode<?> node, Object value, List<Instance> instances) {
+			
+			return instances.stream().filter(p ->  value.equals(p.stringValue(node.attr()))).collect(Collectors.toList());
+		}
+	}
 	
 	public static void avg(Instances instances, Attribute attr) {
 		
