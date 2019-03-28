@@ -74,7 +74,7 @@ public class EntropyClassifier2 {
 
 		// defining data dictionary
 
-		Map<Attribute, List<String>> definition = new LinkedHashMap<Attribute, List<String>>();
+		Map<Attribute, List<?>> definition = new LinkedHashMap<Attribute, List<?>>();
 		definition.put(attr1, outlookVals);
 		definition.put(attr2, tempVals);
 		definition.put(attr3, humidityVals);
@@ -226,11 +226,11 @@ public class EntropyClassifier2 {
 
 	private static class Entropy implements CARTNode.Strategy {
 
-		private Map<Attribute, List<String>> definition = null;
+		private Map<Attribute, List<?>> definition = null;
 		private List<Attribute> attrs = null;
 		private Attribute cls = null;
 
-		public Entropy(Map<Attribute, List<String>> definition, Attribute cls) {
+		public Entropy(Map<Attribute, List<?>> definition, Attribute cls) {
 			this.definition = definition;
 			this.attrs = definition.keySet().stream().collect(Collectors.toList());
 
@@ -239,7 +239,7 @@ public class EntropyClassifier2 {
 		}
 
 		@Override
-		public Map<Attribute, List<String>> definition() {
+		public Map<Attribute, List<?>> definition() {
 			return definition;
 		}
 
@@ -284,7 +284,7 @@ public class EntropyClassifier2 {
 		}
 
 		@Override
-		public List<Instance> filter(boolean binary, CARTNode<?> node, String value, List<Instance> instances) {
+		public List<Instance> filter(boolean binary, CARTNode<?> node, Object value, List<Instance> instances) {
 
 			return instances.stream().filter(p -> value.equals(p.stringValue(node.attr())))
 					.collect(Collectors.toList());

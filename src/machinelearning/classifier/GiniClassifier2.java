@@ -53,7 +53,7 @@ public class GiniClassifier2 {
 
 		// defining data dictionary
 
-		Map<Attribute, List<String>> definition = new LinkedHashMap<Attribute, List<String>>();
+		Map<Attribute, List<?>> definition = new LinkedHashMap<Attribute, List<?>>();
 		definition.put(attr1, weightVals);
 		definition.put(attr2, heightVals);
 		definition.put(attr3, clsVals);
@@ -142,11 +142,11 @@ public class GiniClassifier2 {
 
 	private static class Gini implements CARTNode.Strategy {
 
-		private Map<Attribute, List<String>> definition = null;
+		private Map<Attribute, List<?>> definition = null;
 		private List<Attribute> attrs = null;
 		private Attribute cls = null;
 
-		public Gini(Map<Attribute, List<String>> definition, Attribute cls) {
+		public Gini(Map<Attribute, List<?>> definition, Attribute cls) {
 			this.definition = definition;
 			this.attrs = definition.keySet().stream().collect(Collectors.toList());
 
@@ -155,7 +155,7 @@ public class GiniClassifier2 {
 		}
 		
 		@Override
-		public Map<Attribute, List<String>> definition() {
+		public Map<Attribute, List<?>> definition() {
 			return definition;
 		}
 		
@@ -231,7 +231,7 @@ public class GiniClassifier2 {
 		}
 
 		@Override
-		public List<Instance> filter(boolean binary, CARTNode<?> node, String value, List<Instance> instances) {
+		public List<Instance> filter(boolean binary, CARTNode<?> node, Object value, List<Instance> instances) {
 			
 			if (node.attr() == this.cls) {
 				return instances.stream().filter(p ->  value.equals(p.stringValue(node.attr()))).collect(Collectors.toList());
@@ -240,18 +240,19 @@ public class GiniClassifier2 {
 			
 			if (binary)
 				return instances.stream().filter(p -> { 
-					return Double.valueOf(p.stringValue(node.attr())) < Double.valueOf(value);
+					return Double.valueOf(p.stringValue(node.attr())) < Double.valueOf(value.toString());
 				}).collect(Collectors.toList());
 			else
 				return instances.stream().filter(p ->  {
-					return Double.valueOf(p.stringValue(node.attr())) >= Double.valueOf(value);
+					return Double.valueOf(p.stringValue(node.attr())) >= Double.valueOf(value.toString());
 				}).collect(Collectors.toList());
 		}
 		
 		// treat the possible values as numeric data
-		private List<String> values2(List<String> vals) {
+		@SuppressWarnings("unchecked")
+		private List<String> values2(List<?> vals) {
 			
-			Collections.sort(vals, new Comparator<String>() {
+			Collections.sort((List<String>) vals, new Comparator<String>() {
 
 				@Override
 				public int compare(String o1, String o2) {
@@ -263,8 +264,8 @@ public class GiniClassifier2 {
 			List<String> nList = new ArrayList<String>();
 			
 			for (int i = 0; vals.size() > 0 && i < vals.size() - 1; i++) {
-				double d1 = Double.valueOf(vals.get(i + 1));
-				double d2 = Double.valueOf(vals.get(i));
+				double d1 = Double.valueOf(vals.get(i + 1).toString());
+				double d2 = Double.valueOf(vals.get(i).toString());
 				nList.add(String.valueOf((double) (d1 + d2) / 2));
 			}
 		

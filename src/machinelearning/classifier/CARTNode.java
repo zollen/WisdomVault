@@ -19,7 +19,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 	private List<Instance> inputs = null;
 	private Attribute attr = null;
 	private String label = null;
-	private List<String> values = null;
+	private List<?> values = null;
 	private T strategy = null;
 	private CARTNode<T> parent = null;
 	private boolean isBinaryChoices = false;
@@ -28,11 +28,11 @@ public class CARTNode<T extends CARTNode.Strategy> {
 		this(strategy, attr, null, new ArrayList<Instance>());
 	}
 
-	public CARTNode(T strategy, Attribute attr, List<String> values) {
+	public CARTNode(T strategy, Attribute attr, List<?> values) {
 		this(strategy, attr, values, new ArrayList<Instance>());
 	}
 	
-	public CARTNode(T strategy, Attribute attr, List<String> values, List<Instance> instances) {
+	public CARTNode(T strategy, Attribute attr, List<?> values, List<Instance> instances) {
 	
 		this.attr = attr;
 		this.label = this.attr.name();
@@ -111,7 +111,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 		return inputs;
 	}
 
-	public List<String> values() {
+	public List<?> values() {
 		return values;
 	}
 	
@@ -136,7 +136,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 		this.inputs = instances;
 
 		int index = 0;
-		for (String value : this.values) {
+		for (Object value : this.values) {
 			
 			boolean choice = this.isBinaryChoices;
 			String postfix = "";
@@ -172,7 +172,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 				+ "   Score: " + ff.format(this.score());
 	}
 
-	private List<Instance> filter(boolean binary, String value, List<Instance> instances) {
+	private List<Instance> filter(boolean binary, Object value, List<Instance> instances) {
 		return strategy.filter(binary, this, value, instances);
 	}
 
@@ -223,15 +223,15 @@ public class CARTNode<T extends CARTNode.Strategy> {
 				return new CARTNode<T>(this.strategy, attr);
 			}
 			
-			public CARTNode<T> create(Attribute attr, List<String> values) {
+			public CARTNode<T> create(Attribute attr, List<?> values) {
 				return new CARTNode<T>(this.strategy, attr, values);
 			}
 			
-			public CARTNode<T> create(Attribute attr, List<String> values, List<Instance> instances) {
+			public CARTNode<T> create(Attribute attr, List<?> values, List<Instance> instances) {
 				return new CARTNode<T>(this.strategy, attr, values, instances);
 			}
 					
-			public CARTNode<T> test(Attribute attr, List<String> values, List<Instance> instances) {
+			public CARTNode<T> test(Attribute attr, List<?> values, List<Instance> instances) {
 				
 				CARTNode<T> node = create(attr, values, instances);
 				
@@ -291,7 +291,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 			}
 		}
 		
-		public Map<Attribute, List<String>> definition();
+		public Map<Attribute, List<?>> definition();
 		
 		public Attribute cls();
 		
@@ -301,7 +301,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 
 		public double score(CARTNode<?> node);
 
-		public List<Instance> filter(boolean binary, CARTNode<?> node, String value, List<Instance> instances);
+		public List<Instance> filter(boolean binary, CARTNode<?> node, Object value, List<Instance> instances);
 	}
 	
 }
