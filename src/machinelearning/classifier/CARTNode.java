@@ -4,7 +4,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -376,7 +375,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 		public Strategy(List<Attribute> attrs, Attribute cls) {
 			this.attrs = new ArrayList<Attribute>(attrs);	
 			this.cls = cls;
-			this.definition = new HashMap<Attribute, List<?>>();
+			this.definition = new LinkedHashMap<Attribute, List<?>>();
 			
 			for (Attribute attr : attrs) {
 				
@@ -390,6 +389,11 @@ public class CARTNode<T extends CARTNode.Strategy> {
 			}	
 			
 			this.attrs.remove(this.cls);
+		}
+		
+		public void add(Attribute attr, List<Instance> instances) {
+			
+			this.definition.put(attr, possibleValues(attr, instances));
 		}
 		
 		public Map<Attribute, List<?>> definition() {

@@ -53,12 +53,16 @@ public class GradientBoostClassifier {
 		print(training, attr4);
 
 		Gini gini = new Gini(attrs, attr4);
+		gini.add(attr1, training);
+		gini.add(attr4, training);
+		
 		
 		CARTNode.Strategy.Builder<Gini> builder = new CARTNode.Strategy.Builder<Gini>(gini);
-	
+		
 		CARTNode<Gini> root = builder.build(training);
 		
 		System.out.println(root.toAll());
+
 	}
 	
 	
@@ -79,6 +83,7 @@ public class GradientBoostClassifier {
 				
 			attrs.stream().forEach(p -> {
 				
+				System.err.println("KONGS: " + p);
 				List<Object> vals = possibleValues(p, instances);
 		
 				vals.stream().forEach(v -> {
@@ -116,7 +121,7 @@ public class GradientBoostClassifier {
 				node.data().entrySet().stream().forEach(p -> {
 					sum.add(Math.pow((double) p.getValue().size() / node.inputs().size(), 2));
 				});
-
+System.err.println("ERROR!!!: " + sum.doubleValue());
 				return 1 - sum.doubleValue();
 			} else {
 
