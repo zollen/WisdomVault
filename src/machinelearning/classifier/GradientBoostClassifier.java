@@ -57,10 +57,28 @@ public class GradientBoostClassifier {
 		
 		CARTNode.Strategy.Builder<Gini> builder = new CARTNode.Strategy.Builder<Gini>(gini);
 		
+	
+		List<Object> list = new ArrayList<Object>();
+		list.add(1.45);
+		list.add(1.45);
+		
+		CARTNode<Gini> root = builder.test(attr1, list, training);
+		
+		root.children().entrySet().stream().forEach(p -> {
+			
+			System.out.println("child: " + p.getValue());
+			p.getValue().data().entrySet().stream().forEach(k -> {
+				
+				System.out.println(k.getKey().get() + " --- " + k.getValue().size());
+			});
+			
+		});
+
+/*		
 		CARTNode<Gini> root = builder.build(training);
 		
 		System.out.println(root.toAll());
-
+*/
 	}
 	
 	
@@ -81,7 +99,6 @@ public class GradientBoostClassifier {
 				
 			attrs.stream().forEach(p -> {
 				
-				System.err.println("KONGS: " + p);
 				List<Object> vals = possibleValues(p, instances);
 		
 				vals.stream().forEach(v -> {
@@ -92,7 +109,7 @@ public class GradientBoostClassifier {
 										
 					CARTNode<Gini> node = builder.test(p, list, instances);
 					double score = node.score();
-				System.err.println(node.toAll() + v + " , " + p + " , " + score);	
+			
 					if (min.doubleValue() > score) {
 						min.reset();
 						min.add(score);
@@ -119,7 +136,7 @@ public class GradientBoostClassifier {
 				node.data().entrySet().stream().forEach(p -> {
 					sum.add(Math.pow((double) p.getValue().size() / node.inputs().size(), 2));
 				});
-System.err.println("ERROR!!!: " + sum.doubleValue());
+
 				return 1 - sum.doubleValue();
 			} else {
 

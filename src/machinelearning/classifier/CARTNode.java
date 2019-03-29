@@ -190,6 +190,8 @@ public class CARTNode<T extends CARTNode.Strategy> {
 			}
 		}
 		
+		System.out.println(this.attr() + " : " + value + ", " + value.getClass().getName());
+		
 		return instances.stream().filter(p -> value.equals(p.stringValue(this.attr())))
 				.collect(Collectors.toList());
 	}
@@ -314,7 +316,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 				
 				node.data().entrySet().stream().forEach(p -> {
 
-					CARTNode<T> child = create(this.strategy.cls());
+					CARTNode<T> child = create(this.strategy.cls(), values);
 					node.add(p.getKey(), child);
 				});
 
