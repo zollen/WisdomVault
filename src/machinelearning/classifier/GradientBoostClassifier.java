@@ -53,8 +53,6 @@ public class GradientBoostClassifier {
 		print(training, attr4);
 
 		Gini gini = new Gini(attrs, attr4);
-		gini.add(attr1, training);
-		gini.add(attr4, training);
 		
 		
 		CARTNode.Strategy.Builder<Gini> builder = new CARTNode.Strategy.Builder<Gini>(gini);

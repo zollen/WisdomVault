@@ -41,7 +41,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 		this.attr = attr;
 		this.label = this.attr.name();
 		this.strategy = strategy;
-		this.values = values != null ? values : strategy.definition().get(attr);
+		this.values = values != null ? values : strategy.possibleValues(attr, instances);
 		this.isBinaryChoices = (this.values.size() == 2 && 
 				this.values.get(0).equals(this.values.get(1)));
 
