@@ -54,29 +54,15 @@ public class GradientBoostClassifier {
 		
 		avg(training, attr4);
 		print(training, attr4);
+		
+		training.stream().forEach(p -> System.out.println(p));
 
-		StdDev gini = new StdDev(attrs, attr4, training.size());
+		StdDev stddev = new StdDev(attrs, attr4, training.size());
 		
 		
-		CARTNode.Strategy.Builder<StdDev> builder = new CARTNode.Strategy.Builder<StdDev>(gini);
+		CARTNode.Strategy.Builder<StdDev> builder = new CARTNode.Strategy.Builder<StdDev>(stddev);
 		
-/*	
-		List<Object> list = new ArrayList<Object>();
-		list.add(1.45);
-		list.add(1.45);
-		
-		CARTNode<Gini> root = builder.test(attr1, list, training);
-		
-		root.children().entrySet().stream().forEach(p -> {
-			
-			System.out.println("child: " + p.getValue());
-			p.getValue().data().entrySet().stream().forEach(k -> {
-				
-				System.out.println(k.getKey().get() + " --- " + k.getValue().size());
-			});
-			
-		});
-*/
+
 		
 		CARTNode<StdDev> root = builder.build(training);
 		
@@ -117,7 +103,8 @@ public class GradientBoostClassifier {
 					CARTNode<StdDev> node = builder.test(p, list, instances);
 					double score = node.score();
 					double ratio = (double) instances.size() / this.total;	
-		
+			
+					
 					if (max.doubleValue() < score && ratio > 0.3) {
 						max.reset();
 						max.add(score);

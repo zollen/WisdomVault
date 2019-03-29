@@ -129,6 +129,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 		this.inputs = instances;
 
 		int index = 0;
+
 		for (Object value : this.values) {
 			
 			data.put(new CARTKey(value, index), filter(this.isBinaryChoices(), 
@@ -160,7 +161,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 			
 			if (binary) {
 				if (index == 1) {
-					instances.stream().filter(p -> !value.equals(p.stringValue(this.attr())))
+					return instances.stream().filter(p -> !value.equals(p.stringValue(this.attr())))
 						.collect(Collectors.toList());
 				}
 			}
@@ -186,7 +187,6 @@ public class CARTNode<T extends CARTNode.Strategy> {
 						).collect(Collectors.toList());
 			}
 		}
-		
 		
 		return instances.stream().filter(p -> value.equals(p.stringValue(this.attr())))
 				.collect(Collectors.toList());
@@ -353,7 +353,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 						
 						CARTNode<T> child = construct(score, list, p.getValue());
 						if (child != null) {
-								node.add(p.getKey(), child);
+							node.add(p.getKey(), child);
 						}
 					});
 
