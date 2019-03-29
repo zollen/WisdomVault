@@ -129,13 +129,18 @@ public class CARTNode<T extends CARTNode.Strategy> {
 		this.inputs = instances;
 
 		int index = 0;
-
-		for (Object value : this.values) {
+		
+		if (this.values.size() == 1) {
+			data.put(new CARTKey(values.get(0), index), instances);
+		}
+		else {
+			for (Object value : this.values) {
 			
-			data.put(new CARTKey(value, index), filter(this.isBinaryChoices(), 
+				data.put(new CARTKey(value, index), filter(this.isBinaryChoices(), 
 													index, value, this.inputs));
 			
-			index++;
+				index++;
+			}
 		}
 	}
 	
@@ -151,7 +156,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 	public String toString() {
 
 		return label() + " ==> "
-				+ this.data.entrySet().stream().map(p -> "[" + p.getKey().get() + "]: " + p.getValue().size()).collect(Collectors.joining(", "))
+				+ this.data.entrySet().stream().map(p -> "[" + p.getKey().get(this.isBinaryChoices()) + "]: " + p.getValue().size()).collect(Collectors.joining(", "))
 				+ "   Score: " + ff.format(this.score());
 	}
 
@@ -168,7 +173,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 		}
 		else 
 		if (value instanceof Number) {
-			
+				
 			if (binary) {
 				if (index == 0) {
 					return instances.stream().filter(p -> 
@@ -253,6 +258,10 @@ public class CARTNode<T extends CARTNode.Strategy> {
 			return val;
 		}	
 		
+		public Object get(boolean binary) {
+			return val + ": " + seq;
+		}
+		
 		@Override
 		public int hashCode() {
 			final int prime = 31;
@@ -280,6 +289,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 				return false;
 			return true;
 		}
+		
 		
 	}
 
@@ -423,6 +433,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 				instances.stream().forEach(p -> nums.add(p.value(attr)));
 				
 				Collections.sort(nums);
+		
 				
 				if (nums.size() == 1) {
 					vals.addAll(nums);
