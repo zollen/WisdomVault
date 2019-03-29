@@ -441,7 +441,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 				else {
 					for (int i = 0; nums.size() > 0 && i < nums.size() - 1; i++) {
 						double d1 = nums.get(i + 1).doubleValue();
-					double d2 = nums.get(i).doubleValue();
+						double d2 = nums.get(i).doubleValue();
 						vals.add(Double.valueOf((d1 + d2) / 2));
 					}	
 				}
