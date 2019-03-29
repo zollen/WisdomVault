@@ -54,15 +54,11 @@ public class GradientBoostClassifier {
 		avg(training, attr4);
 		print(training, attr4);
 		
-		training.stream().forEach(p -> System.out.println(p));
 
-		StdDev stddev = new StdDev(attrs, attr4, training.size());
-		
+		StdDev stddev = new StdDev(attrs, attr4, training.size());	
 		
 		CARTNode.Strategy.Builder<StdDev> builder = new CARTNode.Strategy.Builder<StdDev>(stddev);
-		
-
-		
+			
 		CARTNode<StdDev> root = builder.build(training);
 		
 		System.out.println(root.toAll());
