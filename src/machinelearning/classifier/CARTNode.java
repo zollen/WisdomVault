@@ -356,11 +356,11 @@ public class CARTNode<T extends CARTNode.Strategy> {
 					node.data().entrySet().stream().forEach(p -> {
 
 						double score = this.strategy.score(target.children().get(p.getKey()));
-						
+				
 						if (score == last) {
 							score = -1;
 						}
-						
+
 						CARTNode<T> child = construct(score, list, p.getValue());
 						if (child != null) {
 							node.add(p.getKey(), child);

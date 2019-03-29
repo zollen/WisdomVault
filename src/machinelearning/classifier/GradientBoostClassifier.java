@@ -3,7 +3,6 @@ package machinelearning.classifier;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -103,8 +102,9 @@ public class GradientBoostClassifier {
 					CARTNode<StdDev> node = builder.test(p, list, instances);
 					double score = node.score();
 					double ratio = (double) instances.size() / this.total;	
-			
 					
+	System.out.println(node.toAll());
+	
 					if (max.doubleValue() < score && ratio > 0.1) {
 						max.reset();
 						max.add(score);
@@ -119,7 +119,7 @@ public class GradientBoostClassifier {
 		@Override
 		public double score(CARTNode<?> node) {
 			// TODO Auto-generated method stub
-			return sd(node.attr(), node.inputs());
+			return sd(node);
 		}
 		
 		@SuppressWarnings("unused")
@@ -136,30 +136,25 @@ public class GradientBoostClassifier {
 			return Math.sqrt(sd) / mean;
 		}
 		
-		private double sd(Attribute attr, List<Instance> instances) {
-			
-			Map<Object, List<Instance>> map = spreads(attr, instances);
-			
+		private double sd(CARTNode<?> node) {
+					
 			DoubleAdder sum = new DoubleAdder();
-			
-			map.entrySet().stream().forEach(p -> {
+		System.out.println("===============");	
+			node.data().entrySet().stream().forEach(p -> {
 				
-				double [] data = p.getValue().stream().mapToDouble(
-						v -> v.value(cls)).toArray();
+				System.out.println(p.getKey().get() + " --- " + p.getValue().size());
 				
-				if (data.length > 0) {
-					
-					double ssd = Math.sqrt(StatUtils.variance(data));
-					
-					sum.add(ssd * data.length / instances.size());	
-				}
+				if (p.getValue().size() > 1) {
+					double ssd = ssd(p.getValue());
+					sum.add(ssd * (double) p.getValue().size() / node.inputs().size());
+				}		
 			});
-				
-			// calculating standard deviation reduction	
-			double result = ssd(instances) - sum.doubleValue();
-			// calculating standard deviation reduction	
+			
+			// calculating standard deviation reduction	(SDR)
+			double result = ssd(node.inputs()) - sum.doubleValue();
+			
 			if (result < 0)
-				result = 0.00001;
+				result = 0.0001;
 			
 			return result;
 		}
@@ -174,13 +169,6 @@ public class GradientBoostClassifier {
 				return 0;
 			
 			return Math.sqrt(StatUtils.variance(data));
-		}
-
-		private Map<Object, List<Instance>> spreads(Attribute attr, List<Instance> instances) {
-
-			return instances.stream().collect(Collectors.groupingBy(
-					
-					p -> attr.isNominal() ? p.stringValue(attr) : p.value(attr)));
 		}
 	}
 	

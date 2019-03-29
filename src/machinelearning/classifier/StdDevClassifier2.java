@@ -2,10 +2,8 @@ package machinelearning.classifier;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.DoubleAdder;
-import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.StatUtils;
 
@@ -118,37 +116,31 @@ public class StdDevClassifier2 {
 		@Override
 		public double score(CARTNode<?> node) {
 			// TODO Auto-generated method stub
-			return sd(node.attr(), node.inputs());
+			return sd(node);
 		}
 		
-		private double sd(Attribute attr, List<Instance> instances) {
-			
-			Map<String, List<Instance>> map = spreads(attr, instances);
+		private double sd(CARTNode<?> node) {
 			
 			DoubleAdder sum = new DoubleAdder();
 			
-			map.entrySet().stream().forEach(p -> {
+			node.data().entrySet().stream().forEach(p -> {
 				
-				double [] data = p.getValue().stream().mapToDouble(
-						v -> Double.valueOf(v.stringValue(cls))).toArray();
-				
-				if (data.length >= 0) {
-					
-					double ssd = Math.sqrt(StatUtils.variance(data));
-			
-					sum.add(ssd * data.length / instances.size());	
-				}
+				if (p.getValue().size() > 1) {
+					double ssd = ssd(p.getValue());
+					sum.add(ssd * (double) p.getValue().size() / node.inputs().size());
+				}		
 			});
 		
-			double result = ssd(attr, instances) - sum.doubleValue();
-			// calculating standard deviation reduction	
+			// calculating standard deviation reduction	(SDR)
+			double result = ssd(node.inputs()) - sum.doubleValue();
+			
 			if (result < 0)
 				result = 0.00001;
 			
 			return result;
 		}
 		
-		private double ssd(Attribute attr, List<Instance> instances) {
+		private double ssd(List<Instance> instances) {
 
 			// calculating the standard deviation before the splits
 			double [] data = instances.stream().mapToDouble(
@@ -158,11 +150,6 @@ public class StdDevClassifier2 {
 				return 0;
 							
 			return Math.sqrt(StatUtils.variance(data));
-		}
-
-		private Map<String, List<Instance>> spreads(Attribute attr, List<Instance> instances) {
-
-			return instances.stream().collect(Collectors.groupingBy(p -> p.stringValue(attr)));
 		}
 	}
 }
