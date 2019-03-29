@@ -3,9 +3,12 @@ package machinelearning.classifier;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.apache.commons.math3.stat.StatUtils;
 
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -52,12 +55,12 @@ public class GradientBoostClassifier {
 		avg(training, attr4);
 		print(training, attr4);
 
-		Gini gini = new Gini(attrs, attr4);
+		StdDev gini = new StdDev(attrs, attr4, training.size());
 		
 		
-		CARTNode.Strategy.Builder<Gini> builder = new CARTNode.Strategy.Builder<Gini>(gini);
+		CARTNode.Strategy.Builder<StdDev> builder = new CARTNode.Strategy.Builder<StdDev>(gini);
 		
-	
+/*	
 		List<Object> list = new ArrayList<Object>();
 		list.add(1.45);
 		list.add(1.45);
@@ -73,46 +76,51 @@ public class GradientBoostClassifier {
 			});
 			
 		});
-
-/*		
-		CARTNode<Gini> root = builder.build(training);
+*/
+		
+		CARTNode<StdDev> root = builder.build(training);
 		
 		System.out.println(root.toAll());
-*/
+
 	}
 	
 	
-	private static class Gini extends CARTNode.Strategy {
+	private static class StdDev extends CARTNode.Strategy {
+		
+		private int total = 0;
 
-		public Gini(List<Attribute> attrs, Attribute cls) {
-			super(attrs, cls);
+		public StdDev(List<Attribute> attrs, Attribute cls, int size) {
+			super(attrs, cls);			
+			this.total = size;
 		}
 		
 		@Override
-		public CARTNode<Gini> calculate(double last, List<Attribute> attrs, List<Instance> instances) {
+		public CARTNode<StdDev> calculate(double last, List<Attribute> attrs, List<Instance> instances) {
 			
-			CARTNode.Strategy.Builder<Gini> builder = new CARTNode.Strategy.Builder<Gini>(this);
-			DoubleAdder min = new DoubleAdder();
-			min.add(last);
-			
-			PlaceHolder<CARTNode<Gini>> holder = new PlaceHolder<CARTNode<Gini>>();
-				
+			CARTNode.Strategy.Builder<StdDev> builder = 
+					new CARTNode.Strategy.Builder<StdDev>(this);
+			DoubleAdder max = new DoubleAdder();
+			max.add(Double.MIN_VALUE);
+
+			PlaceHolder<CARTNode<StdDev>> holder = new PlaceHolder<CARTNode<StdDev>>();
+
 			attrs.stream().forEach(p -> {
 				
-				List<Object> vals = possibleValues(p, instances);
-		
+				List<Object> vals = this.possibleValues(p, instances);
+				
 				vals.stream().forEach(v -> {
-			
+					
 					List<Object> list = new ArrayList<Object>();
 					list.add(v);
 					list.add(v);
-										
-					CARTNode<Gini> node = builder.test(p, list, instances);
+
+					CARTNode<StdDev> node = builder.test(p, list, instances);
 					double score = node.score();
-			
-					if (min.doubleValue() > score) {
-						min.reset();
-						min.add(score);
+					double ratio = (double) instances.size() / this.total;	
+		
+					if (max.doubleValue() < score && ratio > 0.3) {
+						max.reset();
+						max.add(score);
 						holder.data(node);
 					}
 				});
@@ -124,29 +132,68 @@ public class GradientBoostClassifier {
 		@Override
 		public double score(CARTNode<?> node) {
 			// TODO Auto-generated method stub
-
-			// gini impurities
+			return sd(node.attr(), node.inputs());
+		}
+		
+		@SuppressWarnings("unused")
+		private double cv(List<Instance> instances) {
+			
+			double [] data = instances.stream().mapToDouble(
+					v -> Double.valueOf(v.stringValue(cls))).toArray();
+			
+			double mean = StatUtils.mean(data);
+			double sd = StatUtils.variance(data);
+			if (sd == 0)
+				return 0;
+			
+			return Math.sqrt(sd) / mean;
+		}
+		
+		private double sd(Attribute attr, List<Instance> instances) {
+			
+			Map<Object, List<Instance>> map = spreads(attr, instances);
+			
 			DoubleAdder sum = new DoubleAdder();
+			
+			map.entrySet().stream().forEach(p -> {
+				
+				double [] data = p.getValue().stream().mapToDouble(
+						v -> v.value(cls)).toArray();
+				
+				if (data.length > 0) {
+					
+					double ssd = Math.sqrt(StatUtils.variance(data));
+					
+					sum.add(ssd * data.length / instances.size());	
+				}
+			});
+				
+			// calculating standard deviation reduction	
+			double result = ssd(instances) - sum.doubleValue();
+			// calculating standard deviation reduction	
+			if (result < 0)
+				result = 0.00001;
+			
+			return result;
+		}
+		
+		private double ssd(List<Instance> instances) {
 
-			if (node.inputs().size() <= 0)
-				return 0.0;
+			// calculating the standard deviation before the splits
+			double [] data = instances.stream().mapToDouble(
+						p -> p.value(cls)).toArray();
+						
+			if (data.length <= 0)
+				return 0;
+			
+			return Math.sqrt(StatUtils.variance(data));
+		}
 
-			if (node.children().size() <= 0) {
+		private Map<Object, List<Instance>> spreads(Attribute attr, List<Instance> instances) {
 
-				node.data().entrySet().stream().forEach(p -> {
-					sum.add(Math.pow((double) p.getValue().size() / node.inputs().size(), 2));
-				});
-
-				return 1 - sum.doubleValue();
-			} else {
-
-				node.children().entrySet().stream().forEach(p -> {
-
-					sum.add((double) node.data().get(p.getKey()).size() / node.inputs().size() * score(p.getValue()));
-				});
-
-				return sum.doubleValue();
-			}
+			return instances.stream().collect(Collectors.groupingBy(
+					
+					p -> attr.isNominal() ? p.stringValue(attr) : p.value(attr)));
 		}
 	}
 	

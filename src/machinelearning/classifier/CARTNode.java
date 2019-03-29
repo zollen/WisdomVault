@@ -28,10 +28,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 	private CARTNode<T> parent = null;
 	private boolean isBinaryChoices = false;
 
-	public CARTNode(T strategy, Attribute attr) {
-		this(strategy, attr, null, new ArrayList<Instance>());
-	}
-
+	
 	public CARTNode(T strategy, Attribute attr, List<?> values) {
 		this(strategy, attr, values, new ArrayList<Instance>());
 	}
@@ -190,7 +187,6 @@ public class CARTNode<T extends CARTNode.Strategy> {
 			}
 		}
 		
-		System.out.println(this.attr() + " : " + value + ", " + value.getClass().getName());
 		
 		return instances.stream().filter(p -> value.equals(p.stringValue(this.attr())))
 				.collect(Collectors.toList());
@@ -297,11 +293,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 			public Builder(T strategy) {
 				this.strategy = strategy;
 			}
-		
-			public CARTNode<T> create(Attribute attr) {
-				return new CARTNode<T>(this.strategy, attr);
-			}
-			
+	
 			public CARTNode<T> create(Attribute attr, List<?> values) {
 				return new CARTNode<T>(this.strategy, attr, values);
 			}
@@ -316,7 +308,8 @@ public class CARTNode<T extends CARTNode.Strategy> {
 				
 				node.data().entrySet().stream().forEach(p -> {
 
-					CARTNode<T> child = create(this.strategy.cls(), values);
+					CARTNode<T> child = create(this.strategy.cls(), 
+							this.strategy.possibleValues(this.strategy.cls(), instances));
 					node.add(p.getKey(), child);
 				});
 
@@ -336,7 +329,8 @@ public class CARTNode<T extends CARTNode.Strategy> {
 				Strategy.Builder<T> builder = new Strategy.Builder<T>(this.strategy);
 				
 				if (attrs.size() <= 0 || last <= 0)
-					return builder.create(this.strategy.cls());
+					return builder.create(this.strategy.cls(), 
+							this.strategy.possibleValues(this.strategy.cls(), instances));
 	
 				List<Attribute> list = new ArrayList<Attribute>(attrs);
 
@@ -366,7 +360,8 @@ public class CARTNode<T extends CARTNode.Strategy> {
 					return node;
 				}
 
-				return builder.create(this.strategy.cls());
+				return builder.create(this.strategy.cls(),
+						this.strategy.possibleValues(this.strategy.cls(), instances));
 			}
 		}
 		
