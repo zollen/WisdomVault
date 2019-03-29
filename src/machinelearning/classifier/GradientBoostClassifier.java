@@ -101,9 +101,7 @@ public class GradientBoostClassifier {
 
 					CARTNode<StdDev> node = builder.test(p, list, instances);
 					double score = node.score();
-					double ratio = (double) instances.size() / this.total;	
-					
-	System.out.println(node.toAll());
+					double ratio = (double) instances.size() / this.total;					
 	
 					if (max.doubleValue() < score && ratio > 0.1) {
 						max.reset();
@@ -139,17 +137,15 @@ public class GradientBoostClassifier {
 		private double sd(CARTNode<?> node) {
 					
 			DoubleAdder sum = new DoubleAdder();
-		System.out.println("===============");	
+		
 			node.data().entrySet().stream().forEach(p -> {
-				
-				System.out.println(p.getKey().get() + " --- " + p.getValue().size());
 				
 				if (p.getValue().size() > 1) {
 					double ssd = ssd(p.getValue());
 					sum.add(ssd * (double) p.getValue().size() / node.inputs().size());
 				}		
 			});
-			
+		
 			// calculating standard deviation reduction	(SDR)
 			double result = ssd(node.inputs()) - sum.doubleValue();
 			
