@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -27,6 +28,8 @@ public class GradientBoostClassifier {
 	
 	private static final String VALUE_GENDER_MALE = "Male";
 	private static final String VALUE_GENDER_FEMALE = "Female";
+	
+	private static final double LEARNING_RATE = 0.1;
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
@@ -52,24 +55,46 @@ public class GradientBoostClassifier {
 		attrs.add(attr4);
 		
 		Instances training = generateTrainingData(attrs);
-		print(training, attr4);
 		
-		avg(training, attr4);
-		print(training, attr4);
+		List<Double> first = get(training, attr4);
 		
-
-		StdDev stddev = new StdDev(attrs, attr4);	
+		double avg = avg(training, attr4);
 		
-		CARTNode.Strategy.Builder<StdDev> builder = new CARTNode.Strategy.Builder<StdDev>(stddev);
+		System.out.println("AVG: " + ff.format(avg));
+		List<Double> avgs = new ArrayList<Double>();
+		for (int i = 0; i < training.size(); i++)
+			avgs.add(avg);
+		
+		System.out.println("Original Values");
+		System.out.println("---------------");
+		print(0, training, attr4);
+		
+		System.out.println("Residuals Values");
+		System.out.println("----------------");
+		adjust(training, attr4, avgs);
+		print(0, training, attr4);
+	
+		
+		for (int i = 1; i <= 10; i++) {
 			
-		CARTNode<StdDev> root = builder.build(training);
+			StdDev stddev = new StdDev(attrs, attr4);		
+			CARTNode.Strategy.Builder<StdDev> builder = new CARTNode.Strategy.Builder<StdDev>(stddev);		
+			CARTNode<StdDev> root = builder.build(training);
+			
+			// System.out.println(root.toAll());
 		
-		System.out.println(root.toAll());
+			List<Double> residuals = get(root, attr4, training);
+			
+			for (int j = 0; j < first.size(); j++) {
+				double initial = first.get(j);
+				double residual = residuals.get(j);
+				double result = initial - (avg + LEARNING_RATE * residual);
+				training.get(j).setValue(attr4, result);
+			}
+			
+			print(i, training, attr4);
+		}
 		
-		assign(root, attr4, training);
-		print(training, attr4);
-		
-
 	}
 	
 	
@@ -204,7 +229,9 @@ public class GradientBoostClassifier {
 		}
 	}
 	
-	public static void assign(CARTNode<?> root, Attribute cls, List<Instance> instances) {
+	public static List<Double> get(CARTNode<?> root, Attribute cls, List<Instance> instances) {
+		
+		List<Double> list = new ArrayList<Double>();
 		
 		for (Instance instance : instances) {
 			
@@ -219,24 +246,31 @@ public class GradientBoostClassifier {
 					num.add(1);
 				});
 				
-				instance.setValue(cls, sum.doubleValue() / num.doubleValue());
+				list.add(sum.doubleValue() / num.doubleValue());
 			}	
 		}
+		
+		return list;
 	}
 	
-	public static void avg(Instances instances, Attribute attr) {
+	public static double avg(Instances instances, Attribute attr) {
 		
 		double total = instances.stream().mapToDouble(p -> p.value(attr)).sum();
-		double avg = total / instances.size();
-		
-		instances.stream().forEach(p -> p.setValue(attr, p.value(attr) - avg));
+		return total / instances.size();
 	}
 	
-	public static void print(Instances instances, Attribute attr) {
+	public static void adjust(Instances instances, Attribute attr, List<Double> diffs) {
+		
+		AtomicInteger index = new AtomicInteger();
+		instances.stream().forEach(p -> 
+			p.setValue(attr, p.value(attr) - diffs.get(index.getAndIncrement())));
+	}
+	
+	public static void print(int round, Instances instances, Attribute attr) {
 		
 		Function<Instance, String> func = p ->  String.valueOf(ff.format(p.value(attr)));
 		
-		System.out.println(instances.stream().map(func).collect(Collectors.joining(", ")));
+		System.out.println("Round #" + round + ": " + instances.stream().map(func).collect(Collectors.joining(", ")));
 	}
 	
 	public static List<Double> get(Instances instances, Attribute attr) {
@@ -247,6 +281,7 @@ public class GradientBoostClassifier {
 		
 		return vals;
 	}
+	
 	
 	public static Instances generateTrainingData(ArrayList<Attribute> attrs) {
 
