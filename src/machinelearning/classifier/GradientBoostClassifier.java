@@ -123,7 +123,7 @@ public class GradientBoostClassifier {
 					v -> v.value(cls)).toArray();
 			
 			double mean = StatUtils.mean(data);
-			double sd = StatUtils.variance(data);
+			double sd = StatUtils.populationVariance(data);
 			if (sd == 0)
 				return 0;
 			
@@ -160,7 +160,7 @@ public class GradientBoostClassifier {
 			if (data.length <= 0)
 				return 0;
 			
-			return Math.sqrt(StatUtils.variance(data));
+			return Math.sqrt(StatUtils.populationVariance(data));
 		}
 	}
 	
