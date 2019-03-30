@@ -125,9 +125,9 @@ public class GradientBoostClassifier {
 		
 		Instances testing = new Instances("TESTING", attrs, 1);
 		Instance test = new DenseInstance(4);	
-		test.setValue(attr1, 1.65);
-		test.setValue(attr2, VALUE_COLOR_RED);
-		test.setValue(attr3, VALUE_GENDER_MALE);
+		test.setValue(attr1, 1.7);
+		test.setValue(attr2, VALUE_COLOR_GREEN);
+		test.setValue(attr3, VALUE_GENDER_FEMALE);
 		testing.add(test);
 		
 		// prediction
