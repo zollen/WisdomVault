@@ -1,11 +1,14 @@
 package machinelearning.classifier;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.atomic.DoubleAdder;
 
 import org.apache.commons.math3.stat.StatUtils;
 
+import machinelearning.classifier.CARTNode.CARTKey;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -69,7 +72,7 @@ public class StdDevClassifier1 {
 
 		List<Instance> training = generateTrainingData(attrs);
 			
-		StdDev sd = new StdDev(attrs, attr5, training.size());
+		StdDev sd = new StdDev(attrs, attr5);
 
 		CARTNode.Strategy.Builder<StdDev> builder = 
 				new CARTNode.Strategy.Builder<StdDev>(sd);
@@ -212,11 +215,8 @@ public class StdDevClassifier1 {
 
 	private static class StdDev extends CARTNode.Strategy {
 
-		private int total = 0;
-
-		public StdDev(List<Attribute> attrs, Attribute cls, int size) {
+		public StdDev(List<Attribute> attrs, Attribute cls) {
 			super(attrs, cls);
-			this.total = size;
 		}
 
 		@Override
@@ -233,15 +233,14 @@ public class StdDevClassifier1 {
 
 				CARTNode<StdDev> node = builder.test(p, this.definition().get(p), instances);
 				double score = node.score();
-				double ratio = (double) instances.size() / this.total;	
 		
-				if (max.doubleValue() < score && ratio > 0.3) {
+				if (max.doubleValue() < score && last > 0.1 && instances.size() > 3) {
 					max.reset();
 					max.add(score);
 					holder.data(node);
 				}
 			});
-		
+
 			return holder.data();
 		}
 
@@ -250,8 +249,41 @@ public class StdDevClassifier1 {
 			// TODO Auto-generated method stub
 			return sd(node);
 		}
+		
+		@Override
+		public double stop(CARTNode<?> node, CARTKey key, double last, double score) {
+			
+			List<Instance> instances = node.data().get(key);
+		
+			return cv(instances);
+		}
+		
+		@Override
+		public List<Object> possibleValues(Attribute attr, List<Instance> instances) {
+			
+			List<Object> vals = new ArrayList<Object>();
+			
+			if (attr.isNominal()) {
+				
+				Enumeration<Object> o = attr.enumerateValues();
+				while (o != null && o.hasMoreElements())
+					vals.add(o.nextElement());
+			}
+			else
+			if (attr.isNumeric()) {
+				
+				List<Double> nums = new ArrayList<Double>();
+				
+				instances.stream().forEach(p -> nums.add(p.value(attr)));
+				
+				Collections.sort(nums);
+		
+				vals.addAll(nums);
+			}
+			
+			return vals;
+		}
 
-		@SuppressWarnings("unused")
 		private double cv(List<Instance> instances) {
 			
 			double [] data = instances.stream().mapToDouble(
@@ -274,7 +306,7 @@ public class StdDevClassifier1 {
 				if (p.getValue().size() > 1) {
 					
 					double ssd = ssd(p.getValue());
-					
+										
 					sum.add(ssd * (double) p.getValue().size() / node.inputs().size());
 				}		
 			});

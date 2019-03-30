@@ -357,9 +357,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 
 						double score = this.strategy.score(target.children().get(p.getKey()));
 				
-						if (score == last) {
-							score = -1;
-						}
+						score = this.strategy.stop(node, p.getKey(), last, score);
 
 						CARTNode<T> child = construct(score, list, p.getValue());
 						if (child != null) {
@@ -448,6 +446,13 @@ public class CARTNode<T extends CARTNode.Strategy> {
 			}
 			
 			return vals;
+		}
+		
+		public double stop(CARTNode<?> node, CARTKey key, double last, double score) {
+			if (score == last)
+				return -1;
+			
+			return score;
 		}
 		
 		public abstract CARTNode<?> calculate(double score, List<Attribute> attrs, List<Instance> instances);

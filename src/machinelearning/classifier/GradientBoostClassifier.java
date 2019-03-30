@@ -2,6 +2,8 @@ package machinelearning.classifier;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.Function;
@@ -9,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.StatUtils;
 
+import machinelearning.classifier.CARTNode.CARTKey;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -55,7 +58,7 @@ public class GradientBoostClassifier {
 		print(training, attr4);
 		
 
-		StdDev stddev = new StdDev(attrs, attr4, training.size());	
+		StdDev stddev = new StdDev(attrs, attr4);	
 		
 		CARTNode.Strategy.Builder<StdDev> builder = new CARTNode.Strategy.Builder<StdDev>(stddev);
 			
@@ -67,17 +70,14 @@ public class GradientBoostClassifier {
 	
 	
 	private static class StdDev extends CARTNode.Strategy {
-		
-		private int total = 0;
 
-		public StdDev(List<Attribute> attrs, Attribute cls, int size) {
-			super(attrs, cls);			
-			this.total = size;
+		public StdDev(List<Attribute> attrs, Attribute cls) {
+			super(attrs, cls);
 		}
-		
+
 		@Override
 		public CARTNode<StdDev> calculate(double last, List<Attribute> attrs, List<Instance> instances) {
-			
+
 			CARTNode.Strategy.Builder<StdDev> builder = 
 					new CARTNode.Strategy.Builder<StdDev>(this);
 			DoubleAdder max = new DoubleAdder();
@@ -97,16 +97,15 @@ public class GradientBoostClassifier {
 
 					CARTNode<StdDev> node = builder.test(p, list, instances);
 					double score = node.score();
-					double ratio = (double) instances.size() / this.total;					
-	
-					if (max.doubleValue() < score && ratio > 0.1) {
+		
+					if (max.doubleValue() < score && last > 0.1 && instances.size() > 1) {
 						max.reset();
 						max.add(score);
 						holder.data(node);
 					}
 				});
 			});
-		
+
 			return holder.data();
 		}
 
@@ -116,7 +115,40 @@ public class GradientBoostClassifier {
 			return sd(node);
 		}
 		
-		@SuppressWarnings("unused")
+		@Override
+		public double stop(CARTNode<?> node, CARTKey key, double last, double score) {
+			
+			List<Instance> instances = node.data().get(key);
+		
+			return cv(instances);
+		}
+		
+		@Override
+		public List<Object> possibleValues(Attribute attr, List<Instance> instances) {
+			
+			List<Object> vals = new ArrayList<Object>();
+			
+			if (attr.isNominal()) {
+				
+				Enumeration<Object> o = attr.enumerateValues();
+				while (o != null && o.hasMoreElements())
+					vals.add(o.nextElement());
+			}
+			else
+			if (attr.isNumeric()) {
+				
+				List<Double> nums = new ArrayList<Double>();
+				
+				instances.stream().forEach(p -> nums.add(p.value(attr)));
+				
+				Collections.sort(nums);
+		
+				vals.addAll(nums);
+			}
+			
+			return vals;
+		}
+
 		private double cv(List<Instance> instances) {
 			
 			double [] data = instances.stream().mapToDouble(
@@ -131,22 +163,26 @@ public class GradientBoostClassifier {
 		}
 		
 		private double sd(CARTNode<?> node) {
-					
+			
 			DoubleAdder sum = new DoubleAdder();
-		
+			
 			node.data().entrySet().stream().forEach(p -> {
-				
+					
 				if (p.getValue().size() > 1) {
+					
 					double ssd = ssd(p.getValue());
+										
 					sum.add(ssd * (double) p.getValue().size() / node.inputs().size());
 				}		
 			});
-		
+			
+			
+				
 			// calculating standard deviation reduction	(SDR)
 			double result = ssd(node.inputs()) - sum.doubleValue();
-			
+
 			if (result < 0)
-				result = 0.0001;
+				result = 0.00001;
 			
 			return result;
 		}
