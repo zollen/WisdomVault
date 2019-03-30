@@ -259,6 +259,11 @@ public class CARTNode<T extends CARTNode.Strategy> {
 		}	
 		
 		public Object get(boolean binary) {
+			
+			if (val instanceof Number) {
+				return ff.format(val) + ": " + seq;
+			}
+			
 			return val + ": " + seq;
 		}
 		
