@@ -60,7 +60,7 @@ public class GradientBoostClassifier {
 		
 		
 		Instances training = generateTrainingData(attrs);
-		
+
 		List<Double> first = get(training, attr4);
 		
 		double avg = avg(training, attr4);
@@ -123,21 +123,23 @@ public class GradientBoostClassifier {
 			last = copy(results);
 		}
 		
+		Instances testing = new Instances("TESTING", attrs, 1);
 		Instance test = new DenseInstance(4);	
-		test.setValue(attrs.get(0), 1.65);
-		test.setValue(attrs.get(1), VALUE_COLOR_RED);
-		test.setValue(attrs.get(2), VALUE_GENDER_MALE);
+		test.setValue(attr1, 1.65);
+		test.setValue(attr2, VALUE_COLOR_RED);
+		test.setValue(attr3, VALUE_GENDER_MALE);
+		testing.add(test);
 		
 		// prediction
 		double weight = avg;
 		for (CARTNode<?> node : forest) {
 			
-			CARTNode<?> res = node.classify(test);
+			CARTNode<?> res = node.classify(testing.get(0));
 			Number num = (Number) res.data().keySet().stream().findFirst().get().get();
 			weight += 0.1 * num.doubleValue();
 		}
 		
-		System.out.println(test + " == predicted weight ==> " + weight);
+		System.out.println(testing.get(0) + " == predicted weight ==> " + weight);
 		
 	}
 	
