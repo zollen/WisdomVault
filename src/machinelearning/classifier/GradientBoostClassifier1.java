@@ -21,7 +21,7 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class GradientBoostClassifier {
+public class GradientBoostClassifier1 {
 	
 	private static final DecimalFormat ff = new DecimalFormat("0.000");
 	

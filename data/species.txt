@@ -1,0 +1,12 @@
+@relation 'species'
+@attribute height real
+@attribute color {Green,Blue,Red}
+@attribute gender {Male,Female}
+@attribute weight real
+@data
+1.6,Blue,Male,88
+1.6,Green,Female,76
+1.5,Blue,Female,56
+1.8,Red,Male,73
+1.5,Green,Male,77
+1.4,Blue,Female,57
