@@ -65,6 +65,10 @@ public class GradientBoostClassifier {
 		CARTNode<StdDev> root = builder.build(training);
 		
 		System.out.println(root.toAll());
+		
+		assign(root, attr4, training);
+		print(training, attr4);
+		
 
 	}
 	
@@ -197,6 +201,26 @@ public class GradientBoostClassifier {
 				return 0;
 			
 			return Math.sqrt(StatUtils.populationVariance(data));
+		}
+	}
+	
+	public static void assign(CARTNode<?> root, Attribute cls, List<Instance> instances) {
+		
+		for (Instance instance : instances) {
+			
+			CARTNode<?> node = root.classify(instance);
+			
+			DoubleAdder sum = new DoubleAdder();
+			DoubleAdder num = new DoubleAdder();
+			if (node != null) {
+				node.data().entrySet().stream().forEach(p -> {
+					
+					sum.add(((Number)p.getKey().get()).doubleValue());
+					num.add(1);
+				});
+				
+				instance.setValue(cls, sum.doubleValue() / num.doubleValue());
+			}	
 		}
 	}
 	

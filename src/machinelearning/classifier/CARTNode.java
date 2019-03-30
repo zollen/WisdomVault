@@ -52,17 +52,17 @@ public class CARTNode<T extends CARTNode.Strategy> {
 		this.children.put(value, child);
 	}
 	
-	public void classify(Instance instance) {
+	public CARTNode<?> classify(Instance instance) {
 		
 		List<Instance> instances = new ArrayList<Instance>();
 		instances.add(instance);
 		
 		if (this.attr() == this.strategy.cls()) {
-			System.out.println(instance + "|  RESULT: " + this);
-			return;
+			return this;
 		}
 		
 		DoubleAdder index = new DoubleAdder();
+		PlaceHolder<CARTNode<?>> target = new PlaceHolder<CARTNode<?>>();
 		this.data.entrySet().stream().forEach(p -> {
 			
 			CARTKey value = p.getKey();
@@ -72,19 +72,20 @@ public class CARTNode<T extends CARTNode.Strategy> {
 			if (list.size() > 0) {
 				CARTNode<T> child = this.children.get(p.getKey());
 				if (child != null) {
-					child.classify(instances);
+					target.data(child.classify(instance));
 				}
 			}
 			
 			index.add(1);
 		});
 		
+		return target.data();	
 	}
 	
 	public void classify(List<Instance> instances) {
 		
 		for (Instance instance : instances) {
-			classify(instance);
+			System.out.println(instance + "| RESULT: " + classify(instance));
 		}
 	}
 
