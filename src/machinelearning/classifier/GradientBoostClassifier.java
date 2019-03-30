@@ -120,7 +120,7 @@ public class GradientBoostClassifier {
 		private double cv(List<Instance> instances) {
 			
 			double [] data = instances.stream().mapToDouble(
-					v -> Double.valueOf(v.stringValue(cls))).toArray();
+					v -> v.value(cls)).toArray();
 			
 			double mean = StatUtils.mean(data);
 			double sd = StatUtils.variance(data);

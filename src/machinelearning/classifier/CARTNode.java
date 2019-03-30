@@ -157,7 +157,7 @@ public class CARTNode<T extends CARTNode.Strategy> {
 
 		return label() + " ==> "
 				+ this.data.entrySet().stream().map(p -> "[" + p.getKey().get(this.isBinaryChoices()) + "]: " + p.getValue().size()).collect(Collectors.joining(", "))
-				+ (this.attr != strategy.cls() ? "   Score: " + ff.format(this.score()) : "");
+				+  "   Score: " + ff.format(this.score());
 	}
 
 	private List<Instance> filter(boolean binary, int index, Object value, List<Instance> instances) {

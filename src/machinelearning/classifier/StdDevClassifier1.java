@@ -50,27 +50,14 @@ public class StdDevClassifier1 {
 		ArrayList<String> windyVals = new ArrayList<String>();
 		windyVals.add(VALUE_WINDY_TRUE);
 		windyVals.add(VALUE_WINDY_FALSE);
-		
-		ArrayList<String> playVals = new ArrayList<String>();
-		playVals.add("23");
-		playVals.add("26");
-		playVals.add("30");
-		playVals.add("36");
-		playVals.add("38");
-		playVals.add("43");
-		playVals.add("44");
-		playVals.add("46");
-		playVals.add("48");
-		playVals.add("62");
-		
-		
+				
 
 		ArrayList<Attribute> attrs = new ArrayList<Attribute>();
-		Attribute attr1 = new Attribute("outlook", outlookVals);
-		Attribute attr2 = new Attribute("temperaure", tempVals);
-		Attribute attr3 = new Attribute("humidity", humidityVals);
-		Attribute attr4 = new Attribute("windy", windyVals);
-		Attribute attr5 = new Attribute("play", playVals);
+		Attribute attr1 = new Attribute("outlook", outlookVals, 1);
+		Attribute attr2 = new Attribute("temperaure", tempVals, 2);
+		Attribute attr3 = new Attribute("humidity", humidityVals, 3);
+		Attribute attr4 = new Attribute("windy", windyVals, 4);
+		Attribute attr5 = new Attribute("play", 5);
 		attrs.add(attr1);
 		attrs.add(attr2);
 		attrs.add(attr3);
@@ -113,7 +100,7 @@ public class StdDevClassifier1 {
 		data1.setValue(attrs.get(1), VALUE_TEMP_HOT);
 		data1.setValue(attrs.get(2), VALUE_HUMIDITY_HIGH);
 		data1.setValue(attrs.get(3), VALUE_WINDY_FALSE);
-		data1.setValue(attrs.get(4), "26");
+		data1.setValue(attrs.get(4), 26);
 		training.add(data1);
 		
 		Instance data2 = new DenseInstance(5);	
@@ -121,7 +108,7 @@ public class StdDevClassifier1 {
 		data2.setValue(attrs.get(1), VALUE_TEMP_HOT);
 		data2.setValue(attrs.get(2), VALUE_HUMIDITY_HIGH);
 		data2.setValue(attrs.get(3), VALUE_WINDY_TRUE);
-		data2.setValue(attrs.get(4), "30");
+		data2.setValue(attrs.get(4), 30);
 		training.add(data2);
 		
 		Instance data3 = new DenseInstance(5);	
@@ -129,7 +116,7 @@ public class StdDevClassifier1 {
 		data3.setValue(attrs.get(1), VALUE_TEMP_HOT);
 		data3.setValue(attrs.get(2), VALUE_HUMIDITY_HIGH);
 		data3.setValue(attrs.get(3), VALUE_WINDY_FALSE);
-		data3.setValue(attrs.get(4), "48");
+		data3.setValue(attrs.get(4), 48);
 		training.add(data3);
 		
 		Instance data4 = new DenseInstance(5);	
@@ -137,7 +124,7 @@ public class StdDevClassifier1 {
 		data4.setValue(attrs.get(1), VALUE_TEMP_MILD);
 		data4.setValue(attrs.get(2), VALUE_HUMIDITY_HIGH);
 		data4.setValue(attrs.get(3), VALUE_WINDY_FALSE);
-		data4.setValue(attrs.get(4), "46");
+		data4.setValue(attrs.get(4), 46);
 		training.add(data4);
 		
 		Instance data5 = new DenseInstance(5);	
@@ -145,7 +132,7 @@ public class StdDevClassifier1 {
 		data5.setValue(attrs.get(1), VALUE_TEMP_COOL);
 		data5.setValue(attrs.get(2), VALUE_HUMIDITY_NORMAL);
 		data5.setValue(attrs.get(3), VALUE_WINDY_FALSE);
-		data5.setValue(attrs.get(4), "62");
+		data5.setValue(attrs.get(4), 62);
 		training.add(data5);
 		
 		Instance data6 = new DenseInstance(5);	
@@ -153,7 +140,7 @@ public class StdDevClassifier1 {
 		data6.setValue(attrs.get(1), VALUE_TEMP_COOL);
 		data6.setValue(attrs.get(2), VALUE_HUMIDITY_NORMAL);
 		data6.setValue(attrs.get(3), VALUE_WINDY_TRUE);
-		data6.setValue(attrs.get(4), "23");
+		data6.setValue(attrs.get(4), 23);
 		training.add(data6);
 		
 		Instance data7 = new DenseInstance(5);	
@@ -161,7 +148,7 @@ public class StdDevClassifier1 {
 		data7.setValue(attrs.get(1), VALUE_TEMP_COOL);
 		data7.setValue(attrs.get(2), VALUE_HUMIDITY_NORMAL);
 		data7.setValue(attrs.get(3), VALUE_WINDY_TRUE);
-		data7.setValue(attrs.get(4), "43");
+		data7.setValue(attrs.get(4), 43);
 		training.add(data7);
 		
 		Instance data8 = new DenseInstance(5);	
@@ -169,7 +156,7 @@ public class StdDevClassifier1 {
 		data8.setValue(attrs.get(1), VALUE_TEMP_MILD);
 		data8.setValue(attrs.get(2), VALUE_HUMIDITY_HIGH);
 		data8.setValue(attrs.get(3), VALUE_WINDY_FALSE);
-		data8.setValue(attrs.get(4), "36");
+		data8.setValue(attrs.get(4), 36);
 		training.add(data8);
 		
 		Instance data9 = new DenseInstance(5);	
@@ -177,7 +164,7 @@ public class StdDevClassifier1 {
 		data9.setValue(attrs.get(1), VALUE_TEMP_COOL);
 		data9.setValue(attrs.get(2), VALUE_HUMIDITY_NORMAL);
 		data9.setValue(attrs.get(3), VALUE_WINDY_FALSE);
-		data9.setValue(attrs.get(4), "38");
+		data9.setValue(attrs.get(4), 38);
 		training.add(data9);
 		
 		Instance data10 = new DenseInstance(5);	
@@ -185,7 +172,7 @@ public class StdDevClassifier1 {
 		data10.setValue(attrs.get(1), VALUE_TEMP_MILD);
 		data10.setValue(attrs.get(2), VALUE_HUMIDITY_NORMAL);
 		data10.setValue(attrs.get(3), VALUE_WINDY_FALSE);
-		data10.setValue(attrs.get(4), "48");
+		data10.setValue(attrs.get(4), 48);
 		training.add(data10);
 		
 		Instance data11 = new DenseInstance(5);	
@@ -193,7 +180,7 @@ public class StdDevClassifier1 {
 		data11.setValue(attrs.get(1), VALUE_TEMP_MILD);
 		data11.setValue(attrs.get(2), VALUE_HUMIDITY_NORMAL);
 		data11.setValue(attrs.get(3), VALUE_WINDY_TRUE);
-		data11.setValue(attrs.get(4), "48");
+		data11.setValue(attrs.get(4), 48);
 		training.add(data11);
 		
 		Instance data12 = new DenseInstance(5);	
@@ -201,7 +188,7 @@ public class StdDevClassifier1 {
 		data12.setValue(attrs.get(1), VALUE_TEMP_MILD);
 		data12.setValue(attrs.get(2), VALUE_HUMIDITY_HIGH);
 		data12.setValue(attrs.get(3), VALUE_WINDY_TRUE);
-		data12.setValue(attrs.get(4), "62");
+		data12.setValue(attrs.get(4), 62);
 		training.add(data12);
 		
 		Instance data13 = new DenseInstance(5);	
@@ -209,7 +196,7 @@ public class StdDevClassifier1 {
 		data13.setValue(attrs.get(1), VALUE_TEMP_HOT);
 		data13.setValue(attrs.get(2), VALUE_HUMIDITY_NORMAL);
 		data13.setValue(attrs.get(3), VALUE_WINDY_FALSE);
-		data13.setValue(attrs.get(4), "44");
+		data13.setValue(attrs.get(4), 44);
 		training.add(data13);
 		
 		Instance data14 = new DenseInstance(5);	
@@ -217,7 +204,7 @@ public class StdDevClassifier1 {
 		data14.setValue(attrs.get(1), VALUE_TEMP_MILD);
 		data14.setValue(attrs.get(2), VALUE_HUMIDITY_HIGH);
 		data14.setValue(attrs.get(3), VALUE_WINDY_TRUE);
-		data14.setValue(attrs.get(4), "30");
+		data14.setValue(attrs.get(4), 30);
 		training.add(data14);
 
 		return training;
@@ -268,7 +255,7 @@ public class StdDevClassifier1 {
 		private double cv(List<Instance> instances) {
 			
 			double [] data = instances.stream().mapToDouble(
-					v -> Double.valueOf(v.stringValue(cls))).toArray();
+					v -> v.value(cls)).toArray();
 			
 			double mean = StatUtils.mean(data);
 			double sd = StatUtils.variance(data);
@@ -303,7 +290,7 @@ public class StdDevClassifier1 {
 
 			// calculating the standard deviation before the splits
 			double [] data = instances.stream().mapToDouble(
-						p -> Double.valueOf(p.stringValue(cls))).toArray();
+						p -> p.value(cls)).toArray();
 						
 			if (data.length <= 0)
 				return 0;
