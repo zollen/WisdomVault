@@ -4,13 +4,16 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.StatUtils;
+import org.apache.commons.math3.util.Precision;
 
 import machinelearning.classifier.CARTNode.CARTKey;
 import weka.core.Attribute;
@@ -54,6 +57,8 @@ public class GradientBoostClassifier {
 		attrs.add(attr3);
 		attrs.add(attr4);
 		
+		
+		
 		Instances training = generateTrainingData(attrs);
 		
 		List<Double> first = get(training, attr4);
@@ -74,26 +79,51 @@ public class GradientBoostClassifier {
 		adjust(training, attr4, avgs);
 		print(0, training, attr4);
 	
+		List<Double> last = null;
+		Set<CARTNode<StdDev>> forest = new HashSet<CARTNode<StdDev>>();
 		
-		for (int i = 1; i <= 10; i++) {
+		int i = 1;
+		for (; i <= 1000; i++) {
 			
 			StdDev stddev = new StdDev(attrs, attr4);		
 			CARTNode.Strategy.Builder<StdDev> builder = new CARTNode.Strategy.Builder<StdDev>(stddev);		
 			CARTNode<StdDev> root = builder.build(training);
+			stddev.normalized(root, training);
 			
-			// System.out.println(root.toAll());
+		//	System.out.println(root.toAll());
 		
-			List<Double> residuals = get(root, attr4, training);
+			List<Double> residuals = get(root, training);
+			List<Double> results = new ArrayList<Double>();
 			
+			// gradient adjustment
 			for (int j = 0; j < first.size(); j++) {
-				double initial = first.get(j);
 				double residual = residuals.get(j);
-				double result = initial - (avg + LEARNING_RATE * residual);
-				training.get(j).setValue(attr4, result);
+				double result = LEARNING_RATE * residual;
+				results.add(result);
 			}
 			
+			// accumulated adjustment
+			avgs = add(avgs, results);
+			
+			// new residuals
+			results = substract(first, avgs);
+			
+			set(training, attr4, results);
+			
 			print(i, training, attr4);
+			
+			forest.add(root);
+			
+			
+			if (last != null) {
+				if (equals(results, last, 0.0001))
+					break;
+			}
+			
+			last = copy(results);
 		}
+		
+	
 		
 	}
 	
@@ -227,9 +257,35 @@ public class GradientBoostClassifier {
 			
 			return Math.sqrt(StatUtils.populationVariance(data));
 		}
+		
+		public void normalized(CARTNode<?> root, List<Instance> instances) {
+			
+			for (Instance instance : instances) {
+				
+				CARTNode<?> node = root.classify(instance);
+				
+				DoubleAdder sum = new DoubleAdder();
+				DoubleAdder num = new DoubleAdder();
+				List<Instance> inst = new ArrayList<Instance>();
+				
+				if (node != null) {
+					node.data().entrySet().stream().forEach(p -> {
+						
+						sum.add(((Number)p.getKey().get()).doubleValue());
+						num.add(1);
+						inst.addAll(p.getValue());
+					});
+					
+					double avg = sum.doubleValue() / num.doubleValue();
+					
+					node.data().clear();
+					node.data().put(new CARTKey(avg, 0), inst);
+				}	
+			}
+		}
 	}
 	
-	public static List<Double> get(CARTNode<?> root, Attribute cls, List<Instance> instances) {
+	public static List<Double> get(CARTNode<?> root, List<Instance> instances) {
 		
 		List<Double> list = new ArrayList<Double>();
 		
@@ -237,20 +293,67 @@ public class GradientBoostClassifier {
 			
 			CARTNode<?> node = root.classify(instance);
 			
-			DoubleAdder sum = new DoubleAdder();
-			DoubleAdder num = new DoubleAdder();
 			if (node != null) {
-				node.data().entrySet().stream().forEach(p -> {
-					
-					sum.add(((Number)p.getKey().get()).doubleValue());
-					num.add(1);
-				});
-				
-				list.add(sum.doubleValue() / num.doubleValue());
+				Number num = (Number) node.data().keySet().stream().findFirst().get().get();
+				list.add(num.doubleValue());
 			}	
 		}
 		
 		return list;
+	}
+	
+	public static List<Double> add(List<Double> left, List<Double> right) {
+		
+		List<Double> result = new ArrayList<Double>();
+		
+		for (int i = 0; i < left.size(); i++) {
+			
+			Double ll = left.get(i);
+			Double rr = right.get(i);
+			
+			result.add(ll + rr);
+		}
+		
+		return result;
+	}
+	
+	public static List<Double> substract(List<Double> left, List<Double> right) {
+		
+		List<Double> result = new ArrayList<Double>();
+		
+		for (int i = 0; i < left.size(); i++) {
+			
+			Double ll = left.get(i);
+			Double rr = right.get(i);
+			
+			result.add(ll - rr);
+		}
+		
+		return result;
+	}
+	
+	public static boolean equals(List<Double> left, List<Double> right, double tol) {
+		
+		if (left.size() != right.size())
+			return false;
+		
+		boolean res = false;
+		
+		for (int i = 0; i < left.size(); i++) {
+			
+			Double ll = left.get(i);
+			Double rr = right.get(i);
+			
+			if (ll != rr)
+				res = false;
+			
+			if (Precision.equals(ll, rr, tol))
+				res = true;
+			else
+				break;
+		}
+		
+		return res;
 	}
 	
 	public static double avg(Instances instances, Attribute attr) {
@@ -280,6 +383,23 @@ public class GradientBoostClassifier {
 		instances.stream().forEach(p -> vals.add(p.value(attr)));
 		
 		return vals;
+	}
+	
+	public static void set(Instances instances, Attribute attr, List<Double> values) {
+		
+		AtomicInteger index = new AtomicInteger();
+		instances.stream().forEach(p -> p.setValue(attr, values.get(index.getAndIncrement())));
+	}
+	
+	public static List<Double> copy(List<Double> source) {
+		
+		List<Double> results = new ArrayList<Double>();
+		
+		for (Double src : source) {		
+			results.add(Double.valueOf(src));
+		}
+		
+		return results;
 	}
 	
 	
