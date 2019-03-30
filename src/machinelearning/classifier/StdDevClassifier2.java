@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.DoubleAdder;
 
 import org.apache.commons.math3.stat.StatUtils;
 
+import machinelearning.classifier.CARTNode.CARTKey;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -39,7 +40,7 @@ public class StdDevClassifier2 {
 
 		List<Instance> training = generateTrainingData(100, 0, attrs);
 
-		StdDev sd = new StdDev(attrs, attr4, training.size());
+		StdDev sd = new StdDev(attrs, attr4);
 		
 		CARTNode.Strategy.Builder<StdDev> builder = 
 				new CARTNode.Strategy.Builder<StdDev>(sd);
@@ -80,11 +81,8 @@ public class StdDevClassifier2 {
 
 	private static class StdDev extends CARTNode.Strategy {
 
-		private int total = 0;
-
-		public StdDev(List<Attribute> attrs, Attribute cls, int size) {
+		public StdDev(List<Attribute> attrs, Attribute cls) {
 			super(attrs, cls);
-			this.total = size;
 		}
 
 		@Override
@@ -101,9 +99,8 @@ public class StdDevClassifier2 {
 
 				CARTNode<StdDev> node = builder.test(p, this.definition().get(p), instances);
 				double score = node.score();
-				double ratio = (double) instances.size() / this.total;
 				
-				if (max.doubleValue() < score && ratio > 0.3) {
+				if (max.doubleValue() < score && last > 0.1 && instances.size() > 3) {
 					max.reset();
 					max.add(score);
 					holder.data(node);
@@ -117,6 +114,27 @@ public class StdDevClassifier2 {
 		public double score(CARTNode<?> node) {
 			// TODO Auto-generated method stub
 			return sd(node);
+		}
+		
+		@Override
+		public double stop(CARTNode<?> node, CARTKey key, double last, double score) {
+			
+			List<Instance> instances = node.data().get(key);
+		
+			return cv(instances);
+		}
+		
+		private double cv(List<Instance> instances) {
+			
+			double [] data = instances.stream().mapToDouble(
+					v -> v.value(cls)).toArray();
+			
+			double mean = StatUtils.mean(data);
+			double sd = StatUtils.populationVariance(data);
+			if (sd == 0)
+				return 0;
+			
+			return Math.sqrt(sd) / mean;
 		}
 		
 		private double sd(CARTNode<?> node) {
@@ -149,7 +167,7 @@ public class StdDevClassifier2 {
 			if (data.length <= 0)
 				return 0;
 							
-			return Math.sqrt(StatUtils.variance(data));
+			return Math.sqrt(StatUtils.populationVariance(data));
 		}
 	}
 }

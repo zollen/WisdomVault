@@ -97,7 +97,7 @@ public class GradientBoostClassifier {
 
 					CARTNode<StdDev> node = builder.test(p, list, instances);
 					double score = node.score();
-		
+	
 					if (max.doubleValue() < score && last > 0.1 && instances.size() > 1) {
 						max.reset();
 						max.add(score);
@@ -105,7 +105,7 @@ public class GradientBoostClassifier {
 					}
 				});
 			});
-
+	
 			return holder.data();
 		}
 
