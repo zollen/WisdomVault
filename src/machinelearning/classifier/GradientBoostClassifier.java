@@ -123,7 +123,21 @@ public class GradientBoostClassifier {
 			last = copy(results);
 		}
 		
-	
+		Instance test = new DenseInstance(4);	
+		test.setValue(attrs.get(0), 1.65);
+		test.setValue(attrs.get(1), VALUE_COLOR_RED);
+		test.setValue(attrs.get(2), VALUE_GENDER_MALE);
+		
+		// prediction
+		double weight = avg;
+		for (CARTNode<?> node : forest) {
+			
+			CARTNode<?> res = node.classify(test);
+			Number num = (Number) res.data().keySet().stream().findFirst().get().get();
+			weight += 0.1 * num.doubleValue();
+		}
+		
+		System.out.println(test + " == predicted weight ==> " + weight);
 		
 	}
 	
