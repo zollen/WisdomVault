@@ -124,23 +124,43 @@ public class GradientBoostClassifier1 {
 		}
 		
 		Instances testing = new Instances("TESTING", attrs, 1);
-		Instance test = new DenseInstance(4);	
-		test.setValue(attr1, 1.7);
-		test.setValue(attr2, VALUE_COLOR_GREEN);
-		test.setValue(attr3, VALUE_GENDER_FEMALE);
-		testing.add(test);
+		Instance test1 = new DenseInstance(4);	
+		test1.setValue(attr1, 1.7);
+		test1.setValue(attr2, VALUE_COLOR_GREEN);
+		test1.setValue(attr3, VALUE_GENDER_FEMALE);
+		testing.add(test1);
+		
+		Instance test2 = new DenseInstance(4);	
+		test2.setValue(attr1, 1.53);
+		test2.setValue(attr2, VALUE_COLOR_RED);
+		test2.setValue(attr3, VALUE_GENDER_MALE);
+		testing.add(test2);
+		
+		Instance test3 = new DenseInstance(4);	
+		test3.setValue(attr1, 1.44);
+		test3.setValue(attr2, VALUE_COLOR_BLUE);
+		test3.setValue(attr3, VALUE_GENDER_MALE);
+		testing.add(test3);
 		
 		// prediction
+		
+		System.out.println("Predicting(1.7, Green, Female) ===> " + predict(forest, avg, testing.get(0)));
+		System.out.println("Predicting(1.53, Red, Male) ===> " + predict(forest, avg, testing.get(1)));	
+		System.out.println("Predicting(1.44, Blue, Male) ===> " + predict(forest, avg, testing.get(2)));
+		
+	}
+	
+	private static double predict(Set<CARTNode<StdDev>> forest, double avg, Instance instance) {
+		
 		double weight = avg;
 		for (CARTNode<?> node : forest) {
 			
-			CARTNode<?> res = node.classify(testing.get(0));
+			CARTNode<?> res = node.classify(instance);
 			Number num = (Number) res.data().keySet().stream().findFirst().get().get();
 			weight += 0.1 * num.doubleValue();
 		}
 		
-		System.out.println("Predicting(1.7, Green, Female) ===> " + weight);
-		
+		return weight;
 	}
 	
 	
