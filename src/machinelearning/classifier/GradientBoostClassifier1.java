@@ -123,30 +123,12 @@ public class GradientBoostClassifier1 {
 			last = copy(results);
 		}
 		
-		Instances testing = new Instances("TESTING", attrs, 1);
-		Instance test1 = new DenseInstance(4);	
-		test1.setValue(attr1, 1.7);
-		test1.setValue(attr2, VALUE_COLOR_GREEN);
-		test1.setValue(attr3, VALUE_GENDER_FEMALE);
-		testing.add(test1);
-		
-		Instance test2 = new DenseInstance(4);	
-		test2.setValue(attr1, 1.53);
-		test2.setValue(attr2, VALUE_COLOR_RED);
-		test2.setValue(attr3, VALUE_GENDER_MALE);
-		testing.add(test2);
-		
-		Instance test3 = new DenseInstance(4);	
-		test3.setValue(attr1, 1.44);
-		test3.setValue(attr2, VALUE_COLOR_BLUE);
-		test3.setValue(attr3, VALUE_GENDER_MALE);
-		testing.add(test3);
-		
 		// prediction
+		Instances testing = generateTestingData(attrs);
 		
-		System.out.println("Predicting(1.7, Green, Female) ===> " + predict(forest, avg, testing.get(0)));
-		System.out.println("Predicting(1.53, Red, Male) ===> " + predict(forest, avg, testing.get(1)));	
-		System.out.println("Predicting(1.44, Blue, Male) ===> " + predict(forest, avg, testing.get(2)));
+		System.out.println("Predicting(1.7, Green, Female) ===> " + ff.format(predict(forest, avg, testing.get(0))));
+		System.out.println("Predicting(1.53, Red, Male) ===> " + ff.format(predict(forest, avg, testing.get(1))));	
+		System.out.println("Predicting(1.44, Blue, Male) ===> " + ff.format(predict(forest, avg, testing.get(2))));
 		
 	}
 	
@@ -488,6 +470,35 @@ public class GradientBoostClassifier1 {
 		training.setClassIndex(training.numAttributes() - 1);
 		
 		return training;
+	}
+	
+	public static Instances generateTestingData(ArrayList<Attribute> attrs) {
+		
+		Instances testing = new Instances("TESTING", attrs, 3);
+		Instance test1 = new DenseInstance(4);	
+		test1.setValue(attrs.get(0), 1.7);
+		test1.setValue(attrs.get(1), VALUE_COLOR_GREEN);
+		test1.setValue(attrs.get(2), VALUE_GENDER_FEMALE);
+		test1.setValue(attrs.get(3), 75.63);
+		testing.add(test1);
+		
+		Instance test2 = new DenseInstance(4);	
+		test2.setValue(attrs.get(0), 1.53);
+		test2.setValue(attrs.get(1), VALUE_COLOR_RED);
+		test2.setValue(attrs.get(2), VALUE_GENDER_MALE);
+		test2.setValue(attrs.get(3), 72.31);
+		testing.add(test2);
+		
+		Instance test3 = new DenseInstance(4);	
+		test3.setValue(attrs.get(0), 1.44);
+		test3.setValue(attrs.get(1), VALUE_COLOR_BLUE);
+		test3.setValue(attrs.get(2), VALUE_GENDER_MALE);
+		test3.setValue(attrs.get(3), 73.11);
+		testing.add(test3);
+		
+		testing.setClassIndex(testing.numAttributes() - 1);
+		
+		return testing;
 	}
 
 }

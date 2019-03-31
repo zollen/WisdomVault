@@ -9,7 +9,7 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class RandomTreeClassifier {
+public class RandomForestClassifier1 {
 	
 	private static final String VALUE_OUTLOOK_SUNNY = "sunny";
 	private static final String VALUE_OUTLOOK_OVERCAST = "overcast";
@@ -70,7 +70,7 @@ public class RandomTreeClassifier {
 		
 		RandomTree tree = new RandomTree();
 		tree.setKValue(2);
-		
+	
 		// Decision Trees in general are not good at classifying new data
 		// This is where RamdomForest comes in.
 		// It vastly improves the performance of classifying new data.
@@ -91,7 +91,7 @@ public class RandomTreeClassifier {
 		forest.setComputeAttributeImportance(true);
 		
 		forest.buildClassifier(training);
-		
+	
 		
 		Instances testing = generateTestData(attrs);
 		
