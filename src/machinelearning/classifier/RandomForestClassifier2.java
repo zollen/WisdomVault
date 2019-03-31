@@ -44,7 +44,7 @@ public class RandomForestClassifier2 {
 		
 		Set<CARTNode<Gini>> forest = new HashSet<CARTNode<Gini>>();
 		
-		int k = 2;
+		int k = 3;
 		
 		for (int i = 1; i <= 100; i++) {
 			
