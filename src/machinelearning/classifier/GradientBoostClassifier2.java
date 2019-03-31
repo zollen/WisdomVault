@@ -19,9 +19,6 @@ public class GradientBoostClassifier2 {
 		double[][] x = species.toArray(new double[species.size()][]);
 		double[] y = species.toArray(new double[species.size()]);
 		
-		System.out.println("SIZE: " + species.size());
-		
-		
 		GradientTreeBoost trees = new GradientTreeBoost(x, y, 134);
 		
 		System.out.println("SIZE: " + species.size());
