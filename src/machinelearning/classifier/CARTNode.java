@@ -4,9 +4,11 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.stream.Collectors;
@@ -432,9 +434,11 @@ public class CARTNode<T extends CARTNode.Strategy> {
 			else
 			if (attr.isNumeric()) {
 				
-				List<Double> nums = new ArrayList<Double>();
+				Set<Double> nn = new HashSet<Double>();
 				
-				instances.stream().forEach(p -> nums.add(p.value(attr)));
+				instances.stream().forEach(p -> nn.add(p.value(attr)));
+				
+				List<Double> nums = new ArrayList<Double>(nn);
 				
 				Collections.sort(nums);
 		
