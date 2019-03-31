@@ -110,7 +110,7 @@ public class GradientBoostClassifier1 {
 			
 			set(training, attr4, results);
 			
-			print(i, training, attr4);
+		//	print(i, training, attr4);
 			
 			forest.add(root);
 			
@@ -139,7 +139,7 @@ public class GradientBoostClassifier1 {
 			weight += 0.1 * num.doubleValue();
 		}
 		
-		System.out.println(testing.get(0) + " == predicted weight ==> " + weight);
+		System.out.println("Predicting(1.7, Green, Female) ===> " + weight);
 		
 	}
 	

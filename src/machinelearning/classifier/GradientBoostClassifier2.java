@@ -22,12 +22,12 @@ public class GradientBoostClassifier2 {
 		System.out.println("SIZE: " + species.size());
 		
 		
-		GradientTreeBoost trees = new GradientTreeBoost(x, y, 100);
+		GradientTreeBoost trees = new GradientTreeBoost(x, y, 134);
 		
 		System.out.println("SIZE: " + species.size());
 	
 		double [] k = { 1.7, 0, 1 };
-	 	System.out.println(trees.predict(k));
+	 	System.out.println("Predicting(1.7, Green, Female) ===> " + ff.format(trees.predict(k)));
 	}
 
 }
