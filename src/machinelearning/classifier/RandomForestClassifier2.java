@@ -1,8 +1,10 @@
 package machinelearning.classifier;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.DoubleAdder;
@@ -48,15 +50,16 @@ public class RandomForestClassifier2 {
 		
 		for (int i = 1; i <= 100; i++) {
 			
-			Instances instances = resampleTrainingData(attrs, training);
+			List<Instances> instances = resampleTrainingData(attrs, training);
 			
 			List<Attribute> nattrs = resampleAttributes(attrs, attr5, k);
 
 			Gini tree = new Gini(nattrs, attr5);
-
+			tree.add(instances);
+			
 			CARTNode.Strategy.Builder<Gini> builder = new CARTNode.Strategy.Builder<Gini>(tree);
 		
-			CARTNode<Gini> root = builder.build(instances);
+			CARTNode<Gini> root = builder.build(instances.get(0));
 			
 			forest.add(root);
 		
@@ -64,11 +67,59 @@ public class RandomForestClassifier2 {
 //			System.out.println("Round #" + i + root.toAll());
 		}
 		
+		validation(forest, attr5);
+		
 		Instances testing = generateTestingData(attrs);
+		
+		classify(forest, testing.get(0));
+
+	}
+	
+	public static void validation(Set<CARTNode<Gini>> forest, Attribute cls) {
+		
+		Map<Instance, CARTNode<?>> results = new HashMap<Instance, CARTNode<?>>();
+		
+		for (CARTNode<Gini> tree : forest) {
+			
+			List<Instance> instances = ((Gini)tree.strategy()).instances.get(1);
+			for (Instance instance : instances) {
+				results.put(instance, tree.classify(instance));
+			}
+		}
+		
+		DoubleAdder corrects = new DoubleAdder();
+		
+		results.entrySet().stream().forEach(p -> {
+			
+			DoubleAdder tt = new DoubleAdder();
+			DoubleAdder ff = new DoubleAdder();
+			
+			p.getValue().data().entrySet().stream().forEach(d -> {
+				
+				if ("T".equals(d.getKey().get()))
+					tt.add(d.getValue().size() > 0 ? 1 : 0);
+				else
+					ff.add(d.getValue().size() > 0 ? 1 : 0);
+			});
+			
+			if ("T".equals(p.getKey().stringValue(cls))) {
+				if (tt.doubleValue() > 0)
+					corrects.add(1);
+			} else {
+				if (ff.doubleValue() > 0)
+					corrects.add(1);
+			}
+		});
+		
+		System.out.println("Accuracy: " + corrects.intValue() + " corrects over " + 
+				results.size() + ", [%]: " + (double) corrects.intValue() / results.size());
+	}
+	
+	public static void classify(Set<CARTNode<Gini>> forest, Instance testing) {
 		
 		List<CARTNode<?>> results = new ArrayList<CARTNode<?>>();
 		
-		forest.stream().forEach(p -> results.add(p.classify(testing.get(0))));
+		forest.stream().forEach(p -> results.add(p.classify(testing)));
 		
 		DoubleAdder tt = new DoubleAdder();
 		DoubleAdder ff = new DoubleAdder();
@@ -83,8 +134,7 @@ public class RandomForestClassifier2 {
 			});
 		});
 			
-		System.out.println(testing.get(0) + " ---> " + "T: " + tt + ", F: " + ff);
-
+		System.out.println(testing + " ---> " + "T: " + tt + ", F: " + ff);
 	}
 	
 	public static Instance copy(ArrayList<Attribute> attrs, Instance instance) {
@@ -126,17 +176,33 @@ public class RandomForestClassifier2 {
 		return list;
 	}
 	
-	public static Instances resampleTrainingData(ArrayList<Attribute> attrs, Instances instances) {
+	public static List<Instances> resampleTrainingData(ArrayList<Attribute> attrs, Instances instances) {
 		
 		Instances data = new Instances("TRANING", attrs, instances.size());
+		Instances out = new Instances("OUT-OF-BAG", attrs, instances.size());
+		
+		Set<Integer> positions = new HashSet<Integer>();
 		
 		for (int i = 0; i < instances.size(); i++) {		
-			data.add(copy(attrs, instances.get(rand.nextInt(instances.size()))));
+			int pos = rand.nextInt(instances.size());
+			positions.add(pos);
+			data.add(copy(attrs, instances.get(pos)));
+		}
+		
+		for (int i = 0; i < instances.size(); i++) {
+			if (!positions.contains(i)) {
+				out.add(copy(attrs, instances.get(i)));
+			}
 		}
 		
 		data.setClassIndex(data.numAttributes() - 1);
+		out.setClassIndex(out.numAttributes() - 1);
 			
-		return data;
+		List<Instances> list = new ArrayList<Instances>();
+		list.add(data);
+		list.add(out);
+		
+		return list;
 	}
 	
 	public static Instances generateTestingData(ArrayList<Attribute> attrs) {
@@ -198,6 +264,8 @@ public class RandomForestClassifier2 {
 	}
 
 	private static class Gini extends CARTNode.Strategy {
+		
+		private List<Instances> instances;
 
 		public Gini(List<Attribute> attrs, Attribute cls) {
 			super(attrs, cls);
@@ -258,6 +326,10 @@ public class RandomForestClassifier2 {
 
 				return sum.doubleValue();
 			}
+		}
+		
+		public void add(List<Instances> instances) {
+			this.instances = instances;
 		}
 	}
 }

@@ -126,6 +126,10 @@ public class CARTNode<T extends CARTNode.Strategy> {
 	public double score() {
 		return strategy.score(this);
 	}
+	
+	public T strategy() {
+		return strategy;
+	}
 
 	public void setInstances(List<Instance> instances) {
 
