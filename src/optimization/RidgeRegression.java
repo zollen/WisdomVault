@@ -157,6 +157,7 @@ public class RidgeRegression {
 					sumSqs.add(sum);
 				}
 				
+				// average all k-folds sum errors squared with one lambda
 				double avg = StatUtils.mean(sumSqs.stream().mapToDouble(p -> p.doubleValue()).toArray());
 				
 				System.out.println(ff.format(lambda) + " : " + ff.format(avg));
