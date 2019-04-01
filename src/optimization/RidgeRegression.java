@@ -15,8 +15,6 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
 
-import machinelearning.classifier.PlaceHolder;
-
 public class RidgeRegression {
 	
 	private static final DecimalFormat ff = new DecimalFormat("0.000");
@@ -27,7 +25,10 @@ public class RidgeRegression {
 							new Vector2D(4.0, 2.0),
 							new Vector2D(5.0, 3.0),
 							new Vector2D(6.0, 6.0),
-							new Vector2D(8.0, 9.0)
+							new Vector2D(8.0, 9.0),
+							new Vector2D(10.0, 8.0),
+							new Vector2D(11.0, 10.0),
+							new Vector2D(8.0, 5.0)
 							};
 
 	public static void main(String[] args) throws Exception {
@@ -49,6 +50,9 @@ public class RidgeRegression {
 			regression.addData(points[3].getX(), points[3].getY());
 			regression.addData(points[4].getX(), points[4].getY());
 			regression.addData(points[5].getX(), points[5].getY());
+			regression.addData(points[6].getX(), points[6].getY());
+			regression.addData(points[7].getX(), points[7].getY());
+			regression.addData(points[8].getX(), points[8].getY());
 			
 			RegressionResults result = regression.regress();
 			
@@ -112,10 +116,13 @@ public class RidgeRegression {
 							" 1, 4;" +
 							" 1, 5;" +
 							" 1, 6;" +
+							" 1, 8;" +
+							" 1, 10;" +
+							" 1, 11;" +
 							" 1, 8 " +
 							"]");
 			
-			eq.process("b = [ 1; 3; 2; 3; 6; 9 ]"); 
+			eq.process("b = [ 1; 3; 2; 3; 6; 9; 8; 10; 5 ]"); 
 			
 			eq.process("K = inv(A' * A) * A' * b");
 			
@@ -161,27 +168,21 @@ public class RidgeRegression {
 				// average all k-folds sum errors squared with one fix lambda
 				double avg = StatUtils.mean(sumSqs.stream().mapToDouble(p -> p.doubleValue()).toArray());
 		
-				map.put(avg, lambda);
+				System.out.println(" ==> Lambda: " + ff.format(lambda) + ", SumSqs: " + ff.format(avg));
+				
+				if (map.get(avg) == null)
+					map.put(avg, lambda);
 			}
 			
-			PlaceHolder<Double> min = new PlaceHolder<Double>(Double.MAX_VALUE);
-			PlaceHolder<Double> num = new PlaceHolder<Double>();
-			map.entrySet().stream().forEach(p -> {
-				
-				// the trick to find the most optimal smallest pair of values
-				double indicator = p.getKey() * p.getValue();
-				if (indicator < min.data()) {
-					min.data(indicator);
-					num.data(p.getKey());
-				}				
-			});
+			// Eyes balls the results
 			
-			double lambda = map.get(num.data());
-		
-			System.out.println("LAMBDA: " + ff.format(lambda) + ", SumSqs: " + ff.format(num.data()));	
+			// lowest sum error squared alone
+			// lambda: 13.6   SumSqs: 6.975
+			eq.process("LINE = inv(A' * A + 13.60 * eye(2)) * A' * b");
+			System.out.println("LAMBDA: 13.60 " + eq.lookupDDRM("LINE"));
 			
-			eq.process("LINE = inv(A' * A + " + lambda + " * eye(2)) * A' * b");
-			System.out.println(eq.lookupDDRM("LINE"));
+			// lowest sum error squared *and* lowest lambda
+			// lambda: 
 
 		}
 		
