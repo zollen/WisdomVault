@@ -1,7 +1,10 @@
 package optimization;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
@@ -24,6 +27,10 @@ public class RidgeRegression {
 							new Vector2D(5.0, 3.0),
 							new Vector2D(6.0, 6.0),
 							new Vector2D(8.0, 9.0)
+							};
+	
+	public static final double [] LAMBDAS = {
+							0.2, 0.4, 0.5, 0.7, 1.0, 1.2, 5.0, 10.0
 							};
 
 	public static void main(String[] args) throws Exception {
@@ -136,8 +143,7 @@ public class RidgeRegression {
 			// double lambda = cv(points);
 			
 			double lambda = cv(points);
-			
-			System.out.println("LAMBDA: " + lambda);
+		
 		}
 		
 	}
@@ -156,13 +162,23 @@ public class RidgeRegression {
 				}
 			}
 			
-			RegressionResults result = regression.regress();
+			
+			RegressionResults result = regression.regress(); 
 			double [] pts = result.getParameterEstimates();
 				
 			double yIntercept = pts[0];
 			double slope = pts[1];
 			double yy = yIntercept + slope * point1.getX();
-			System.out.println("y: " + ff.format(yIntercept) + ", slope: " + ff.format(slope) + "  DIFF: " + ff.format(Math.pow(yy - point1.getY(), 2)));
+			
+			AtomicInteger index = new AtomicInteger();
+			List<Double> values = new ArrayList<Double>();
+			Arrays.stream(LAMBDAS).forEach(p -> {				
+				values.add(Math.pow(yy - point1.getY(), 2) + LAMBDAS[index.getAndIncrement()] * Math.pow(slope, 2));
+			});
+			
+			String vals = values.stream().map(p -> ff.format(p)).collect(Collectors.joining(", "));
+			
+			System.out.println("y: " + ff.format(yIntercept) + ", slope: " + ff.format(slope) + "  ridge regression: " + vals);
 		}
 		
 		return 0.0;
