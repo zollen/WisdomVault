@@ -3,7 +3,6 @@ package optimization;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +14,8 @@ import org.apache.commons.math3.stat.regression.RegressionResults;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
+
+import machinelearning.classifier.PlaceHolder;
 
 public class RidgeRegression {
 	
@@ -157,22 +158,31 @@ public class RidgeRegression {
 					sumSqs.add(sum);
 				}
 				
-				// average all k-folds sum errors squared with one lambda
+				// average all k-folds sum errors squared with one fix lambda
 				double avg = StatUtils.mean(sumSqs.stream().mapToDouble(p -> p.doubleValue()).toArray());
-				
-				System.out.println(ff.format(lambda) + " : " + ff.format(avg));
-			
+		
 				map.put(avg, lambda);
 			}
 			
-			double min = map.keySet().stream().min(Comparator.comparing(Double::doubleValue)).get();
-			double lambda = map.get(min);
-/*			
-			System.out.println("LAMBDA: " + ff.format(lambda) + ", SumSqs: " + ff.format(min));	
+			PlaceHolder<Double> min = new PlaceHolder<Double>(Double.MAX_VALUE);
+			PlaceHolder<Double> num = new PlaceHolder<Double>();
+			map.entrySet().stream().forEach(p -> {
+				
+				// the trick to find the most optimal smallest pair of values
+				double indicator = p.getKey() * p.getValue();
+				if (indicator < min.data()) {
+					min.data(indicator);
+					num.data(p.getKey());
+				}				
+			});
 			
-			eq.process("LINE = inv(A' * A + 14.0 * eye(2)) * A' * b");
+			double lambda = map.get(num.data());
+		
+			System.out.println("LAMBDA: " + ff.format(lambda) + ", SumSqs: " + ff.format(num.data()));	
+			
+			eq.process("LINE = inv(A' * A + " + lambda + " * eye(2)) * A' * b");
 			System.out.println(eq.lookupDDRM("LINE"));
-*/
+
 		}
 		
 	}
