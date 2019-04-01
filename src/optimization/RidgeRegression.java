@@ -2,7 +2,6 @@ package optimization;
 
 import java.text.DecimalFormat;
 import java.util.Arrays;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
@@ -17,8 +16,17 @@ import org.ejml.interfaces.linsol.LinearSolverDense;
 public class RidgeRegression {
 	
 	private static final DecimalFormat ff = new DecimalFormat("0.000");
+	
+	public static final Vector2D [] points = {
+							new Vector2D(1.0, 1.0),
+							new Vector2D(2.0, 3.0),
+							new Vector2D(4.0, 2.0),
+							new Vector2D(5.0, 3.0),
+							new Vector2D(6.0, 6.0),
+							new Vector2D(8.0, 9.0)
+							};
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
 		// Ridge Regression introduces penalty to regression for preventing small training 
 		// data from overfitting. For example with two training data points - a straight line 
@@ -74,12 +82,12 @@ public class RidgeRegression {
 		
 			SimpleRegression regression = new SimpleRegression();
 		
-			regression.addData(1.0, 1.0);
-			regression.addData(2.0, 3.0);
-			regression.addData(4.0, 2.0);
-			regression.addData(5.0, 3.0);
-			regression.addData(6.0, 6.0);
-			regression.addData(8.0, 9.0);
+			regression.addData(points[0].getX(), points[0].getY());
+			regression.addData(points[1].getX(), points[1].getY());
+			regression.addData(points[2].getX(), points[2].getY());
+			regression.addData(points[3].getX(), points[3].getY());
+			regression.addData(points[4].getX(), points[4].getY());
+			regression.addData(points[5].getX(), points[5].getY());
 			
 			RegressionResults result = regression.regress();
 			
@@ -127,13 +135,36 @@ public class RidgeRegression {
 			// performing k-folds cross validation to estimate the lambda
 			// double lambda = cv(points);
 			
+			double lambda = cv(points);
 			
+			System.out.println("LAMBDA: " + lambda);
 		}
 		
 	}
 	
-	public static double cv(Set<Vector2D> points) {
+	public static double cv(Vector2D [] points) throws Exception {
 		// working on it....
+		
+		for (Vector2D point1 : points) {
+			
+			SimpleRegression regression = new SimpleRegression();
+			
+			for (Vector2D point2 : points) {
+				
+				if (point1 != point2) {					
+					regression.addData(point2.getX(), point2.getY());
+				}
+			}
+			
+			RegressionResults result = regression.regress();
+			double [] pts = result.getParameterEstimates();
+				
+			double yIntercept = pts[0];
+			double slope = pts[1];
+			double yy = yIntercept + slope * point1.getX();
+			System.out.println("y: " + ff.format(yIntercept) + ", slope: " + ff.format(slope) + "  DIFF: " + ff.format(Math.pow(yy - point1.getY(), 2)));
+		}
+		
 		return 0.0;
 	}
 
