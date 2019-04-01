@@ -3,18 +3,18 @@ package optimization;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
+import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.regression.RegressionResults;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
-import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.equation.Equation;
-import org.ejml.interfaces.linsol.LinearSolverDense;
 
 public class RidgeRegression {
 	
@@ -28,65 +28,18 @@ public class RidgeRegression {
 							new Vector2D(6.0, 6.0),
 							new Vector2D(8.0, 9.0)
 							};
-	
-	public static final double [] LAMBDAS = {
-							0.2, 0.4, 0.5, 0.7, 1.0, 1.2, 5.0, 10.0
-							};
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
 		// Ridge Regression introduces penalty to regression for preventing small training 
-		// data from overfitting. For example with two training data points - a straight line 
+		// data from over-fitting. For example with two training data points - a straight line 
 		// would have zero squared sum residuals, zero bias but large variance when test with
 		// other 'unseen' testing data points. Ridge regression ensure the straight line does
 		// not matched the two training points, introduce small bias in exchange of significant
 		// reduction of variances from testing with new data points.
 		
 		{
-			// If all training data points are available. Easy - least square approximate
-			// (1.0, 1.0), (2.0, 3.0), (4.0, 2.0), (5.0, 3.0), (6.0, 6.0), (8.0, 9.0)
-			// C + Dx = y
-			// ==========
-			// C + 1D = 1
-			// C + 2D = 3
-			// C + 4D = 2
-			// C + 5D = 3
-			// C + 6D = 6
-			// C + 8D = 9
-			Equation eq = new Equation();
-			eq.process("A = [" +
-							" 1, 1;" +
-							" 1, 2;" +
-							" 1, 4;" +
-							" 1, 5;" +
-							" 1, 6;" +
-							" 1, 8 " +
-							"]");
-			
-			eq.process("b = [ 1; 3; 2; 3; 6; 9 ]"); 
-			
-			DMatrixRMaj A = eq.lookupDDRM("A");
-			DMatrixRMaj x = new DMatrixRMaj(A.numCols, 1);
-	        DMatrixRMaj y = eq.lookupDDRM("b");
-			
-			// x = [ C; D ]
-			// Ax = b is not solvable!!!!!!!!!
-	        
-	        LinearSolverDense<DMatrixRMaj> x2 =  LinearSolverFactory_DDRM.leastSquares(A.numRows, A.numCols);
-			x2.setA(A);
-			
-			CommonOps_DDRM.fill(x, 0);
-			x2.solve(y, x);
-			
-			System.out.println(x);
-			
-			eq.alias(x, "x");
-			
-		}
-		
-		
-		{
-		
+			// OLS (x, y) using commons math library
 			SimpleRegression regression = new SimpleRegression();
 		
 			regression.addData(points[0].getX(), points[0].getY());
@@ -98,12 +51,12 @@ public class RidgeRegression {
 			
 			RegressionResults result = regression.regress();
 			
-			System.out.println("Sum of Squared Errors: " + result.getErrorSumSquares());
-			System.out.println("R^2: " + result.getRSquared());
+			System.out.println("Sum of Squared Errors: " + ff.format(result.getErrorSumSquares()));
+			System.out.println("R^2: " + ff.format(result.getRSquared()));
 			
 			double [] pts = result.getParameterEstimates();
 		
-			System.out.println(Arrays.stream(pts).mapToObj( p -> ff.format(p) ).collect(
+			System.out.println("OLS: " + Arrays.stream(pts).mapToObj( p -> ff.format(p) ).collect(
 							Collectors.joining(", ")));
 		}
 		
@@ -125,7 +78,7 @@ public class RidgeRegression {
 			// ----------------
 			// Ridge Regression introduces penalty or bias 
 			// y = b + mx, where mx = slope * weight, where weight is the minimized of
-			// 0 + 1 * 2^2 = 4 (let's assume lambda is 1)
+			// 0 + 1 * 2^2 = 4 (let's assume λ is 1)
 			// using the above least squared answer (-0.420, 1.020)
 			// y = -0.42 + 1.02x
 			// -0.42 + 1.02(1) = 0.6     (1.0, 0.6)
@@ -133,55 +86,114 @@ public class RidgeRegression {
 			// (1.0 - 0.6)^2 + (3 - 1.62)^2 + 1 * 1.02^2 = 2.14 
 			// 2.14 is obviously smaller bias than 4 (perfect fitted)
 			
-			// lambda = 10-folds cross validation 
+			// λ = 10-folds cross validation 
 			
 			// Ridge Regression helps reduce variance by shrinking the parameters and make
 			// our prediction less sensitive to them. In general, the ridge regression
 			// penalty includes all of the parameters *EXCEPT* the y-intercept (b).
 			
 			// performing k-folds cross validation to estimate the lambda
-			// double lambda = cv(points);
 			
-			double lambda = cv(points);
-		
+			// General formula of least squared (OLS) : inv(A'A) A'y
+			// (1.0, 1.0), (2.0, 3.0), (4.0, 2.0), (5.0, 3.0), (6.0, 6.0), (8.0, 9.0)
+			// C + Dx = y
+			// ==========
+			// C + 1D = 1
+			// C + 2D = 3
+			// C + 4D = 2
+			// C + 5D = 3
+			// C + 6D = 6
+			// C + 8D = 9
+			Equation eq = new Equation();
+			eq.process("A = [" +
+							" 1, 1;" +
+							" 1, 2;" +
+							" 1, 4;" +
+							" 1, 5;" +
+							" 1, 6;" +
+							" 1, 8 " +
+							"]");
+			
+			eq.process("b = [ 1; 3; 2; 3; 6; 9 ]"); 
+			
+			eq.process("K = inv(A' * A) * A' * b");
+			
+			System.out.println("OLS: " + eq.lookupDDRM("K"));
+			
+			DMatrixRMaj A = eq.lookupDDRM("A");
+			DMatrixRMaj b = eq.lookupDDRM("b");
+			
+			// General formula of ridge regression : inv(A'A + λI) A'y
+			// as λ increase, slope decrease
+			// as λ getting very large, A'A no longer matter, then
+			// new_y = inv(λI) A'y = 1/λ A'y
+			
+			Map<Double, Double> map = new HashMap<Double, Double>();
+			
+			for (double lambda = 0.1; lambda < 20; lambda += 0.1) {
+				
+				List<Double> sumSqs = new ArrayList<Double>();
+				double sum = 0.0;
+				
+				// k-folds cross validation (in this case: omit one data for testing)
+				for (int omit = 0; omit < points.length; omit++) {
+					
+					// training with k-data
+					DMatrixRMaj C = generate(A, omit);
+					DMatrixRMaj d = generate(b, omit);
+					
+					eq.alias(C, "C");
+					eq.alias(d, "d");
+					
+					eq.process("LAMBDA = " + lambda);
+					eq.process("LINE = inv(C' * C + LAMBDA * eye(2)) * C' * d");
+					
+					DMatrixRMaj line = eq.lookupDDRM("LINE");
+					
+					// validate with the test data
+					double y = points[omit].getY();
+					double yy = line.get(0, 0) + line.get(1, 0) * points[omit].getX();
+					sum += Math.pow(y - yy, 2);
+					sumSqs.add(sum);
+				}
+				
+				double avg = StatUtils.mean(sumSqs.stream().mapToDouble(p -> p.doubleValue()).toArray());
+				
+				System.out.println(ff.format(lambda) + " : " + ff.format(avg));
+			
+				map.put(avg, lambda);
+			}
+			
+			double min = map.keySet().stream().min(Comparator.comparing(Double::doubleValue)).get();
+			double lambda = map.get(min);
+/*			
+			System.out.println("LAMBDA: " + ff.format(lambda) + ", SumSqs: " + ff.format(min));	
+			
+			eq.process("LINE = inv(A' * A + 14.0 * eye(2)) * A' * b");
+			System.out.println(eq.lookupDDRM("LINE"));
+*/
 		}
 		
 	}
 	
-	public static double cv(Vector2D [] points) throws Exception {
-		// working on it....
+	
+	private static DMatrixRMaj generate(DMatrixRMaj mat, int omitted) {
 		
-		for (Vector2D point1 : points) {
+		DMatrixRMaj A = new DMatrixRMaj(mat.numRows - 1, mat.numCols);
+		
+		for (int row = 0, i = 0; row < mat.numRows; row++) {
 			
-			SimpleRegression regression = new SimpleRegression();
-			
-			for (Vector2D point2 : points) {
-				
-				if (point1 != point2) {					
-					regression.addData(point2.getX(), point2.getY());
+			if (row != omitted) {
+				for (int col = 0; col < mat.numCols; col++) {
+					A.set(i, col, mat.get(row, col));
 				}
+				i++;
 			}
-			
-			
-			RegressionResults result = regression.regress(); 
-			double [] pts = result.getParameterEstimates();
-				
-			double yIntercept = pts[0];
-			double slope = pts[1];
-			double yy = yIntercept + slope * point1.getX();
-			
-			AtomicInteger index = new AtomicInteger();
-			List<Double> values = new ArrayList<Double>();
-			Arrays.stream(LAMBDAS).forEach(p -> {				
-				values.add(Math.pow(yy - point1.getY(), 2) + LAMBDAS[index.getAndIncrement()] * Math.pow(slope, 2));
-			});
-			
-			String vals = values.stream().map(p -> ff.format(p)).collect(Collectors.joining(", "));
-			
-			System.out.println("y: " + ff.format(yIntercept) + ", slope: " + ff.format(slope) + "  ridge regression: " + vals);
 		}
+			
+		return A;
 		
-		return 0.0;
 	}
-
+	
+	
 }
