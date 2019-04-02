@@ -192,20 +192,13 @@ public class RidgeRegression {
 			
 			}
 			
-	//		map.entrySet().stream().forEach(p -> System.out.println("SumSqs: " +ff.format(p.getKey()) + ", Lambda: " + ff.format(p.getValue())));
+	//		map.entrySet().stream().forEach(p -> System.out.println("SumSqs: " + ff.format(p.getKey()) + ", Lambda: " + ff.format(p.getValue())));
 			
 			// pick a lambda with the lowest sum error squared
 			double lambda = map.entrySet().stream().map(p -> p.getValue()).findFirst().get();
 			eq.alias(lambda, "LAMBDA");
 			eq.process("LINE = inv(A' * A + LAMBDA * eye(2)) * A' * b");
 			System.out.println("LAMBDA: " + ff.format(lambda) + " " + eq.lookupDDRM("LINE"));
-			
-		}
-		
-		{
-			// LASSO regression
-			
-			
 		}
 		
 	}
@@ -252,6 +245,5 @@ public class RidgeRegression {
 		return A;
 		
 	}
-	
 	
 }
