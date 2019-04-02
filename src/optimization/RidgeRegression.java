@@ -3,9 +3,12 @@ package optimization;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
@@ -19,17 +22,19 @@ public class RidgeRegression {
 	
 	private static final DecimalFormat ff = new DecimalFormat("0.000");
 	
+	private static final Random rand = new Random(0);
+	
 	public static final Vector2D [] points = {
 							new Vector2D(1.0, 1.0),
 							new Vector2D(2.0, 3.0),
 							new Vector2D(4.0, 2.0),
 							new Vector2D(5.0, 3.0),
 							new Vector2D(6.0, 6.0),
+							new Vector2D(8.0, 5.0),
 							new Vector2D(8.0, 9.0),
 							new Vector2D(10.0, 8.0),
-							new Vector2D(11.0, 10.0),
-							new Vector2D(8.0, 5.0)
-							};
+							new Vector2D(11.0, 10.0)
+						};
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
@@ -117,12 +122,12 @@ public class RidgeRegression {
 							" 1, 5;" +
 							" 1, 6;" +
 							" 1, 8;" +
+							" 1, 8;" +
 							" 1, 10;" +
-							" 1, 11;" +
-							" 1, 8 " +
+							" 1, 11 " +
 							"]");
 			
-			eq.process("b = [ 1; 3; 2; 3; 6; 9; 8; 10; 5 ]"); 
+			eq.process("b = [ 1; 3; 2; 3; 6; 5; 9; 8; 10 ]"); 
 			
 			eq.process("K = inv(A' * A) * A' * b");
 			
@@ -136,69 +141,110 @@ public class RidgeRegression {
 			// as λ getting very large, A'A no longer matter, then
 			// new_y = inv(λI) A'y = 1/λ A'y
 			
-			Map<Double, Double> map = new HashMap<Double, Double>();
+			Map<Double, Double> map = new TreeMap<Double, Double>();
+			
 			
 			for (double lambda = 0.1; lambda < 20; lambda += 0.1) {
 				
 				List<Double> sumSqs = new ArrayList<Double>();
 				double sum = 0.0;
+				int k = 3;
 				
-				// k-folds cross validation (in this case: omit one data for testing)
-				for (int omit = 0; omit < points.length; omit++) {
+				// k-folds cross validation (in this case: omit k number of data for testing)
+				for (int fold = 0; fold < 100; fold++) {
+					
+					Set<Integer> omitted = random(A.numRows, k);
 					
 					// training with k-data
-					DMatrixRMaj C = generate(A, omit);
-					DMatrixRMaj d = generate(b, omit);
+					DMatrixRMaj C = generate(A, omitted);
+					DMatrixRMaj d = generate(b, omitted);
 					
 					eq.alias(C, "C");
 					eq.alias(d, "d");
 					
-					eq.process("LAMBDA = " + lambda);
+					eq.alias(lambda, "LAMBDA");
 					eq.process("LINE = inv(C' * C + LAMBDA * eye(2)) * C' * d");
 					
 					DMatrixRMaj line = eq.lookupDDRM("LINE");
 					
 					// validate with the test data
-					double y = points[omit].getY();
-					double yy = line.get(0, 0) + line.get(1, 0) * points[omit].getX();
-					sum += Math.pow(y - yy, 2);
+					for (Integer omit : omitted) {
+						double y = points[omit].getY();
+						double yy = line.get(0, 0) + line.get(1, 0) * points[omit].getX();
+						sum += Math.pow(y - yy, 2);
+					}
+					
 					sumSqs.add(sum);
 				}
 				
 				// average all k-folds sum errors squared with one fix lambda
 				double avg = StatUtils.mean(sumSqs.stream().mapToDouble(p -> p.doubleValue()).toArray());
 		
-				System.out.println(" ==> Lambda: " + ff.format(lambda) + ", SumSqs: " + ff.format(avg));
+				Double ll = map.get(avg);
 				
-				if (map.get(avg) == null)
+				if (ll == null) {
 					map.put(avg, lambda);
+				}
+				else {
+					if (ll > lambda)
+						map.put(avg, lambda);
+				}
+			
 			}
 			
-			// Eyes balls the results
+	//		map.entrySet().stream().forEach(p -> System.out.println("SumSqs: " +ff.format(p.getKey()) + ", Lambda: " + ff.format(p.getValue())));
 			
-			// lowest sum error squared alone
-			// lambda: 13.6   SumSqs: 6.975
-			eq.process("LINE = inv(A' * A + 13.60 * eye(2)) * A' * b");
-			System.out.println("LAMBDA: 13.60 " + eq.lookupDDRM("LINE"));
+			// pick a lambda with the lowest sum error squared
+			double lambda = map.entrySet().stream().map(p -> p.getValue()).findFirst().get();
+			eq.alias(lambda, "LAMBDA");
+			eq.process("LINE = inv(A' * A + LAMBDA * eye(2)) * A' * b");
+			System.out.println("LAMBDA: " + ff.format(lambda) + " " + eq.lookupDDRM("LINE"));
 			
-			// lowest sum error squared *and* lowest lambda
-			// lambda: 
-
+		}
+		
+		{
+			// LASSO regression
+			
+			
 		}
 		
 	}
 	
-	
-	private static DMatrixRMaj generate(DMatrixRMaj mat, int omitted) {
+	private static Set<Integer> random(int size, int k) {
 		
-		DMatrixRMaj A = new DMatrixRMaj(mat.numRows - 1, mat.numCols);
+		int [] arr = new int[size];
+		
+		for (int i = 0; i < size; i++)
+			arr[i] = i;
+		
+		for (int i = 0; i < size; i++) {
+			int from = rand.nextInt(size);
+			int to = rand.nextInt(size);
+			
+			int tmp = arr[to];
+			arr[to] = arr[from];
+			arr[from] = tmp;
+		}
+		
+		Set<Integer> set = new HashSet<Integer>();
+		for (int i = 0; i < k; i++)
+			set.add(arr[i]);
+		
+		return set;
+	}
+	
+	private static DMatrixRMaj generate(DMatrixRMaj mat, Set<Integer> omitted) {
+		
+		DMatrixRMaj A = new DMatrixRMaj(mat.numRows - omitted.size(), mat.numCols);
 		
 		for (int row = 0, i = 0; row < mat.numRows; row++) {
 			
-			if (row != omitted) {
+			if (!omitted.contains(row)) {
+				
 				for (int col = 0; col < mat.numCols; col++) {
 					A.set(i, col, mat.get(row, col));
 				}
+				
 				i++;
 			}
 		}
