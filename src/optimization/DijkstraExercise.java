@@ -1,7 +1,9 @@
 package optimization;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -12,9 +14,11 @@ import org.ejml.equation.Equation;
 
 public class DijkstraExercise {
 	
+	private static final int END_STATE_F = 5;
+	
 	private static DMatrixRMaj A = null;
 
-	private static Map<Integer, Map<Integer, Integer>> results = new TreeMap<Integer, Map<Integer, Integer>>();
+	private static Map<Integer, List<Map<Integer, Integer>>> results = new TreeMap<Integer, List<Map<Integer, Integer>>>();
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -56,8 +60,10 @@ public class DijkstraExercise {
 		
 		dijkstra(0, vertices, new LinkedHashMap<Integer, Integer>(), new HashSet<Integer>());
 		
-		results.entrySet().stream().forEach(p -> print(p.getKey(), p.getValue()));
+		Map.Entry<Integer, List<Map<Integer, Integer>>> first = results.entrySet().stream().findFirst().get();
 		
+		first.getValue().stream().forEach(p -> print(first.getKey(), p));
+
 	}
 	
 	public static void dijkstra(int state, Map<Integer, Integer> vertices, 
@@ -81,14 +87,23 @@ public class DijkstraExercise {
 					_paths.put(state, row);
 				}
 				
-				if (!_states.contains(row) && row != 5) {
+				if (!_states.contains(row) && row != END_STATE_F) {
 					dijkstra(row, _vertices, _paths, _states);
 				}
 				else {
-					if (row == 5 && _paths.values().stream().reduce(
-							(first, second) -> second).orElse(null) == 5) {
-					print(_vertices.get(5), _paths);
-				//		results.put(_vertices.get(5), _paths);
+					if (row == END_STATE_F && _paths.values().stream().reduce(
+							(first, second) -> second).orElse(null) == END_STATE_F) {
+						
+						int score = _vertices.get(END_STATE_F);
+		
+						List<Map<Integer, Integer>> list = results.get(score);
+						
+						if (list == null) {
+							list = new ArrayList<Map<Integer, Integer>>();							
+							results.put(score, list);
+						}
+						
+						list.add(new LinkedHashMap<Integer, Integer>(_paths));
 					}
 				}
 			}	
@@ -99,11 +114,8 @@ public class DijkstraExercise {
 		
 		final String [] labels = { "A", "B", "C", "D", "E", "F", "G" };
 		
-		StringBuilder builder = new StringBuilder();
-		paths.entrySet().stream().forEach(p -> builder.append(labels[p.getKey()] + " ===> " + 
-										labels[p.getValue()] + ", "));
-		
-		String tmp = paths.entrySet().stream().map(p -> labels[p.getKey()] + " ===> " + 
+	
+		String tmp = paths.entrySet().stream().map(p -> labels[p.getKey()] + " ==> " + 
 										labels[p.getValue()]).collect(Collectors.joining(", "));
 		
 		System.out.println(tmp + " : " + scores);
