@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
@@ -11,7 +13,8 @@ import org.ejml.equation.Equation;
 public class DijkstraExercise {
 	
 	private static DMatrixRMaj A = null;
-	
+
+	private static Map<Integer, Map<Integer, Integer>> results = new TreeMap<Integer, Map<Integer, Integer>>();
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -53,6 +56,8 @@ public class DijkstraExercise {
 		
 		dijkstra(0, vertices, new LinkedHashMap<Integer, Integer>(), new HashSet<Integer>());
 		
+		results.entrySet().stream().forEach(p -> print(p.getKey(), p.getValue()));
+		
 	}
 	
 	public static void dijkstra(int state, Map<Integer, Integer> vertices, 
@@ -80,15 +85,17 @@ public class DijkstraExercise {
 					dijkstra(row, _vertices, _paths, _states);
 				}
 				else {
-					if (row == 5) {
-						print(_vertices, _paths);	
+					if (row == 5 && _paths.values().stream().reduce(
+							(first, second) -> second).orElse(null) == 5) {
+					print(_vertices.get(5), _paths);
+				//		results.put(_vertices.get(5), _paths);
 					}
 				}
 			}	
 		}
 	}
 	
-	public static void print(Map<Integer, Integer> vertices, Map<Integer, Integer> paths) {
+	public static void print(int scores, Map<Integer, Integer> paths) {
 		
 		final String [] labels = { "A", "B", "C", "D", "E", "F", "G" };
 		
@@ -96,7 +103,10 @@ public class DijkstraExercise {
 		paths.entrySet().stream().forEach(p -> builder.append(labels[p.getKey()] + " ===> " + 
 										labels[p.getValue()] + ", "));
 		
-		System.out.println(builder.toString() + " : " + vertices.get(5));
+		String tmp = paths.entrySet().stream().map(p -> labels[p.getKey()] + " ===> " + 
+										labels[p.getValue()]).collect(Collectors.joining(", "));
+		
+		System.out.println(tmp + " : " + scores);
 	}
 
 }
