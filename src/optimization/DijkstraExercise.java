@@ -71,10 +71,10 @@ public class DijkstraExercise {
 		
 		Set<Integer> _states = new HashSet<Integer>(states);
 		_states.add(state);
-		Map<Integer, Integer> _vertices = new LinkedHashMap<Integer, Integer>();
-		_vertices.putAll(vertices);
-		Map<Integer, Integer> _paths = new LinkedHashMap<Integer, Integer>();
-		_paths.putAll(paths);
+		
+		Map<Integer, Integer> _vertices = new LinkedHashMap<Integer, Integer>(vertices);
+		Map<Integer, Integer> _paths = new LinkedHashMap<Integer, Integer>(paths);
+		
 				
 		for (int row = 0; row < A.numRows; row++) {
 			
