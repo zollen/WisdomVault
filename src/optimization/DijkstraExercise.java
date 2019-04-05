@@ -92,7 +92,7 @@ public class DijkstraExercise {
 					dijkstra(row, _vertices, _paths, _states);
 				}
 				else {
-					if (row == END_STATE_F && _paths.values().stream().reduce(
+					if (_paths.values().stream().reduce(
 							(first, second) -> second).orElse(null) == END_STATE_F) {
 						
 						int score = _vertices.get(END_STATE_F);
