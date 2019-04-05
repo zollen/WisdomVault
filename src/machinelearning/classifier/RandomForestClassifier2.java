@@ -16,7 +16,7 @@ import weka.core.Instances;
 
 public class RandomForestClassifier2 {
 	
-	private static final Random rand = new Random();
+	private static final Random rand = new Random(0);
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
