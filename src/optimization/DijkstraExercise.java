@@ -14,6 +14,7 @@ import org.ejml.equation.Equation;
 
 public class DijkstraExercise {
 	
+	private static final int START_STATE_A = 0;
 	private static final int END_STATE_F = 5;
 	
 	private static DMatrixRMaj A = null;
@@ -51,14 +52,14 @@ public class DijkstraExercise {
 		
 
 		Map<Integer, Integer> vertices = new LinkedHashMap<Integer, Integer>();
-		vertices.put(0, 0);
+		vertices.put(START_STATE_A, 0);
 		for (int i = 1; i <= 6; i++)
 			vertices.put(i, Integer.MAX_VALUE);
 			
 		
 		A = eq.lookupDDRM("A");
 		
-		dijkstra(0, vertices, new LinkedHashMap<Integer, Integer>(), new HashSet<Integer>());
+		dijkstra(START_STATE_A, vertices, new LinkedHashMap<Integer, Integer>(), new HashSet<Integer>());
 		
 		Map.Entry<Integer, List<Map<Integer, Integer>>> first = results.entrySet().stream().findFirst().get();
 		
@@ -76,7 +77,7 @@ public class DijkstraExercise {
 		Map<Integer, Integer> _paths = new LinkedHashMap<Integer, Integer>(paths);
 		
 				
-		for (int row = 0; row < A.numRows; row++) {
+		for (int row = START_STATE_A; row < A.numRows; row++) {
 			
 			if (A.get(row, state) > 0) {
 				
