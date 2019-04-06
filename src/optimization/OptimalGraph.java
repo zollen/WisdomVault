@@ -53,7 +53,7 @@ public class OptimalGraph {
 		
 		System.out.println(root);	
 		
-		shortestPath(root);
+		shortestPath(A, root);
 		
 		
 		
@@ -95,11 +95,11 @@ public class OptimalGraph {
 		// dijkstra with new features!
 	}
 	
-	public static void shortestPath(Node node) {
+	public static void shortestPath(DMatrixRMaj A, Node node) {
 		
 		Map<Integer, List<Map<Integer, Integer>>> results = new TreeMap<Integer, List<Map<Integer, Integer>>>();
 
-		search(node, new LinkedHashMap<Integer, Integer>(), results);
+		search(A, node, new LinkedHashMap<Integer, Integer>(), results);
 		
 		Map.Entry<Integer, List<Map<Integer, Integer>>> first = results.entrySet().stream().findFirst().get();
 		
@@ -107,7 +107,7 @@ public class OptimalGraph {
 		
 	}
 	
-	public static void search(Node node, Map<Integer, Integer> paths,
+	public static void search(DMatrixRMaj A, Node node, Map<Integer, Integer> paths,
 			Map<Integer, List<Map<Integer, Integer>>> results) {
 		
 		Map<Integer, Integer> _paths = new LinkedHashMap<Integer, Integer>(paths);
@@ -133,8 +133,10 @@ public class OptimalGraph {
 	
 		for (Node child : node.getChildren()) {
 			
-			_paths.put(node.id, child.id);
-			search(child, _paths, results);		
+			if (node.score + (int) A.get(child.getId(), node.getId()) == child.getScore()) {
+				_paths.put(node.id, child.id);
+				search(A, child, _paths, results);		
+			}
 		}
 	}
 	
