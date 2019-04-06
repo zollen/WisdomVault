@@ -26,6 +26,8 @@ public class OptimalGraph {
 	private static final int END_STATE_F = 5;
 	private static final int STATE_G = 6;
 	
+	private static int fDist = Integer.MAX_VALUE;
+	
 	private static final String [] LABELS = { "A", "B", "C", "D", "E", "F", "G" };
 
 	public static void main(String ...args) {
@@ -36,7 +38,7 @@ public class OptimalGraph {
 			/* A */ "  0,  4,  3,  0,  7,  0,  0;" +
 			/* B */	"  4,  0,  6,  5,  0,  0,  0;" +
 			/* C */ "  3,  6,  0, 11,  8,  0,  0;" +
-			/* D */ "  0,  5, 11,  0,  2,  2,  0;" +
+			/* D */ "  0,  5, 11,  0,  2,  2, 10;" +
 			/* E */ "  7,  0,  8,  2,  0,  0,  5;" +
 			/* F */ "  0,  0,  0,  2,  0,  0,  3;" +
 			/* G */ "  0,  0,  0, 10,  5,  3,  0 " +
@@ -44,21 +46,21 @@ public class OptimalGraph {
 		
 		DMatrixRMaj A = eq.lookupDDRM("A");
 		
-		Map<Integer, Integer> vertices = new LinkedHashMap<Integer, Integer>();
-		vertices.put(START_STATE_A, 0);
-		for (int i = 1; i <= 6; i++)
-			vertices.put(i, Integer.MAX_VALUE);
+		{
+			Map<Integer, Integer> vertices = new LinkedHashMap<Integer, Integer>();
+			vertices.put(START_STATE_A, 0);
+			for (int i = 1; i <= 6; i++)
+				vertices.put(i, Integer.MAX_VALUE);
+			
+			Node root = dijkstra(A, START_STATE_A, vertices, new HashSet<Integer>());
 		
-		Node root = dijkstra(A, START_STATE_A, vertices, new HashSet<Integer>());
-		
-		System.out.println(root);	
-		
-		shortestPath(A, root);
-		
+			System.out.println("Number of Nodes: " + count(root));
+			shortestPath(A, root);
+		}
 		
 		
 		// Shortest path features that could optimizes the performance:
-		// 1. Node that has already been visited or extended, skip
+		// 1. Node that has already been extended, skip
 		// 2. Heuristic - any additional information that help speed up the search (i.e. estimation of the distance left to the end state)
 		//	  Let F be the end state (Goal). 
 		//	  Let H(X -> F) be the estimated distance from X to the end state F. 
@@ -92,7 +94,18 @@ public class OptimalGraph {
 		alreadyExtended.put(STATE_G, false);
 		
 		
-		// dijkstra with new features!
+		{
+			Map<Integer, Integer> vertices = new LinkedHashMap<Integer, Integer>();
+			vertices.put(START_STATE_A, 0);
+			for (int i = 1; i <= 6; i++)
+				vertices.put(i, Integer.MAX_VALUE);
+			
+			// dijkstra with new features!
+			Node root = dijkstra2(A, START_STATE_A, vertices);
+		
+			System.out.println("Number of Nodes: " + count(root));
+			shortestPath(A, root);
+		}
 	}
 	
 	public static void shortestPath(DMatrixRMaj A, Node node) {
@@ -105,6 +118,18 @@ public class OptimalGraph {
 		
 		first.getValue().stream().forEach(p -> print(first.getKey(), p));
 		
+	}
+	
+	public static int count(Node node) {
+		
+		int count = 1;
+		
+		for (Node child : node.getChildren()) {
+			
+			count += count(child);
+		}
+		
+		return count;
 	}
 	
 	public static void search(DMatrixRMaj A, Node node, Map<Integer, Integer> paths,
@@ -140,6 +165,43 @@ public class OptimalGraph {
 		}
 	}
 	
+	public static Node dijkstra2(DMatrixRMaj A, int from, Map<Integer, Integer> vertices) {
+		
+		Map<Integer, Integer> _vertices = new LinkedHashMap<Integer, Integer>(vertices);
+		
+		Integer score = _vertices.get(from);
+		Node node = create(from, score);
+		
+		if (from == END_STATE_F) {
+			return node;
+		}
+	
+		// could use heuristic info for excluding any states that have already exceed 
+		// the estimated distance from the end state F.
+		
+		for (int to = STATE_G; to >= STATE_B; to--) {	
+			
+			if (A.get(to, from) > 0) {
+			
+				int dist = _vertices.get(from) + (int) A.get(to, from);
+				
+				if (dist < _vertices.get(to)) {
+					_vertices.put(to, dist);
+					
+					if (to == END_STATE_F) {
+						fDist = dist;
+					}
+					
+					if (dist <= fDist) {
+						node.getChildren().add(dijkstra2(A, to, _vertices));
+					}
+				}
+			}	
+		}
+		
+		return node;
+	}
+	
 	public static Node dijkstra(DMatrixRMaj A, int from, Map<Integer, Integer> vertices, 
 			Set<Integer> states) {
 		
@@ -156,13 +218,13 @@ public class OptimalGraph {
 		}
 	
 				
-		for (int to = START_STATE_A; to < A.numRows; to++) {
+		for (int to = STATE_B; to < A.numRows; to++) {
 			
 			if (A.get(to, from) > 0) {
 			
 				int dist = _vertices.get(from) + (int) A.get(to, from);
 				
-				if (!_states.contains(to) && dist < _vertices.get(to)) {
+				if (dist < _vertices.get(to)) {
 					_vertices.put(to, dist);
 				}
 				
