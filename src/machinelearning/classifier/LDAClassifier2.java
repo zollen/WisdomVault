@@ -43,27 +43,33 @@ public class LDAClassifier2 {
 		List<Instance> dogList = getInstances(attr3, VALUE_CLASS_DOG, training);
 		List<Instance> catList = getInstances(attr3, VALUE_CLASS_CAT, training);
 		
-		DMatrixRMaj dogs = new DMatrixRMaj(new Covariance(convert(attr1, attr2, dogList))
+		DMatrixRMaj coVarDogs = new DMatrixRMaj(new Covariance(convert(attr1, attr2, dogList))
 							.getCovarianceMatrix().getData());
 		
-		DMatrixRMaj cats = new DMatrixRMaj(new Covariance(convert(attr1, attr2, catList))
+		DMatrixRMaj coVarCats = new DMatrixRMaj(new Covariance(convert(attr1, attr2, catList))
 							.getCovarianceMatrix().getData());
 		
 		DMatrixRMaj dogMean = avg(attr1, attr2, dogList);
 		DMatrixRMaj catMean = avg(attr1, attr2, catList);
 		
 		Equation eq = new Equation();
-		eq.alias(dogs, "DOGS");
-		eq.alias(cats, "CATS");
+		eq.alias(coVarDogs, "C_DOGS");
+		eq.alias(coVarCats, "C_CATS");
 		
 		eq.alias(dogMean, "DMEAN");
 		eq.alias(catMean, "CMEAN");
 		
-		eq.process("C = 3./5 * DOGS + 2./5 * CATS");
-		eq.process("CC = inv(C)");
+		// with LDA:
+		// ( mean(DOGS) - mean(CATS) )^2 / ( how_much_scatter(DOGS)^2 + how_much_scatter(CATS)^2 )
+		// We want to maximize the mean(DOGS) - mean(CATS), but
+		// minimize the variation - bottom part (how_much_scatter(DOGS)^2 + how_much_scatter(CATS)^2)
+		
+		eq.process("C = 3./5 * C_DOGS + 2./5 * C_CATS");
 		eq.process("B = inv(C) * (DMEAN - CMEAN)");
 		
-		System.out.println("B: " + eq.lookupDDRM("B"));
+		DMatrixRMaj B = eq.lookupDDRM("B");
+		System.out.println("Separation Line on the scattor plot = (" + ff.format(B.get(0, 0))  + ") * weight + (" +
+							ff.format(B.get(1, 0)) + ") * height");
 		
 		// Calculating Mahalanobis distance - how well DOGS and CATS are separated from each other
 		// Large positive integer indicates a small overlap between two groups, which means
