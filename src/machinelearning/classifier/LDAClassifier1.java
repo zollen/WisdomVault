@@ -86,8 +86,8 @@ public class LDAClassifier1 {
 		training.add(data1);
 		
 		Instance data2 = new DenseInstance(3);	
-		data2.setValue(attrs.get(0), 50);
-		data2.setValue(attrs.get(1), 40);
+		data2.setValue(attrs.get(0), 20);
+		data2.setValue(attrs.get(1), 15);
 		data2.setValue(attrs.get(2), VALUE_CLASS_DOG);
 		training.add(data2);
 		
