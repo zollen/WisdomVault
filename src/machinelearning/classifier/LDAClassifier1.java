@@ -7,7 +7,7 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class RegressionClassifier1 {
+public class LDAClassifier1 {
 	
 	private static final String VALUE_CLASS_DOG = "Dog";
 	private static final String VALUE_CLASS_CAT = "Cat";
