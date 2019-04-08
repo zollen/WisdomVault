@@ -87,10 +87,10 @@ public class LDAClassifier2 {
 		
 		
 		System.out.println("============= PASSED ==============");
-		newCoordsAll(passedMean, _covar, P, passed);
+		discriminantAll(passedMean, _covar, P, passed);
 		
 		System.out.println("============= FAILED ==============");
-		newCoordsAll(failedMean, _covar, P, failed);
+		discriminantAll(failedMean, _covar, P, failed);
 		
 		// Model Coefficients(B) = inv(C) * (mean1 - mean2)
 		DMatrixRMaj diffMean = new DMatrixRMaj(2, 1);
@@ -131,7 +131,7 @@ public class LDAClassifier2 {
 		System.out.println(ff.format(dist.get(0, 0)) + " > " + ff.format(prob) + " is not true. Therefore [2.81, 5.46] does not passed. It belongs to c2");
 	}
 	
-	public static void newCoordsAll(DMatrixRMaj mean, DMatrixRMaj coVar, DMatrixRMaj P, DMatrixRMaj data) {
+	public static void discriminantAll(DMatrixRMaj mean, DMatrixRMaj coVar, DMatrixRMaj P, DMatrixRMaj data) {
 		
 		
 		for (int row = 0; row < data.numRows; row++) {
@@ -151,7 +151,7 @@ public class LDAClassifier2 {
 			}
 			builder.append("] ==> [");
 			
-			DMatrixRMaj nn = newCoords(mean, coVar, P, x);
+			DMatrixRMaj nn = discriminant(mean, coVar, P, x);
 			
 			boolean flag = false;
 			for (int rr = 0; rr < nn.numRows; rr++) {
@@ -167,7 +167,7 @@ public class LDAClassifier2 {
 		}
 	}
 	
-	public static DMatrixRMaj newCoords(DMatrixRMaj mean, DMatrixRMaj coVar, DMatrixRMaj P, DMatrixRMaj x) {
+	public static DMatrixRMaj discriminant(DMatrixRMaj mean, DMatrixRMaj coVar, DMatrixRMaj P, DMatrixRMaj x) {
 		
 		DMatrixRMaj tmp1 = new DMatrixRMaj(1, coVar.numCols);
 		DMatrixRMaj tmp2 = new DMatrixRMaj(1, 1);
