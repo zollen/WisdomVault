@@ -6,9 +6,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.apache.commons.math3.stat.correlation.Covariance;
 import org.ejml.data.DMatrixRMaj;
-import org.ejml.equation.Equation;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -19,79 +18,218 @@ public class LDAClassifier2 {
 	
 	private static final DecimalFormat ff = new DecimalFormat("0.000");
 	
-	private static final String VALUE_CLASS_DOG = "Dog";
-	private static final String VALUE_CLASS_CAT = "Cat";
+	private static final String VALUE_QUALITY_PASSED = "Y";
+	private static final String VALUE_QUALITY_FAILED = "N";
+	
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
 		ArrayList<String> clsVals = new ArrayList<String>();
-		clsVals.add(VALUE_CLASS_DOG);
-		clsVals.add(VALUE_CLASS_CAT);
+		clsVals.add(VALUE_QUALITY_PASSED);
+		clsVals.add(VALUE_QUALITY_FAILED);
 		
 
 		ArrayList<Attribute> attrs = new ArrayList<Attribute>();
-		Attribute attr1 = new Attribute("weight", 1);
-		Attribute attr2 = new Attribute("height", 2);
-		Attribute attr3 = new Attribute("animal", clsVals, 3);
+		Attribute attr1 = new Attribute("curvature", 1);
+		Attribute attr2 = new Attribute("diameter", 2);
+		Attribute attr3 = new Attribute("quality", clsVals, 3);
 		attrs.add(attr1);
 		attrs.add(attr2);
 		attrs.add(attr3);
 		
 		
+		// with Linear Discriminant Analysis (LDA):
+		// ( mean(PASSED) - mean(FAILED) )^2 / ( how_much_scatter(PASSED)^2 + how_much_scatter(FAILED)^2 )
+		// We want to maximize the mean(PASSED) - mean(FAILED), but
+		// minimize the variation - bottom part (how_much_scatter(PASSED)^2 + how_much_scatter(FAILED)^2)
+		
+		
 		Instances training = generateTrainingData(attrs);
 
-		List<Instance> dogList = getInstances(attr3, VALUE_CLASS_DOG, training);
-		List<Instance> catList = getInstances(attr3, VALUE_CLASS_CAT, training);
+		List<Instance> passedList = getInstances(attr3, VALUE_QUALITY_PASSED, training);
+		List<Instance> failedList = getInstances(attr3, VALUE_QUALITY_FAILED, training);
 		
-		DMatrixRMaj coVarDogs = new DMatrixRMaj(new Covariance(convert(attr1, attr2, dogList))
-							.getCovarianceMatrix().getData());
+		DMatrixRMaj passed = new DMatrixRMaj(convert(attr1, attr2, passedList));
+		DMatrixRMaj failed = new DMatrixRMaj(convert(attr1, attr2, failedList));
 		
-		DMatrixRMaj coVarCats = new DMatrixRMaj(new Covariance(convert(attr1, attr2, catList))
-							.getCovarianceMatrix().getData());
+		DMatrixRMaj globalMean = avg(attr1, attr2, training);
+		DMatrixRMaj passedMean = avg(attr1, attr2, passedList);
+		DMatrixRMaj failedMean = avg(attr1, attr2, failedList);
 		
-		DMatrixRMaj dogMean = avg(attr1, attr2, dogList);
-		DMatrixRMaj catMean = avg(attr1, attr2, catList);
+		// Matrix_passed - [ avg_x, avg_y ]
+		DMatrixRMaj passed2 = meanError(passed, globalMean);
+		// Matrix_failed - [ avg_x, avg_y ]
+		DMatrixRMaj failed2 = meanError(failed, globalMean);
+				
+		// CoVar(passed) = (Matrix_passed * Matrix_passed') / number of passed
+		DMatrixRMaj passedCoVar = covariance(passed2);	
+		// CoVar(failed) = (Matrix_failed * Matrix_failed') / number of failed
+		DMatrixRMaj failedCoVar = covariance(failed2);
 		
-		Equation eq = new Equation();
-		eq.alias(coVarDogs, "C_DOGS");
-		eq.alias(coVarCats, "C_CATS");
+		List<DMatrixRMaj> covars = new ArrayList<DMatrixRMaj>();
+		covars.add(passedCoVar);
+		covars.add(failedCoVar);
 		
-		eq.alias(dogMean, "DMEAN");
-		eq.alias(catMean, "CMEAN");
+		// CoVar(pool) = CoVar(passed) * 4 / 7 + CoVar(failed) * 3 / 7
+		DMatrixRMaj covar = covariance(training.size(), covars);
 		
-		// with LDA:
-		// ( mean(DOGS) - mean(CATS) )^2 / ( how_much_scatter(DOGS)^2 + how_much_scatter(CATS)^2 )
-		// We want to maximize the mean(DOGS) - mean(CATS), but
-		// minimize the variation - bottom part (how_much_scatter(DOGS)^2 + how_much_scatter(CATS)^2)
+		// inv(CoVar(pool))
+		DMatrixRMaj _covar = new DMatrixRMaj(covar.numRows, covar.numCols);
+		CommonOps_DDRM.invert(covar, _covar);
 		
-		eq.process("C = 3./5 * C_DOGS + 2./5 * C_CATS");
-		eq.process("B = inv(C) * (DMEAN - CMEAN)");
 		
-		DMatrixRMaj B = eq.lookupDDRM("B");
-		System.out.println("Separation Line on the scattor plot = (" + ff.format(B.get(0, 0))  + ") * weight + (" +
-							ff.format(B.get(1, 0)) + ") * height");
+		// Prior probability vector.
+		// If prior probabilty is not available, then we assume all events are independent and use the regular probability
+		// P = [ 4 / 7, 3 / 7 ]
+		DMatrixRMaj P = new DMatrixRMaj(2, 1);
+		P.set(0, 0, (double) passedList.size() / training.size());
+		P.set(1, 0, (double) failedList.size() / training.size());
 		
-		// Calculating Mahalanobis distance - how well DOGS and CATS are separated from each other
-		// Large positive integer indicates a small overlap between two groups, which means
-		// good separation between the two classes by the linear model
-		// Separation Line: Z = x * b1 + y * b2
-		eq.process("DIST = B' * (DMEAN - CMEAN)");
-		System.out.println("Mahalanobis Distance: " + 
-							ff.format(Math.sqrt(eq.lookupDouble("DIST"))));
+		
+		System.out.println("============= PASSED ==============");
+		newCoordsAll(passedMean, _covar, P, passed);
+		
+		System.out.println("============= FAILED ==============");
+		newCoordsAll(failedMean, _covar, P, failed);
+		
+		// Model Coefficients(B) = inv(C) * (mean1 - mean2)
+		DMatrixRMaj diffMean = new DMatrixRMaj(2, 1);
+		DMatrixRMaj B = new DMatrixRMaj(2, 1);
+		CommonOps_DDRM.subtract(passedMean, failedMean, diffMean);
+		CommonOps_DDRM.mult(_covar, diffMean, B);
+		
+		System.out.println("Model Coefficients: " + B);
+		
+		// The scoring function
+		System.out.println("Z = (" + ff.format(B.get(0, 0)) + ") * x + (" + ff.format(B.get(1, 0)) + ") * y");
+		
+		// For Accessing the effectiveness of the separation of the two classes
+		// Use Mahalanobis distance = B' * (mean1 - mean2)
+		DMatrixRMaj dist = new DMatrixRMaj(1, 1);
+		CommonOps_DDRM.multTransA(B, diffMean, dist);
+		System.out.println("Mahalanobis: " + ff.format(Math.sqrt(dist.get(0, 0))));
+		
+		
+		// TEST data (x)
+		System.out.println("Testing [2.81, 5.46]...");
+		DMatrixRMaj test = new DMatrixRMaj(2, 1);
+		test.set(0, 0, 2.81);
+		test.set(1, 0, 5.46);
+		
+		// B' * (x - (mean1 + mean2) / 2)       > log(P(c1)/P(c2))
+		// B' * x  -  B' * (mean1 + mean2) / 2  > log(P(c1)/P(c2))
+		// Proj_B(x) - Proj_B(avg(means))       > log(P(c1)/P(c2))
+		double prob = Math.log((4.0 / 7.0) / (3.0 / 7.0));
+		
+		DMatrixRMaj res = new DMatrixRMaj(2, 1);
+		CommonOps_DDRM.add(passedMean, failedMean, diffMean);
+		CommonOps_DDRM.scale(0.5, diffMean);
+		CommonOps_DDRM.subtract(test, diffMean, res);
+		CommonOps_DDRM.multTransA(B, res, dist);
+		System.out.println("ln(P(c1)/P(c2)): " + ff.format(prob));
+		System.out.println("Projecting(x) onto the max separating direction: " + ff.format(dist.get(0, 0)));
+		System.out.println(ff.format(dist.get(0, 0)) + " > " + ff.format(prob) + " is not true. Therefore [2.81, 5.46] does not passed. It belongs to c2");
+	}
 	
+	public static void newCoordsAll(DMatrixRMaj mean, DMatrixRMaj coVar, DMatrixRMaj P, DMatrixRMaj data) {
 		
-		// prediction: B' * ( x - (DMEAN + CMEAN) / 2 ) > log(P(DOGS) / P(CATS))
-		Instances testing = generateTestData(attrs);
 		
-		double ratio = Math.log((3.0 / 5.0) / (2.0 / 5.0));
+		for (int row = 0; row < data.numRows; row++) {
+			
+			DMatrixRMaj x = new DMatrixRMaj(data.numCols, 1);
+			StringBuilder builder = new StringBuilder();
+			builder.append("[");
+			
+			for (int col = 0; col < data.numCols; col++) {
+				
+				if (builder.length() > 1)
+					builder.append(", ");
 		
-		for (Instance test : testing) {
-			DMatrixRMaj mat = get(attr1, attr2, test);
-			eq.alias(mat, "x");
-			eq.process("K = B' * ( x - (DMEAN + CMEAN) / 2)");
-			System.out.println(test + " ==> " + (eq.lookupDouble("K") > ratio ? "DOGS" : "CATS"));
+				builder.append(ff.format(data.get(row, col)));
+				
+				x.set(col, 0, data.get(row, col));
+			}
+			builder.append("] ==> [");
+			
+			DMatrixRMaj nn = newCoords(mean, coVar, P, x);
+			
+			boolean flag = false;
+			for (int rr = 0; rr < nn.numRows; rr++) {
+				if (flag)
+					builder.append(", ");
+				builder.append(ff.format(nn.get(rr, 0)));
+				flag = true;
+			}
+			
+			builder.append("]");
+			
+			System.out.println(builder.toString());	
+		}
+	}
+	
+	public static DMatrixRMaj newCoords(DMatrixRMaj mean, DMatrixRMaj coVar, DMatrixRMaj P, DMatrixRMaj x) {
+		
+		DMatrixRMaj tmp1 = new DMatrixRMaj(1, coVar.numCols);
+		DMatrixRMaj tmp2 = new DMatrixRMaj(1, 1);
+		DMatrixRMaj tmp3 = new DMatrixRMaj(1, 1);
+		DMatrixRMaj result = P.copy();
+		
+		CommonOps_DDRM.multTransA(mean, coVar, tmp1);
+		CommonOps_DDRM.mult(tmp1, x, tmp2);
+		
+		double first = tmp2.get(0, 0);
+		
+		CommonOps_DDRM.multTransA(-0.5, mean, coVar, tmp1);
+		CommonOps_DDRM.mult(tmp1, mean, tmp3);
+		
+		double second = tmp3.get(0, 0);
+		
+		double last = first + second;
+		
+		CommonOps_DDRM.elementExp(P, result);
+		CommonOps_DDRM.add(result, last);
+		
+		return result;
+	}
+	
+	public static DMatrixRMaj meanError(DMatrixRMaj A, DMatrixRMaj mean) {
+		
+		DMatrixRMaj E = new DMatrixRMaj(A.numRows, A.numCols);
+		
+		for (int col = 0; col < mean.numRows; col++) {
+			
+			for (int row = 0; row < A.numRows; row++) {
+				
+				E.set(row, col, A.get(row, col) - mean.get(col, 0));
+			}
 		}
 		
+		return E;
+	}
+	
+	public static DMatrixRMaj covariance(int total, List<DMatrixRMaj> list) {
+		
+		DMatrixRMaj C = new DMatrixRMaj(list.get(0).numRows, list.get(0).numCols);
+		CommonOps_DDRM.fill(C, 0.0);
+		
+		for (DMatrixRMaj A : list) {
+			
+			DMatrixRMaj S = new DMatrixRMaj(A.numRows, A.numCols);
+			CommonOps_DDRM.scale((double) A.numRows / total, A, S);
+			CommonOps_DDRM.addEquals(C, S);
+		}
+		
+		return C;
+	}
+	
+	public static DMatrixRMaj covariance(DMatrixRMaj A) {
+		
+		DMatrixRMaj C = new DMatrixRMaj(A.numCols, A.numCols);
+		
+		CommonOps_DDRM.multInner(A, C);
+		CommonOps_DDRM.scale((double) 1 / A.numRows, C);
+
+		return C;
 	}
 	
 	public static DMatrixRMaj get(Attribute attr1, Attribute attr2, Instance instance) {
@@ -139,67 +277,51 @@ public class LDAClassifier2 {
 		return instances.stream().filter(p -> val.equals(p.stringValue(attr))).collect(Collectors.toList());
 	}
 	
-	public static Instances generateTestData(ArrayList<Attribute> attrs) {
-		
-		Instances testing = new Instances("TESTING", attrs, 2);
-		
-		Instance data1 = new DenseInstance(3);	
-		data1.setValue(attrs.get(0), 8.5);
-		data1.setValue(attrs.get(1), 13);
-	//	data1.setValue(attrs.get(2), VALUE_CLASS_CAT);
-		testing.add(data1);
-		
-		Instance data2 = new DenseInstance(3);	
-		data2.setValue(attrs.get(0), 11);
-		data2.setValue(attrs.get(1), 7.6);
-	//	data2.setValue(attrs.get(2), VALUE_CLASS_DOG);
-		testing.add(data2);
-		
-		testing.setClassIndex(testing.numAttributes() - 1);
-		
-		return testing;
-	}
-
 	public static Instances generateTrainingData(ArrayList<Attribute> attrs) {
 
 		Instances training = new Instances("TRAINING", attrs, 5);
 		
-		// ANSWERS:
-		// weight <= 12.0
-		//    + - true  - height <= 8.5
-		//					+ - dog (1)
-		//					+ - cat (2)
-		//    + - false - dog (2)
-		
 		Instance data1 = new DenseInstance(3);	
-		data1.setValue(attrs.get(0), 8);
-		data1.setValue(attrs.get(1), 8);
-		data1.setValue(attrs.get(2), VALUE_CLASS_DOG);
+		data1.setValue(attrs.get(0), 2.95);
+		data1.setValue(attrs.get(1), 6.63);
+		data1.setValue(attrs.get(2), VALUE_QUALITY_PASSED);
 		training.add(data1);
 		
 		Instance data2 = new DenseInstance(3);	
-		data2.setValue(attrs.get(0), 20);
-		data2.setValue(attrs.get(1), 15);
-		data2.setValue(attrs.get(2), VALUE_CLASS_DOG);
+		data2.setValue(attrs.get(0), 2.53);
+		data2.setValue(attrs.get(1), 7.79);
+		data2.setValue(attrs.get(2), VALUE_QUALITY_PASSED);
 		training.add(data2);
 		
 		Instance data3 = new DenseInstance(3);	
-		data3.setValue(attrs.get(0), 8);
-		data3.setValue(attrs.get(1), 9);
-		data3.setValue(attrs.get(2), VALUE_CLASS_CAT);
+		data3.setValue(attrs.get(0), 3.57);
+		data3.setValue(attrs.get(1), 5.65);
+		data3.setValue(attrs.get(2), VALUE_QUALITY_PASSED);
 		training.add(data3);
 		
 		Instance data4 = new DenseInstance(3);	
-		data4.setValue(attrs.get(0), 15);
-		data4.setValue(attrs.get(1), 12);
-		data4.setValue(attrs.get(2), VALUE_CLASS_DOG);
+		data4.setValue(attrs.get(0), 3.16);
+		data4.setValue(attrs.get(1), 5.47);
+		data4.setValue(attrs.get(2), VALUE_QUALITY_PASSED);
 		training.add(data4);
 		
 		Instance data5 = new DenseInstance(3);	
-		data5.setValue(attrs.get(0), 9);
-		data5.setValue(attrs.get(1), 10);
-		data5.setValue(attrs.get(2), VALUE_CLASS_CAT);
+		data5.setValue(attrs.get(0), 2.58);
+		data5.setValue(attrs.get(1), 4.46);
+		data5.setValue(attrs.get(2), VALUE_QUALITY_FAILED);
 		training.add(data5);
+		
+		Instance data6 = new DenseInstance(3);	
+		data6.setValue(attrs.get(0), 2.16);
+		data6.setValue(attrs.get(1), 6.22);
+		data6.setValue(attrs.get(2), VALUE_QUALITY_FAILED);
+		training.add(data6);
+		
+		Instance data7 = new DenseInstance(3);	
+		data7.setValue(attrs.get(0), 3.27);
+		data7.setValue(attrs.get(1), 3.52);
+		data7.setValue(attrs.get(2), VALUE_QUALITY_FAILED);
+		training.add(data7);
 		
 		training.setClassIndex(training.numAttributes() - 1);
 
