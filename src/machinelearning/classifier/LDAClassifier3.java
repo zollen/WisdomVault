@@ -6,15 +6,18 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import org.ejml.data.Complex_F64;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.simple.SimpleEVD;
+import org.ejml.simple.SimpleMatrix;
 
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class LDAClassifier2 {
+public class LDAClassifier3 {
 	
 	private static final DecimalFormat ff = new DecimalFormat("0.000");
 	
@@ -38,11 +41,13 @@ public class LDAClassifier2 {
 		attrs.add(attr3);
 		
 		
-		// with Linear Discriminant Analysis (LDA):
-		// ( mean(PASSED) - mean(FAILED) )^2 / ( how_much_scatter(PASSED)^2 + how_much_scatter(FAILED)^2 )
-		// We want to maximize the mean(PASSED) - mean(FAILED), but
-		// minimize the variation - bottom part (how_much_scatter(PASSED)^2 + how_much_scatter(FAILED)^2)
-		
+		// LDA Algorithm
+		// 1. Compute the mean vector for each class: Mc = (Σ xi) / ni
+		// 2. Compute the total mean vector M = (Σ xi) / N
+		// 3. Compute the within-class scatter Sw = Σ Σ (xj - Mc)(xj - Mc)'
+		// 4. Compute the between-class scatter Sb = Σ (Mc - M)(Mc - M)'
+		// 5. Eigen Decomposition [V, D] = eig(inv(Sw) * Sb)
+		// 6. Get the projection matrix P is composed of the top-p eigenvectors corresponding to the largest eigenvalues
 		
 		Instances training = generateTrainingData(attrs);
 
@@ -53,127 +58,97 @@ public class LDAClassifier2 {
 		DMatrixRMaj passed = new DMatrixRMaj(convert(attr1, attr2, passedList));
 		DMatrixRMaj failed = new DMatrixRMaj(convert(attr1, attr2, failedList));
 		
-		DMatrixRMaj globalMean = avg(attr1, attr2, training);
+		// *** Step 1 ***
 		DMatrixRMaj passedMean = avg(attr1, attr2, passedList);
 		DMatrixRMaj failedMean = avg(attr1, attr2, failedList);
 		
-		// Matrix_passed - [ avg_x, avg_y ]
-		DMatrixRMaj passed2 = meanError(passed, globalMean);
-		// Matrix_failed - [ avg_x, avg_y ]
-		DMatrixRMaj failed2 = meanError(failed, globalMean);
-				
+		// *** Step 2 ***
+		DMatrixRMaj globalMean = avg(attr1, attr2, training);
+		
+		// *** Step 3 ***
+		// Matrix_passed - [ x - avg_x_passed, y - avg_y_passed ]
+		DMatrixRMaj passed2 = meanError(passed, passedMean);
+		// Matrix_failed - [ x - avg_x_failed, y - avg_y_failed ]
+		DMatrixRMaj failed2 = meanError(failed, failedMean);
+		
 		// CoVar(passed) = (Matrix_passed * Matrix_passed') / number of passed
-		DMatrixRMaj passedCoVar = covariance(passed2);	
+		DMatrixRMaj passedWithinClasses = covariance(passed2);	
 		// CoVar(failed) = (Matrix_failed * Matrix_failed') / number of failed
-		DMatrixRMaj failedCoVar = covariance(failed2);
+		DMatrixRMaj failedWithinClasses = covariance(failed2);
 		
-		List<DMatrixRMaj> covars = new ArrayList<DMatrixRMaj>();
-		covars.add(passedCoVar);
-		covars.add(failedCoVar);
+		List<DMatrixRMaj> covars1 = new ArrayList<DMatrixRMaj>();
+		covars1.add(passedWithinClasses);
+		covars1.add(failedWithinClasses);
 		
-		// CoVar(pool) = CoVar(passed) * 4 / 7 + CoVar(failed) * 3 / 7
-		DMatrixRMaj covar = covariance(training.size(), covars);
+		// CoVar(withinClasses) = CoVar(passed) * 4 / 7 + CoVar(failed) * 3 / 7
+		DMatrixRMaj covarw = covariance(training.size(), covars1);
 		
-		// inv(CoVar(pool))
-		DMatrixRMaj _covar = new DMatrixRMaj(covar.numRows, covar.numCols);
-		CommonOps_DDRM.invert(covar, _covar);
+		// inv(CoVar(withinClasses))
+		DMatrixRMaj _covarw = new DMatrixRMaj(covarw.numRows, covarw.numCols);
+		CommonOps_DDRM.invert(covarw, _covarw);
+		
+		// *** Step 4 ***
+		// Matrix_passed - [ avg_passed, avg_global ]
+		DMatrixRMaj passed3 = new DMatrixRMaj(2, 1);
+		CommonOps_DDRM.subtract(passedMean, globalMean, passed3);
+		DMatrixRMaj failed3 = new DMatrixRMaj(2, 1);
+		CommonOps_DDRM.subtract(failedMean, globalMean, failed3);
+		
+		DMatrixRMaj betweenClasses = new DMatrixRMaj(2, 2);
+		betweenClasses.set(0, 0, passed3.get(0, 0));
+		betweenClasses.set(1, 0, passed3.get(1, 0));
+		betweenClasses.set(0, 1, failed3.get(0, 0));
+		betweenClasses.set(0, 1, failed3.get(1, 0));
+		
+		// CoVar(betweenClasses) = (Matrix_passed * Matrix_passed') / number of passed
+		DMatrixRMaj covarb = covariance(betweenClasses);		
+		
+		// S = variance between classes / variance within classes
+		DMatrixRMaj S = new DMatrixRMaj(covarb.numRows, covarb.numCols);
+		
+		CommonOps_DDRM.mult(_covarw, covarb, S);
+		
+		// *** Step 5 ***
+		SimpleMatrix mat = new SimpleMatrix(S);		
+		SimpleEVD<SimpleMatrix> eigen = mat.eig();
 		
 		
-		// Prior probability vector.
-		// If prior probabilty is not available, then we assume all events are independent and use the regular probability
-		// P = [ 4 / 7, 3 / 7 ]
-		DMatrixRMaj P = new DMatrixRMaj(2, 1);
-		P.set(0, 0, (double) passedList.size() / training.size());
-		P.set(1, 0, (double) failedList.size() / training.size());
+		List<Complex_F64> list = eigen.getEigenvalues();
+		System.out.println("EigenValues(inv(Sw) * Sb) = {" + ff.format(list.get(0).real) + ", " + ff.format(list.get(1).real) + "}");
 		
+		// *** Step 6 ***
+		DMatrixRMaj proj = new DMatrixRMaj(2, 2);
+		proj.set(0, 0, eigen.getEigenVector(0).get(0, 0));
+		proj.set(1, 0, eigen.getEigenVector(0).get(1, 0));
+		proj.set(0, 1, eigen.getEigenVector(1).get(0, 0));
+		proj.set(1, 1, eigen.getEigenVector(1).get(1, 0));
 		
-		List<DMatrixRMaj> means = new ArrayList<DMatrixRMaj>();
-		means.add(passedMean);
-		means.add(failedMean);
+		DMatrixRMaj projected = new DMatrixRMaj(all.numCols, all.numRows);
+		CommonOps_DDRM.multTransB(proj, all, projected);
 		
-		System.out.println("============= TRAINING ==============");
-		discriminantAll(means, _covar, P, all);
-		
-		
-		// Model Coefficients(B) = inv(C) * (mean1 - mean2)
-		DMatrixRMaj diffMean = new DMatrixRMaj(2, 1);
-		DMatrixRMaj B = new DMatrixRMaj(2, 1);
-		CommonOps_DDRM.subtract(passedMean, failedMean, diffMean);
-		CommonOps_DDRM.mult(_covar, diffMean, B);
-		
-		System.out.println("Model Coefficients: " + B);
-		
-		// The scoring function
-		System.out.println("Z = (" + ff.format(B.get(0, 0)) + ") * x + (" + ff.format(B.get(1, 0)) + ") * y");
-		
-		// For Accessing the effectiveness of the separation of the two classes
-		// Use Mahalanobis distance = B' * (mean1 - mean2)
-		DMatrixRMaj dist = new DMatrixRMaj(1, 1);
-		CommonOps_DDRM.multTransA(B, diffMean, dist);
-		System.out.println("Mahalanobis: " + ff.format(Math.sqrt(dist.get(0, 0))));
-		
+		System.out.println("Projected training data");
+		System.out.println(projected);
 		
 		// TEST data (x)
 		System.out.println("Testing [2.81, 5.46]...");
-		DMatrixRMaj test = new DMatrixRMaj(1, 2);
+		DMatrixRMaj test = new DMatrixRMaj(2, 1);
 		test.set(0, 0, 2.81);
-		test.set(0, 1, 5.46);
-		discriminantAll(means, _covar, P, test);
-		
-		// B' * (x - (mean1 + mean2) / 2)       > log(P(c1)/P(c2))
-		// B' * x  -  B' * (mean1 + mean2) / 2  > log(P(c1)/P(c2))
-		// Proj_B(x) - Proj_B(avg(means))       > log(P(c1)/P(c2))
-		double prob = Math.log((4.0 / 7.0) / (3.0 / 7.0));
+		test.set(1, 0, 5.46);
 		
 		DMatrixRMaj res = new DMatrixRMaj(2, 1);
-		CommonOps_DDRM.add(passedMean, failedMean, diffMean);
-		CommonOps_DDRM.scale(0.5, diffMean);
-		CommonOps_DDRM.transpose(test);
-		CommonOps_DDRM.subtract(test, diffMean, res);
-		CommonOps_DDRM.multTransA(B, res, dist);
-		System.out.println("ln(P(c1)/P(c2)): " + ff.format(prob));
-		System.out.println("Projecting(x) onto the max separating direction: " + ff.format(dist.get(0, 0)));
-		System.out.println(ff.format(dist.get(0, 0)) + " > " + ff.format(prob) + " is not true. Therefore [2.81, 5.46] does not passed. It belongs to c2");
+		CommonOps_DDRM.mult(proj, test, res);
+		
+		System.out.println("Projected test data");
+		System.out.println(res);
+		
 	}
 	
-	public static void discriminantAll(List<DMatrixRMaj> means, DMatrixRMaj coVar, DMatrixRMaj P, DMatrixRMaj data) {
-		
-		for (int row = 0; row < data.numRows; row++) {
-			
-			
-			DMatrixRMaj x = new DMatrixRMaj(data.numCols, 1);
-			StringBuilder builder = new StringBuilder();
-			builder.append("[");
-			
-			for (int col = 0; col < data.numCols; col++) {
-				
-				if (builder.length() > 1)
-					builder.append(", ");
-		
-				builder.append(ff.format(data.get(row, col)));
-				
-				x.set(col, 0, data.get(row, col));
-			}
-			builder.append("] ==> [");
-			
-			double xx = discriminant(means.get(0), coVar, P.get(0, 0), x);
-			double yy = discriminant(means.get(1), coVar, P.get(1, 0), x);
-			
-			builder.append(ff.format(xx) + ", " + ff.format(yy));
-			builder.append("]");
-		
-			
-			System.out.println(builder.toString());	
-		}
-	}
-	
-	public static double discriminant(DMatrixRMaj mean, DMatrixRMaj coVar, double p, DMatrixRMaj x) {
-		
-		// f1 = mean_i * inv(C) * x' - 0.5 * mean_i * inv(C) * mean_i' + ln(p)
+	public static DMatrixRMaj discriminant(DMatrixRMaj mean, DMatrixRMaj coVar, DMatrixRMaj P, DMatrixRMaj x) {
 		
 		DMatrixRMaj tmp1 = new DMatrixRMaj(1, coVar.numCols);
 		DMatrixRMaj tmp2 = new DMatrixRMaj(1, 1);
 		DMatrixRMaj tmp3 = new DMatrixRMaj(1, 1);
+		DMatrixRMaj result = P.copy();
 		
 		CommonOps_DDRM.multTransA(mean, coVar, tmp1);
 		CommonOps_DDRM.mult(tmp1, x, tmp2);
@@ -187,7 +162,10 @@ public class LDAClassifier2 {
 		
 		double last = first + second;
 		
-		return Math.log(p) * last;
+		CommonOps_DDRM.elementExp(P, result);
+		CommonOps_DDRM.add(result, last);
+		
+		return result;
 	}
 	
 	public static DMatrixRMaj meanError(DMatrixRMaj A, DMatrixRMaj mean) {
