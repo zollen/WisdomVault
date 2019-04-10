@@ -16,6 +16,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
 import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -145,8 +146,54 @@ public class LDAClassifier3 extends ApplicationFrame {
 		DMatrixRMaj covar = new DMatrixRMaj(4, 4);
 		CommonOps_DDRM.invert(within);
 		CommonOps_DDRM.mult(within, between, covar);
+		
+	
+		List<DMatrixRMaj> list = svd(covar);
+	
+//  	List<DMatrixRMaj> list = eigen(covar);
+	
+		DMatrixRMaj proj = combine(list);
 
-		EigenDecomposition_F64<DMatrixRMaj> eigen = DecompositionFactory_DDRM.eig(4, true);
+		DMatrixRMaj setosa2 = new DMatrixRMaj(2, setosa.numRows);
+		DMatrixRMaj vcolor2 = new DMatrixRMaj(2, vcolor.numRows);
+		DMatrixRMaj virgin2 = new DMatrixRMaj(2, virgin.numRows);
+
+		CommonOps_DDRM.multTransAB(proj, setosa, setosa2);
+		CommonOps_DDRM.multTransAB(proj, vcolor, vcolor2);
+		CommonOps_DDRM.multTransAB(proj, virgin, virgin2);
+
+		LDAClassifier3 classifier = new LDAClassifier3("Linear Discriminant Analysis", setosa2, vcolor2, virgin2);
+		
+		classifier.pack();
+        RefineryUtilities.centerFrameOnScreen(classifier);
+        classifier.setVisible(true);
+
+	}
+	
+	public static List<DMatrixRMaj> svd(DMatrixRMaj covar) {
+		
+		SingularValueDecomposition<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(covar.numRows, covar.numCols, true, false, false);
+		svd.decompose(covar);
+		DMatrixRMaj U = svd.getU(null, false);
+		
+		List<DMatrixRMaj> list = new ArrayList<DMatrixRMaj>();
+		for (int col = 0; col < U.numCols; col++) {
+			
+			DMatrixRMaj sv = new DMatrixRMaj(U.numRows, 1);
+			
+			for (int row = 0; row < U.numRows; row++) {			
+				sv.set(row, 0, U.get(row, col));	
+			}
+			if (col < 2)
+				list.add(sv);
+		}
+		
+		return list;
+	}
+	
+	public static List<DMatrixRMaj> eigen(DMatrixRMaj covar) {
+		
+		EigenDecomposition_F64<DMatrixRMaj> eigen = DecompositionFactory_DDRM.eig(covar.numCols, true);
 		eigen.decompose(covar);
 		
 		Map<Double, DMatrixRMaj> mat = new TreeMap<Double, DMatrixRMaj>(new Comparator<Double>() {
@@ -164,24 +211,7 @@ public class LDAClassifier3 extends ApplicationFrame {
 			mat.put(eigen.getEigenvalue(i).getReal(), eigen.getEigenVector(i));
 		}
 		
-		List<DMatrixRMaj> list = mat.entrySet().stream().limit(2).map(p -> p.getValue()).collect(Collectors.toList());
-		
-		DMatrixRMaj proj = combine(list);
-
-		DMatrixRMaj setosa2 = new DMatrixRMaj(2, setosa.numRows);
-		DMatrixRMaj vcolor2 = new DMatrixRMaj(2, vcolor.numRows);
-		DMatrixRMaj virgin2 = new DMatrixRMaj(2, virgin.numRows);
-
-		CommonOps_DDRM.multTransAB(proj, setosa, setosa2);
-		CommonOps_DDRM.multTransAB(proj, vcolor, vcolor2);
-		CommonOps_DDRM.multTransAB(proj, virgin, virgin2);
-
-		LDAClassifier3 classifier = new LDAClassifier3("Linear Discriminant Analysis", setosa2, vcolor2, virgin2);
-		
-		classifier.pack();
-        RefineryUtilities.centerFrameOnScreen(classifier);
-        classifier.setVisible(true);
-
+		return mat.entrySet().stream().limit(2).map(p -> p.getValue()).collect(Collectors.toList());
 	}
 	
 	public static DMatrixRMaj cook() {
