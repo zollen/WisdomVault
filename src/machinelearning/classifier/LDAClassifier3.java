@@ -3,7 +3,6 @@ package machinelearning.classifier;
 import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Enumeration;
@@ -38,7 +37,7 @@ public class LDAClassifier3 extends ApplicationFrame {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final DecimalFormat ff = new DecimalFormat("0.000");
+//	private static final DecimalFormat ff = new DecimalFormat("0.000");
 
 	private static final String VALUE_FLOWER_SETOSA = "Iris-setosa";
 	private static final String VALUE_QUALITY_VERCOLOR = "Iris-versicolor";
@@ -141,16 +140,14 @@ public class LDAClassifier3 extends ApplicationFrame {
 		DMatrixRMaj within = scatter(world, means);
 		DMatrixRMaj between = scatter(world, means, overalMean);
 		
-		between = cook();
-		
 		DMatrixRMaj covar = new DMatrixRMaj(4, 4);
 		CommonOps_DDRM.invert(within);
 		CommonOps_DDRM.mult(within, between, covar);
 		
 	
-		List<DMatrixRMaj> list = svd(covar);
+//		List<DMatrixRMaj> list = svd(covar);
 	
-//  	List<DMatrixRMaj> list = eigen(covar);
+		List<DMatrixRMaj> list = eigen(covar);
 	
 		DMatrixRMaj proj = combine(list);
 
@@ -167,7 +164,6 @@ public class LDAClassifier3 extends ApplicationFrame {
 		classifier.pack();
         RefineryUtilities.centerFrameOnScreen(classifier);
         classifier.setVisible(true);
-
 	}
 	
 	public static List<DMatrixRMaj> svd(DMatrixRMaj covar) {
@@ -214,34 +210,6 @@ public class LDAClassifier3 extends ApplicationFrame {
 		return mat.entrySet().stream().limit(2).map(p -> p.getValue()).collect(Collectors.toList());
 	}
 	
-	public static DMatrixRMaj cook() {
-		
-		DMatrixRMaj between = new DMatrixRMaj(4, 4);
-		
-		between.set(0, 0, 63.2121);
-		between.set(1, 0, -19.534);
-		between.set(2, 0, 165.1647);
-		between.set(3, 0, 71.3631);
-		
-		between.set(0, 1, -19.534);
-		between.set(1, 1, 10.9776);
-		between.set(2, 1, -56.0552);
-		between.set(3, 1, -22.4924);
-		
-		between.set(0, 2, 165.1647);
-		between.set(1, 2, -56.0552);
-		between.set(2, 2, 436.6437);
-		between.set(3, 2, 186.9081);
-		
-		between.set(0, 3, 71.3631);
-		between.set(1, 3, -22.4924);
-		between.set(2, 3, 186.9081);
-		between.set(3, 3, 80.6041);
-		
-		return between;
-	}
-	
-
 	public static DMatrixRMaj scatter(List<DMatrixRMaj> data, List<DMatrixRMaj> means, DMatrixRMaj overall) {
 
 		int size = overall.numRows;
@@ -252,16 +220,17 @@ public class LDAClassifier3 extends ApplicationFrame {
 		for (int index = 0; index < means.size(); index++) {
 
 			DMatrixRMaj c = new DMatrixRMaj(size, size);
+			DMatrixRMaj diff = new DMatrixRMaj(size, 1);
 
 			DMatrixRMaj A = data.get(index);
 			DMatrixRMaj mean = means.get(index);
 
-			DMatrixRMaj diff = meanError(mean, overall);
+			CommonOps_DDRM.subtract(mean, overall, diff);
 
 			CommonOps_DDRM.multOuter(diff, c);
 
 			CommonOps_DDRM.scale(A.numRows, c);
-
+			
 			CommonOps_DDRM.addEquals(S, c);
 		}
 
