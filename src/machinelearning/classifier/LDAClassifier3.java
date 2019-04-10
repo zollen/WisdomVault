@@ -3,7 +3,9 @@ package machinelearning.classifier;
 import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +37,7 @@ public class LDAClassifier3 extends ApplicationFrame {
 
 	private static final long serialVersionUID = 1L;
 
-//	private static final DecimalFormat ff = new DecimalFormat("0.000");
+	private static final DecimalFormat ff = new DecimalFormat("0.000");
 
 	private static final String VALUE_FLOWER_SETOSA = "Iris-setosa";
 	private static final String VALUE_QUALITY_VERCOLOR = "Iris-versicolor";
@@ -137,22 +139,33 @@ public class LDAClassifier3 extends ApplicationFrame {
 
 		DMatrixRMaj within = scatter(world, means);
 		DMatrixRMaj between = scatter(world, means, overalMean);
-
+		
+		between = cook();
+		
 		DMatrixRMaj covar = new DMatrixRMaj(4, 4);
 		CommonOps_DDRM.invert(within);
 		CommonOps_DDRM.mult(within, between, covar);
 
 		EigenDecomposition_F64<DMatrixRMaj> eigen = DecompositionFactory_DDRM.eig(4, true);
 		eigen.decompose(covar);
+		
+		Map<Double, DMatrixRMaj> mat = new TreeMap<Double, DMatrixRMaj>(new Comparator<Double>() {
 
-		Map<Double, DMatrixRMaj> mat = new TreeMap<Double, DMatrixRMaj>();
+			@Override
+			public int compare(Double o1, Double o2) {
+				// TODO Auto-generated method stub
+				return o1.compareTo(o2) * -1;
+			}
+			
+		});
+		
+		
 		for (int i = 0; i < eigen.getNumberOfEigenvalues(); i++) {
 			mat.put(eigen.getEigenvalue(i).getReal(), eigen.getEigenVector(i));
 		}
-
-		List<DMatrixRMaj> list = new ArrayList<DMatrixRMaj>();
-		mat.entrySet().stream().skip(2).forEach(p -> list.add(p.getValue()));
-
+		
+		List<DMatrixRMaj> list = mat.entrySet().stream().limit(2).map(p -> p.getValue()).collect(Collectors.toList());
+		
 		DMatrixRMaj proj = combine(list);
 
 		DMatrixRMaj setosa2 = new DMatrixRMaj(2, setosa.numRows);
@@ -170,6 +183,34 @@ public class LDAClassifier3 extends ApplicationFrame {
         classifier.setVisible(true);
 
 	}
+	
+	public static DMatrixRMaj cook() {
+		
+		DMatrixRMaj between = new DMatrixRMaj(4, 4);
+		
+		between.set(0, 0, 63.2121);
+		between.set(1, 0, -19.534);
+		between.set(2, 0, 165.1647);
+		between.set(3, 0, 71.3631);
+		
+		between.set(0, 1, -19.534);
+		between.set(1, 1, 10.9776);
+		between.set(2, 1, -56.0552);
+		between.set(3, 1, -22.4924);
+		
+		between.set(0, 2, 165.1647);
+		between.set(1, 2, -56.0552);
+		between.set(2, 2, 436.6437);
+		between.set(3, 2, 186.9081);
+		
+		between.set(0, 3, 71.3631);
+		between.set(1, 3, -22.4924);
+		between.set(2, 3, 186.9081);
+		between.set(3, 3, 80.6041);
+		
+		return between;
+	}
+	
 
 	public static DMatrixRMaj scatter(List<DMatrixRMaj> data, List<DMatrixRMaj> means, DMatrixRMaj overall) {
 
