@@ -339,31 +339,6 @@ public class LDAClassifier3 extends ApplicationFrame {
 		return data;
 	}
 
-	public static DMatrixRMaj get(List<Attribute> attrs, Instances instances) {
-
-		DMatrixRMaj data = new DMatrixRMaj(instances.size(), attrs.size());
-		DMatrixRMaj output = new DMatrixRMaj(attrs.size(), attrs.size());
-
-		int row = 0;
-		for (Instance instance : instances) {
-
-			List<Double> vals = new ArrayList<Double>();
-			for (Attribute attr : attrs) {
-				vals.add(instance.value(attr));
-			}
-
-			for (int col = 0; col < attrs.size(); col++) {
-				data.set(row, col, vals.get(col));
-			}
-
-			row++;
-		}
-
-		CommonOps_DDRM.multOuter(data, output);
-
-		return output;
-	}
-
 	public static List<Attribute> get(Instances instances) {
 
 		List<Attribute> attrs = new ArrayList<Attribute>();
