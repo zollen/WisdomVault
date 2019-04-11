@@ -82,9 +82,13 @@ public class LDAClassifier3 extends ApplicationFrame {
 		XYDotRenderer render = new XYDotRenderer();
 		render.setDotHeight(5);
 		render.setDotWidth(5);
+		
+		render.setSeriesPaint(0, Color.red);
+		render.setSeriesPaint(1, Color.blue);
+		render.setSeriesPaint(2, Color.black);
+		
 		plot.setRenderer(render);
-
-
+			
 		plot.setDomainAxis(lda1);
 		plot.setRangeAxis(lda2);
 		chart.setBackgroundPaint(Color.white);
