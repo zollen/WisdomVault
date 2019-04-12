@@ -1,4 +1,4 @@
-package machinelearning;
+package graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.color.ColorSpace;

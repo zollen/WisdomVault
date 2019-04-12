@@ -7,6 +7,7 @@ import org.apache.commons.math3.linear.SingularValueDecomposition;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
+import graphics.ImageUtils;
 import linearalgebra.MatrixFeatures;
 
 public class PCAExperiment4 {
