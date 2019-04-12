@@ -8,7 +8,7 @@ import org.opencv.core.Mat;
  * Setting up opencv library in Eclipse
  * https://opencv-java-tutorials.readthedocs.io/en/latest/02-first-java-application-with-opencv.html
  */ 
-public class OpenCVExerrcise {
+public class OpenCVBasic {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
