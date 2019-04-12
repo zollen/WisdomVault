@@ -6,10 +6,8 @@ import java.util.Arrays;
 public class CannyEdgeDetector {
 
 	public static void main(String... args) throws Exception {
-
-		BufferedImage image = ImageUtils.image("img/test/obama9.jpg");
-		image = ImageUtils.resize(image, 200, 200);
-		image = ImageUtils.grey(image);
+		
+		BufferedImage image = ImageUtils.image("img/sample1.jpg");
 
 		CannyEdgeDetector detector = new CannyEdgeDetector();
 
@@ -20,7 +18,7 @@ public class CannyEdgeDetector {
 		detector.process();
 		BufferedImage edges = detector.getEdgesImage();
 	
-		ImageUtils.write(edges, ImageUtils.array(edges), "img/obama9a.jpg");
+		System.out.println("Done: " + ImageUtils.write(edges, ImageUtils.array(edges), "img/output.gif"));
 	}
 
 	// statics

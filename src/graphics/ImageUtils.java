@@ -21,11 +21,12 @@ public class ImageUtils {
 		return image.getRaster().getPixels(0, 0, image.getWidth(), image.getHeight(), t);
 	}
 
-	public static void write(BufferedImage image, double[] pixels, String fileName) throws Exception {
+	public static boolean write(BufferedImage image, double[] pixels, String fileName) throws Exception {
 	
 		BufferedImage bImage = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());	
 		bImage.getRaster().setPixels(0, 0, image.getWidth(), image.getHeight(), pixels);	
-		ImageIO.write(bImage, "jpg", new File(fileName));
+		return ImageIO.write(bImage, 
+				fileName.toLowerCase().substring(fileName.length() - 3), new File(fileName));		
 	}
 	
 	public static BufferedImage grey(BufferedImage image) {
