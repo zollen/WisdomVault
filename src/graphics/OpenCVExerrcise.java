@@ -4,6 +4,10 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
+/**
+ * Setting up opencv library in Eclipse
+ * https://opencv-java-tutorials.readthedocs.io/en/latest/02-first-java-application-with-opencv.html
+ */ 
 public class OpenCVExerrcise {
 
 	public static void main(String[] args) {
