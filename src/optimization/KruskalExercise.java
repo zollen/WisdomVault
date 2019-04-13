@@ -17,7 +17,7 @@ import machinelearning.classifier.PlaceHolder;
 
 /**
  * Kruskal algothirm results in a minimum spanning tree against a
- * connected, by-directional, weighted graph with unknown start and end states.
+ * connected, uni/by-directional, weighted graph with unknown start and end states.
  * 
  * https://www.youtube.com/watch?v=71UQH7Pr9kU&t=1s
  * @author zollen
