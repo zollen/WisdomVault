@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
 
-public class OptimalGraph {
+public class DijkstraExercise2 {
 	
 	private static final Map<Integer, Boolean> alreadyExtended = new HashMap<Integer, Boolean>();	
 	private static final Map<Integer, Integer> heuristicInfo = new HashMap<Integer, Integer>();
