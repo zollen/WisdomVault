@@ -13,8 +13,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
 
-import machinelearning.classifier.PlaceHolder;
-
 /**
  * Kruskal algorithm results in a minimum spanning tree against a
  * connected, uni/by-directional, weighted graph with unknown start and end states.
@@ -100,10 +98,17 @@ public class KruskalExercise2 {
 		pool.stream().forEach(p -> System.out.println(p));
 		System.out.println("Number of edges: " + pool.size());
 
-		System.out.println(construct(pool));
+		List<Node> results = construct(pool);
+		results.stream().forEach(p -> {
+			
+			System.out.println("====  Score: [" + score(p) + "]  ===");
+			System.out.println(p);
+			
+		});
+		
 	}
 	
-	public static Node construct(List<Edge> pool) {
+	public static List<Node> construct(List<Edge> pool) {
 		
 		Map<Integer, Node> nodes = new HashMap<Integer, Node>();
 		
@@ -122,17 +127,24 @@ public class KruskalExercise2 {
 */
 		
 		
-		AtomicInteger max = new AtomicInteger();
-		PlaceHolder<Node> holder = new PlaceHolder<Node>();
+		AtomicInteger max = new AtomicInteger();		
 		nodes.entrySet().stream().forEach(p -> {
 			int score = score(p.getValue());
 			if (max.intValue() < score) {
 				max.set(score);
-				holder.data(p.getValue());
 			}
 		});
 		
-		return holder.data();
+		
+		List<Node> candidates = new ArrayList<Node>();
+		nodes.entrySet().stream().forEach(p -> {
+			int score = score(p.getValue());
+			if (max.intValue() == score) {
+				candidates.add(p.getValue());
+			}
+		});
+		
+		return candidates;
 	}
 	
 	public static void create(Map<Integer, Node> nodes, int from , int to, int weight) {
