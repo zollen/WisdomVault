@@ -76,7 +76,7 @@ public class KruskalExercise2 {
 		});
 	
 		
-		
+		// Kruskal algo begin
 
 		Map<Integer, Set<Integer>> map = new HashMap<Integer, Set<Integer>>();	
 		List<Edge> pool = new ArrayList<Edge>();
