@@ -1,4 +1,4 @@
-package optimization;
+package optimization.graph;
 
 import java.util.ArrayList;
 import java.util.Collections;

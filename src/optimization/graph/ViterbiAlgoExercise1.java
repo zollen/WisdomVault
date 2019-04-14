@@ -1,4 +1,4 @@
-package optimization;
+package optimization.graph;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -7,7 +7,7 @@ import java.util.Map;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
 
-public class ViterbiAlgoExercise2 {
+public class ViterbiAlgoExercise1 {
 
 
 	public static void main(String[] args) {
@@ -16,19 +16,17 @@ public class ViterbiAlgoExercise2 {
 		
 		Equation eq = new Equation();
 		eq.process("A = [ " +
-				 /* A, B, C, D, E, F, G, I, J, K, L, M */
-		/* A */   " 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;" +
-		/* B */   " 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;" +
-		/* C */   " 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;" +
-		/* D */   " 1, 2, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0;" +
-		/* E */   " 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0;" +
-		/* F */   " 0, 2, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0;" + 
-		/* G */   " 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0;" + 
-		/* I */   " 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 0;" + 
-		/* J */   " 0, 0, 0, 3, 5, 5, 0, 0, 0, 1, 0, 0;" + 
-		/* K */   " 0, 0, 0, 0, 0, 1, 2, 0, 0, 1, 0, 0;" + 
-		/* L */   " 0, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 0;" + 
-		/* M */   " 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0 " + 
+				 /* A, B, C, D, E, F, G, H, I, J */
+		/* A */   " 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;" +
+		/* B */   " 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;" +
+		/* C */   " 2, 1, 0, 0, 0, 0, 0, 0, 0, 0;" +
+		/* D */   " 3, 4, 0, 0, 0, 0, 0, 0, 0, 0;" +
+		/* E */   " 0, 2, 0, 0, 0, 0, 0, 0, 0, 0;" +
+		/* F */   " 0, 0, 0, 1, 3, 0, 0, 0, 0, 0;" + 
+		/* G */   " 0, 0, 1, 1, 0, 0, 0, 0, 0, 0;" + 
+		/* H */   " 0, 0, 3, 0, 1, 0, 0, 0, 0, 0;" + 
+		/* I */   " 0, 0, 0, 0, 0, 2, 1, 0, 0, 0;" + 
+		/* J */   " 0, 0, 0, 0, 0, 3, 0, 2, 0, 0 " + 
 				"]");
 		
 		DMatrixRMaj A = eq.lookupDDRM("A");
@@ -36,11 +34,10 @@ public class ViterbiAlgoExercise2 {
 		Collection<Integer> starts = new HashSet<Integer>();
 		starts.add(0);  /* A */
 		starts.add(1);  /* B */
-		starts.add(2);  /* C */
 	
 		Collection<Integer> ends = new HashSet<Integer>();
-		ends.add(10);   /* L */
-		ends.add(11);   /* M */
+		ends.add(8);   /* I */
+		ends.add(9);   /* J */
 		
 		Map<Integer, Arc> results = new LinkedHashMap<Integer, Arc>();
 		analysis(A, starts, results);
@@ -75,19 +72,18 @@ public class ViterbiAlgoExercise2 {
 			}
 		}
 		
-		
 		Arc arc = results.get(selected);
 		if (arc != null) {
 			
 			Collection<Integer> nexts = new HashSet<Integer>();
 			nexts.add(arc.getFrom());
 			
-			
 			traverse(results, nexts, output);
 			
 			output.append(" ==> " + Arc.STATES[selected]);
 		}
 		else {
+			
 			output.append(Arc.STATES[selected]);
 		}
 	}
@@ -127,10 +123,10 @@ public class ViterbiAlgoExercise2 {
 	}
 	
 	
+	
 	public static class Arc {
 		
-		public static final String [] STATES = { "A", "B", "C", "D", "E", "F", "G", 
-				 "I", "J", "K", "L", "M" };
+		public static final String [] STATES = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" };
 
 		
 		private int from = -1;
