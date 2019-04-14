@@ -22,6 +22,10 @@ import machinelearning.classifier.PlaceHolder;
  * The algorithm computes the spanning tree of traversing all nodes with the least amount of cost.
  * (without circles)
  * 
+ * Difference between uni-directional and bi-directional
+ * 	1. register(...)
+ * 	2. Edge.equals(...)
+ * 
  * https://www.youtube.com/watch?v=71UQH7Pr9kU&t=1s
  * @author zollen
  *
@@ -123,39 +127,54 @@ public class KruskalExercise {
 		
 		for (Edge edge : pool) {
 			
-			Node node = nodes.get(edge.getFrom());
-			if (node == null) {
-				
-				Node parent = new Node(edge.getFrom(), edge.getWeight());
-				Node child = nodes.get(edge.getTo());
-				if (child == null)
-					child = new Node(edge.getTo(), edge.getWeight());
-				parent.getChildren().add(child);
-				
-				nodes.put(edge.getFrom(), parent);
-				nodes.put(edge.getTo(), child);
-			}
-			else {
-				Node child = nodes.get(edge.getTo());
-				if (child == null)
-					child = new Node(edge.getTo(), edge.getWeight());
-				node.getChildren().add(child);
-				
-				nodes.put(edge.getTo(), child);
-			}
+			create(nodes, edge.getFrom(), edge.getTo(), edge.getWeight());
+			create(nodes, edge.getTo(), edge.getFrom(), edge.getWeight());
 		}
+
+/*
+		nodes.entrySet().stream().forEach(p -> {
+			
+			System.err.println("SCORE: " + score(p.getValue()));
+			System.err.println(p.getValue());
+		});
+*/
+		
 		
 		AtomicInteger max = new AtomicInteger();
 		PlaceHolder<Node> holder = new PlaceHolder<Node>();
 		nodes.entrySet().stream().forEach(p -> {
-			int count = count(p.getValue());
-			if (max.intValue() < count) {
-				max.set(count);
+			int score = score(p.getValue());
+			if (max.intValue() < score) {
+				max.set(score);
 				holder.data(p.getValue());
 			}
 		});
 		
 		return holder.data();
+	}
+	
+	public static void create(Map<Integer, Node> nodes, int from , int to, int weight) {
+		
+		Node node = nodes.get(from);
+		
+		if (node == null) {	
+			Node parent = new Node(from, weight);
+			Node child = nodes.get(to);
+			if (child == null)
+				child = new Node(to, weight);
+			parent.getChildren().add(child);
+			
+			nodes.put(from, parent);
+			nodes.put(to, child);
+		}
+		else {
+			Node child = nodes.get(to);
+			if (child == null)
+				child = new Node(to, weight);
+			node.getChildren().add(child);
+			
+			nodes.put(to, child);
+		}
 	}
 	
 	public static boolean circle(Map<Integer, Set<Integer>> map, Edge target) {
@@ -203,13 +222,44 @@ public class KruskalExercise {
 		dests.add(to);
 	}
 	
-	private static int count(Node node) {
+	private static int score(Node node) {
 		
-		int count = 1;
+		int count = count(new HashSet<Integer>(), node);
+		int depth = depth(new HashSet<Integer>(), 0, node);
+		
+		// tree with largest number of nodes and minimum depth has the highest score
+		return (int) Math.pow(count, 2) + (int) Math.pow(count - depth, 2);
+	}
+	
+	private static int depth(Set<Integer> visited, int depth, Node node) {
+		
+		if (visited.contains(node.getId()))
+			return depth;
+		
+		int max = 0;
+		
+		visited.add(node.getId());
 		
 		for (Node child : node.getChildren()) {
 			
-			count += count(child);
+			int dep = depth(visited, depth + 1, child);
+			if (max < dep)
+				max = dep;
+		}
+		
+		return max;
+	}
+	
+	private static int count(Set<Integer> visited, Node node) {
+		
+		int count = 1;
+		
+		visited.add(node.getId());
+		
+		for (Node child : node.getChildren()) {
+			
+			if (!visited.contains(child.getId()))
+				count += count(visited, child);
 		}
 		
 		return count;
@@ -331,18 +381,24 @@ public class KruskalExercise {
 		
 		@Override
 		public String toString() {
-			return toString(0);
+			return toString(new HashSet<Integer>(), 0);
 		}
 		
-		private String toString(int indent) {
+		private String toString(Set<Integer> visited, int indent) {
 			
 			StringBuilder builder = new StringBuilder();
+			
+			visited.add(this.getId());
 			
 			for (int i = 0; i < indent; i++)
 				builder.append(" ");
 			
 			builder.append("Node: [" + LABELS[id] + ":" + weight + "]\n");
-			children.stream().forEach(p -> builder.append(p.toString(indent + 3)));
+			children.stream().forEach(p -> {
+				
+				if (!visited.contains(p.getId()))
+					builder.append(p.toString(visited, indent + 3)); 
+			});
 			
 			return builder.toString();
 		}
