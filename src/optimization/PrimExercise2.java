@@ -1,8 +1,6 @@
 package optimization;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,7 +12,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
 
 /**
- * Kruskal algorithm results in a minimum spanning tree against a
+ * Prim algorithm results in a minimum spanning tree against a
  * connected, uni/by-directional, weighted graph with unknown start and end states.
  * 
  * The algorithm computes the spanning tree of traversing all nodes with the least amount of cost.
@@ -24,11 +22,11 @@ import org.ejml.equation.Equation;
  * 	1. register(...)
  * 	2. Edge.equals(...)
  * 
- * https://www.youtube.com/watch?v=71UQH7Pr9kU&t=1s
+ * https://www.youtube.com/watch?v=cplfcGZmX7I
  * @author zollen
  *
  */
-public class KruskalExercise2 {
+public class PrimExercise2 {
 	
 	private static final String [] LABELS = { "A", "B", "C", "D", "E", "F", "G", "H", "I" };
 
@@ -50,48 +48,40 @@ public class KruskalExercise2 {
 		
 		DMatrixRMaj A = eq.lookupDDRM("A");
 		
-		Set<Edge> initial = new HashSet<Edge>();
+		// Prim Algo begin
 		
-		for (int col = 0; col < A.numCols; col++) {
+		List<Edge> pool = new ArrayList<Edge>();
+		int last = pool.size();
+		
+		Set<Integer> visited = new HashSet<Integer>();
+		
+		// randomly pick a start node
+		visited.add(0);   /* let's pick A */
 			
-			for (int row = 0; row < A.numRows; row++) {
-				
-				int weight = (int) A.get(row, col);
-				
-				if (weight > 0) {		
-					initial.add(new Edge(row, col, weight));
+		while (pool.size() < LABELS.length - 1) {
+			
+			last = pool.size();
+			
+			int min = Integer.MAX_VALUE;
+			Edge edge = null;
+			for (Integer from : visited) {
+			
+				for (int to = 0; to < A.numRows; to++) {
+					int dist = (int) A.get(to, from);
+					if (dist > 0 && min > dist && !visited.contains(to)) {
+						min = dist;
+						edge = new Edge(to, from, dist);
+					}
 				}
 			}
-		}
 		
-		List<Edge> list = new ArrayList<Edge>(initial);		
-		Collections.sort(list, new Comparator<Edge>() {
-
-			@Override
-			public int compare(Edge o1, Edge o2) {
-				// TODO Auto-generated method stub
-				return Integer.valueOf(o1.getWeight()).compareTo(o2.getWeight());
-			}			
-		});
-	
-		
-		// Kruskal algo begin
-
-		Map<Integer, Set<Integer>> map = new HashMap<Integer, Set<Integer>>();	
-		List<Edge> pool = new ArrayList<Edge>();
-		
-		while (list.size() > 0) {
-			
-			Edge first = list.stream().findFirst().get();
-			list.remove(first);
-			
-			if (circle(map, first)) {
-				continue;
+			if (edge != null) {
+				visited.add(edge.getTo());
+				pool.add(edge);
 			}
 			
-			register(map, first);
-			
-			pool.add(first);
+			if (last == pool.size())
+				break;
 		}
 		
 		pool.stream().forEach(p -> System.out.println(p));
@@ -104,7 +94,7 @@ public class KruskalExercise2 {
 			System.out.println(p);
 			
 		});
-		
+
 	}
 	
 	public static List<Node> construct(List<Edge> pool) {
@@ -168,51 +158,6 @@ public class KruskalExercise2 {
 			
 			nodes.put(to, child);
 		}
-	}
-	
-	public static boolean circle(Map<Integer, Set<Integer>> map, Edge target) {
-		
-		Set<Integer> visited = new HashSet<Integer>();
-		visited.add(target.getFrom());
-			
-		return circle(map, visited, target.getFrom(), target.getTo());
-	}
-	
-	private static boolean circle(Map<Integer, Set<Integer>> map, Set<Integer> visited, 
-							int last, int current) {
-				
-		if (visited.contains(current))
-			return true;
-		
-		visited.add(current);
-				
-		Set<Integer> set = map.get(current);
-		
-		if (set != null) {		
-			for (Integer s : set) {			
-				if (s != last && circle(map, visited, current, s))
-					return true;		
-			}
-		}
-		
-		return false;
-	}
-	
-	private static void register(Map<Integer, Set<Integer>> map, Edge edge) {
-			
-		register(map, edge.getFrom(), edge.getTo());
-		register(map, edge.getTo(), edge.getFrom());
-	}
-	
-	private static void register(Map<Integer, Set<Integer>> map, int from, int to) {
-		
-		Set<Integer> dests = map.get(from);
-		if (dests == null) {
-			dests = new HashSet<Integer>();
-			map.put(from, dests);
-		}
-			
-		dests.add(to);
 	}
 	
 	private static int score(Node node) {
