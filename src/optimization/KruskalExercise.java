@@ -16,8 +16,11 @@ import org.ejml.equation.Equation;
 import machinelearning.classifier.PlaceHolder;
 
 /**
- * Kruskal algothirm results in a minimum spanning tree against a
+ * Kruskal algorithm results in a minimum spanning tree against a
  * connected, uni/by-directional, weighted graph with unknown start and end states.
+ * 
+ * The algorithm computes the spanning tree of traversing all nodes with the least amount of cost.
+ * 
  * 
  * https://www.youtube.com/watch?v=71UQH7Pr9kU&t=1s
  * @author zollen
