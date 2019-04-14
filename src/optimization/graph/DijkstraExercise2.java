@@ -29,6 +29,11 @@ public class DijkstraExercise2 {
 	private static int fDist = Integer.MAX_VALUE;
 	
 	private static final String [] LABELS = { "A", "B", "C", "D", "E", "F", "G" };
+	
+	static {
+		BINode.setLABELS(LABELS);
+		BIEdge.setLABELS(LABELS);
+	}
 
 	public static void main(String ...args) {
 			
@@ -52,9 +57,9 @@ public class DijkstraExercise2 {
 			for (int i = 1; i <= 6; i++)
 				vertices.put(i, Integer.MAX_VALUE);
 			
-			Node root = dijkstra(A, START_STATE_A, vertices, new HashSet<Integer>());
+			BINode root = dijkstra(A, START_STATE_A, vertices, new HashSet<Integer>());
 		
-			System.out.println("Number of Nodes: " + count(root));
+			System.out.println("Number of Nodes: " + root.count());
 			shortestPath(A, root);
 		}
 		
@@ -101,14 +106,14 @@ public class DijkstraExercise2 {
 				vertices.put(i, Integer.MAX_VALUE);
 			
 			// dijkstra with new features!
-			Node root = dijkstra2(A, START_STATE_A, vertices);
+			BINode root = dijkstra2(A, START_STATE_A, vertices);
 		
-			System.out.println("Number of Nodes: " + count(root));
+			System.out.println("Number of Nodes: " + root.count());
 			shortestPath(A, root);
 		}
 	}
 	
-	public static void shortestPath(DMatrixRMaj A, Node node) {
+	public static void shortestPath(DMatrixRMaj A, BINode node) {
 		
 		Map<Integer, List<Map<Integer, Integer>>> results = new TreeMap<Integer, List<Map<Integer, Integer>>>();
 
@@ -119,20 +124,8 @@ public class DijkstraExercise2 {
 		first.getValue().stream().forEach(p -> print(first.getKey(), p));
 		
 	}
-	
-	public static int count(Node node) {
-		
-		int count = 1;
-		
-		for (Node child : node.getChildren()) {
-			
-			count += count(child);
-		}
-		
-		return count;
-	}
-	
-	public static void search(DMatrixRMaj A, Node node, Map<Integer, Integer> paths,
+
+	public static void search(DMatrixRMaj A, BINode node, Map<Integer, Integer> paths,
 			Map<Integer, List<Map<Integer, Integer>>> results) {
 		
 		Map<Integer, Integer> _paths = new LinkedHashMap<Integer, Integer>(paths);
@@ -141,12 +134,12 @@ public class DijkstraExercise2 {
 			
 			Integer min = results.keySet().stream().findFirst().orElse(Integer.MAX_VALUE);
 			
-			if (min == null || (min != null && min.intValue() >= node.getScore())) {
+			if (min == null || (min != null && min.intValue() >= node.getWeight())) {
 				
-				List<Map<Integer, Integer>> list = results.get(node.getScore());
+				List<Map<Integer, Integer>> list = results.get(node.getWeight());
 				if (list == null) {
 					list = new ArrayList<Map<Integer, Integer>>();
-					results.put(node.getScore(), list);
+					results.put(node.getWeight(), list);
 				}
 			
 				list.add(_paths);
@@ -156,21 +149,21 @@ public class DijkstraExercise2 {
 		}
 		
 	
-		for (Node child : node.getChildren()) {
+		for (BINode child : node.getChildren()) {
 			
-			if (node.score + (int) A.get(child.getId(), node.getId()) == child.getScore()) {
-				_paths.put(node.id, child.id);
+			if (node.getWeight() + (int) A.get(child.getId(), node.getId()) == child.getWeight()) {
+				_paths.put(node.getId(), child.getId());
 				search(A, child, _paths, results);		
 			}
 		}
 	}
 	
-	public static Node dijkstra2(DMatrixRMaj A, int from, Map<Integer, Integer> vertices) {
+	public static BINode dijkstra2(DMatrixRMaj A, int from, Map<Integer, Integer> vertices) {
 		
 		Map<Integer, Integer> _vertices = new LinkedHashMap<Integer, Integer>(vertices);
 		
 		Integer score = _vertices.get(from);
-		Node node = create(from, score);
+		BINode node = new BINode(from, score);
 		
 		if (from == END_STATE_F) {
 			return node;
@@ -202,7 +195,7 @@ public class DijkstraExercise2 {
 		return node;
 	}
 	
-	public static Node dijkstra(DMatrixRMaj A, int from, Map<Integer, Integer> vertices, 
+	public static BINode dijkstra(DMatrixRMaj A, int from, Map<Integer, Integer> vertices, 
 			Set<Integer> states) {
 		
 		Map<Integer, Integer> _vertices = new LinkedHashMap<Integer, Integer>(vertices);
@@ -211,7 +204,7 @@ public class DijkstraExercise2 {
 		_states.add(from);
 		
 		Integer score = _vertices.get(from);
-		Node node = create(from, score);
+		BINode node = new BINode(from, score);
 		
 		if (from == END_STATE_F) {
 			return node;
@@ -236,82 +229,12 @@ public class DijkstraExercise2 {
 		
 		return node;
 	}
-	
-	public static Node create(int id) {
-		return new Node(id);
-	}
-	
-	public static Node create(int id, int score) {
-		return new Node(id, score);
-	}
-	
+
 	public static void print(int scores, Map<Integer, Integer> paths) {
 	
 		String tmp = paths.entrySet().stream().map(p -> LABELS[p.getKey()] + " ==> " + 
 										LABELS[p.getValue()]).collect(Collectors.joining(", "));
 		
 		System.out.println(tmp + " : " + scores);
-	}
-	
-	
-	public static class Node {
-
-		private int score;
-		
-		private int id;
-		
-		private List<Node> children = new ArrayList<Node>();
-		
-		public Node(int id) {
-			this.id = id;
-		}
-		
-		public Node(int id, int score) {
-			this.id = id;
-			this.score = score;
-		}
-		
-		public int getId() {
-			return id;
-		}
-		
-		public void setId(int id) {
-			this.id = id;
-		}
-		
-		public int getScore() {
-			return score;
-		}
-
-		public void setScore(int score) {
-			this.score = score;
-		}
-
-		public List<Node> getChildren() {
-			return children;
-		}
-
-		public void setChildren(List<Node> children) {
-			this.children = children;
-		}
-		
-		@Override
-		public String toString() {
-			return toString(0);
-		}
-		
-		private String toString(int indent) {
-			
-			StringBuilder builder = new StringBuilder();
-			
-			for (int i = 0; i < indent; i++)
-				builder.append(" ");
-			
-			builder.append("Node: [" + LABELS[id] + ":" + score + "]\n");
-			children.stream().forEach(p -> builder.append(p.toString(indent + 3)));
-			
-			return builder.toString();
-		}
-		
 	}
 }

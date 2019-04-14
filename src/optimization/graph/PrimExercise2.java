@@ -1,12 +1,9 @@
 package optimization.graph;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
@@ -28,7 +25,12 @@ import org.ejml.equation.Equation;
  */
 public class PrimExercise2 {
 	
-	private static final String [] LABELS = { "A", "B", "C", "D", "E", "F", "G", "H", "I" };
+	static final String [] LABELS = { "A", "B", "C", "D", "E", "F", "G", "H", "I" };
+	
+	static {
+		BINode.setLABELS(LABELS);
+		BIEdge.setLABELS(LABELS);
+	}
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -50,7 +52,7 @@ public class PrimExercise2 {
 		
 		// Prim Algo begin
 		
-		List<Edge> pool = new ArrayList<Edge>();
+		List<BIEdge> pool = new ArrayList<BIEdge>();
 		int last = pool.size();
 		
 		Set<Integer> visited = new HashSet<Integer>();
@@ -63,14 +65,14 @@ public class PrimExercise2 {
 			last = pool.size();
 			
 			int min = Integer.MAX_VALUE;
-			Edge edge = null;
+			BIEdge edge = null;
 			for (Integer from : visited) {
 			
 				for (int to = 0; to < A.numRows; to++) {
 					int dist = (int) A.get(to, from);
 					if (dist > 0 && min > dist && !visited.contains(to)) {
 						min = dist;
-						edge = new Edge(to, from, dist);
+						edge = new BIEdge(to, from, dist);
 					}
 				}
 			}
@@ -87,258 +89,13 @@ public class PrimExercise2 {
 		pool.stream().forEach(p -> System.out.println(p));
 		System.out.println("Number of edges: " + pool.size());
 
-		List<Node> results = construct(pool);
+		List<BINode> results = BINode.construct(pool);
 		results.stream().forEach(p -> {
 			
-			System.out.println("====  Score: [" + score(p) + "]  ===");
+			System.out.println("====  Score: [" + p.score() + "]  ===");
 			System.out.println(p);
 			
 		});
 
-	}
-	
-	public static List<Node> construct(List<Edge> pool) {
-		
-		Map<Integer, Node> nodes = new HashMap<Integer, Node>();
-		
-		for (Edge edge : pool) {
-			
-			create(nodes, edge.getFrom(), edge.getTo(), edge.getWeight());
-			create(nodes, edge.getTo(), edge.getFrom(), edge.getWeight());
-		}
-
-/*
-		nodes.entrySet().stream().forEach(p -> {
-			
-			System.err.println("SCORE: " + score(p.getValue()));
-			System.err.println(p.getValue());
-		});
-*/
-		
-		
-		AtomicInteger max = new AtomicInteger();		
-		nodes.entrySet().stream().forEach(p -> {
-			int score = score(p.getValue());
-			if (max.intValue() < score) {
-				max.set(score);
-			}
-		});
-		
-		
-		List<Node> candidates = new ArrayList<Node>();
-		nodes.entrySet().stream().forEach(p -> {
-			int score = score(p.getValue());
-			if (max.intValue() == score) {
-				candidates.add(p.getValue());
-			}
-		});
-		
-		return candidates;
-	}
-	
-	public static void create(Map<Integer, Node> nodes, int from , int to, int weight) {
-		
-		Node node = nodes.get(from);
-		
-		if (node == null) {	
-			Node parent = new Node(from, weight);
-			Node child = nodes.get(to);
-			if (child == null)
-				child = new Node(to, weight);
-			parent.getChildren().add(child);
-			
-			nodes.put(from, parent);
-			nodes.put(to, child);
-		}
-		else {
-			Node child = nodes.get(to);
-			if (child == null)
-				child = new Node(to, weight);
-			node.getChildren().add(child);
-			
-			nodes.put(to, child);
-		}
-	}
-	
-	private static int score(Node node) {
-		
-		int count = count(new HashSet<Integer>(), node);
-		int depth = depth(new HashSet<Integer>(), 0, node);
-		
-		// tree with largest number of nodes and minimum depth has the highest score
-		return (int) Math.pow(count, 2) + (int) Math.pow(count - depth, 2);
-	}
-	
-	private static int depth(Set<Integer> visited, int depth, Node node) {
-		
-		if (visited.contains(node.getId()))
-			return depth;
-		
-		int max = 0;
-		
-		visited.add(node.getId());
-		
-		for (Node child : node.getChildren()) {
-			
-			int dep = depth(visited, depth + 1, child);
-			if (max < dep)
-				max = dep;
-		}
-		
-		return max;
-	}
-	
-	private static int count(Set<Integer> visited, Node node) {
-		
-		int count = 1;
-		
-		visited.add(node.getId());
-		
-		for (Node child : node.getChildren()) {
-			
-			if (!visited.contains(child.getId()))
-				count += count(visited, child);
-		}
-		
-		return count;
-	}
-	
-	public static class Edge {
-		
-		private static final int PRIME1 = 31;
-		private static final int PRIME2 = 37;
-
-		private int from;		
-		private int to;	
-		private int weight;
-		
-		public Edge(int to, int from, int weight) {
-			this.to = to;
-			this.from = from;
-			this.weight = weight;
-		}
-		
-		public int getFrom() {
-			return from;
-		}
-
-		public void setFrom(int from) {
-			this.from = from;
-		}
-
-		public int getTo() {
-			return to;
-		}
-
-		public void setTo(int to) {
-			this.to = to;
-		}
-
-		public int getWeight() {
-			return weight;
-		}
-
-		public void setWeight(int weight) {
-			this.weight = weight;
-		}
-		
-		@Override
-		public int hashCode() {
-			int result = 1;
-			result = (from + PRIME1) * (to + PRIME1);
-			result = result + PRIME2 * weight;
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			
-			Edge other = (Edge) obj;
-			if (from == other.from && to == other.to && weight == other.weight)
-				return true;
-			
-			if (from == other.to && to == other.from && weight == other.weight)
-				return true;
-				
-			return false;
-		}
-		
-		@Override
-		public String toString() {
-			return "Edge [From=" + LABELS[from] + " <==> " + "To=" + 
-						LABELS[to] + ", Weight=" + weight + "]";
-		}
-	}
-	
-	public static class Node {
-		
-		private int weight;
-		
-		private int id;
-		
-		private List<Node> children = new ArrayList<Node>();
-		
-		public Node(int id) {
-			this.id = id;
-		}
-		
-		public Node(int id, int weight) {
-			this.id = id;
-			this.weight = weight;
-		}
-		
-		public int getId() {
-			return id;
-		}
-		
-		public void setId(int id) {
-			this.id = id;
-		}
-		
-		public int getWeight() {
-			return weight;
-		}
-
-		public void setWeight(int weight) {
-			this.weight = weight;
-		}
-
-		public List<Node> getChildren() {
-			return children;
-		}
-
-		public void setChildren(List<Node> children) {
-			this.children = children;
-		}
-		
-		@Override
-		public String toString() {
-			return toString(new HashSet<Integer>(), 0);
-		}
-		
-		private String toString(Set<Integer> visited, int indent) {
-			
-			StringBuilder builder = new StringBuilder();
-			
-			visited.add(this.getId());
-			
-			for (int i = 0; i < indent; i++)
-				builder.append(" ");
-			
-			builder.append("Node: [" + LABELS[id] + ":" + weight + "]\n");
-			children.stream().forEach(p -> {
-				
-				if (!visited.contains(p.getId()))
-					builder.append(p.toString(visited, indent + 3)); 
-			});
-			
-			return builder.toString();
-		}
 	}
 }

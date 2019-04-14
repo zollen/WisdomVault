@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
@@ -31,31 +30,15 @@ import org.ejml.equation.Equation;
 public class KruskalExercise {
 	
 	private static final String [] LABELS = { "A", "B", "C", "D", "E", "F", "G" };
+	
+	static {
+		BINode.setLABELS(LABELS);
+		BIEdge.setLABELS(LABELS);
+	}
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Equation eq = new Equation();
-		// A - 2 -> B
-		//			B - 4 -> C
-		//			B - 3 -> E
-		// A <- 2 - B
-		// A - 3 -> D
-		//			D - 5 -> C
-		//			D - 7 -> F
-		// A <- 3 - D			
-		// A - 3 -> C
-		// 			C - 4 -> B
-		//			C - 5 -> D
-		//			C - 1 - >E
-		// A <- 3 -	C
-		// D - 5 -> C
-		// D - 3 -> A
-		// D - 7 -> F
-		//			F - 9 -> G
-		// D <- 7 - F
-		// E - 3 -> B
-		// E - 1 -> C
-		// E - 8 -> F
 		eq.process("A = [ " + 
 				/*  A,  B,  C,  D,  E,  F,  G */
 	/* A */ 	"	0,  2,  3,  3,  0,  0,  0;" +
@@ -69,7 +52,7 @@ public class KruskalExercise {
 		
 		DMatrixRMaj A = eq.lookupDDRM("A");
 		
-		Set<Edge> initial = new HashSet<Edge>();
+		Set<BIEdge> initial = new HashSet<BIEdge>();
 		
 		for (int col = 0; col < A.numCols; col++) {
 			
@@ -78,16 +61,16 @@ public class KruskalExercise {
 				int weight = (int) A.get(row, col);
 				
 				if (weight > 0) {		
-					initial.add(new Edge(row, col, weight));
+					initial.add(new BIEdge(row, col, weight));
 				}
 			}
 		}
 		
-		List<Edge> list = new ArrayList<Edge>(initial);		
-		Collections.sort(list, new Comparator<Edge>() {
+		List<BIEdge> list = new ArrayList<BIEdge>(initial);		
+		Collections.sort(list, new Comparator<BIEdge>() {
 
 			@Override
-			public int compare(Edge o1, Edge o2) {
+			public int compare(BIEdge o1, BIEdge o2) {
 				// TODO Auto-generated method stub
 				return Integer.valueOf(o1.getWeight()).compareTo(o2.getWeight());
 			}			
@@ -97,11 +80,11 @@ public class KruskalExercise {
 		// Kruskal algo begin
 
 		Map<Integer, Set<Integer>> map = new HashMap<Integer, Set<Integer>>();	
-		List<Edge> pool = new ArrayList<Edge>();
+		List<BIEdge> pool = new ArrayList<BIEdge>();
 		
 		while (list.size() > 0) {
 			
-			Edge first = list.stream().findFirst().get();
+			BIEdge first = list.stream().findFirst().get();
 			list.remove(first);
 			
 			if (circle(map, first)) {
@@ -116,79 +99,16 @@ public class KruskalExercise {
 		pool.stream().forEach(p -> System.out.println(p));
 		System.out.println("Number of edges: " + pool.size());
 
-		List<Node> results = construct(pool);
+		List<BINode> results = BINode.construct(pool);
 		results.stream().forEach(p -> {
 			
-			System.out.println("====  Score: [" + score(p) + "]  ===");
+			System.out.println("====  Score: [" + p.score() + "]  ===");
 			System.out.println(p);
 			
 		});
 	}
 	
-public static List<Node> construct(List<Edge> pool) {
-		
-		Map<Integer, Node> nodes = new HashMap<Integer, Node>();
-		
-		for (Edge edge : pool) {
-			
-			create(nodes, edge.getFrom(), edge.getTo(), edge.getWeight());
-			create(nodes, edge.getTo(), edge.getFrom(), edge.getWeight());
-		}
-
-/*
-		nodes.entrySet().stream().forEach(p -> {
-			
-			System.err.println("SCORE: " + score(p.getValue()));
-			System.err.println(p.getValue());
-		});
-*/
-		
-		
-		AtomicInteger max = new AtomicInteger();		
-		nodes.entrySet().stream().forEach(p -> {
-			int score = score(p.getValue());
-			if (max.intValue() < score) {
-				max.set(score);
-			}
-		});
-		
-		
-		List<Node> candidates = new ArrayList<Node>();
-		nodes.entrySet().stream().forEach(p -> {
-			int score = score(p.getValue());
-			if (max.intValue() == score) {
-				candidates.add(p.getValue());
-			}
-		});
-		
-		return candidates;
-	}
-	
-	public static void create(Map<Integer, Node> nodes, int from , int to, int weight) {
-		
-		Node node = nodes.get(from);
-		
-		if (node == null) {	
-			Node parent = new Node(from, weight);
-			Node child = nodes.get(to);
-			if (child == null)
-				child = new Node(to, weight);
-			parent.getChildren().add(child);
-			
-			nodes.put(from, parent);
-			nodes.put(to, child);
-		}
-		else {
-			Node child = nodes.get(to);
-			if (child == null)
-				child = new Node(to, weight);
-			node.getChildren().add(child);
-			
-			nodes.put(to, child);
-		}
-	}
-	
-	public static boolean circle(Map<Integer, Set<Integer>> map, Edge target) {
+	public static boolean circle(Map<Integer, Set<Integer>> map, BIEdge target) {
 		
 		Set<Integer> visited = new HashSet<Integer>();
 		visited.add(target.getFrom());
@@ -216,7 +136,7 @@ public static List<Node> construct(List<Edge> pool) {
 		return false;
 	}
 	
-	private static void register(Map<Integer, Set<Integer>> map, Edge edge) {
+	private static void register(Map<Integer, Set<Integer>> map, BIEdge edge) {
 			
 		register(map, edge.getFrom(), edge.getTo());
 		register(map, edge.getTo(), edge.getFrom());
@@ -231,187 +151,5 @@ public static List<Node> construct(List<Edge> pool) {
 		}
 			
 		dests.add(to);
-	}
-	
-	private static int score(Node node) {
-		
-		int count = count(new HashSet<Integer>(), node);
-		int depth = depth(new HashSet<Integer>(), 0, node);
-		
-		// tree with largest number of nodes and minimum depth has the highest score
-		return (int) Math.pow(count, 2) + (int) Math.pow(count - depth, 2);
-	}
-	
-	private static int depth(Set<Integer> visited, int depth, Node node) {
-		
-		if (visited.contains(node.getId()))
-			return depth;
-		
-		int max = 0;
-		
-		visited.add(node.getId());
-		
-		for (Node child : node.getChildren()) {
-			
-			int dep = depth(visited, depth + 1, child);
-			if (max < dep)
-				max = dep;
-		}
-		
-		return max;
-	}
-	
-	private static int count(Set<Integer> visited, Node node) {
-		
-		int count = 1;
-		
-		visited.add(node.getId());
-		
-		for (Node child : node.getChildren()) {
-			
-			if (!visited.contains(child.getId()))
-				count += count(visited, child);
-		}
-		
-		return count;
-	}
-	
-	public static class Edge {
-		
-		private static final int PRIME1 = 31;
-		private static final int PRIME2 = 37;
-
-		private int from;		
-		private int to;	
-		private int weight;
-		
-		public Edge(int to, int from, int weight) {
-			this.to = to;
-			this.from = from;
-			this.weight = weight;
-		}
-		
-		public int getFrom() {
-			return from;
-		}
-
-		public void setFrom(int from) {
-			this.from = from;
-		}
-
-		public int getTo() {
-			return to;
-		}
-
-		public void setTo(int to) {
-			this.to = to;
-		}
-
-		public int getWeight() {
-			return weight;
-		}
-
-		public void setWeight(int weight) {
-			this.weight = weight;
-		}
-		
-		@Override
-		public int hashCode() {
-			int result = 1;
-			result = (from + PRIME1) * (to + PRIME1);
-			result = result + PRIME2 * weight;
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			
-			Edge other = (Edge) obj;
-			if (from == other.from && to == other.to && weight == other.weight)
-				return true;
-			
-			if (from == other.to && to == other.from && weight == other.weight)
-				return true;
-				
-			return false;
-		}
-		
-		@Override
-		public String toString() {
-			return "Edge [From=" + LABELS[from] + " <==> " + "To=" + 
-						LABELS[to] + ", Weight=" + weight + "]";
-		}
-	}
-	
-	public static class Node {
-		
-		private int weight;
-		
-		private int id;
-		
-		private List<Node> children = new ArrayList<Node>();
-		
-		public Node(int id) {
-			this.id = id;
-		}
-		
-		public Node(int id, int weight) {
-			this.id = id;
-			this.weight = weight;
-		}
-		
-		public int getId() {
-			return id;
-		}
-		
-		public void setId(int id) {
-			this.id = id;
-		}
-		
-		public int getWeight() {
-			return weight;
-		}
-
-		public void setWeight(int weight) {
-			this.weight = weight;
-		}
-
-		public List<Node> getChildren() {
-			return children;
-		}
-
-		public void setChildren(List<Node> children) {
-			this.children = children;
-		}
-		
-		@Override
-		public String toString() {
-			return toString(new HashSet<Integer>(), 0);
-		}
-		
-		private String toString(Set<Integer> visited, int indent) {
-			
-			StringBuilder builder = new StringBuilder();
-			
-			visited.add(this.getId());
-			
-			for (int i = 0; i < indent; i++)
-				builder.append(" ");
-			
-			builder.append("Node: [" + LABELS[id] + ":" + weight + "]\n");
-			children.stream().forEach(p -> {
-				
-				if (!visited.contains(p.getId()))
-					builder.append(p.toString(visited, indent + 3)); 
-			});
-			
-			return builder.toString();
-		}
 	}
 }
