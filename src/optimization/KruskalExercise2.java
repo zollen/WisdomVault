@@ -26,43 +26,25 @@ import machinelearning.classifier.PlaceHolder;
  * @author zollen
  *
  */
-public class KruskalExercise {
+public class KruskalExercise2 {
 	
-	private static final String [] LABELS = { "A", "B", "C", "D", "E", "F", "G" };
+	private static final String [] LABELS = { "0", "1", "2", "3", "4", "5", "6", "7", "8" };
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Equation eq = new Equation();
-		// A - 2 -> B
-		//			B - 4 -> C
-		//			B - 3 -> E
-		// A <- 2 - B
-		// A - 3 -> D
-		//			D - 5 -> C
-		//			D - 7 -> F
-		// A <- 3 - D			
-		// A - 3 -> C
-		// 			C - 4 -> B
-		//			C - 5 -> D
-		//			C - 1 - >E
-		// A <- 3 -	C
-		// D - 5 -> C
-		// D - 3 -> A
-		// D - 7 -> F
-		//			F - 9 -> G
-		// D <- 7 - F
-		// E - 3 -> B
-		// E - 1 -> C
-		// E - 8 -> F
+		
 		eq.process("A = [ " + 
-				/*  A,  B,  C,  D,  E,  F,  G */
-	/* A */ 	"	0,  2,  3,  3,  0,  0,  0;" +
-	/* B */		"   2,  0,  4,  0,  3,  0,  0;" +
-	/* C */		"   3,  4,  0,  5,  1,  0,  0;" +
-	/* D */		"   3,  0,  5,  0,  0,  7,  0;" +
-	/* E */		"   0,  3,  1,  0,  0,  8,  0;" +
-	/* F */		"   0,  0,  0,  7,  8,  0,  9;" +
-	/* G */		"   0,  0,  0,  0,  0,  9,  0 " +
+				/*  0,  1,  2,  3,  4,  5,  6,  7,  8 */
+	/* 0 */ 	"	0,  4,  0,  0,  0,  0,  0,  8,  0;" +
+	/* 1 */		"   4,  0,  8,  0,  0,  0,  0, 11,  0;" +
+	/* 2 */		"   0,  8,  0,  7,  0,  4,  0,  0,  2;" +
+	/* 3 */		"   0,  0,  7,  0,  9, 14,  0,  0,  0;" +
+	/* 4 */		"   0,  0,  0,  9,  0, 10,  0,  0,  0;" +
+	/* 5 */		"   0,  0,  4, 14, 10,  0,  2,  0,  0;" +
+	/* 6 */		"   0,  0,  0,  0,  0,  2,  0,  1,  6;" +
+	/* 7 */		"   8, 11,  0,  0,  0,  0,  1,  0,  7;" +
+	/* 8 */		"   0,  0,  2,  0,  0,  0,  6,  7,  0 " +
 				"]");
 		
 		DMatrixRMaj A = eq.lookupDDRM("A");
