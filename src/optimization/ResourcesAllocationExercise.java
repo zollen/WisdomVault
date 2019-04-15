@@ -52,8 +52,11 @@ public class ResourcesAllocationExercise {
 		BAG.add(YELLOW);
 
 		result = scan(result);
-
-		result.entrySet().stream().forEach(p -> System.out.println(STATES[p.getKey()] + " --> " + color(p.getValue())));
+		
+		if (result == null)
+			System.out.println(BAG.size() + " elements are not possible!!");
+		else	
+			result.entrySet().stream().forEach(p -> System.out.println(STATES[p.getKey()] + " --> " + color(p.getValue())));
 	}
 
 	public static Map<Integer, Integer> scan(Map<Integer, Integer> result) {
@@ -76,13 +79,12 @@ public class ResourcesAllocationExercise {
 
 					_result.put(from, color);
 
-					_result = scan(_result);
-					if (_result != null)
+					Map<Integer, Integer> tmp = scan(_result);
+					if (tmp != null) {
+						_result = tmp;
 						break;
+					}
 				}
-
-				if (_result == null)
-					return null; /* invalid branch */
 			} else {
 				return null; /* invalid branch */
 			}
