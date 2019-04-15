@@ -63,31 +63,28 @@ public class ResourcesAllocationExercise {
 
 		Map<Integer, Integer> _result = new LinkedHashMap<Integer, Integer>(result);
 
-		for (int col = 0; col < A.numCols; col++) {
+		for (int from = 0; from < A.numCols; from++) {
 
-			if (_result.get(col) > 0)
+			if (_result.get(from) > 0)
 				continue;
 
-			Set<Integer> colors = check(col, _result);
+			Set<Integer> colors = check(from, _result);
 
-			for (int row = 0; row < A.numRows; row++) {
+			if (colors.size() > 0) {
 
-				if (colors.size() > 0) {
+				for (int color : colors) {
 
-					for (int color : colors) {
+					_result.put(from, color);
 
-						_result.put(col, color);
-
-						_result = scan(_result);
-						if (_result != null)
-							break;
-					}
-
-					if (_result == null)
-						return null; /* invalid branch */
-				} else {
-					return null; /* invalid branch */
+					_result = scan(_result);
+					if (_result != null)
+						break;
 				}
+
+				if (_result == null)
+					return null; /* invalid branch */
+			} else {
+				return null; /* invalid branch */
 			}
 		}
 
@@ -99,15 +96,15 @@ public class ResourcesAllocationExercise {
 		return result.values().stream().allMatch(p -> p > 0);
 	}
 
-	public static Set<Integer> check(int col, Map<Integer, Integer> result) {
+	public static Set<Integer> check(int from, Map<Integer, Integer> result) {
 
 		Set<Integer> bag = new HashSet<Integer>(BAG);
 
-		for (int row = 0; row < A.numRows; row++) {
+		for (int to = 0; to < A.numRows; to++) {
 
-			if (A.get(row, col) > 0) {
+			if (A.get(to, from) > 0) {
 
-				int color = result.get(row);
+				int color = result.get(to);
 				if (color > 0) {
 					bag.remove(color);
 				}
