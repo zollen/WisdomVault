@@ -22,7 +22,7 @@ import org.ejml.data.DMatrixRMaj;
  * @author zollen
  *
  */
-public class PrimExercise3 {
+public class ResourcesAllocationExercise {
 
 	static final String[] STATES = { "Washington", "Oregon", "Nevada", "California", "Montana", "Idaho", "Utah",
 			"Arizona", "Wyoming", "Colorado", "New Mexico", "North Dakota", "South Dakota", "Nebraska", "Kansas",
