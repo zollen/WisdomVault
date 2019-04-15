@@ -1,6 +1,9 @@
-package optimization.graph;
+package optimization;
 
 import org.ejml.data.DMatrixRMaj;
+
+import optimization.graph.BIEdge;
+import optimization.graph.BINode;
 
 public class ResourcesAllocationExercise {
 
