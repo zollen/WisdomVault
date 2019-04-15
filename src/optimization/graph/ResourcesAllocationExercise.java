@@ -1,27 +1,7 @@
 package optimization.graph;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.ejml.data.DMatrixRMaj;
 
-/**
- * Prim algorithm results in a minimum spanning tree against a connected,
- * uni/by-directional, weighted graph with unknown start and end states.
- * 
- * The algorithm computes the spanning tree of traversing all nodes with the
- * least amount of cost. (without circles)
- * 
- * Difference between uni-directional and bi-directional 1. register(...) 2.
- * Edge.equals(...)
- * 
- * https://www.youtube.com/watch?v=cplfcGZmX7I
- * 
- * @author zollen
- *
- */
 public class ResourcesAllocationExercise {
 
 	static final String[] STATES = { "Washington", "Oregon", "Nevada", "California", "Montana", "Idaho", "Utah",
@@ -57,52 +37,6 @@ public class ResourcesAllocationExercise {
 		
 	
 
-		// Prim Algo begin
-
-		List<BIEdge> pool = new ArrayList<BIEdge>();
-		int last = pool.size();
-
-		Set<Integer> visited = new HashSet<Integer>();
-
-		// randomly pick a start node
-		visited.add(0); /* let's pick A */
-
-		while (pool.size() < STATES.length - 1) {
-
-			last = pool.size();
-
-			int min = Integer.MAX_VALUE;
-			BIEdge edge = null;
-			for (Integer from : visited) {
-
-				for (int to = 0; to < A.numRows; to++) {
-					int dist = (int) A.get(to, from);
-					if (dist > 0 && min > dist && !visited.contains(to)) {
-						min = dist;
-						edge = new BIEdge(to, from, dist);
-					}
-				}
-			}
-
-			if (edge != null) {
-				visited.add(edge.getTo());
-				pool.add(edge);
-			}
-
-			if (last == pool.size())
-				break;
-		}
-
-		pool.stream().forEach(p -> System.out.println(p));
-		System.out.println("Number of edges: " + pool.size());
-
-		List<BINode> results = BINode.construct(pool);
-		results.stream().forEach(p -> {
-
-			System.out.println("====  Score: [" + p.score() + "]  ===");
-			System.out.println(p);
-
-		});
-
+		
 	}
 }
