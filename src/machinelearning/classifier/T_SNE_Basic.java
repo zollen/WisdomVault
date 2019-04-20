@@ -40,12 +40,16 @@ public class T_SNE_Basic {
     	DMatrixRMaj xx = probabilites(X1, true);
     	DMatrixRMaj yy = probabilites(Y1, false);
     	
-  
+    	System.out.println(xx);
+    	System.out.println(yy);
 
 	}
 	
 	
 	public static void kld(DMatrixRMaj samples) {
+		// t-SNE technique invented back in 2008. This is the state of the art most advance
+		// technique.
+		
 		// Kullback-Leibler divergence (KLD)
 		// Pji - conditional probability between J and I in high dimensional space
 		// Qji - conditional probability between J and I in low dimensional space
