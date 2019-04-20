@@ -51,6 +51,8 @@ public class T_SNE_Basic {
 		// technique.
 		
 		// Kullback-Leibler divergence (KLD)
+		// Xi - points in high dimensional space
+		// Yi - equivalent point of Xi in low dimensional space
 		// Pji - conditional probability between J and I in high dimensional space
 		// Qji - conditional probability between J and I in low dimensional space
 		// Cost function (C) = Σ Σ Pji * log(Pji/Qij)
