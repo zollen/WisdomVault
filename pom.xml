@@ -44,5 +44,10 @@
 			<artifactId>weka-stable</artifactId>
 			<version>3.8.3</version>
 		</dependency>
+		<dependency>
+			<groupId>com.jujutsu.tsne</groupId>
+			<artifactId>tsne</artifactId>
+			<version>2.5.0</version>
+		</dependency>
 	</dependencies>
 </project>
