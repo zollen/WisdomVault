@@ -75,7 +75,7 @@ public class T_SNE_Basic {
 		
 		// Gradient Decent formula
 		// n = learning rate
-		// α(t) = momentum (how fast does it moves)
+		// α(t) = momentum (how fast does it moves) - overcome local minimum
 		// Y(t) = Y(t-1) + n * ∂C/∂y * α(t)(Y(t-1) - Y(t-2))
 		
 		// Algorithm
