@@ -62,7 +62,7 @@ public class T_SNE_Basic {
 		// the distance between neighbors would be impossible to preserve.
 		// Therefore t-distribution is used instead of gaussian distribution
 		
-		// Gradient Decent:
+		// Computing Gradient:
 		// Minimize the gradient of the cost function
 		// SNE gradient: ∂C/∂yi = 4 Σ (Pij - Qij)(Yi - Yj)
 		// t-SNE gradient: ∂C/∂yi = 4 Σ (Pij - Qij) * 1 / ((Yi - Yj)(1 + (Yi - Yj)^2))
