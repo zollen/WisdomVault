@@ -47,10 +47,24 @@ public class T_SNE_Basic {
 	
 	
 	public static void kld(DMatrixRMaj samples) {
+		// Kullback-Leibler divergence (KLD)
+		// Xi - points in high dimensional space
+		// Yi - equivalent point of Xi in low dimensional space
+		// Pji - conditional probability between J and I in high dimensional space
+		// Qji - conditional probability between J and I in low dimensional space
+		// Cost function (C) = Σ Σ Pji * log(Pji/Qji)
+		
+		// The cost function calculates the total overhead of 'encoding' Pji to Qji
+		// total overhead = the sum of overhead of all data points.
+		
+		// SNE/t-SNE minimizes the sum of KLD of all data points using gradient descent method.
+	}
+	
+	
+	public static void gradient(DMatrixRMaj samples) {
 		// t-SNE technique invented back in 2008. This is the state of the art most advance
 		// technique.
 		
-		// Kullback-Leibler divergence (KLD)
 		// Xi - points in high dimensional space
 		// Yi - equivalent point of Xi in low dimensional space
 		// Pji - conditional probability between J and I in high dimensional space
