@@ -40,6 +40,11 @@
 			<version>1.0.13</version>
 		</dependency>
 		<dependency>
+			<groupId>com.github.yannrichet</groupId>
+			<artifactId>JMathPlot</artifactId>
+			<version>1.0.1</version>
+		</dependency>
+		<dependency>
 			<groupId>nz.ac.waikato.cms.weka</groupId>
 			<artifactId>weka-stable</artifactId>
 			<version>3.8.3</version>
