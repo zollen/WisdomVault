@@ -11,6 +11,7 @@ import org.math.plot.plots.ColoredScatterPlot;
 
 import com.jujutsu.tsne.FastTSne;
 import com.jujutsu.tsne.PrincipalComponentAnalysis;
+import com.jujutsu.tsne.SimpleTSne;
 import com.jujutsu.tsne.TSne;
 import com.jujutsu.tsne.TSneConfiguration;
 import com.jujutsu.utils.TSneUtils;
@@ -22,7 +23,7 @@ import weka.core.converters.ArffLoader.ArffReader;
 
 public class T_SNE_PCA_Demo {
 
-	private static final double perplexity = 50.0;
+	private static final double perplexity = 30.0;
 	
 	private static int initial_dims;
 
@@ -35,10 +36,29 @@ public class T_SNE_PCA_Demo {
 		initial_dims = training.numAttributes();
 
 		pca(data, labels);
-		tsne(data, labels);
+		fast_tsne(data, labels);
+		simple_tsne(data, labels);
+	}
+	
+	public static void simple_tsne(double[][] data, String[] labels) {
+
+		TSneConfiguration config = TSneUtils.buildConfig(data, 2, initial_dims, perplexity, 300);
+		TSne tsne = new SimpleTSne();
+		double[][] Y = tsne.tsne(config);
+
+		Plot2DPanel plot = new Plot2DPanel();
+
+		ColoredScatterPlot setosaPlot = new ColoredScatterPlot("iris", Y, labels);
+		plot.plotCanvas.setNotable(true);
+		plot.plotCanvas.setNoteCoords(true);
+		plot.plotCanvas.addPlot(setosaPlot);
+
+		FrameView plotframe = new FrameView("Simple t-SNE", plot);
+		plotframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		plotframe.setVisible(true);
 	}
 
-	public static void tsne(double[][] data, String[] labels) {
+	public static void fast_tsne(double[][] data, String[] labels) {
 
 		TSneConfiguration config = TSneUtils.buildConfig(data, 2, initial_dims, perplexity, 300);
 		TSne tsne = new FastTSne();
@@ -51,7 +71,7 @@ public class T_SNE_PCA_Demo {
 		plot.plotCanvas.setNoteCoords(true);
 		plot.plotCanvas.addPlot(setosaPlot);
 
-		FrameView plotframe = new FrameView("t-SNE", plot);
+		FrameView plotframe = new FrameView("Fast t-SNE", plot);
 		plotframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		plotframe.setVisible(true);
 	}
