@@ -35,14 +35,26 @@ public class T_SNE_Basic {
     	CommonOps_DDRM.transpose(Y1);
     	
     	
+    	// Algorithm
+    	// data set X = { x1, x2, x3 ... xn etc }
+    	// cost function parameter: perplexity (perp)
+    	// optimization parameter:
+    	//		1. number of iteration T
+    	//		2. learning rate η
+    	//		3. momentum α(t)
+    	// Output: low dimensional data representation Y = { y1, y2, y3 ..yn etc }
+    	// begin
+    	//		compute pairwise affinities Pji with perplexity (perp)
+    	//		set Pji = (Pji + Pij) / (2n)
+    	// for t = 1 to T do
+    	//    Compute low-dimensional affinities Qij
+    	// 	  Compute gradient ∂C/∂y 
+    	//	  Compute Y(t) = Y(t-1) + η * ∂C/∂y * α(t)(Y(t-1) - Y(t-2))
+    	// end
     	
-    	
-    	DMatrixRMaj xx = probabilites(X1, true);
-    	DMatrixRMaj yy = probabilites(Y1, false);
-    	
-    	System.out.println(xx);
-    	System.out.println(yy);
-
+    	// perp(Pji) = 2^(H(Pji)) where H(Pji) = - Σ Pi Log(Pi) is the entropy
+    	// Compute affinities Qij = (1 + (Yi - Yj)^2)^-1 / ( Σ Σ (1 + (Yi - Yk)^2)^-1 )
+    	// Compute gradient ∂C/∂yi = Σ (Pij - Qij) * (Yi - Yj) * (1 + (Yi - Yj)^2)^-1
 	}
 	
 	
@@ -88,16 +100,9 @@ public class T_SNE_Basic {
 		// t-SNE gradient: ∂C/∂yi = 4 Σ (Pij - Qij) * 1 / ((Yi - Yj)(1 + (Yi - Yj)^2))
 		
 		// Gradient Decent formula
-		// n = learning rate
+		// η = learning rate
 		// α(t) = momentum (how fast does it moves) - overcome local minimum
-		// Y(t) = Y(t-1) + n * ∂C/∂y * α(t)(Y(t-1) - Y(t-2))
-		
-		// Algorithm
-		// for i = 1 to N do
-		//    Compute low-dimension Qij
-		// 	  Compute ∂C/∂y(i)
-		//	  Compute Y(i) = Y(i-1) + n * ∂C/∂y * α(i)(Y(i-1) - Y(i-2))
-		// end
+		// Y(t) = Y(t-1) + η * ∂C/∂y * α(t)(Y(t-1) - Y(t-2))
 		
 	}
 
