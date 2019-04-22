@@ -33,7 +33,7 @@ public class T_SNE_Basic {
     	DMatrixRMaj Y1 = new DMatrixRMaj(Y);
     	// Y1[attribute][record]
     	CommonOps_DDRM.transpose(Y1);
-    	
+    		
     	
     	// Algorithm
     	// data set X = { x1, x2, x3 ... xn etc }
@@ -55,6 +55,20 @@ public class T_SNE_Basic {
     	// perp(Pji) = 2^(H(Pji)) where H(Pji) = - Σ Pi Log(Pi) is the entropy
     	// Compute affinities Qij = (1 + (Yi - Yj)^2)^-1 / ( Σ Σ (1 + (Yi - Yk)^2)^-1 )
     	// Compute gradient ∂C/∂yi = Σ (Pij - Qij) * (Yi - Yj) * (1 + (Yi - Yj)^2)^-1
+    	
+    	// Perplexity
+    	// The perplexity is related to the number of nearest neighbors that is used in 
+    	// other manifold learning algorithms. Larger datasets usually require a larger 
+    	// perplexity. Consider selecting a value between 5 and 50. The choice is not 
+    	// extremely critical since t-SNE is quite insensitive to this parameter.
+    	
+    	// Learning rate
+    	// The learning rate for t-SNE is usually in the range [10.0, 1000.0]. 
+    	// If the learning rate is too high, the data may look like a ‘ball’ with any 
+    	// point approximately equidistant from its nearest neighbors. If the learning rate 
+    	// is too low, most points may look compressed in a dense cloud with few outliers. 
+    	// If the cost function gets stuck in a bad local minimum increasing the learning rate 
+    	// may help.
 	}
 	
 	
