@@ -53,6 +53,8 @@
 			<groupId>com.jujutsu.tsne</groupId>
 			<artifactId>tsne</artifactId>
 			<version>2.5.0-KONGS</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/tsne-2.5.0-KONGS.jar</systemPath>
 		</dependency>
 	</dependencies>
 </project>
