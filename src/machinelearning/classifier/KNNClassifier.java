@@ -13,6 +13,8 @@ public class KNNClassifier {
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
+		// KNN classification is only effective against numeric data, 
+		// not symbolic data (i.e. Yes, No)
 		
 		ArrayList<Attribute> attrs1 = new ArrayList<Attribute>();
 		Attribute x0 = new Attribute("x0");
