@@ -38,6 +38,7 @@ public class T_SNE_PCA_Demo {
 		pca(data, labels);
 		fast_tsne(data, labels);
 		simple_tsne(data, labels);
+		
 	}
 	
 	public static void simple_tsne(double[][] data, String[] labels) {
