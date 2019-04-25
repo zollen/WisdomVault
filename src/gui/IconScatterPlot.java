@@ -1,4 +1,4 @@
-package org.math.plot.plots;
+package gui;
 
 import java.awt.Color;
 import java.awt.Image;
@@ -11,6 +11,7 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
+import org.math.plot.plots.ScatterPlot;
 import org.math.plot.render.AbstractDrawer;
 
 public class IconScatterPlot extends ScatterPlot {
@@ -23,11 +24,13 @@ public class IconScatterPlot extends ScatterPlot {
 	float alpha = 1.0f;
 	double width = 0.4;
 	double height = 0.4;
+	double [][] XY;
 	
 	public IconScatterPlot(String n, double[][] _XY, String [] imagefiles) {
 		super(n, AbstractDrawer.DEFAULT_COLOR, AbstractDrawer.ROUND_DOT, AbstractDrawer.DEFAULT_DOT_RADIUS, _XY);
 		
 		this.imagefiles = imagefiles;
+		this.XY = _XY;
 		imgs = new Image[imagefiles.length];
 		for (int i = 0; i < imagefiles.length; i++) {
 			BufferedImage img = null;

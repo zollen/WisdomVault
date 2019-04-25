@@ -48,7 +48,7 @@
  *
  */ 
 
-package org.math.plot.plots;
+package gui;
 
 import java.awt.Color;
 import java.util.ArrayList;

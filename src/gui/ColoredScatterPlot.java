@@ -1,4 +1,4 @@
-package org.math.plot.plots;
+package gui;
 
 import java.awt.Color;
 import java.util.Arrays;
@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import org.math.plot.plots.ScatterPlot;
 import org.math.plot.render.AbstractDrawer;
 
 public class ColoredScatterPlot extends ScatterPlot {
@@ -18,10 +19,12 @@ public class ColoredScatterPlot extends ScatterPlot {
 	Map<String,Color> colors = new HashMap<String,Color>();
 	int colorCnt = 0;
 	Color [] palette;
+	double [][] XY;
 	
 	public ColoredScatterPlot(String n, double[][] _XY, String [] classes) {
 		super(n, AbstractDrawer.DEFAULT_COLOR, AbstractDrawer.ROUND_DOT, AbstractDrawer.DEFAULT_DOT_RADIUS, _XY);
 		this.classes = classes;
+		this.XY = _XY;
 		Set<String> unique = new HashSet<>(Arrays.asList(classes));
 		boolean colorBlindSave = false;
         ColorBrewer[] sequentialPalettes = ColorBrewer.getQualitativeColorPalettes(colorBlindSave);  
