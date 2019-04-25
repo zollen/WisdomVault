@@ -43,6 +43,8 @@
 			<groupId>com.github.yannrichet</groupId>
 			<artifactId>JMathPlot</artifactId>
 			<version>1.0.1</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/JMathPlot-1.0.1.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>nz.ac.waikato.cms.weka</groupId>
