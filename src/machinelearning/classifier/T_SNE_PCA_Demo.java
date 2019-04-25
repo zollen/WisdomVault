@@ -7,7 +7,6 @@ import javax.swing.JFrame;
 
 import org.math.plot.FrameView;
 import org.math.plot.Plot2DPanel;
-import org.math.plot.plots.ColoredScatterPlot;
 
 import com.jujutsu.tsne.FastTSne;
 import com.jujutsu.tsne.PrincipalComponentAnalysis;
@@ -16,6 +15,7 @@ import com.jujutsu.tsne.TSne;
 import com.jujutsu.tsne.TSneConfiguration;
 import com.jujutsu.utils.TSneUtils;
 
+import gui.ColoredScatterPlot;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
