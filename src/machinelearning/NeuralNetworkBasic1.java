@@ -32,7 +32,7 @@ public class NeuralNetworkBasic1 {
         double[][] W2 = MatrixCommon.random(1, nodes);
         double[][] b2 = new double[1][m];
 
-        for (int i = 0; i < 4000; i++) {
+        for (int i = 0; i < 32000; i++) {
             // Foward Prop
             // LAYER 1
             double[][] Z1 = MatrixCommon.add(MatrixCommon.dot(W1, X), b1);
