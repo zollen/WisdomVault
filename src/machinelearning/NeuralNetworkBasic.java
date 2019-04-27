@@ -9,7 +9,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.ejml.equation.Equation;
 
-public class NeuralNetworkBasic2 {
+public class NeuralNetworkBasic {
 	
 	private static DecimalFormat ff = new DecimalFormat("0.000");
 	
@@ -183,9 +183,23 @@ public class NeuralNetworkBasic2 {
 	
 	public static double entropy(int inputs, DMatrixRMaj Y, DMatrixRMaj A) {
 		
+		DMatrixRMaj out = new DMatrixRMaj(A.numRows, A.numCols);
+		double sum = 0.0;
 		
+		for (int col = 0; col < out.numCols; col++) {
+			for (int row = 0; row < out.numRows; row++) {
+				out.set(row, col, Y.get(row, col) * Math.log(A.get(row, col)) + 
+									(1 - Y.get(row, col)) * Math.log(1 - A.get(row, col)));
+			}
+		}
 		
-		return 0.0;
+		for (int col = 0; col < out.numCols; col++) {
+			for (int row = 0; row < out.numRows; row++) {
+				sum += out.get(row, col);
+			}
+		}
+		
+		return -1.0 * sum / inputs;
 	}
 	
 	public static DMatrixRMaj sigmoid(DMatrixRMaj mat) {
