@@ -53,7 +53,7 @@ public class NeuralNetworkBasic2 {
 		DMatrixRMaj W2 = RandomMatrices_DDRM.rectangle(1, nodes, 0.0, 1.0, rand);
 		DMatrixRMaj b2 = new DMatrixRMaj(1, m);
 		
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 4000; i++) {
 					
 			// Forward Prop
             // LAYER 1

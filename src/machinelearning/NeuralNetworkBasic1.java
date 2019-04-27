@@ -1,5 +1,7 @@
 package machinelearning;
 
+import java.text.DecimalFormat;
+
 /** @Email: deusjeraldy@gmail.com
  * BSD License
  */
@@ -7,8 +9,11 @@ package machinelearning;
 // np.java -> https://gist.github.com/Jeraldy/7d4262db0536d27906b1e397662512bc
 
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class NeuralNetworkBasic1 {
+	
+	private static DecimalFormat ff = new DecimalFormat("0.000");
   
     public static void main(String[] args) {
   
@@ -60,8 +65,8 @@ public class NeuralNetworkBasic1 {
 
             if (i % 400 == 0) {
                 System.out.println("==============");
-                System.out.print("Cost = " + cost);
-                System.out.println(" Predictions = " + Arrays.deepToString(A2));
+                System.out.print("Cost = " + ff.format(cost));
+                System.out.println(" Predictions = " + Arrays.stream(A2[0]).mapToObj(p -> ff.format(p)).collect(Collectors.joining(", ")));
             }
         }
     }
