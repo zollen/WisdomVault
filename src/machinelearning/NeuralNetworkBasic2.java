@@ -1,5 +1,6 @@
 package machinelearning;
 
+import java.text.DecimalFormat;
 import java.util.Random;
 
 import org.apache.commons.math3.analysis.function.Sigmoid;
@@ -9,6 +10,8 @@ import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.ejml.equation.Equation;
 
 public class NeuralNetworkBasic2 {
+	
+	private static DecimalFormat ff = new DecimalFormat("0.000");
 	
 	private static final Random rand = new Random(0);
 
@@ -53,7 +56,7 @@ public class NeuralNetworkBasic2 {
 		DMatrixRMaj W2 = RandomMatrices_DDRM.rectangle(1, nodes, 0.0, 1.0, rand);
 		DMatrixRMaj b2 = new DMatrixRMaj(1, m);
 		
-		for (int i = 0; i < 4000; i++) {
+		for (int i = 0; i < 32000; i++) {
 					
 			// Forward Prop
             // LAYER 1
@@ -68,9 +71,7 @@ public class NeuralNetworkBasic2 {
 			// {400,4}
 			DMatrixRMaj A1 = sigmoid(Z1);
 		
-			
-
-
+		
 			// LAYER 2
 			
 			// Z2    =  W2     x A1      + b2
@@ -96,11 +97,12 @@ public class NeuralNetworkBasic2 {
 			// {1,4} = {1,4} - {1,4}
 			DMatrixRMaj DZ2 = new DMatrixRMaj(1, m);
 			CommonOps_DDRM.subtract(A2, Y, DZ2);
-			DMatrixRMaj DZ2A1 = new DMatrixRMaj(1, nodes);
-			CommonOps_DDRM.multTransB(DZ2, A1, DZ2A1);
 		
 			// DW2     = (DZ2   x A1'    ) / m
 			// {1,400} = ({1,4} x {4,400}) / 4
+			DMatrixRMaj DZ2A1 = new DMatrixRMaj(1, nodes);
+			CommonOps_DDRM.multTransB(DZ2, A1, DZ2A1);
+			
 			DMatrixRMaj DW2 = DZ2A1.copy();
 			CommonOps_DDRM.scale((double) 1.0 / m, DW2);
 			
@@ -116,7 +118,7 @@ public class NeuralNetworkBasic2 {
 			CommonOps_DDRM.multTransA(W2, DZ2, W2DZ2);
 			
 			DMatrixRMaj A1A1 = new DMatrixRMaj(nodes, m);	
-			CommonOps_DDRM.elementMult(A1, A1, A1A1);
+			CommonOps_DDRM.elementPower(A1, 2, A1A1);
 			
 			DMatrixRMaj MA1A1 = new DMatrixRMaj(nodes, m);
 			CommonOps_DDRM.subtract(1.0, A1A1, MA1A1);
@@ -131,35 +133,35 @@ public class NeuralNetworkBasic2 {
 			DMatrixRMaj DW1 = new DMatrixRMaj(nodes, 2);
 			CommonOps_DDRM.multTransB(DZ1, X, DW1);
 			
-			// DB1     = DW1     / m
-			// {400,2} = {400,2} / 4
-			DMatrixRMaj DB1 = DW1.copy();
+			// DB1     = DZ1     / m
+			// {400,4} = {400,4} / 4
+			DMatrixRMaj DB1 = DZ1.copy();
 			CommonOps_DDRM.scale((double) 1.0 / m, DB1);
-			
+
 			
 			// Gradient Decent
 			
 			// DW1     = DW1     - DW1     * 0.01
 			// {400,2} = {400,2} - {400,2} * 0.01
-			DMatrixRMaj W1W = W1.copy();
+			DMatrixRMaj W1W = DW1.copy();
 			CommonOps_DDRM.scale(0.01, W1W);
 			CommonOps_DDRM.subtractEquals(W1, W1W);
 			
-			// b1      = b1      - b1      * 0.01
+			// b1      = b1      - DB1      * 0.01
 			// {400,4} = {400,4} - {400,4} * 0.01
-			DMatrixRMaj b1b = b1.copy();
+			DMatrixRMaj b1b = DB1.copy();
 			CommonOps_DDRM.scale(0.01, b1b);
 			CommonOps_DDRM.subtractEquals(b1, b1b);
 			
 			// DW2     = DW2     - DW2     * 0.01
 			// {1,400} = {1,400} - {1,400} * 0.01
-			DMatrixRMaj W2W = W2.copy();
+			DMatrixRMaj W2W = DW2.copy();
 			CommonOps_DDRM.scale(0.01, W2W);
 			CommonOps_DDRM.subtractEquals(W2, W2W);
 			
 			// b2    = b2    - b2    * 0.01
 			// {1,4} = {1,4} - {1,4} * 0.01
-			DMatrixRMaj b2b = b2.copy();
+			DMatrixRMaj b2b = DB2.copy();
 			CommonOps_DDRM.scale(0.01, b2b);
 			CommonOps_DDRM.subtractEquals(b2, b2b);
 			
@@ -169,9 +171,9 @@ public class NeuralNetworkBasic2 {
                 	if (k > 0)
                 		builder.append(", ");
                 	
-                	builder.append(A2.get(0, k));
+                	builder.append(ff.format(A2.get(0, k)));
                 }
-                System.out.println("Cost = " + cost + " >> Prediction: " + builder.toString());
+                System.out.println("Cost = " + ff.format(cost) + " >> Prediction: " + builder.toString());
             }
 			
 		}
