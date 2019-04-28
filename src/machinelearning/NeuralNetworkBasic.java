@@ -203,6 +203,10 @@ public class NeuralNetworkBasic {
 	}
 	
 	public static DMatrixRMaj sigmoid(DMatrixRMaj mat) {
+		// Nowadays Neural network use ReLU activation function, instead of the
+		// old school sigmoid. ReLU is much simple and more effective than sigmoid.
+		// ReLU return 0 if the input is negative
+		// ReLU return 1 if the input is positive
 		
 		DMatrixRMaj out = new DMatrixRMaj(mat.numRows, mat.numCols);
 		Sigmoid sigmoid = new Sigmoid();
