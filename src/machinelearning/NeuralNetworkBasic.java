@@ -141,25 +141,25 @@ public class NeuralNetworkBasic {
 			
 			// Gradient Decent
 			
-			// DW1     = DW1     - DW1     * 0.01
+			// W1      = W1      - DW1     * 0.01
 			// {400,2} = {400,2} - {400,2} * 0.01
 			DMatrixRMaj W1W = DW1.copy();
 			CommonOps_DDRM.scale(0.01, W1W);
 			CommonOps_DDRM.subtractEquals(W1, W1W);
 			
-			// b1      = b1      - DB1      * 0.01
+			// b1      = b1      - DB1     * 0.01
 			// {400,4} = {400,4} - {400,4} * 0.01
 			DMatrixRMaj b1b = DB1.copy();
 			CommonOps_DDRM.scale(0.01, b1b);
 			CommonOps_DDRM.subtractEquals(b1, b1b);
 			
-			// DW2     = DW2     - DW2     * 0.01
+			// W2      =  W2     - DW2     * 0.01
 			// {1,400} = {1,400} - {1,400} * 0.01
 			DMatrixRMaj W2W = DW2.copy();
 			CommonOps_DDRM.scale(0.01, W2W);
 			CommonOps_DDRM.subtractEquals(W2, W2W);
 			
-			// b2    = b2    - b2    * 0.01
+			// b2    = b2    - DB2   * 0.01
 			// {1,4} = {1,4} - {1,4} * 0.01
 			DMatrixRMaj b2b = DB2.copy();
 			CommonOps_DDRM.scale(0.01, b2b);
