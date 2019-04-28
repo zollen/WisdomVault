@@ -182,6 +182,9 @@ public class NeuralNetworkBasic {
 	}
 	
 	public static double entropy(int inputs, DMatrixRMaj Y, DMatrixRMaj A) {
+		// This is the cost function. The general cost function for Nerual network
+		// is Σ (Actual ouput_i - Expect output_i)^2
+		// The goal is to minimize the cost function
 		
 		DMatrixRMaj out = new DMatrixRMaj(A.numRows, A.numCols);
 		double sum = 0.0;
