@@ -1,4 +1,4 @@
-package machinelearning;
+package machinelearning.classifier;
 
 import java.text.DecimalFormat;
 import java.util.Random;
