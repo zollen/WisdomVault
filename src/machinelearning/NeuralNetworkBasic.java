@@ -57,7 +57,7 @@ public class NeuralNetworkBasic {
 		DMatrixRMaj W2 = RandomMatrices_DDRM.rectangle(1, nodes, 0.0, 1.0, rand);
 		DMatrixRMaj b2 = new DMatrixRMaj(1, m);
 		
-		for (int i = 0; i < 32000; i++) {
+		for (int i = 0; i < 28000; i++) {
 					
 			// Forward Prop
             // LAYER 1
@@ -133,6 +133,7 @@ public class NeuralNetworkBasic {
 			// {400,2} = ({400,4} x {4,2]}) / 4
 			DMatrixRMaj DW1 = new DMatrixRMaj(nodes, 2);
 			CommonOps_DDRM.multTransB(DZ1, X, DW1);
+			CommonOps_DDRM.scale((double) 1.0 / m, DW1);
 			
 			// DB1     = DZ1     / m
 			// {400,4} = {400,4} / 4
