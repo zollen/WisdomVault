@@ -6,6 +6,7 @@ import java.text.DecimalFormat;
 
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.MultilayerPerceptron;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.core.converters.ArffLoader.ArffReader;
@@ -35,10 +36,12 @@ public class NeuralNetwork1 {
 
 		System.out.println("Predictions");
 		for (int i = 0; i < training.numInstances(); i++) {
+			
+			Instance instance = training.instance(i);
 
-			double actual = training.instance(i).classValue();
-			double prediction = mlp.distributionForInstance(training.instance(i))[0];
-			System.out.println("Actual: [" + ff.format(actual) + 
+			double actual = instance.classValue();
+			double prediction = mlp.distributionForInstance(instance)[0];
+			System.out.println(instance + " ---> Actual: [" + ff.format(actual) + 
 					"]  Prediction: [" + ff.format(prediction) + "]");
 		}
 		
