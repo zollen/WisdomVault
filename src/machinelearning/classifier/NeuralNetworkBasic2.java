@@ -43,6 +43,7 @@ public class NeuralNetworkBasic2 {
 		
 		
 		int m = 4;
+		int attrs = 2;
 		int nodes = 400;
 		double learningRate = 0.01;
 		
@@ -53,7 +54,7 @@ public class NeuralNetworkBasic2 {
 		// {1,4}
 		CommonOps_DDRM.transpose(Y);
 		
-		DMatrixRMaj W1 = RandomMatrices_DDRM.rectangle(nodes, 2, 0.0, 1.0, rand);
+		DMatrixRMaj W1 = RandomMatrices_DDRM.rectangle(nodes, attrs, 0.0, 1.0, rand);
 		DMatrixRMaj b1 = new DMatrixRMaj(nodes, m);
 		
 		DMatrixRMaj W2 = RandomMatrices_DDRM.rectangle(1, nodes, 0.0, 1.0, rand);
@@ -135,7 +136,7 @@ public class NeuralNetworkBasic2 {
 				
 			// DW1     = (DZ1     x X'   ) / m
 			// {400,2} = ({400,4} x {4,2}) / 4
-			DMatrixRMaj DW1 = new DMatrixRMaj(nodes, 2);
+			DMatrixRMaj DW1 = new DMatrixRMaj(nodes, attrs);
 			CommonOps_DDRM.multTransB(DZ1, X, DW1);
 			CommonOps_DDRM.scale((double) 1.0 / m, DW1);
 			
