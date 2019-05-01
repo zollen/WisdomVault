@@ -214,6 +214,9 @@ public class NeuralNetworkBasic2 {
 	
 	public static DMatrixRMaj dsigmoid(DMatrixRMaj mat) {
 		
+		// a = 1 / (1 + e^(-x))
+		// ∂a/∂x = ∂(x) * (1 - ∂(x))
+		
 		DMatrixRMaj out = new DMatrixRMaj(mat.numRows, mat.numCols);
 			
 		for (int col = 0; col < mat.numCols; col++) {
@@ -237,6 +240,10 @@ public class NeuralNetworkBasic2 {
 		// old school sigmoid. ReLU is much simple and more effective than sigmoid.
 		// ReLU return 0 if the input is negative
 		// ReLU return 1 if the input is positive
+		// a = 1, x > 0
+		// a = 0, x <= 0
+		// ∂a/∂x = 1, x > 0
+		// ∂a/∂x = 0, x <= 0
 		
 		DMatrixRMaj out = new DMatrixRMaj(mat.numRows, mat.numCols);
 		Sigmoid sigmoid = new Sigmoid();
