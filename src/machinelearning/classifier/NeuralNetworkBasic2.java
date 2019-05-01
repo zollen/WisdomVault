@@ -105,7 +105,6 @@ public class NeuralNetworkBasic2 {
 			// {1,4} = {1,4} - {1,4}
 			DMatrixRMaj DZ2 = new DMatrixRMaj(1, m);
 			CommonOps_DDRM.subtract(A2, Y, DZ2);
-		
 					
 			// DW2     = DZ2   x A1'
 			// {1,400} = {1,4} x {4,400}
@@ -124,7 +123,7 @@ public class NeuralNetworkBasic2 {
 			
 			// LAYER 1
 			
-			// δ1 = W2 x δ2
+			// δ1 = W2 x δ2 
 			// ∂E/∂w1 = δ1 x X'
 			
 			// DZ1     = W2'      x DZ2
@@ -132,8 +131,6 @@ public class NeuralNetworkBasic2 {
 			DMatrixRMaj DZ1 = new DMatrixRMaj(nodes, m);
 			CommonOps_DDRM.multTransA(W2, DZ2, DZ1);
 			
-		
-				
 			// DW1     = (DZ1     x X'   ) / m
 			// {400,2} = ({400,4} x {4,2}) / 4
 			DMatrixRMaj DW1 = new DMatrixRMaj(nodes, attrs);
@@ -219,13 +216,8 @@ public class NeuralNetworkBasic2 {
 		
 		DMatrixRMaj out = new DMatrixRMaj(mat.numRows, mat.numCols);
 			
-		for (int col = 0; col < mat.numCols; col++) {
-			
-			for (int row = 0; row < mat.numRows; row++) {	
-				out.set(row, col, math(mat.get(row, col)));
-			}
-		}
-		
+		CommonOps_DDRM.subtract(1, mat, out);
+		CommonOps_DDRM.elementMult(out, mat);
 		
 		return out;
 	}
