@@ -60,8 +60,10 @@ public class NeuralNetwork2 {
 						// random initialize weights with values between 0 and 1
 						.weightInit(WeightInit.DISTRIBUTION).dist(new UniformDistribution(0, 1)).build())
 				.layer(1,
-						new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).nOut(2)
-								.activation(Activation.SOFTMAX).weightInit(WeightInit.DISTRIBUTION)
+						new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
+								.nOut(2)
+								.activation(Activation.SOFTMAX)
+								.weightInit(WeightInit.DISTRIBUTION)
 								.dist(new UniformDistribution(0, 1)).build())
 				.build();
 
