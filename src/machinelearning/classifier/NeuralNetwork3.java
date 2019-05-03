@@ -64,7 +64,7 @@ public class NeuralNetwork3 {
 				.l2(0.0001)
 				.list()
 				.layer(0, new DenseLayer.Builder().nIn(4).nOut(3).activation(Activation.TANH).build())
-				.layer(1, new DenseLayer.Builder().nIn(3).nOut(3).activation(Activation.RELU).build())
+				.layer(1, new DenseLayer.Builder().nIn(3).nOut(3).activation(Activation.LEAKYRELU).build())
 				.layer(2, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
 								.nIn(3)
 								.nOut(3)
