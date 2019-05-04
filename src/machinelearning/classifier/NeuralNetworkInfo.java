@@ -1,9 +1,17 @@
 package machinelearning.classifier;
 
-public class NeuralNetworkUpdaters {
+public class NeuralNetworkInfo {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		
+		// Activation
+		// tanh has a stronger gradient than sigmoid 
+		// sigmoid: 1/(1+e^-x)                                           0.5 <= y < 1
+		// df/dx( 1/(1+e^-x) ) = e^x/(1+e^x)^2  center at x = 0            0 < y <= 0.25
+		// tanh: tanh(x)                        center at x = 0           -1 < y < 1
+		// df/dx( tanh(x) ) = sech(x)^2         center at x = 0            0 < y <= 1
+	 
 		
 		// hyper-parameters
 		// η - learning rate
