@@ -1,4 +1,4 @@
-package machinelearning.classifier;
+package machinelearning.neuralnetwork;
 
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;

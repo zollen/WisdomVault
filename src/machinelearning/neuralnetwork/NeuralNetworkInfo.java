@@ -1,4 +1,4 @@
-package machinelearning.classifier;
+package machinelearning.neuralnetwork;
 
 public class NeuralNetworkInfo {
 

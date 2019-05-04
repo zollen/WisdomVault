@@ -1,4 +1,4 @@
-package machinelearning.classifier;
+package machinelearning.neuralnetwork;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
