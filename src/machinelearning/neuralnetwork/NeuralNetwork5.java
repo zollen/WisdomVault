@@ -34,7 +34,7 @@ public class NeuralNetwork5 {
 	
 	private static final Random rand = new Random(0);
 	
-	// Autoencoder
+	// Autoencoder example
 	
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub	
@@ -122,6 +122,7 @@ public class NeuralNetwork5 {
 			}
 		}
 			
+		System.out.println("RESULT: Re-Construction Error score");
 		map.entrySet().stream().forEach(p -> {
 			StringBuilder builder = new StringBuilder();
 			builder.append("Digit: [" + p.getKey() + "], Size: [" + p.getValue().size() + "] ==> ");
