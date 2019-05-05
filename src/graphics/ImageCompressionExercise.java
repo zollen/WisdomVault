@@ -96,7 +96,7 @@ public class ImageCompressionExercise {
 	public static void writeImage(BufferedImage image, double[] pixels) throws Exception {
 
 		image.getRaster().setPixels(0, 0, image.getWidth(), image.getHeight(), pixels);
-		ImageIO.write(image, "jpg", new File("img/output.jpg"));
+		ImageIO.write(image, "jpg", new File("out/output.jpg"));
 	}
 
 	public static DMatrixRMaj filterByLargestEigenValues(DMatrixRMaj m, int col) {
