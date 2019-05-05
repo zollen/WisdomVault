@@ -1,19 +1,27 @@
 package machinelearning.neuralnetwork;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import javax.imageio.ImageIO;
 
 import org.deeplearning4j.datasets.iterator.impl.MnistDataSetIterator;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.layers.AutoEncoder;
+import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
@@ -28,7 +36,7 @@ import org.nd4j.linalg.learning.config.AdaGrad;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.nd4j.linalg.primitives.ImmutablePair;
 
-public class NeuralNetwork5 {
+public class AutoEncoder2 {
 	
 	private static DecimalFormat ff = new DecimalFormat("0.000");
 	
@@ -47,9 +55,9 @@ public class NeuralNetwork5 {
 				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
 				.l2(0.0001)
 				.list()
-				.layer(0, new AutoEncoder.Builder().nIn(784).nOut(250).build())
-				.layer(1, new AutoEncoder.Builder().nIn(250).nOut(10).build())
-				.layer(2, new AutoEncoder.Builder().nIn(10).nOut(250).build())
+				.layer(0, new DenseLayer.Builder().nIn(784).nOut(250).build())
+				.layer(1, new DenseLayer.Builder().nIn(250).nOut(10).build())
+				.layer(2, new DenseLayer.Builder().nIn(10).nOut(250).build())
 				.layer(3, new OutputLayer.Builder().nIn(250).nOut(784)
 								.lossFunction(LossFunctions.LossFunction.MSE).build())
 				.build();
@@ -61,7 +69,6 @@ public class NeuralNetwork5 {
 		
 		System.out.println("Downloading Data...");
 		DataSetIterator itr = new MnistDataSetIterator(10000, 50000, false);
-		
 		
 		List<INDArray> featuresTrain = new ArrayList<INDArray>();
 		List<INDArray> featuresTest = new ArrayList<INDArray>();
@@ -122,8 +129,23 @@ public class NeuralNetwork5 {
 			}
 		}
 			
-		System.out.println("RESULT: Re-Construction Error score");
+		
+		
+		System.out.println("RESULT: Re-Construction Error scores...");
+		Map<String, INDArray> bests = new LinkedHashMap<String, INDArray>();
+		Map<String, INDArray> worsts = new LinkedHashMap<String, INDArray>();
+		
+		AtomicInteger count = new AtomicInteger();
+
 		map.entrySet().stream().forEach(p -> {
+			
+			count.incrementAndGet();
+			
+			p.getValue().stream().sorted(new PairComparator(1)).limit(4).forEach(
+					k -> bests.put("BEST_" + p.getKey() + "_" + ff.format(k.getKey()) + count.get(), k.getRight()));
+			p.getValue().stream().sorted(new PairComparator(-1)).limit(4).forEach(
+					k -> worsts.put("WORST_" + p.getKey() + "_" + ff.format(k.getKey()) + count.get(), k.getRight()));
+			
 			StringBuilder builder = new StringBuilder();
 			builder.append("Digit: [" + p.getKey() + "], Size: [" + p.getValue().size() + "] ==> ");
 			builder.append("Best: [" + p.getValue().stream().sorted(new PairComparator(1)).limit(4)
@@ -132,6 +154,45 @@ public class NeuralNetwork5 {
 							.map(k -> ff.format(k.getKey())).collect(Collectors.joining(", ")) + "]");
 			System.out.println(builder.toString());
 		});
+	
+		
+		System.out.println("Creating Image Files at out directory...");		
+		bests.entrySet().stream().forEach(p -> {			
+			createImage("out/" + p.getKey() + ".png", p.getValue());
+		});
+		
+		worsts.entrySet().stream().forEach(p -> {
+			createImage("out/" + p.getKey() + ".png", p.getValue());
+		});
+
+	}
+	
+	public static void createImage(String fileName, INDArray arr) {
+		
+		OutputStream out = null;
+		
+		try {
+		
+			BufferedImage image = new BufferedImage(28, 28, BufferedImage.TYPE_BYTE_GRAY);
+			
+			for (int i = 0; i < 784; i++) {
+				image.getRaster().setSample(i % 28, i / 28, 0, (255 * arr.getInt(i)));
+			}
+		
+			out = new FileOutputStream(new File(fileName));
+			
+			ImageIO.write(image, "PNG", out);		
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		finally {
+			try {
+				if (out != null)
+					out.close();
+			}
+			catch (Exception ex) {}
+		}	
 	}
 	
 	
