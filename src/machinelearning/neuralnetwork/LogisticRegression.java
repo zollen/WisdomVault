@@ -16,7 +16,7 @@ import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.Nesterovs;
 
-public class NeuralNetwork4 {
+public class LogisticRegression {
 	
 	// Logistic Regression using DL4j
 	

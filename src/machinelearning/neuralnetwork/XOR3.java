@@ -38,7 +38,7 @@ import org.nd4j.linalg.lossfunctions.LossFunctions;
  * +---------+---------+---------------+--------------+
  *
  */
-public class NeuralNetwork2 {
+public class XOR3 {
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub

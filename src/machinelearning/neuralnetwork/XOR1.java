@@ -9,7 +9,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.ejml.equation.Equation;
 
-public class NeuralNetworkBasic {
+public class XOR1 {
 	
 	private static DecimalFormat ff = new DecimalFormat("0.000");
 	

@@ -27,7 +27,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader.ArffReader;
 
-public class NeuralNetwork3 {
+public class BasicClassification {
 	
 	private static final String VALUE_FLOWER_SETOSA = "Iris-setosa";
 	private static final String VALUE_QUALITY_VERCOLOR = "Iris-versicolor";

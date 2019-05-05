@@ -11,7 +11,7 @@ import weka.core.Instances;
 import weka.core.Utils;
 import weka.core.converters.ArffLoader.ArffReader;
 
-public class NeuralNetwork1 {
+public class XOR4 {
 
 	private static DecimalFormat ff = new DecimalFormat("0.000");
 
