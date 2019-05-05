@@ -2,7 +2,6 @@ package machinelearning.neuralnetwork;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +13,7 @@ import org.deeplearning4j.datasets.iterator.impl.MnistDataSetIterator;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.layers.DenseLayer;
+import org.deeplearning4j.nn.conf.layers.AutoEncoder;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
@@ -48,9 +47,9 @@ public class NeuralNetwork5 {
 				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
 				.l2(0.0001)
 				.list()
-				.layer(0, new DenseLayer.Builder().nIn(784).nOut(250).build())
-				.layer(1, new DenseLayer.Builder().nIn(250).nOut(10).build())
-				.layer(2, new DenseLayer.Builder().nIn(10).nOut(250).build())
+				.layer(0, new AutoEncoder.Builder().nIn(784).nOut(250).build())
+				.layer(1, new AutoEncoder.Builder().nIn(250).nOut(10).build())
+				.layer(2, new AutoEncoder.Builder().nIn(10).nOut(250).build())
 				.layer(3, new OutputLayer.Builder().nIn(250).nOut(784)
 								.lossFunction(LossFunctions.LossFunction.MSE).build())
 				.build();
@@ -122,27 +121,33 @@ public class NeuralNetwork5 {
 				list.add(new ImmutablePair<Double, INDArray>(score, test));
 			}
 		}
-		
-
-		map.values().stream().forEach(p -> {
 			
-			Collections.sort(p, new Comparator<ImmutablePair<Double, INDArray>>() {
-
-				@Override
-				public int compare(ImmutablePair<Double, INDArray> o1, ImmutablePair<Double, INDArray> o2) {
-					// TODO Auto-generated method stub
-					return o1.getKey().compareTo(o2.getKey()) * -1;
-				}	
-			});
-		});
-		
-		
-		
 		map.entrySet().stream().forEach(p -> {
-			
-			System.out.println("[" + p.getKey() + "]: " +
-					p.getValue().stream().limit(5).map(k -> ff.format(k.getKey())).collect(Collectors.joining(", ")));
+			StringBuilder builder = new StringBuilder();
+			builder.append("Digit: [" + p.getKey() + "], Size: [" + p.getValue().size() + "] ==> ");
+			builder.append("Best: [" + p.getValue().stream().sorted(new PairComparator(1)).limit(4)
+							.map(k -> ff.format(k.getKey())).collect(Collectors.joining(", ")) + "]");
+			builder.append(", Worst: [" + p.getValue().stream().sorted(new PairComparator(-1)).limit(4)
+							.map(k -> ff.format(k.getKey())).collect(Collectors.joining(", ")) + "]");
+			System.out.println(builder.toString());
 		});
+	}
+	
+	
+	private static class PairComparator implements Comparator<ImmutablePair<Double, INDArray>> {
+		
+		private int sign = 1;
+		
+		public PairComparator(int sign) {
+			this.sign = sign;
+		}
+
+		@Override
+		public int compare(ImmutablePair<Double, INDArray> o1, ImmutablePair<Double, INDArray> o2) {
+			// TODO Auto-generated method stub
+			return o1.getKey().compareTo(o2.getKey()) * sign;
+		}
+		
 	}
 	
 }
