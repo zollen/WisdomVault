@@ -11,6 +11,19 @@ public class NeuralNetworkInfo {
 		// df/dx( 1/(1+e^-x) ) = e^x/(1+e^x)^2  center at x = 0            0 < y <= 0.25
 		// tanh: tanh(x)                        center at x = 0           -1 < y < 1
 		// df/dx( tanh(x) ) = sech(x)^2         center at x = 0            0 < y <= 1
+		
+		// 1. Regression Loss Functions
+		//		1.1 Mean Squared Error Loss
+		//		1.2 Mean Squared Logarithmic Error Loss
+		//		1.3 Mean Absolute Error Loss
+		// 2. Binary Classification Loss Functions
+		//		2.1 Binary Cross-Entropy
+		//		2.2 Hinge Loss
+		//		2.3 Squared Hinge Loss
+		// 3. Multi-Class Classification Loss Functions
+		//		3.1 Multi-Class Cross-Entropy Loss
+		//		3.2 Sparse Multiclass Cross-Entropy Loss
+		//		3.3 Kullback Leibler Divergence Loss
 	 
 		
 		// hyper-parameters
