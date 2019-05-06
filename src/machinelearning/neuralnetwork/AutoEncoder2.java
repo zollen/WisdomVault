@@ -32,7 +32,7 @@ import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.SplitTestAndTrain;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.learning.config.AdaGrad;
+import org.nd4j.linalg.learning.config.AdaDelta;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.nd4j.linalg.primitives.ImmutablePair;
 
@@ -50,13 +50,14 @@ public class AutoEncoder2 {
 		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
 				.seed(0)
 				.weightInit(WeightInit.XAVIER)
-				.updater(new AdaGrad(0.05))
-				.activation(Activation.RELU)
+				.updater(new AdaDelta())
+				.activation(Activation.LEAKYRELU)
 				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
 				.l2(0.0001)
 				.list()
 				.layer(0, new AutoEncoder.Builder().nIn(784).nOut(250).build())
-				.layer(1, new OutputLayer.Builder().nIn(250).nOut(2)
+				.layer(1, new AutoEncoder.Builder().nIn(250).nOut(10).build())
+				.layer(2, new OutputLayer.Builder().nIn(10).nOut(2)
 								.lossFunction(LossFunctions.LossFunction.MSE).build())
 				.build();
 		
