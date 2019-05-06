@@ -26,6 +26,7 @@ import org.nd4j.linalg.lossfunctions.LossFunctions;
 import com.jujutsu.tsne.PrincipalComponentAnalysis;
 
 import gui.ColoredScatterPlot;
+import smile.clustering.GMeans;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -43,11 +44,52 @@ public class AutoEncoder2 {
 		
 		
 		pca(data, labels);
+		pca_gmeans(data);
 		nn(data, labels);
 				
 	}
 	
-	public static void nn(double [][]data, String [] labels) {
+	// G-means clustering (self-determine total number of clusters)
+	// ============================================================
+	// We fit a set of k gaussians clusters to the data. And we estimate gaussian 
+	// distribution parameters such as mean and Variance for each cluster and weight 
+	// of a cluster. After learning the parameters for each data point we can calculate 
+	// the probabilities of it belonging to each of the clusters.
+	
+	// Unlike K-means where we map each data point to the closest cluster (requirement: number of 
+	// clusters must be known)
+	// G-means imposes number of clusters(from 1 to max) into all data points and compute 
+	// the probabilities of each data points that belongs to each cluster. As long as all 
+	// existing clusters meet the gaussian, G-means continues to add a new cluster until
+	// any clusters failed to meet the gaussian constraint.
+	
+	// gaussian distribution has the following probability density function
+	// P(x) = 1 / ( σ * sqrt( 2 π ) )  *  e^( -(x - μ)^2 / (2 σ^2) )
+	public static void pca_gmeans(double[][] data) {
+
+		String[] labels = new String[data.length];
+		
+		PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis();
+		double[][] Y = pca.pca(data, 2);
+
+		GMeans gmeans = new GMeans(Y, 16);
+
+		for (int i = 0; i < data.length; i++) {
+			labels[i] = "cluster_" + String.valueOf(gmeans.getClusterLabel()[i]);
+		}
+		
+		Plot2DPanel plot = new Plot2DPanel();
+		ColoredScatterPlot setosaPlot = new ColoredScatterPlot("iris", Y, labels);
+		plot.plotCanvas.setNotable(true);
+		plot.plotCanvas.setNoteCoords(true);
+		plot.plotCanvas.addPlot(setosaPlot);
+
+		FrameView plotframe = new FrameView("PCA with G-Means Clustering", plot);
+		plotframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		plotframe.setVisible(true);
+	}
+	
+	public static void nn(double [][] data, String [] labels) {
 		
 		System.out.println("Starting Neural Network - AutoEncoder");
 		
