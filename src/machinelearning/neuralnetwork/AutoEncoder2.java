@@ -21,7 +21,7 @@ import org.deeplearning4j.datasets.iterator.impl.MnistDataSetIterator;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.layers.DenseLayer;
+import org.deeplearning4j.nn.conf.layers.AutoEncoder;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
@@ -42,7 +42,7 @@ public class AutoEncoder2 {
 	
 	private static final Random rand = new Random(0);
 	
-	// Autoencoder example
+	// AutoEncoder vs PCA for for Dimensional reductions
 	
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub	
@@ -55,10 +55,8 @@ public class AutoEncoder2 {
 				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
 				.l2(0.0001)
 				.list()
-				.layer(0, new DenseLayer.Builder().nIn(784).nOut(250).build())
-				.layer(1, new DenseLayer.Builder().nIn(250).nOut(10).build())
-				.layer(2, new DenseLayer.Builder().nIn(10).nOut(250).build())
-				.layer(3, new OutputLayer.Builder().nIn(250).nOut(784)
+				.layer(0, new AutoEncoder.Builder().nIn(784).nOut(250).build())
+				.layer(1, new OutputLayer.Builder().nIn(250).nOut(2)
 								.lossFunction(LossFunctions.LossFunction.MSE).build())
 				.build();
 		
