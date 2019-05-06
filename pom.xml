@@ -47,6 +47,11 @@
 			<systemPath>${project.basedir}/lib/JMathPlot-1.0.1.jar</systemPath>
 		</dependency>
 		<dependency>
+			<groupId>com.github.yannrichet</groupId>
+			<artifactId>JMathIO</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
 			<groupId>nz.ac.waikato.cms.weka</groupId>
 			<artifactId>weka-stable</artifactId>
 			<version>3.8.3</version>
