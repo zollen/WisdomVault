@@ -59,9 +59,9 @@ public class AutoEncoder2 {
 	// Unlike K-means where we map each data point to the closest cluster (requirement: number of 
 	// clusters must be known)
 	// G-means imposes number of clusters(from 1 to max) into all data points and compute 
-	// the probabilities of each data points that belongs to each cluster. As long as all 
-	// existing clusters meet the gaussian, G-means continues to add a new cluster until
-	// any clusters failed to meet the gaussian constraint.
+	// the probabilities of each data points that belongs to each cluster. As long as data 
+	// points in existing clusters meet the gaussian, G-means continues to add a new cluster 
+	// until any clusters failed to meet the gaussian constraint.
 	
 	// gaussian distribution has the following probability density function
 	// P(x) = 1 / ( σ * sqrt( 2 π ) )  *  e^( -(x - μ)^2 / (2 σ^2) )
