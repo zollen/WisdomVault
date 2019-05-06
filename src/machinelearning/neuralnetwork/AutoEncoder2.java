@@ -20,7 +20,7 @@ import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.learning.config.AdaDelta;
+import org.nd4j.linalg.learning.config.Sgd;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 import com.jujutsu.tsne.PrincipalComponentAnalysis;
@@ -96,7 +96,7 @@ public class AutoEncoder2 {
 		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
 				.seed(0)
 				.weightInit(WeightInit.XAVIER)
-				.updater(new AdaDelta())
+				.updater(new Sgd(0.01))
 				.activation(Activation.LEAKYRELU)
 				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
 				.l2(0.0001)
