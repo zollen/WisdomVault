@@ -42,14 +42,14 @@ public class RNN {
 				.weightInit(WeightInit.XAVIER)
 				.biasInit(0.0)
 				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-				.updater(new Nesterovs(0.005, 0.5))
+				.updater(new Nesterovs(0.05, 0.1))
 				.gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
 				.gradientNormalizationThreshold(0.5)
 				.list()
-				.layer(0, new LSTM.Builder().nIn(1).nOut(10).activation(Activation.TANH).build())
+				.layer(0, new LSTM.Builder().nIn(1).nOut(30).activation(Activation.TANH).build())
 				.layer(1,
 						new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-								.nIn(10)
+								.nIn(30)
 								.nOut(numLabelClasses)
 								.activation(Activation.SOFTMAX).build())
 				.build();
@@ -77,7 +77,7 @@ public class RNN {
 
 		
 		System.out.println("Training model....");
-		for (int i = 0;i < 30; i++) {
+		for (int i = 0;i < 100; i++) {
 			network.fit(itr1);
 		}
 		
