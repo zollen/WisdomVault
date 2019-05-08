@@ -7,7 +7,6 @@ import java.text.DecimalFormat;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.distribution.UniformDistribution;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
@@ -41,7 +40,6 @@ public class DigitsClassifier {
 						.nIn(784)
 						.nOut(250)
 						.activation(Activation.TANH)	
-						.dist(new UniformDistribution(0, 1))
 						.build())
 				.layer(1, new DenseLayer.Builder()
 						.nIn(250)

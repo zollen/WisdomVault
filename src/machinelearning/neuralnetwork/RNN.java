@@ -77,7 +77,9 @@ public class RNN {
 
 		
 		System.out.println("Training model....");
-		network.fit(itr1);
+		for (int i = 0;i < 30; i++) {
+			network.fit(itr1);
+		}
 		
 		System.out.println("Testing model....");
 		Evaluation evaluation = network.evaluate(itr2);	
