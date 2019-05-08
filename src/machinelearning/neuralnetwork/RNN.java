@@ -17,7 +17,6 @@ import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.distribution.UniformDistribution;
 import org.deeplearning4j.nn.conf.layers.LSTM;
 import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
@@ -52,8 +51,7 @@ public class RNN {
 						new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
 								.nIn(10)
 								.nOut(numLabelClasses)
-								.activation(Activation.SOFTMAX)
-								.dist(new UniformDistribution(0, 1)).build())
+								.activation(Activation.SOFTMAX).build())
 				.build();
 
 		MultiLayerNetwork network = new MultiLayerNetwork(conf);
