@@ -123,7 +123,6 @@ public class RNN {
 			
 			Integer count = lineCount / 100;
 			String newLine = line.replaceAll("\\s+", ", " + count.toString() + "\n");
-			newLine = newLine + ", " + count.toString();
 			linesList.add(newLine);
 			lineCount++;
 		}
