@@ -1,6 +1,7 @@
 package machinelearning.neuralnetwork;
 
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
+import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.layers.LSTM;
@@ -41,13 +42,15 @@ public class RNN {
 				.biasInit(0.0)
 				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
 				.updater(new Nesterovs())
+				.gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)  //Not always required, but helps with this data set
+			    .gradientNormalizationThreshold(0.7)
 				.list()
 				.layer(0, new LSTM.Builder()
 						.nIn(5)
-						.nOut(20)
+						.nOut(3)
 						.activation(Activation.TANH).build())
 				.layer(1, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-						.nIn(20)
+						.nIn(3)
 						.nOut(3)
 						.activation(Activation.SOFTMAX).build())
 				.build();
@@ -74,7 +77,7 @@ public class RNN {
 		}
 
 		System.out.println("Training model....");
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 30; i++) {
 			network.fit(inputs, labels);
 		}
 
