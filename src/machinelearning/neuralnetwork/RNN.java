@@ -1,20 +1,6 @@
 package machinelearning.neuralnetwork;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FilenameFilter;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.datavec.api.records.reader.impl.csv.CSVSequenceRecordReader;
-import org.datavec.api.split.NumberedFileInputSplit;
-import org.deeplearning4j.datasets.datavec.SequenceRecordReaderDataSetIterator;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
-import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.layers.LSTM;
@@ -22,119 +8,101 @@ import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
-import org.nd4j.evaluation.classification.Evaluation;
 import org.nd4j.linalg.activations.Activation;
-import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.api.ops.impl.indexaccum.IMax;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.Nesterovs;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 public class RNN {
-	
-	private static final int numLabelClasses = 6;
-	
-	private static final int batchSize = 128;
-	
+
+	private static final int SUNNY = 0;
+	private static final int RAINY = 1;
+
+	private static final int PIZZA = 2;
+	private static final int SALAD = 3;
+	private static final int HOTDOG = 4;
+
+	private static final String[] LABELS = { "Sunny", "Rainy", "Pizza", "Salad", "Hotdog" };
+
+	private static final int[][] activities = { { SUNNY, PIZZA }, { SUNNY, PIZZA }, { RAINY, SALAD }, { RAINY, HOTDOG },
+			{ SUNNY, HOTDOG }, { RAINY, PIZZA }, { RAINY, SALAD }, { SUNNY, SALAD }, { SUNNY, SALAD },
+			{ RAINY, HOTDOG }, { SUNNY, HOTDOG }, { RAINY, PIZZA }, { SUNNY, PIZZA }, { RAINY, SALAD },
+			{ RAINY, HOTDOG }, { SUNNY, HOTDOG }, { RAINY, PIZZA }, { SUNNY, PIZZA }, { RAINY, SALAD },
+			{ SUNNY, SALAD }, { RAINY, HOTDOG }, { SUNNY, HOTDOG }, { RAINY, PIZZA }, { RAINY, SALAD },
+			{ SUNNY, SALAD }, { RAINY, HOTDOG }, { SUNNY, HOTDOG }, { RAINY, PIZZA }, { RAINY, SALAD },
+			{ RAINY, HOTDOG }, { SUNNY, HOTDOG }, { RAINY, PIZZA }, { RAINY, SALAD }, { SUNNY, SALAD } };
+
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
 		System.out.println("Building model....");
-		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
-				.seed(0)
-				.weightInit(WeightInit.XAVIER)
+		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().seed(0).weightInit(WeightInit.XAVIER)
 				.biasInit(0.0)
 				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-				.updater(new Nesterovs(0.05, 0.1))
-				.gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
-				.gradientNormalizationThreshold(0.5)
+				.updater(new Nesterovs())
 				.list()
-				.layer(0, new LSTM.Builder().nIn(1).nOut(30).activation(Activation.TANH).build())
-				.layer(1,
-						new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-								.nIn(30)
-								.nOut(numLabelClasses)
-								.activation(Activation.SOFTMAX).build())
+				.layer(0, new LSTM.Builder()
+						.nIn(5)
+						.nOut(20)
+						.activation(Activation.TANH).build())
+				.layer(1, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
+						.nIn(20)
+						.nOut(3)
+						.activation(Activation.SOFTMAX).build())
 				.build();
 
 		MultiLayerNetwork network = new MultiLayerNetwork(conf);
 		network.init();
-		network.setListeners(new ScoreIterationListener(20)); 
-		
+		network.setListeners(new ScoreIterationListener(1));
+
 		System.out.println(network.summary());
-		
-		
-		File dir = new File("out");
-		
-		generate("data/synthetic_control.data");
-		
-		
-		// Training data
-		CSVSequenceRecordReader trainer = new CSVSequenceRecordReader(0, ", ");
-		trainer.initialize(new NumberedFileInputSplit(dir.getAbsoluteFile() + File.separator + "testseq_%d.csv", 0, 499));
-		DataSetIterator itr1 = new SequenceRecordReaderDataSetIterator(trainer, batchSize, numLabelClasses, 1);
-		
-		CSVSequenceRecordReader tester = new CSVSequenceRecordReader(0, ", ");
-		tester.initialize(new NumberedFileInputSplit(dir.getAbsoluteFile() + File.separator + "testseq_%d.csv", 499, 599));
-		DataSetIterator itr2 = new SequenceRecordReaderDataSetIterator(tester, batchSize, numLabelClasses, 1);
 
-		
+		INDArray inputs = Nd4j.zeros(1, 5, activities.length);
+		INDArray labels = Nd4j.zeros(1, 3, activities.length);
+
+		for (int day = 1; day < activities.length; day++) {
+
+			int[] yesterday = activities[day - 1];
+			int[] today = activities[day];
+
+			inputs.putScalar(new int[] { 0, today[0], day }, 1);
+			inputs.putScalar(new int[] { 0, yesterday[1], day }, 1);
+
+			labels.putScalar(new int[] { 0, today[1] - PIZZA, day }, 1);
+
+		}
+
 		System.out.println("Training model....");
-		for (int i = 0;i < 100; i++) {
-			network.fit(itr1);
+		for (int i = 0; i < 100; i++) {
+			network.fit(inputs, labels);
 		}
-		
-		System.out.println("Testing model....");
-		Evaluation evaluation = network.evaluate(itr2);	
-		System.out.println(evaluation.stats());
-		
-		cleanup();
-	}
-	
-	public static void cleanup() throws Exception {
-		
-		File dir = new File("out");
-		
-		File [] files = dir.listFiles(new FilenameFilter() {
 
-			@Override
-			public boolean accept(File dir, String name) {
-				// TODO Auto-generated method stub
-				return name.toLowerCase().startsWith("testseq_") && name.toLowerCase().endsWith(".csv");
+		INDArray test = Nd4j.zeros(1, 5, 1);
+		test.putScalar(new int[] { 0, SUNNY, 0 }, 1);
+		test.putScalar(new int[] { 0, SALAD, 0 }, 1);
+
+		INDArray output = network.output(test);
+
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < 5; i++) {
+
+			if (test.getInt(new int[] { 0, i, 0 }) == 1) {
+				if (builder.length() > 0)
+					builder.append(", ");
+
+				String date = "Today: ";
+				if (i >= PIZZA)
+					date = "Yesterday: ";
+
+				builder.append(date + LABELS[i]);
 			}
-			
-		});
-		
-		for (int i = 0; files != null && i < files.length; i++) {
-			files[i].delete();
 		}
+
+		System.err.println(output);
+
+		int idx = Nd4j.getExecutioner().exec(new IMax(output, 1)).getInt(0) + PIZZA;
+		System.out.println(builder.toString() + " =======> " + LABELS[idx]);
 	}
-	
-	public static void generate(String fileName) throws Exception {
-		
-		cleanup();
-		
-		String content = IOUtils.toString(new FileReader(new File(fileName)));
-		String [] lines = content.split("\n");
-		
-		int lineCount = 0;
-		int index = 0;
-		
-		List<String> linesList = new ArrayList<String>();
-		
-		for (String line : lines) {
-			
-			Integer count = lineCount / 100;
-			String newLine = line.replaceAll("\\s+", ", " + count.toString() + "\n");
-			linesList.add(newLine);
-			lineCount++;
-		}
-		
-		Collections.shuffle(linesList);
-		
-		for (String line : linesList) {
-			File file = new File("out/testseq_" + index + ".csv");
-			FileUtils.writeStringToFile(file, line, Charset.defaultCharset());
-			index++;	
-		}
-	}
-	
-	
+
 }
