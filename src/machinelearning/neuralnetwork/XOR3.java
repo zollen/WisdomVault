@@ -3,7 +3,6 @@ package machinelearning.neuralnetwork;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.distribution.UniformDistribution;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
@@ -58,13 +57,13 @@ public class XOR3 {
 				.list()
 				.layer(0, new DenseLayer.Builder().nIn(2).nOut(4).activation(Activation.SIGMOID)
 						// random initialize weights with values between 0 and 1
-						.weightInit(WeightInit.DISTRIBUTION).dist(new UniformDistribution(0, 1)).build())
+						.weightInit(WeightInit.DISTRIBUTION).build())
 				.layer(1,
 						new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
 								.nOut(2)
 								.activation(Activation.SOFTMAX)
 								.weightInit(WeightInit.DISTRIBUTION)
-								.dist(new UniformDistribution(0, 1)).build())
+								.build())
 				.build();
 
 		MultiLayerNetwork network = new MultiLayerNetwork(conf);
