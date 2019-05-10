@@ -35,7 +35,12 @@ public class RNN {
 			{ RAINY, HOTDOG }, { SUNNY, HOTDOG }, { RAINY, PIZZA }, { SUNNY, PIZZA }, { RAINY, SALAD },
 			{ SUNNY, SALAD }, { RAINY, HOTDOG }, { SUNNY, HOTDOG }, { RAINY, PIZZA }, { RAINY, SALAD },
 			{ SUNNY, SALAD }, { RAINY, HOTDOG }, { SUNNY, HOTDOG }, { RAINY, PIZZA }, { RAINY, SALAD },
-			{ RAINY, HOTDOG }, { SUNNY, HOTDOG }, { RAINY, PIZZA }, { RAINY, SALAD }, { SUNNY, SALAD } };
+			{ RAINY, HOTDOG }, { SUNNY, HOTDOG }, { RAINY, PIZZA }, { RAINY, SALAD }, { SUNNY, SALAD },
+			{ SUNNY, SALAD }, { SUNNY, SALAD }, { RAINY, HOTDOG }, { SUNNY, HOTDOG }, { SUNNY, HOTDOG },
+			{ SUNNY, HOTDOG }, { RAINY, PIZZA }, { SUNNY, PIZZA }, { SUNNY, PIZZA }, { SUNNY, PIZZA },
+			{ RAINY, SALAD }, { SUNNY, SALAD }, { SUNNY, SALAD }, { SUNNY, SALAD }, { SUNNY, SALAD },
+			{ RAINY, HOTDOG }, { SUNNY, HOTDOG }, { SUNNY, HOTDOG }, { SUNNY, HOTDOG }, { RAINY, PIZZA }
+		};
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
@@ -79,20 +84,20 @@ public class RNN {
 		}
 
 		System.out.println("Training model....");
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 30; i++) {
 			network.fit(inputs, labels);
 		}
 		
 		network.rnnClearPreviousState();
 		
-		Random rand = new Random(0);
+		Random rand = new Random(System.currentTimeMillis());
 		
-		int choice = SALAD;
+		int choice = PIZZA;
 
 		for (int day = 0; day < 10; day++) {
 			
 			INDArray test = Nd4j.zeros(1, 5, 1);
-			test.putScalar(new int[] { 0, rand.nextInt(2), 0 }, 1);
+			test.putScalar(new int[] { 0, rand.nextInt(10) <= 6 ? 0 : 1, 0 }, 1);
 			test.putScalar(new int[] { 0, choice, 0 }, 1);
 
 			INDArray output = network.rnnTimeStep(test);
