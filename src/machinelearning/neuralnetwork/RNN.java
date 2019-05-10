@@ -16,6 +16,8 @@ import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.Nesterovs;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
+import weka.core.Debug.Random;
+
 public class RNN {
 
 	private static final int SUNNY = 0;
@@ -77,37 +79,44 @@ public class RNN {
 		}
 
 		System.out.println("Training model....");
-		for (int i = 0; i < 30; i++) {
+		for (int i = 0; i < 100; i++) {
 			network.fit(inputs, labels);
 		}
 		
 		network.rnnClearPreviousState();
+		
+		Random rand = new Random(0);
+		
+		int choice = SALAD;
 
-		INDArray test = Nd4j.zeros(1, 5, 1);
-		test.putScalar(new int[] { 0, SUNNY, 0 }, 1);
-		test.putScalar(new int[] { 0, SALAD, 0 }, 1);
+		for (int day = 0; day < 10; day++) {
+			
+			INDArray test = Nd4j.zeros(1, 5, 1);
+			test.putScalar(new int[] { 0, rand.nextInt(2), 0 }, 1);
+			test.putScalar(new int[] { 0, choice, 0 }, 1);
 
-		INDArray output = network.rnnTimeStep(test);
+			INDArray output = network.rnnTimeStep(test);
 
-		StringBuilder builder = new StringBuilder();
-		for (int i = 0; i < 5; i++) {
+			StringBuilder builder = new StringBuilder();
+			for (int i = 0; i < 5; i++) {
 
-			if (test.getInt(new int[] { 0, i, 0 }) == 1) {
-				if (builder.length() > 0)
-					builder.append(", ");
+				if (test.getInt(new int[] { 0, i, 0 }) == 1) {
+					if (builder.length() > 0)
+						builder.append(", ");
 
-				String date = "Today: ";
-				if (i >= PIZZA)
-					date = "Yesterday: ";
+					String date = "Day[" + day + "]: ";
+					if (i >= PIZZA)
+						date = "Day[" + (day - 1 < 0 ? day : day - 1) + "]: ";
 
-				builder.append(date + LABELS[i]);
+					builder.append(date + LABELS[i]);
+				}
 			}
+
+			System.err.println(output);
+
+			choice = Nd4j.getExecutioner().exec(new IMax(output, 1)).getInt(0) + PIZZA;
+			System.out.println(builder.toString() + " =======> " + LABELS[choice]);
 		}
-
-		System.err.println(output);
-
-		int idx = Nd4j.getExecutioner().exec(new IMax(output, 1)).getInt(0) + PIZZA;
-		System.out.println(builder.toString() + " =======> " + LABELS[idx]);
 	}
 
 }
