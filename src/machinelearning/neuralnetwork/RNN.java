@@ -80,12 +80,14 @@ public class RNN {
 		for (int i = 0; i < 30; i++) {
 			network.fit(inputs, labels);
 		}
+		
+		network.rnnClearPreviousState();
 
 		INDArray test = Nd4j.zeros(1, 5, 1);
 		test.putScalar(new int[] { 0, SUNNY, 0 }, 1);
 		test.putScalar(new int[] { 0, SALAD, 0 }, 1);
 
-		INDArray output = network.output(test);
+		INDArray output = network.rnnTimeStep(test);
 
 		StringBuilder builder = new StringBuilder();
 		for (int i = 0; i < 5; i++) {
