@@ -79,11 +79,13 @@ public class RNN {
 			System.out.println("Testing model....");
 			List<List<INDArray>> testing = generateData(1, 10);
 			
+			
 			for (List<INDArray> data : testing) {
 				
 				INDArray inputs = data.get(0);
 				INDArray labels = data.get(1);
-			
+				
+
 				for (int day = 0; day < 10; day++) {
 				
 					INDArray output = network.rnnTimeStep(inputs);
@@ -92,16 +94,16 @@ public class RNN {
 					builder.append("Day [" + (day + 1) + "] ");
 					
 					for (int i = 0; i < 2; i++) {
-						if (inputs.getInt(new int[] { 0, i, 0 }) == 1) {
-							builder.append(" Today: " + LABELS[i]);
+						if (inputs.getInt(new int[] { 0, i, day }) == 1) {
+							builder.append("Today: [" + LABELS[i] + "], ");
 							break;
 						}
 					}
 					
 					for (int i = 2; i < 5; i++) {
 
-						if (inputs.getInt(new int[] { 0, i, 0 }) == 1) {
-							builder.append(" Yesterday: " + LABELS[i]);
+						if (inputs.getInt(new int[] { 0, i, day }) == 1) {
+							builder.append("Yesterday: [" + LABELS[i] + "]");
 							break;
 						}
 					}
@@ -138,7 +140,7 @@ public class RNN {
 			
 			for (int day = 0; day < seqLength; day++) {
 				
-				int weather = rand.nextInt(2);
+				int weather = rand.nextInt(10) <= 5 ? 0 : 1;
 				
 				input.putScalar(new int[] { record, weather, day }, 1);
 				input.putScalar(new int[] { record, food + PIZZA, day }, 1);
