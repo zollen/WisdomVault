@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Random;
 
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
-import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.layers.LSTM;
@@ -34,12 +33,12 @@ public class RNN {
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
 		System.out.println("Building model....");
-		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().seed(0).weightInit(WeightInit.XAVIER)
+		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
+				.seed(0)
+				.weightInit(WeightInit.XAVIER)
 				.biasInit(0.0)
 				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
 				.updater(new Nesterovs())
-				.gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)  //Not always required, but helps with this data set
-			    .gradientNormalizationThreshold(0.7)
 				.list()
 				.layer(0, new LSTM.Builder()
 						.nIn(5)
