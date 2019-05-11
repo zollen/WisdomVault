@@ -19,6 +19,7 @@ import org.nd4j.linalg.api.ops.impl.indexaccum.IMax;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.Nesterovs;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
+import org.nd4j.linalg.primitives.Pair;
 
 public class RNN {
 	
@@ -68,12 +69,12 @@ public class RNN {
 		for (int numEpochs = 0; numEpochs < 30; numEpochs++) {
 			
 			System.out.println("Training model....");
-			List<List<INDArray>> training = generateData(1000, SEQLENGTH);
+			List<Pair<INDArray, INDArray>> training = generateData(1000, SEQLENGTH);
 			
-			for (List<INDArray> data : training) {
+			for (Pair<INDArray, INDArray> data : training) {
 				
-				INDArray inputs = data.get(0);
-				INDArray labels = data.get(1);
+				INDArray inputs = data.getFirst();
+				INDArray labels = data.getSecond();
 				
 				network.fit(inputs, labels);
 			}
@@ -82,13 +83,13 @@ public class RNN {
 			
 			
 			System.out.println("Testing model....");
-			List<List<INDArray>> testing = generateData(1, SEQLENGTH);
+			List<Pair<INDArray, INDArray>> testing = generateData(1, SEQLENGTH);
 			
 			
-			for (List<INDArray> data : testing) {
+			for (Pair<INDArray, INDArray> data : testing) {
 				
-				INDArray inputs = data.get(0);
-				INDArray labels = data.get(1);
+				INDArray inputs = data.getFirst();
+				INDArray labels = data.getSecond();
 				
 
 				for (int day = 0; day < SEQLENGTH; day++) {
@@ -132,9 +133,9 @@ public class RNN {
 		System.out.println("TOTAL: " + total + " -> ACCURACY: " + (double) correct / total);
 	}
 	
-	public static List<List<INDArray>> generateData(int numOfRecords, int seqLength) {
+	public static List<Pair<INDArray, INDArray>> generateData(int numOfRecords, int seqLength) {
 		
-		List<List<INDArray>> ds = new ArrayList<List<INDArray>>();
+		List<Pair<INDArray, INDArray>> ds = new ArrayList<Pair<INDArray, INDArray>>();
 		
 		for (int record = 0; record < numOfRecords; record++) {
 			
@@ -156,9 +157,9 @@ public class RNN {
 				label.putScalar(new int[] { record, food, day }, 1);
 			}
 			
-			List<INDArray> combo = new ArrayList<INDArray>();
-			combo.add(input);
-			combo.add(label);
+			Pair<INDArray, INDArray> combo = new Pair<INDArray, INDArray>();
+			combo.setFirst(input);
+			combo.setSecond(label);
 			
 			ds.add(combo);
 		}
