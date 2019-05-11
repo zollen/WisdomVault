@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
+import org.deeplearning4j.nn.conf.BackpropType;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.layers.LSTM;
@@ -22,6 +23,8 @@ import org.nd4j.linalg.lossfunctions.LossFunctions;
 public class RNN {
 	
 	private static final Random rand = new Random(System.currentTimeMillis());
+	
+	private static final int SEQLENGTH = 40;
 
 	private static final int SUNNY = 0;
 	
@@ -48,6 +51,9 @@ public class RNN {
 						.nIn(3)
 						.nOut(3)
 						.activation(Activation.SOFTMAX).build())
+				.backpropType(BackpropType.TruncatedBPTT)
+	            .tBPTTForwardLength(10)
+	            .tBPTTBackwardLength(10)
 				.build();
 
 		MultiLayerNetwork network = new MultiLayerNetwork(conf);
@@ -62,7 +68,7 @@ public class RNN {
 		for (int numEpochs = 0; numEpochs < 30; numEpochs++) {
 			
 			System.out.println("Training model....");
-			List<List<INDArray>> training = generateData(1000, 10);
+			List<List<INDArray>> training = generateData(1000, SEQLENGTH);
 			
 			for (List<INDArray> data : training) {
 				
@@ -76,7 +82,7 @@ public class RNN {
 			
 			
 			System.out.println("Testing model....");
-			List<List<INDArray>> testing = generateData(1, 10);
+			List<List<INDArray>> testing = generateData(1, SEQLENGTH);
 			
 			
 			for (List<INDArray> data : testing) {
@@ -85,7 +91,7 @@ public class RNN {
 				INDArray labels = data.get(1);
 				
 
-				for (int day = 0; day < 10; day++) {
+				for (int day = 0; day < SEQLENGTH; day++) {
 				
 					INDArray output = network.rnnTimeStep(inputs);
 					
