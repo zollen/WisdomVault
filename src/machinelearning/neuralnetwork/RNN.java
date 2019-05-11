@@ -1,5 +1,9 @@
 package machinelearning.neuralnetwork;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -16,31 +20,16 @@ import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.Nesterovs;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
-import weka.core.Debug.Random;
-
 public class RNN {
+	
+	private static final Random rand = new Random(System.currentTimeMillis());
 
 	private static final int SUNNY = 0;
-	private static final int RAINY = 1;
-
+	
 	private static final int PIZZA = 2;
-	private static final int SALAD = 3;
-	private static final int HOTDOG = 4;
 
 	private static final String[] LABELS = { "Sunny", "Rainy", "Pizza", "Salad", "Hotdog" };
 
-	private static final int[][] activities = { { SUNNY, PIZZA }, { SUNNY, PIZZA }, { RAINY, SALAD }, { RAINY, HOTDOG },
-			{ SUNNY, HOTDOG }, { RAINY, PIZZA }, { RAINY, SALAD }, { SUNNY, SALAD }, { SUNNY, SALAD },
-			{ RAINY, HOTDOG }, { SUNNY, HOTDOG }, { RAINY, PIZZA }, { SUNNY, PIZZA }, { RAINY, SALAD },
-			{ RAINY, HOTDOG }, { SUNNY, HOTDOG }, { RAINY, PIZZA }, { SUNNY, PIZZA }, { RAINY, SALAD },
-			{ SUNNY, SALAD }, { RAINY, HOTDOG }, { SUNNY, HOTDOG }, { RAINY, PIZZA }, { RAINY, SALAD },
-			{ SUNNY, SALAD }, { RAINY, HOTDOG }, { SUNNY, HOTDOG }, { RAINY, PIZZA }, { RAINY, SALAD },
-			{ RAINY, HOTDOG }, { SUNNY, HOTDOG }, { RAINY, PIZZA }, { RAINY, SALAD }, { SUNNY, SALAD },
-			{ SUNNY, SALAD }, { SUNNY, SALAD }, { RAINY, HOTDOG }, { SUNNY, HOTDOG }, { SUNNY, HOTDOG },
-			{ SUNNY, HOTDOG }, { RAINY, PIZZA }, { SUNNY, PIZZA }, { SUNNY, PIZZA }, { SUNNY, PIZZA },
-			{ RAINY, SALAD }, { SUNNY, SALAD }, { SUNNY, SALAD }, { SUNNY, SALAD }, { SUNNY, SALAD },
-			{ RAINY, HOTDOG }, { SUNNY, HOTDOG }, { SUNNY, HOTDOG }, { SUNNY, HOTDOG }, { RAINY, PIZZA }
-		};
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
@@ -67,61 +56,108 @@ public class RNN {
 		network.setListeners(new ScoreIterationListener(1));
 
 		System.out.println(network.summary());
-
-		INDArray inputs = Nd4j.zeros(1, 5, activities.length);
-		INDArray labels = Nd4j.zeros(1, 3, activities.length);
-
-		for (int day = 1; day < activities.length; day++) {
-
-			int[] yesterday = activities[day - 1];
-			int[] today = activities[day];
-
-			inputs.putScalar(new int[] { 0, today[0], day }, 1);
-			inputs.putScalar(new int[] { 0, yesterday[1], day }, 1);
-
-			labels.putScalar(new int[] { 0, today[1] - PIZZA, day }, 1);
-
-		}
-
-		System.out.println("Training model....");
-		for (int i = 0; i < 30; i++) {
-			network.fit(inputs, labels);
-		}
 		
-		network.rnnClearPreviousState();
-		
-		Random rand = new Random(System.currentTimeMillis());
-		
-		int choice = PIZZA;
+		int total = 0;
+		int correct = 0;
 
-		for (int day = 0; day < 10; day++) {
+		for (int numEpochs = 0; numEpochs < 30; numEpochs++) {
 			
-			INDArray test = Nd4j.zeros(1, 5, 1);
-			test.putScalar(new int[] { 0, rand.nextInt(10) <= 6 ? 0 : 1, 0 }, 1);
-			test.putScalar(new int[] { 0, choice, 0 }, 1);
+			System.out.println("Training model....");
+			List<List<INDArray>> training = generateData(1000, 10);
+			
+			for (List<INDArray> data : training) {
+				
+				INDArray inputs = data.get(0);
+				INDArray labels = data.get(1);
+				
+				network.fit(inputs, labels);
+			}
+			
+			network.rnnClearPreviousState();
+			
+			
+			System.out.println("Testing model....");
+			List<List<INDArray>> testing = generateData(1, 10);
+			
+			for (List<INDArray> data : testing) {
+				
+				INDArray inputs = data.get(0);
+				INDArray labels = data.get(1);
+			
+				for (int day = 0; day < 10; day++) {
+				
+					INDArray output = network.rnnTimeStep(inputs);
+					
+					StringBuilder builder = new StringBuilder();
+					builder.append("Day [" + (day + 1) + "] ");
+					
+					for (int i = 0; i < 2; i++) {
+						if (inputs.getInt(new int[] { 0, i, 0 }) == 1) {
+							builder.append(" Today: " + LABELS[i]);
+							break;
+						}
+					}
+					
+					for (int i = 2; i < 5; i++) {
 
-			INDArray output = network.rnnTimeStep(test);
-
-			StringBuilder builder = new StringBuilder();
-			for (int i = 0; i < 5; i++) {
-
-				if (test.getInt(new int[] { 0, i, 0 }) == 1) {
-					if (builder.length() > 0)
-						builder.append(", ");
-
-					String date = "Day[" + day + "]: ";
-					if (i >= PIZZA)
-						date = "Day[" + (day - 1 < 0 ? day : day - 1) + "]: ";
-
-					builder.append(date + LABELS[i]);
+						if (inputs.getInt(new int[] { 0, i, 0 }) == 1) {
+							builder.append(" Yesterday: " + LABELS[i]);
+							break;
+						}
+					}
+					
+					int expected = Nd4j.getExecutioner().exec(new IMax(labels, 1)).getInt(day) + PIZZA;
+					int actual = Nd4j.getExecutioner().exec(new IMax(output, 1)).getInt(day) + PIZZA;
+					
+					if (expected == actual) {
+						correct++;
+						System.out.println(builder.toString() + " ===> " + LABELS[expected] + " : " + LABELS[actual]);
+					}
+					else {
+						System.err.println(builder.toString() + " ===> " + LABELS[expected] + " : " + LABELS[actual]);
+					}
+					
+					total++;
 				}
 			}
-
-			System.err.println(output);
-
-			choice = Nd4j.getExecutioner().exec(new IMax(output, 1)).getInt(0) + PIZZA;
-			System.out.println(builder.toString() + " =======> " + LABELS[choice]);
 		}
+		
+		System.out.println("TOTAL: " + total + " -> ACCURACY: " + (double) correct / total);
+	}
+	
+	public static List<List<INDArray>> generateData(int numOfRecords, int seqLength) {
+		
+		List<List<INDArray>> ds = new ArrayList<List<INDArray>>();
+		
+		for (int record = 0; record < numOfRecords; record++) {
+			
+			INDArray input = Nd4j.zeros(1, 5, seqLength);
+			INDArray label = Nd4j.zeros(1, 3, seqLength);
+			
+			int food = rand.nextInt(3);
+			
+			for (int day = 0; day < seqLength; day++) {
+				
+				int weather = rand.nextInt(2);
+				
+				input.putScalar(new int[] { record, weather, day }, 1);
+				input.putScalar(new int[] { record, food + PIZZA, day }, 1);
+				
+				if (weather != SUNNY)
+					food = (food + 1) % 3;
+				
+				label.putScalar(new int[] { record, food, day }, 1);
+			}
+			
+			List<INDArray> combo = new ArrayList<INDArray>();
+			combo.add(input);
+			combo.add(label);
+			
+			ds.add(combo);
+		}
+				
+		return ds;
+		
 	}
 
 }
