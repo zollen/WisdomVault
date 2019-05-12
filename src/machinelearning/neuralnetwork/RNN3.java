@@ -121,8 +121,9 @@ public class RNN3 {
 
 		//Create input for initialization
 		INDArray initializationInput = Nd4j.zeros(numSamples, iter.inputColumns(), initialization.length());
+		
 		char[] init = initialization.toCharArray();
-		for( int i=0; i<init.length; i++ ){
+		for( int i=0; i<init.length; i++ ) {
 			int idx = iter.convertCharacterToIndex(init[i]);
 			for( int j=0; j<numSamples; j++ ){
 				initializationInput.putScalar(new int[]{j,idx,i}, 1.0f);
@@ -130,24 +131,28 @@ public class RNN3 {
 		}
 
 		StringBuilder[] sb = new StringBuilder[numSamples];
-		for( int i=0; i<numSamples; i++ ) sb[i] = new StringBuilder(initialization);
+		for( int i = 0; i < numSamples; i++ ) 
+			sb[i] = new StringBuilder(initialization);
 
 		//Sample from network (and feed samples back into input) one character at a time (for all samples)
 		//Sampling is done in parallel here
 		net.rnnClearPreviousState();
 		INDArray output = net.rnnTimeStep(initializationInput);
-		output = output.tensorAlongDimension((int)output.size(2)-1,1,0);	//Gets the last time step output
+		output = output.tensorAlongDimension((int)output.size(2) - 1, 1, 0);	//Gets the last time step output
 
-		for( int i=0; i<charactersToSample; i++ ){
+		for( int i = 0; i < charactersToSample; i++ ) {
 			//Set up next input (single time step) by sampling from previous output
 			INDArray nextInput = Nd4j.zeros(numSamples,iter.inputColumns());
 			//Output is a probability distribution. Sample from this for each example we want to generate, and add it to the new input
-			for( int s=0; s<numSamples; s++ ){
+			for( int s = 0; s < numSamples; s++ ) {
+				
 				double[] outputProbDistribution = new double[iter.totalOutcomes()];
-				for( int j=0; j<outputProbDistribution.length; j++ ) outputProbDistribution[j] = output.getDouble(s,j);
+				for( int j = 0; j < outputProbDistribution.length; j++ ) 
+					outputProbDistribution[j] = output.getDouble(s,j);
+				
 				int sampledCharacterIdx = sampleFromDistribution(outputProbDistribution,rng);
 
-				nextInput.putScalar(new int[]{s,sampledCharacterIdx}, 1.0f);		//Prepare next time step input
+				nextInput.putScalar(new int[]{ s, sampledCharacterIdx }, 1.0);		//Prepare next time step input
 				sb[s].append(iter.convertIndexToCharacter(sampledCharacterIdx));	//Add sampled character to StringBuilder (human readable output)
 			}
 

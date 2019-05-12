@@ -1,29 +1,32 @@
-import java.io.File;
+import java.util.Random;
 
-import com.google.common.io.Files;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 
 
 public class TestMe {
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
-		String base = "C:\\Users\\zollen\\Downloads\\organizer";
-		String target = "C:\\Users\\zollen\\eclipse-workspace\\WisdomVault\\img\\digits";
+		INDArray arr = Nd4j.zeros(2, 3, 4);
+		Random rand = new Random(0);
 		
-		for (int i = 0, index = 1000; i < 10; i++) {
-			
-			File dir = new File(base + File.separator + i);
-			
-			File [] files = dir.listFiles();
-			
-			for (File file : files) {
-				if (file.getName().endsWith(".png")) {
-				
-					Files.copy(file, 
-							new File(target + File.separator + i + "_" + index + "_TRAINING.png"));
-					index++;
+		for (int i = 0; i < 2; i++) {
+			for (int j = 0; j < 3; j++) {
+				for (int k = 0; k < 4; k++) {
+					arr.putScalar(new int[] { i, j, k }, Math.abs(rand.nextInt()) % 1000); 
 				}
 			}
 		}
+		
+		System.out.println(arr);
+		System.out.println("======================");
+		INDArray me = arr.tensorAlongDimension(0, 2, 0);
+		System.out.println(me);
+		System.out.println("======================");
+		INDArray you = arr.tensorAlongDimension(0, 0, 2);
+		System.out.println(you);
+
+	
 	}
 }
