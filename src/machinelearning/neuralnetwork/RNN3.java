@@ -1,6 +1,6 @@
 package machinelearning.neuralnetwork;
 
-import java.nio.charset.Charset;
+import java.io.File;
 import java.util.Random;
 
 import org.deeplearning4j.nn.conf.BackpropType;
@@ -19,6 +19,8 @@ import org.nd4j.linalg.learning.config.Adam;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 public class RNN3 {
+	
+	private static final Random rand = new Random(0);
 
 	public static void main( String[] args ) throws Exception {
 		int lstmLayerSize = 200;					//Number of units in each LSTM layer
@@ -26,17 +28,15 @@ public class RNN3 {
 		int exampleLength = 1000;					//Length of each training example sequence to use. This could certainly be increased
         int tbpttLength = 50;                       //Length for truncated backpropagation through time. i.e., do parameter updates ever 50 characters
 		int numEpochs = 1;							//Total number of training epochs
-        int generateSamplesEveryNMinibatches = 10;  //How frequently to generate samples from the network? 1000 characters / 50 tbptt length: 20 parameter updates per minibatch
 		int nSamplesToGenerate = 4;					//Number of samples to generate after each training epoch
 		int nCharactersToSample = 300;				//Length of each sample to generate
 		String generationInitialization = null;		//Optional character initialization; a random character is used if null
 		// Above is Used to 'prime' the LSTM with a character sequence to continue/complete.
 		// Initialization characters must all be in CharacterIterator.getMinimalCharacterSet() by default
-		Random rng = new Random(0);
-
+		
 		//Get a DataSetIterator that handles vectorization of text into something we can use to train
 		// our LSTM network.
-		CharacterIterator iter = getShakespeareIterator(miniBatchSize,exampleLength);
+		WordDataSetIterator iter = getWordsIterator("data/book.txt", miniBatchSize, exampleLength);
 		int nOut = iter.totalOutcomes();
 		
 
@@ -71,20 +71,21 @@ public class RNN3 {
             while(iter.hasNext()){
                 DataSet ds = iter.next();
                 net.fit(ds);
-                if(++miniBatchNumber % generateSamplesEveryNMinibatches == 0){
-                    System.out.println("--------------------");
-                    System.out.println("Completed " + miniBatchNumber + " minibatches of size " + miniBatchSize + "x" + exampleLength + " characters" );
-                    System.out.println("Sampling characters from network given initialization \"" + (generationInitialization == null ? "" : generationInitialization) + "\"");
-                    String[] samples = sampleCharactersFromNetwork(generationInitialization,net,iter,rng,nCharactersToSample,nSamplesToGenerate);
-                    for( int j=0; j<samples.length; j++ ){
-                        System.out.println("----- Sample " + j + " -----");
-                        System.out.println(samples[j]);
-                        System.out.println();
-                    }
-                }
             }
-
-			iter.reset();	//Reset iterator for another epoch
+            iter.reset();
+		}
+     
+		System.out.println("--------------------");
+		System.out.println("Completed " + miniBatchNumber + " minibatches of size " + miniBatchSize + "x"
+				+ exampleLength + " characters");
+		System.out.println("Sampling characters from network given initialization \""
+				+ (generationInitialization == null ? "" : generationInitialization) + "\"");
+		String[] samples = sampleCharactersFromNetwork("For", net, iter, 
+												nCharactersToSample, nSamplesToGenerate);
+		for (int j = 0; j < samples.length; j++) {
+			System.out.println("----- Sample " + j + " -----");
+			System.out.println(samples[j]);
+			System.out.println();
 		}
 
 		System.out.println("\n\nExample complete");
@@ -95,13 +96,8 @@ public class RNN3 {
 	 * @param miniBatchSize Number of text segments in each training mini-batch
 	 * @param sequenceLength Number of characters in each text segment.
 	 */
-	public static CharacterIterator getShakespeareIterator(int miniBatchSize, int sequenceLength) throws Exception{
-		//The Complete Works of William Shakespeare
-		//5.3MB file in UTF-8 Encoding, ~5.4 million characters
-		//https://www.gutenberg.org/ebooks/100
-		char[] validCharacters = CharacterIterator.getMinimalCharacterSet();	//Which characters are allowed? Others will be removed
-		return new CharacterIterator("data/shakespeare.txt", Charset.forName("UTF-8"),
-				miniBatchSize, sequenceLength, validCharacters, new Random(0));
+	public static WordDataSetIterator getWordsIterator(String fileName, int miniBatchSize, int sequenceLength) throws Exception{
+		return new WordDataSetIterator(new File(fileName), miniBatchSize, sequenceLength);
 	}
 
 	/** Generate a sample from the network, given an (optional, possibly null) initialization. Initialization
@@ -113,26 +109,21 @@ public class RNN3 {
 	 * @param iter CharacterIterator. Used for going from indexes back to characters
 	 */
 	private static String[] sampleCharactersFromNetwork(String initialization, MultiLayerNetwork net,
-                                                        CharacterIterator iter, Random rng, int charactersToSample, int numSamples ){
-		//Set up initialization. If no initialization: use a random character
-		if( initialization == null ){
-			initialization = String.valueOf(iter.getRandomCharacter());
-		}
-
+				WordDataSetIterator iter, int charactersToSample, int numSamples ){
+		
 		//Create input for initialization
 		INDArray initializationInput = Nd4j.zeros(numSamples, iter.inputColumns(), initialization.length());
 		
-		char[] init = initialization.toCharArray();
-		for( int i=0; i<init.length; i++ ) {
-			int idx = iter.convertCharacterToIndex(init[i]);
-			for( int j=0; j<numSamples; j++ ){
-				initializationInput.putScalar(new int[]{j,idx,i}, 1.0f);
-			}
+		int idx = iter.toIdx(initialization);
+		for( int j=0; j<numSamples; j++ ){
+			initializationInput.putScalar(new int[]{j,idx, 0}, 1.0f);
 		}
 
 		StringBuilder[] sb = new StringBuilder[numSamples];
-		for( int i = 0; i < numSamples; i++ ) 
+		for( int i = 0; i < numSamples; i++ ) {
 			sb[i] = new StringBuilder(initialization);
+			sb[i].append(" ");
+		}
 
 		//Sample from network (and feed samples back into input) one character at a time (for all samples)
 		//Sampling is done in parallel here
@@ -150,10 +141,10 @@ public class RNN3 {
 				for( int j = 0; j < outputProbDistribution.length; j++ ) 
 					outputProbDistribution[j] = output.getDouble(s,j);
 				
-				int sampledCharacterIdx = sampleFromDistribution(outputProbDistribution,rng);
+				int sampledCharacterIdx = sampleFromDistribution(outputProbDistribution, rand);
 
 				nextInput.putScalar(new int[]{ s, sampledCharacterIdx }, 1.0);		//Prepare next time step input
-				sb[s].append(iter.convertIndexToCharacter(sampledCharacterIdx));	//Add sampled character to StringBuilder (human readable output)
+				sb[s].append(iter.toWord(sampledCharacterIdx) + " ");	//Add sampled character to StringBuilder (human readable output)
 			}
 
 			output = net.rnnTimeStep(nextInput);	//Do one time step of forward pass

@@ -8,6 +8,7 @@ public class TestMe {
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
+
 		INDArray arr = Nd4j.zeros(2, 3, 4);
 		Random rand = new Random(0);
 		
@@ -27,6 +28,9 @@ public class TestMe {
 		INDArray you = arr.tensorAlongDimension(0, 0, 2);
 		System.out.println(you);
 
+		
 	
+		
+		
 	}
 }
