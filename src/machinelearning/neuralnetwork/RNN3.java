@@ -27,7 +27,7 @@ public class RNN3 {
 		int miniBatchSize = 32;						//Size of mini batch to use when  training
 		int exampleLength = 1000;					//Length of each training example sequence to use. This could certainly be increased
         int tbpttLength = 50;                       //Length for truncated backpropagation through time. i.e., do parameter updates ever 50 characters
-		int numEpochs = 1;							//Total number of training epochs
+		int numEpochs = 100;							//Total number of training epochs
 		int nSamplesToGenerate = 4;					//Number of samples to generate after each training epoch
 		int nCharactersToSample = 300;				//Length of each sample to generate
 		String generationInitialization = null;		//Optional character initialization; a random character is used if null

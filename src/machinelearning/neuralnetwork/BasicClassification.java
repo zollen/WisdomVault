@@ -2,9 +2,23 @@ package machinelearning.neuralnetwork;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import org.deeplearning4j.api.storage.StatsStorage;
+import org.deeplearning4j.datasets.iterator.SamplingDataSetIterator;
+import org.deeplearning4j.earlystopping.EarlyStoppingConfiguration;
+import org.deeplearning4j.earlystopping.EarlyStoppingModelSaver;
+import org.deeplearning4j.earlystopping.EarlyStoppingResult;
+import org.deeplearning4j.earlystopping.saver.InMemoryModelSaver;
+import org.deeplearning4j.earlystopping.scorecalc.DataSetLossCalculator;
+import org.deeplearning4j.earlystopping.termination.MaxEpochsTerminationCondition;
+import org.deeplearning4j.earlystopping.termination.MaxTimeIterationTerminationCondition;
+import org.deeplearning4j.earlystopping.trainer.EarlyStoppingTrainer;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
@@ -13,11 +27,14 @@ import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
-import org.nd4j.evaluation.classification.Evaluation;
+import org.deeplearning4j.ui.api.UIServer;
+import org.deeplearning4j.ui.stats.StatsListener;
+import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.SplitTestAndTrain;
+import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.dataset.api.preprocessor.NormalizerStandardize;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.Sgd;
@@ -36,6 +53,15 @@ public class BasicClassification {
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
+		//Initialize the user interface backend
+	    UIServer uiServer = UIServer.getInstance();
+
+	    //Configure where the network information (gradients, score vs. time etc) is to be stored. Here: store in memory.
+	    StatsStorage statsStorage = new InMemoryStatsStorage();         //Alternative: new FileStatsStorage(File), for saving and loading later
+
+	    //Attach the StatsStorage instance to the UI: this allows the contents of the StatsStorage to be visualized
+	    uiServer.attach(statsStorage);
+	    
 		System.out.println("Preparing data");
 		DataSet data = getData("data/iris.arff.txt");
 		
@@ -51,6 +77,9 @@ public class BasicClassification {
 		normalizer.fit(training);
 		normalizer.transform(training);
 		normalizer.transform(test);
+		
+		DataSetIterator testIter = new SamplingDataSetIterator(training, 10, 15);
+		DataSetIterator trainIter = new SamplingDataSetIterator(test, 10, 15);
 		
 		
 		
@@ -74,20 +103,40 @@ public class BasicClassification {
 		
 		MultiLayerNetwork network = new MultiLayerNetwork(conf);
 		network.init();
-		network.setListeners(new ScoreIterationListener(100));
+		network.setListeners(new ScoreIterationListener(1));
+		//Then add the StatsListener to collect this information from the network, as it trains
+		network.setListeners(new StatsListener(statsStorage));
+		
+		System.out.println(network.summary());
+		
+		EarlyStoppingModelSaver<MultiLayerNetwork> saver = new InMemoryModelSaver<MultiLayerNetwork>();
+		
+		EarlyStoppingConfiguration<MultiLayerNetwork> eac = new EarlyStoppingConfiguration.Builder<MultiLayerNetwork>()
+				.epochTerminationConditions(new MaxEpochsTerminationCondition(100))
+				.iterationTerminationConditions(new MaxTimeIterationTerminationCondition(1, TimeUnit.MINUTES))
+				.scoreCalculator(new DataSetLossCalculator(testIter, true))
+				.evaluateEveryNEpochs(1)
+				.modelSaver(saver)
+				.build();	
+		
+		EarlyStoppingTrainer trainer = new EarlyStoppingTrainer(eac, conf, trainIter);
 		
 		System.out.println("Training model....");
-		for (int i = 0; i < 1000; i++) {
-			network.fit(training);
-		}
+		EarlyStoppingResult<MultiLayerNetwork> result = trainer.fit();
 		
-		
-		System.out.println("Cross-Validating model....");
-		Evaluation eval = new Evaluation(3);
-		INDArray output = network.output(test.getFeatures());
-		eval.eval(test.getLabels(), output);
-		System.out.println(eval.stats());
-		
+		System.out.println("Termination reason: " + result.getTerminationReason());
+        System.out.println("Termination details: " + result.getTerminationDetails());
+        System.out.println("Total epochs: " + result.getTotalEpochs());
+        System.out.println("Best epoch number: " + result.getBestModelEpoch());
+        System.out.println("Score at best epoch: " + result.getBestModelScore());
+        
+        Map<Integer,Double> scoreVsEpoch = result.getScoreVsEpoch();
+        List<Integer> list = new ArrayList<Integer>(scoreVsEpoch.keySet());
+        Collections.sort(list);
+        System.out.println("Score vs. Epoch:");
+        for( Integer i : list){
+            System.out.println(i + "\t" + scoreVsEpoch.get(i));
+        }
 	}
 	
 	private static DataSet getData(String fileName) throws Exception {
