@@ -60,7 +60,7 @@ public class RNN3 {
 
 		MultiLayerNetwork net = new MultiLayerNetwork(conf);
 		net.init();
-		net.setListeners(new ScoreIterationListener(1));
+		net.setListeners(new ScoreIterationListener(100));
 
 		//Print the  number of parameters in the network (and for each layer)
         System.out.println(net.summary());
