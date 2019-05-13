@@ -1,5 +1,6 @@
 package machinelearning.neuralnetwork;
 
+import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
@@ -8,6 +9,9 @@ import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
+import org.deeplearning4j.ui.api.UIServer;
+import org.deeplearning4j.ui.stats.StatsListener;
+import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
 import org.nd4j.evaluation.classification.Evaluation;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -41,7 +45,15 @@ public class XOR3 {
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
+		//Initialize the user interface backend
+	    UIServer uiServer = UIServer.getInstance();
 
+	    //Configure where the network information (gradients, score vs. time etc) is to be stored. Here: store in memory.
+	    StatsStorage statsStorage = new InMemoryStatsStorage();         //Alternative: new FileStatsStorage(File), for saving and loading later
+
+	    //Attach the StatsStorage instance to the UI: this allows the contents of the StatsStorage to be visualized
+	    uiServer.attach(statsStorage);
+	    
 		double rate = 0.05; // learning rate
 		int numEpochs = 10000; // number of epochs to perform
 
@@ -55,21 +67,24 @@ public class XOR3 {
 				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
 				.updater(new Sgd(rate))
 				.list()
-				.layer(0, new DenseLayer.Builder().nIn(2).nOut(4).activation(Activation.SIGMOID)
-						// random initialize weights with values between 0 and 1
-						.weightInit(WeightInit.DISTRIBUTION).build())
+				.layer(0, new DenseLayer.Builder()
+								.nIn(2)
+								.nOut(4)
+								.activation(Activation.SIGMOID)
+								.build())
 				.layer(1,
 						new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
 								.nOut(2)
 								.activation(Activation.SOFTMAX)
-								.weightInit(WeightInit.DISTRIBUTION)
 								.build())
 				.build();
 
 		MultiLayerNetwork network = new MultiLayerNetwork(conf);
 		network.init();
-		network.setListeners(new ScoreIterationListener(100)); // print the score with every iteration
-
+		network.setListeners(new ScoreIterationListener(1)); // print the score with every iteration
+		//Then add the StatsListener to collect this information from the network, as it trains
+		network.setListeners(new StatsListener(statsStorage));
+		
 		System.out.println(network.summary());
 
 		System.out.println("Training model....");

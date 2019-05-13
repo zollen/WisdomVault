@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.datasets.iterator.SamplingDataSetIterator;
 import org.deeplearning4j.earlystopping.EarlyStoppingConfiguration;
 import org.deeplearning4j.earlystopping.EarlyStoppingModelSaver;
@@ -27,9 +26,6 @@ import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
-import org.deeplearning4j.ui.api.UIServer;
-import org.deeplearning4j.ui.stats.StatsListener;
-import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
@@ -53,15 +49,6 @@ public class BasicClassification {
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
-		//Initialize the user interface backend
-	    UIServer uiServer = UIServer.getInstance();
-
-	    //Configure where the network information (gradients, score vs. time etc) is to be stored. Here: store in memory.
-	    StatsStorage statsStorage = new InMemoryStatsStorage();         //Alternative: new FileStatsStorage(File), for saving and loading later
-
-	    //Attach the StatsStorage instance to the UI: this allows the contents of the StatsStorage to be visualized
-	    uiServer.attach(statsStorage);
-	    
 		System.out.println("Preparing data");
 		DataSet data = getData("data/iris.arff.txt");
 		
@@ -104,15 +91,13 @@ public class BasicClassification {
 		MultiLayerNetwork network = new MultiLayerNetwork(conf);
 		network.init();
 		network.setListeners(new ScoreIterationListener(1));
-		//Then add the StatsListener to collect this information from the network, as it trains
-		network.setListeners(new StatsListener(statsStorage));
 		
 		System.out.println(network.summary());
 		
 		EarlyStoppingModelSaver<MultiLayerNetwork> saver = new InMemoryModelSaver<MultiLayerNetwork>();
 		
 		EarlyStoppingConfiguration<MultiLayerNetwork> eac = new EarlyStoppingConfiguration.Builder<MultiLayerNetwork>()
-				.epochTerminationConditions(new MaxEpochsTerminationCondition(100))
+				.epochTerminationConditions(new MaxEpochsTerminationCondition(5))
 				.iterationTerminationConditions(new MaxTimeIterationTerminationCondition(1, TimeUnit.MINUTES))
 				.scoreCalculator(new DataSetLossCalculator(testIter, true))
 				.evaluateEveryNEpochs(1)
