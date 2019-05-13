@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.deeplearning4j.datasets.iterator.SamplingDataSetIterator;
+import org.deeplearning4j.datasets.test.TestDataSetIterator;
 import org.deeplearning4j.earlystopping.EarlyStoppingConfiguration;
 import org.deeplearning4j.earlystopping.EarlyStoppingModelSaver;
 import org.deeplearning4j.earlystopping.EarlyStoppingResult;
@@ -31,6 +31,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.SplitTestAndTrain;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
+import org.nd4j.linalg.dataset.api.iterator.SamplingDataSetIterator;
 import org.nd4j.linalg.dataset.api.preprocessor.NormalizerStandardize;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.Sgd;
@@ -65,8 +66,9 @@ public class BasicClassification {
 		normalizer.transform(training);
 		normalizer.transform(test);
 		
-		DataSetIterator testIter = new SamplingDataSetIterator(training, 10, 15);
-		DataSetIterator trainIter = new SamplingDataSetIterator(test, 10, 15);
+		DataSetIterator testIter = new SamplingDataSetIterator(training, 10, 15, true);
+		DataSetIterator trainIter = new TestDataSetIterator(
+						new SamplingDataSetIterator(test, 10, 15, true));
 		
 		
 		
@@ -97,10 +99,10 @@ public class BasicClassification {
 		EarlyStoppingModelSaver<MultiLayerNetwork> saver = new InMemoryModelSaver<MultiLayerNetwork>();
 		
 		EarlyStoppingConfiguration<MultiLayerNetwork> eac = new EarlyStoppingConfiguration.Builder<MultiLayerNetwork>()
-				.epochTerminationConditions(new MaxEpochsTerminationCondition(5))
-				.iterationTerminationConditions(new MaxTimeIterationTerminationCondition(1, TimeUnit.MINUTES))
+				.epochTerminationConditions(new MaxEpochsTerminationCondition(1000))
+				.iterationTerminationConditions(new MaxTimeIterationTerminationCondition(1, TimeUnit.SECONDS))
 				.scoreCalculator(new DataSetLossCalculator(testIter, true))
-				.evaluateEveryNEpochs(1)
+				.evaluateEveryNEpochs(50)
 				.modelSaver(saver)
 				.build();	
 		
