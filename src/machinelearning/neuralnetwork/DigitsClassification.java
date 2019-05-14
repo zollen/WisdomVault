@@ -22,7 +22,7 @@ import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 import graphics.ImageUtils;
 
-public class DigitsClassifier {
+public class DigitsClassification {
 	
 	private static DecimalFormat ff = new DecimalFormat("0.000");
 
