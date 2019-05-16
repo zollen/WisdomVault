@@ -9,6 +9,7 @@ import java.util.Random;
 import org.apache.commons.io.FilenameUtils;
 import org.datavec.api.io.filters.BalancedPathFilter;
 import org.datavec.api.io.labels.ParentPathLabelGenerator;
+import org.datavec.api.io.labels.PatternPathLabelGenerator;
 import org.datavec.api.split.FileSplit;
 import org.datavec.api.split.InputSplit;
 import org.datavec.image.loader.NativeImageLoader;
@@ -17,7 +18,6 @@ import org.datavec.image.transform.FlipImageTransform;
 import org.datavec.image.transform.ImageTransform;
 import org.datavec.image.transform.PipelineImageTransform;
 import org.datavec.image.transform.WarpImageTransform;
-import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -36,9 +36,6 @@ import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.api.InvocationType;
 import org.deeplearning4j.optimize.listeners.EvaluativeListener;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
-import org.deeplearning4j.ui.api.UIServer;
-import org.deeplearning4j.ui.stats.StatsListener;
-import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
@@ -74,10 +71,10 @@ public class AnimalsClassification {
 
     protected static long seed = 83;
     protected static Random rng = new Random(seed);
-    protected static int epochs = 100;
-    protected static double splitTrainTest = 0.8;
+    protected static int epochs = 30;
+    protected static double splitTrainTest = 0.9;
     protected static boolean save = false;
-    protected static int maxPathsPerLabel=18;
+    protected static int maxPathsPerLabel = 50;
 
     // LeNet, AlexNet or Custom but you need to fill it out
     protected static String modelType = "LeNet"; 
@@ -85,7 +82,7 @@ public class AnimalsClassification {
 
     public void run(String[] args) throws Exception {
         System.out.println("Load data....");
-        /**cd
+        /**
          * Data Setup -> organize and limit data file paths:
          *  - mainPath = path to image files
          *  - fileSplit = define basic dataset split with limits on format
@@ -146,9 +143,6 @@ public class AnimalsClassification {
         }
         network.init();
        
-        UIServer uiServer = UIServer.getInstance();
-        StatsStorage statsStorage = new InMemoryStatsStorage();
-        uiServer.attach(statsStorage);
         /**
          * Data Setup -> define how to load data into net:
          *  - recordReader = the reader that loads and converts image data pass in inputSplit to initialize
@@ -168,8 +162,8 @@ public class AnimalsClassification {
         testIter.setPreProcessor(scaler);
 
         // listeners
-        network.setListeners(new StatsListener(statsStorage), new ScoreIterationListener(1), 
-        		new EvaluativeListener(testIter, 1, InvocationType.EPOCH_END));
+        network.setListeners(new ScoreIterationListener(1), 
+        					new EvaluativeListener(testIter, 1, InvocationType.EPOCH_END));
         
         System.out.println(network.summary());
 
@@ -187,16 +181,38 @@ public class AnimalsClassification {
         trainIter.setPreProcessor(scaler);
         network.fit(trainIter, epochs);
 
-        // Example on how to get predict results with trained model. Result for first example in minibatch is printed
-        trainIter.reset();
-        DataSet testDataSet = trainIter.next();
-        List<String> allClassLabels = trainRR.getLabels();
-        int labelIndex = testDataSet.getLabels().argMax(1).getInt(0);
-        int[] predictedClasses = network.predict(testDataSet.getFeatures());
-        String expectedResult = allClassLabels.get(labelIndex);
-        String modelPrediction = allClassLabels.get(predictedClasses[0]);
-        System.out.print("\nFor a single example that is labeled " + expectedResult + " the model predicted " + modelPrediction + "\n\n");
-
+        
+        // Evaluation test samples
+        DataSetIterator testIter2 = getTestData("img/test_animals");
+        scaler.fit(testIter2);
+        testIter2.setPreProcessor(scaler);
+        
+        double total = 0.0;
+        double correct = 0.0;
+        
+        while (testIter2.hasNext()) {
+        	
+        	DataSet data = testIter2.next();
+        	
+        	List<String> allClassLabels = testIter2.getLabels();
+            int labelIndex = data.getLabels().argMax(1).getInt(0);
+            int[] predictedClasses = network.predict(data.getFeatures());
+            String expectedResult = allClassLabels.get(labelIndex);
+            String modelPrediction = allClassLabels.get(predictedClasses[0]);
+            
+            if (expectedResult.equals(modelPrediction)) {
+            	correct++;
+            	System.out.println("For a single example that is labeled " + expectedResult + " the model predicted " + modelPrediction);
+            }
+            else {
+            	System.err.println("For a single example that is labeled " + expectedResult + " the model predicted " + modelPrediction);
+            }
+            total++;
+        }
+        
+        System.out.println("Accuracy: " + correct / total);
+        
+       
         if (save) {
             System.out.println("Save model....");
             String basePath = FilenameUtils.concat(System.getProperty("user.dir"), "src/main/resources/");
@@ -296,11 +312,26 @@ public class AnimalsClassification {
 
     }
 
-    public static MultiLayerNetwork customModel() {
+    public MultiLayerNetwork customModel() {
         /**
          * Use this method to build your own custom model.
          **/
         return null;
+    }
+    
+    public DataSetIterator getTestData(String path) throws Exception {
+    	
+    	FileSplit fileSplit = new FileSplit(new File(path), NativeImageLoader.ALLOWED_FORMATS);
+    	
+    	InputSplit [] inputSplit = fileSplit.sample(null);
+        InputSplit data = inputSplit[0];
+        
+        PatternPathLabelGenerator labelDecider = new PatternPathLabelGenerator("_", 0);
+        ImageRecordReader reader = new ImageRecordReader(height, width, channels, labelDecider);
+        reader.initialize(data);
+    	
+ 	
+    	return new RecordReaderDataSetIterator(reader, 1, 1, 4);
     }
 
     public static void main(String[] args) throws Exception {
