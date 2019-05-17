@@ -14,9 +14,6 @@ import org.datavec.api.split.FileSplit;
 import org.datavec.api.split.InputSplit;
 import org.datavec.image.loader.NativeImageLoader;
 import org.datavec.image.recordreader.ImageRecordReader;
-import org.datavec.image.transform.BoxImageTransform;
-import org.datavec.image.transform.ColorConversionTransform;
-import org.datavec.image.transform.EqualizeHistTransform;
 import org.datavec.image.transform.FlipImageTransform;
 import org.datavec.image.transform.ImageTransform;
 import org.datavec.image.transform.PipelineImageTransform;
@@ -107,7 +104,8 @@ public class AnimalsClassification {
         InputSplit[] inputSplit = fileSplit.sample(pathFilter, splitTrainTest, 1 - splitTrainTest);
         InputSplit trainData = inputSplit[0];
         InputSplit testData = inputSplit[1];
-
+        
+        
         /**
          * Data Setup -> normalization
          *  - how to normalize images and generate large dataset to train on
@@ -149,7 +147,7 @@ public class AnimalsClassification {
         System.out.println("Train model....");
         // test iterator
         ImageRecordReader testRR = new ImageRecordReader(height, width, channels, labelMaker);
-        testRR.initialize(testData, null);
+        testRR.initialize(testData);
         DataSetIterator testIter = new RecordReaderDataSetIterator(testRR, batchSize, 1, numLabels);
         scaler.fit(testIter);
         testIter.setPreProcessor(scaler);
@@ -161,18 +159,18 @@ public class AnimalsClassification {
         System.out.println(network.summary());
 
         // Train without transformations
-        trainRR.initialize(trainData, null);
+        trainRR.initialize(trainData);
         trainIter = new RecordReaderDataSetIterator(trainRR, batchSize, 1, numLabels);
         scaler.fit(trainIter);
         trainIter.setPreProcessor(scaler);
         network.fit(trainIter, epochs);
         
         // Train without transformations #10
- /*      
-        for (int i = 0; i < 1; i++) {       	
+       
+        for (int i = 0; i < 2; i++) {       	
         	network.fit(getIterator(trainRR, trainData), epochs);
         }
-*/       
+       
 
         
         // Evaluation test samples
@@ -323,19 +321,13 @@ public class AnimalsClassification {
     public DataSetIterator getIterator(ImageRecordReader trainRR, InputSplit trainData) throws Exception {
     	
     	DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
-        ImageTransform flipTransform = new FlipImageTransform(1);
-        ImageTransform colorTransform = new ColorConversionTransform(rng, 36);
-        ImageTransform histTransform = new EqualizeHistTransform(rng, 36);
+        ImageTransform vFlipTransform = new FlipImageTransform(1);
         ImageTransform warpTransform = new WarpImageTransform(rng, 42);
-        ImageTransform rotateTransform = new RotateImageTransform(rng, 90);
-        ImageTransform boxTransform = new BoxImageTransform(rng, width, height);
+        ImageTransform rotateTransform = new RotateImageTransform(rng, 90);     
    
         List<Pair<ImageTransform, Double>> pipeline = Arrays.asList(
-        															new Pair<>(flipTransform, 0.5),
-        															new Pair<>(colorTransform, 0.5),
-        															new Pair<>(histTransform, 0.5),
-        															new Pair<>(boxTransform, 0.5),
-        															new Pair<>(rotateTransform, 0.5),      															
+        															new Pair<>(vFlipTransform, 0.5),       														 
+        															new Pair<>(rotateTransform, 0.5),       													
                                                                     new Pair<>(warpTransform, 0.5)
         															);
 
@@ -353,7 +345,7 @@ public class AnimalsClassification {
     public DataSetIterator getTestData(String path) throws Exception {
     	
     	FileSplit fileSplit = new FileSplit(new File(path), NativeImageLoader.ALLOWED_FORMATS);
-    	
+    
     	InputSplit [] inputSplit = fileSplit.sample(null);
         InputSplit data = inputSplit[0];
         
