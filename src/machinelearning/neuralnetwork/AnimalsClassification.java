@@ -332,8 +332,8 @@ public class AnimalsClassification {
    
         List<Pair<ImageTransform, Double>> pipeline = Arrays.asList(
         															new Pair<>(flipTransform, 0.5),
-        															new Pair<>(colorTransform, 1.0),
-        															new Pair<>(histTransform, 1.0),
+        															new Pair<>(colorTransform, 0.5),
+        															new Pair<>(histTransform, 0.5),
         															new Pair<>(boxTransform, 0.5),
         															new Pair<>(rotateTransform, 0.5),      															
                                                                     new Pair<>(warpTransform, 0.5)
