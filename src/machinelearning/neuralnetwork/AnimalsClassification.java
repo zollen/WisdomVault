@@ -2,7 +2,6 @@ package machinelearning.neuralnetwork;
 
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -14,10 +13,6 @@ import org.datavec.api.split.FileSplit;
 import org.datavec.api.split.InputSplit;
 import org.datavec.image.loader.NativeImageLoader;
 import org.datavec.image.recordreader.ImageRecordReader;
-import org.datavec.image.transform.FlipImageTransform;
-import org.datavec.image.transform.ImageTransform;
-import org.datavec.image.transform.PipelineImageTransform;
-import org.datavec.image.transform.WarpImageTransform;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -43,7 +38,6 @@ import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.dataset.api.preprocessor.ImagePreProcessingScaler;
 import org.nd4j.linalg.learning.config.AdaDelta;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
-import org.nd4j.linalg.primitives.Pair;
 
 /**
  * Animal Classification
@@ -103,19 +97,7 @@ public class AnimalsClassification {
         InputSplit trainData = inputSplit[0];
         InputSplit testData = inputSplit[1];
 
-        /**
-         * Data Setup -> transformation
-         *  - Transform = how to tranform images and generate large dataset to train on
-         **/
-        ImageTransform flipTransform1 = new FlipImageTransform(rng);
-        ImageTransform flipTransform2 = new FlipImageTransform(new Random(123));
-        ImageTransform warpTransform = new WarpImageTransform(rng, 42);
-        boolean shuffle = false;
-        List<Pair<ImageTransform,Double>> pipeline = Arrays.asList(new Pair<>(flipTransform1,0.9),
-                                                                   new Pair<>(flipTransform2,0.8),
-                                                                   new Pair<>(warpTransform,0.5));
 
-        ImageTransform transform = new PipelineImageTransform(pipeline,shuffle);
         /**
          * Data Setup -> normalization
          *  - how to normalize images and generate large dataset to train on
@@ -125,7 +107,8 @@ public class AnimalsClassification {
         System.out.println("Build model....");
 
         // Uncomment below to try AlexNet. Note change height and width to at least 100
-//        MultiLayerNetwork network = new AlexNet(height, width, channels, numLabels, seed, iterations).init();
+        // MultiLayerNetwork network = new AlexNet(height, width, channels, numLabels, 
+        // seed, iterations).init();
 
         MultiLayerNetwork network;
         switch (modelType) {
@@ -169,13 +152,6 @@ public class AnimalsClassification {
 
         // Train without transformations
         trainRR.initialize(trainData, null);
-        trainIter = new RecordReaderDataSetIterator(trainRR, batchSize, 1, numLabels);
-        scaler.fit(trainIter);
-        trainIter.setPreProcessor(scaler);
-        network.fit(trainIter, epochs);
-
-        // Train with transformations
-        trainRR.initialize(trainData, transform);
         trainIter = new RecordReaderDataSetIterator(trainRR, batchSize, 1, numLabels);
         scaler.fit(trainIter);
         trainIter.setPreProcessor(scaler);
