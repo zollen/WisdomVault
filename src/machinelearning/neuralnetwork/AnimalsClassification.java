@@ -179,10 +179,10 @@ public class AnimalsClassification {
             
             if (expectedResult.equals(modelPrediction)) {
             	correct++;
-            	System.out.println("For a single example that is labeled " + expectedResult + " the model predicted " + modelPrediction);
+            	System.out.println("For a single example that is labeled [" + expectedResult + "], and the model predicted [" + modelPrediction + "]");
             }
             else {
-            	System.err.println("For a single example that is labeled " + expectedResult + " the model predicted " + modelPrediction);
+            	System.err.println("For a single example that is labeled [" + expectedResult + "], but the model predicted [" + modelPrediction + "]");
             }
             total++;
         }
