@@ -153,8 +153,8 @@ public class AnimalsClassification {
         testIter.setPreProcessor(scaler);
 
         // listeners
-        network.setListeners(new ScoreIterationListener(1), 
-        					new EvaluativeListener(testIter, 1, InvocationType.EPOCH_END));
+        network.setListeners(new ScoreIterationListener(10), 
+        					new EvaluativeListener(testIter, 10, InvocationType.EPOCH_END));
         
         System.out.println(network.summary());
 
