@@ -73,7 +73,7 @@ public class AnimalsClassification {
 
     protected static long seed = 83;
     protected static Random rng = new Random(seed);
-    protected static int epochs = 46;
+    protected static int epochs = 150;
     protected static double splitTrainTest = 0.9;
     protected static boolean save = false;
     protected static int maxPathsPerLabel = 80;
@@ -168,7 +168,7 @@ public class AnimalsClassification {
         // Train without transformations #10
        
         for (int i = 0; i < 2; i++) {       	
-//        	network.fit(getIterator(trainRR, trainData), epochs);
+        	network.fit(getIterator(trainRR, trainData), epochs);
         }
        
 
@@ -189,7 +189,7 @@ public class AnimalsClassification {
     	
     	// Evaluation test samples
     	DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
-        DataSetIterator iter = getTestData("img/test_animals");
+    	RecordReaderDataSetIterator iter = getTestData("img/test_animals");
         scaler.fit(iter);
         iter.setPreProcessor(scaler);
         
@@ -199,6 +199,8 @@ public class AnimalsClassification {
         while (iter.hasNext()) {
         	
         	DataSet data = iter.next();
+        	ImageRecordReader reader = (ImageRecordReader) iter.getRecordReader();
+        	File file = reader.getCurrentFile();
         	
         	List<String> allClassLabels = iter.getLabels();
             int labelIndex = data.getLabels().argMax(1).getInt(0);
@@ -208,10 +210,10 @@ public class AnimalsClassification {
             
             if (expectedResult.equals(modelPrediction)) {
             	correct++;
-            	System.out.println("That is labeled [" + expectedResult + "], and the model predicted [" + modelPrediction + "]");
+            	System.out.println(file.getName() + " labeled [" + expectedResult + "], and the model predicted [" + modelPrediction + "]");
             }
             else {
-            	System.err.println("That is labeled [" + expectedResult + "], but the model predicted [" + modelPrediction + "]");
+            	System.err.println(file.getName() + " labeled [" + expectedResult + "], but the model predicted [" + modelPrediction + "]");
             }
             total++;
         }
@@ -342,7 +344,7 @@ public class AnimalsClassification {
 
     }
     
-    public DataSetIterator getTestData(String path) throws Exception {
+    public RecordReaderDataSetIterator getTestData(String path) throws Exception {
     	
     	FileSplit fileSplit = new FileSplit(new File(path), NativeImageLoader.ALLOWED_FORMATS);
     
@@ -360,5 +362,4 @@ public class AnimalsClassification {
     public static void main(String[] args) throws Exception {
         new AnimalsClassification().run(args);
     }
-
 }
