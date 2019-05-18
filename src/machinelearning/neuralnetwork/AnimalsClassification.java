@@ -73,10 +73,10 @@ public class AnimalsClassification {
 
     protected static long seed = 83;
     protected static Random rng = new Random(seed);
-    protected static int epochs = 30;
+    protected static int epochs = 46;
     protected static double splitTrainTest = 0.9;
     protected static boolean save = false;
-    protected static int maxPathsPerLabel = 60;
+    protected static int maxPathsPerLabel = 80;
 
     // LeNet, AlexNet or Custom but you need to fill it out
     protected static String modelType = "LeNet"; 
@@ -168,7 +168,7 @@ public class AnimalsClassification {
         // Train without transformations #10
        
         for (int i = 0; i < 2; i++) {       	
-        	network.fit(getIterator(trainRR, trainData), epochs);
+//        	network.fit(getIterator(trainRR, trainData), epochs);
         }
        
 
