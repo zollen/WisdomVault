@@ -322,7 +322,7 @@ public class AnimalsClassification {
     	
     	DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
         ImageTransform vFlipTransform = new FlipImageTransform(1);
-        ImageTransform warpTransform = new WarpImageTransform(rng, 42);
+        ImageTransform warpTransform = new WarpImageTransform(rng, 30);
         ImageTransform rotateTransform = new RotateImageTransform(rng, 90);     
    
         List<Pair<ImageTransform, Double>> pipeline = Arrays.asList(
