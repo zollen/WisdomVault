@@ -76,7 +76,7 @@ public class AnimalsClassification {
     protected static int epochs = 30;
     protected static double splitTrainTest = 0.9;
     protected static boolean save = false;
-    protected static int maxPathsPerLabel = 60;
+    protected static int maxPathsPerLabel = 0;
 
     // LeNet, AlexNet or Custom but you need to fill it out
     protected static String modelType = "LeNet"; 
