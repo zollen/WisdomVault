@@ -74,7 +74,7 @@ public class AnimalsClassification {
     protected static Random rng = new Random(seed);
     protected static int epochs = 150;
     protected static double splitTrainTest = 0.9;
-    protected static boolean save = true;
+    protected static boolean save = false;
     protected static int maxPathsPerLabel = 80;
 
     // LeNet, AlexNet or Custom but you need to fill it out
