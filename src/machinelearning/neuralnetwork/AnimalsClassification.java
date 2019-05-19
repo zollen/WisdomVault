@@ -68,14 +68,14 @@ public class AnimalsClassification {
     protected static int height = 100;
     protected static int width = 100;
     protected static int channels = 3;
-    protected static int batchSize = 40;
+    protected static int batchSize = 45;
 
     protected static long seed = 83;
     protected static Random rng = new Random(seed);
-    protected static int epochs = 150;
+    protected static int epochs = 100;
     protected static double splitTrainTest = 0.9;
-    protected static boolean save = false;
-    protected static int maxPathsPerLabel = 80;
+    protected static boolean save = true;
+    protected static int maxPathsPerLabel = 90;
 
     // LeNet, AlexNet or Custom but you need to fill it out
     protected static String modelType = "LeNet"; 
