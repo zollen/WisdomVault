@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.commons.io.FilenameUtils;
 import org.datavec.api.io.filters.BalancedPathFilter;
 import org.datavec.api.io.labels.ParentPathLabelGenerator;
 import org.datavec.api.io.labels.PatternPathLabelGenerator;
@@ -75,7 +74,7 @@ public class AnimalsClassification {
     protected static Random rng = new Random(seed);
     protected static int epochs = 150;
     protected static double splitTrainTest = 0.9;
-    protected static boolean save = false;
+    protected static boolean save = true;
     protected static int maxPathsPerLabel = 80;
 
     // LeNet, AlexNet or Custom but you need to fill it out
@@ -168,7 +167,7 @@ public class AnimalsClassification {
         // Train without transformations #10
        
         for (int i = 0; i < 2; i++) {       	
-        	network.fit(getIterator(trainRR, trainData), epochs);
+//        	network.fit(getIterator(trainRR, trainData), epochs);
         }
        
 
@@ -179,8 +178,7 @@ public class AnimalsClassification {
        
         if (save) {
             System.out.println("Save model....");
-            String basePath = FilenameUtils.concat(System.getProperty("user.dir"), "src/main/resources/");
-            network.save(new File(basePath + "model.bin"));
+            network.save(new File("data/lenet.model"));
         }
         System.out.println("****************Example finished********************");
     }
