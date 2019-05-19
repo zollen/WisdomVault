@@ -72,7 +72,7 @@ public class AnimalsClassification {
 
     protected static long seed = 83;
     protected static Random rng = new Random(seed);
-    protected static int epochs = 100;
+    protected static int epochs = 107;
     protected static double splitTrainTest = 0.9;
     protected static boolean save = true;
     protected static int maxPathsPerLabel = 90;
