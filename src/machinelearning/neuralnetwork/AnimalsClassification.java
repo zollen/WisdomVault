@@ -72,7 +72,7 @@ public class AnimalsClassification {
 
     protected static long seed = 83;
     protected static Random rng = new Random(seed);
-    protected static int epochs = 35;
+    protected static int epochs = 32;
     protected static double splitTrainTest = 0.9;
     protected static boolean save = true;
     protected static int maxPathsPerLabel = 90;
@@ -166,8 +166,8 @@ public class AnimalsClassification {
         
         // Train without transformations #10
        
-        for (int i = 0; i < 2; i++) {       	
-//        	network.fit(getIterator(trainRR, trainData), epochs);
+        for (int i = 0; i < 1; i++) {       	
+        	network.fit(getIterator(trainRR, trainData), epochs);
         }
        
 
@@ -333,7 +333,7 @@ public class AnimalsClassification {
 
         ImageTransform transform = new PipelineImageTransform(pipeline, true);
         
-        trainRR.initialize(trainData, transform);
+        trainRR.initialize(trainData, vFlipTransform);
         DataSetIterator trainIter = new RecordReaderDataSetIterator(trainRR, batchSize, 1, numLabels);
         scaler.fit(trainIter);
         trainIter.setPreProcessor(scaler);
