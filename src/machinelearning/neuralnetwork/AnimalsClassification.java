@@ -68,11 +68,11 @@ public class AnimalsClassification {
     protected static int height = 100;
     protected static int width = 100;
     protected static int channels = 3;
-    protected static int batchSize = 45;
+    protected static int batchSize = 30;
 
     protected static long seed = 83;
     protected static Random rng = new Random(seed);
-    protected static int epochs = 107;
+    protected static int epochs = 35;
     protected static double splitTrainTest = 0.9;
     protected static boolean save = true;
     protected static int maxPathsPerLabel = 90;
