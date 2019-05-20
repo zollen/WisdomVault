@@ -14,12 +14,14 @@ import org.datavec.image.loader.NativeImageLoader;
 import org.datavec.image.recordreader.ImageRecordReader;
 import org.datavec.image.transform.FlipImageTransform;
 import org.datavec.image.transform.ImageTransform;
+import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.ComputationGraphConfiguration;
 import org.deeplearning4j.nn.conf.ConvolutionMode;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.WorkspaceMode;
+import org.deeplearning4j.nn.conf.graph.L2NormalizeVertex;
 import org.deeplearning4j.nn.conf.graph.MergeVertex;
 import org.deeplearning4j.nn.conf.inputs.InputType;
 import org.deeplearning4j.nn.conf.layers.ActivationLayer;
@@ -33,13 +35,16 @@ import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.api.InvocationType;
 import org.deeplearning4j.optimize.listeners.EvaluativeListener;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
+import org.deeplearning4j.ui.api.UIServer;
+import org.deeplearning4j.ui.stats.StatsListener;
+import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.dataset.api.preprocessor.ImagePreProcessingScaler;
-import org.nd4j.linalg.learning.config.AdaDelta;
+import org.nd4j.linalg.learning.config.RmsProp;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 
@@ -49,17 +54,24 @@ public class AnimalsClassification2 {
     protected static int width = 100;
     protected static int channels = 3;
     protected static int batchSize = 30;
-  
-    protected static long seed = 83;
-    protected static Random rng = new Random(seed);
-    protected static int epochs = 32;
+    protected static double learningRate = 0.01;
+    protected static int epochs = 40;
+    protected static int embedding = 128;
+    
     protected static double splitTrainTest = 0.9;
     protected static boolean save = true;
     protected static int maxPathsPerLabel = 90;
+    protected static long seed = 83;
+    protected static Random rng = new Random(seed);
 
     private int numLabels;
 
     public void run(String[] args) throws Exception {
+    	UIServer uiServer = UIServer.getInstance();	  
+	    StatsStorage statsStorage = new InMemoryStatsStorage();        
+	    uiServer.attach(statsStorage);
+	    
+	    
         System.out.println("Load data....");
         /**
          * Data Setup -> organize and limit data file paths:
@@ -119,6 +131,8 @@ public class AnimalsClassification2 {
         // listeners
         network.setListeners(new ScoreIterationListener(10), 
         					new EvaluativeListener(testIter, 10, InvocationType.EPOCH_END));
+        
+        network.setListeners(new StatsListener(statsStorage));
         
         System.out.println(network.summary());
 
@@ -188,11 +202,12 @@ public class AnimalsClassification2 {
     public ComputationGraph skynetModel() {
     	
 		ComputationGraphConfiguration.GraphBuilder graph = new NeuralNetConfiguration.Builder()
-				.seed(seed).l2(0.005)
+				.seed(seed)
+				.l2(0.005)
 				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
 				.activation(Activation.RELU)
 				.weightInit(WeightInit.XAVIER)
-				.updater(new AdaDelta())
+				.updater(new RmsProp(learningRate))
 				.convolutionMode(ConvolutionMode.Same)
 				.inferenceWorkspaceMode(WorkspaceMode.ENABLED)
 				.trainingWorkspaceMode(WorkspaceMode.ENABLED)
@@ -201,57 +216,62 @@ public class AnimalsClassification2 {
 		ComputationGraphConfiguration conf = graph
 			.addInputs("inputs1").setInputTypes(InputType.convolutional(height, width, channels))
 			
-			.addLayer("incept-1-1", convolution("1x1c", channels, 1, new int[] { 1, 1 }, new int[] { 1, 1 }), 
+			.addLayer("1.1-1x1", convolution("1x1c", channels, 1, new int[] { 1, 1 }, new int[] { 1, 1 }), 
 					"inputs1")
-			.addLayer("incept-1-2", batchNormalization("batch1"), 
-					"incept-1-1")
-			.addLayer("incept-1-3", activation("activation1", Activation.RELU), 
-					"incept-1-2")
+			.addLayer("1.2-batch", batchNormalization("batch"), 
+					"1.1-1x1")
+			.addLayer("1.3-activation", activation("activation", Activation.RELU), 
+					"1.2-batch")
 		
-			.addLayer("incept-2-1", convolution("1x1c", channels, 1, new int[] { 1, 1 }, new int[] { 1, 1 }), 
+			.addLayer("2.1-1x1", convolution("1x1c", channels, 1, new int[] { 1, 1 }, new int[] { 1, 1 }), 
 					"inputs1")
-			.addLayer("incept-2-2", convolution("3x3c", 50, 50, new int[] { 3, 3 }, new int[] { 1, 1 }, new int [] { 0, 0 }), 
-					"incept-2-1")	
-			.addLayer("incept-2-3a", convolution("3x1c", 50, 50, new int[] { 3, 1 }, new int[] { 1, 1 }, new int [] { 0, 0 }), 
-					"incept-2-2")
-			.addLayer("incept-2-3b", convolution("1x3c", 50, 50, new int[] { 1, 3 }, new int[] { 1, 1 }, new int [] { 0, 0 }), 
-					"incept-2-2")		
-			.addVertex("vertex-2-4", new MergeVertex(), 
-					"incept-2-3a", "incept-2-3b")
-			.addLayer("incept-2-5", batchNormalization("batch1"), 
-					"vertex-2-4")
-			.addLayer("incept-2-6", activation("activation1", Activation.RELU), 
-					"incept-2-5")
+			.addLayer("2.2-3x3", convolution("3x3c", 1, 1, new int[] { 3, 3 }, new int[] { 1, 1 }), 
+					"2.1-1x1")	
+			.addLayer("2.3-3x1", convolution("3x1c", 1, 1, new int[] { 3, 1 }, new int[] { 1, 1 }), 
+					"2.2-3x3")
+			.addLayer("2.3-1x3", convolution("1x3c", 1, 1, new int[] { 1, 3 }, new int[] { 1, 1 }), 
+					"2.2-3x3")		
+			.addVertex("2.4-vertex", new MergeVertex(), 
+					"2.3-3x1", "2.3-1x3")
+			.addLayer("2.5-batch", batchNormalization("batch"), 
+					"2.4-vertex")
+			.addLayer("2.6-activation", activation("activation", Activation.RELU), 
+					"2.5-batch")
 						
-			.addLayer("incept-3-1", convolution("1x1c", channels, 1, new int[] { 1, 1 }, new int[] { 1, 1 }),
+			.addLayer("3.1-1x1", convolution("1x1c", channels, 1, new int[] { 1, 1 }, new int[] { 1, 1 }),
 					"inputs1")
-			.addLayer("incept-3-2a", convolution("3x1c", 50, 50, new int[] { 3, 1 }, new int[] { 1, 1 }), 
-					"incept-3-1")
-			.addLayer("incept-3-2b", convolution("1x3c", 50, 50, new int[] { 1, 3 }, new int[] { 1, 1 }), 
-					"incept-3-1")			
-			.addVertex("vertex-3-3", new MergeVertex(), 
-					"incept-3-2a", "incept-3-2b")
-			.addLayer("incept-3-4", batchNormalization("batch1"), 
-					"vertex-3-3")
-			.addLayer("incept-3-5", activation("activation1", Activation.RELU), 
-					"incept-3-4")
+			.addLayer("3.2-3x1", convolution("3x1c", 1, 1, new int[] { 3, 1 }, new int[] { 1, 1 }), 
+					"3.1-1x1")
+			.addLayer("3.2-1x3", convolution("1x3c", 1, 1, new int[] { 1, 3 }, new int[] { 1, 1 }), 
+					"3.1-1x1")			
+			.addVertex("3.3-vertex", new MergeVertex(), 
+					"3.2-3x1", "3.2-1x3")
+			.addLayer("3.4-batch", batchNormalization("batch"), 
+					"3.3-vertex")
+			.addLayer("3.5-activation", activation("activation", Activation.RELU), 
+					"3.4-batch")
 		
-			.addVertex("incept-123", new MergeVertex(),
-					"incept-1-3", "incept-2-6", "incept-3-5")
+			.addVertex("4.1-vertex", new MergeVertex(),
+					"1.3-activation", "2.6-activation", "3.5-activation")
 			
-			.addLayer("incept-4-1", maxPooling("maxpool4", new int[] { 2, 2 }), 
-					"incept-123")
+			.addLayer("4.2-maxpool", maxPooling("maxpool", new int[] { 2, 2 }), 
+					"4.1-vertex")
 		
-			.addLayer("incept-5", new DenseLayer.Builder().nIn(500).nOut(500).dropOut(0.5).build(), 
-					"incept-4-1")
+			.addLayer("4.3-dense", new DenseLayer.Builder().name("dense")
+					.nOut(embedding).build(), 
+					"4.2-maxpool")
 			
-			.addLayer("incept-6", new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
-					.nIn(500)
+			.addVertex("4.4-embedding", new L2NormalizeVertex(new int[] {1}, 1e-6),
+					 "4.3-dense")
+			
+			.addLayer("4.4-output", new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
+					.name("output")
+					.nIn(embedding)
 					.nOut(numLabels)
                 .activation(Activation.SOFTMAX).build(), 
-                "incept-5")
+                "4.4-embedding")
 			
-			.setOutputs("incept-6")
+			.setOutputs("4.4-output")
             .build();
 		
 		
@@ -292,7 +312,7 @@ public class AnimalsClassification2 {
     }
     
     public static ActivationLayer activation(String name, Activation algo) {
-    	return new ActivationLayer.Builder().name(name).activation(algo).dropOut(0.2).build();
+    	return new ActivationLayer.Builder().name(name).activation(algo).dropOut(0.1).build();
     }
     
     public static BatchNormalization batchNormalization(String name) {
