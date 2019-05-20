@@ -2,7 +2,6 @@ package machinelearning.neuralnetwork;
 
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -15,9 +14,6 @@ import org.datavec.image.loader.NativeImageLoader;
 import org.datavec.image.recordreader.ImageRecordReader;
 import org.datavec.image.transform.FlipImageTransform;
 import org.datavec.image.transform.ImageTransform;
-import org.datavec.image.transform.PipelineImageTransform;
-import org.datavec.image.transform.RotateImageTransform;
-import org.datavec.image.transform.WarpImageTransform;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.GradientNormalization;
@@ -44,7 +40,6 @@ import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.dataset.api.preprocessor.ImagePreProcessingScaler;
 import org.nd4j.linalg.learning.config.AdaDelta;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
-import org.nd4j.linalg.primitives.Pair;
 
 /**
  * Animal Classification
@@ -63,7 +58,7 @@ import org.nd4j.linalg.primitives.Pair;
  *  - Tune by adjusting learning rate, updaters, activation & loss functions, regularization, ...
  */
 
-public class AnimalsClassification {
+public class AnimalsClassification1 {
     
     protected static int height = 100;
     protected static int width = 100;
@@ -322,6 +317,7 @@ public class AnimalsClassification {
     	
     	DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
         ImageTransform vFlipTransform = new FlipImageTransform(1);
+/*
         ImageTransform warpTransform = new WarpImageTransform(rng, 30);
         ImageTransform rotateTransform = new RotateImageTransform(rng, 90);     
    
@@ -332,7 +328,7 @@ public class AnimalsClassification {
         															);
 
         ImageTransform transform = new PipelineImageTransform(pipeline, true);
-        
+*/       
         trainRR.initialize(trainData, vFlipTransform);
         DataSetIterator trainIter = new RecordReaderDataSetIterator(trainRR, batchSize, 1, numLabels);
         scaler.fit(trainIter);
@@ -358,6 +354,6 @@ public class AnimalsClassification {
     }
 
     public static void main(String[] args) throws Exception {
-        new AnimalsClassification().run(args);
+        new AnimalsClassification1().run(args);
     }
 }
