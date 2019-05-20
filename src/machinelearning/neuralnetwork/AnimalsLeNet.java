@@ -34,6 +34,7 @@ public class AnimalsLeNet {
 		// TODO Auto-generated method stub
 		MultiLayerNetwork network = MultiLayerNetwork.load(new File("data/lenet.model"), false);
 		
+		System.out.println("Begin examining testset...");
 		eval(network);
 	}
 	
