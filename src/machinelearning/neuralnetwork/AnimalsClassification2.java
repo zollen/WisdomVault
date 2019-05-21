@@ -14,11 +14,11 @@ import org.datavec.image.loader.NativeImageLoader;
 import org.datavec.image.recordreader.ImageRecordReader;
 import org.datavec.image.transform.FlipImageTransform;
 import org.datavec.image.transform.ImageTransform;
-import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.ComputationGraphConfiguration;
 import org.deeplearning4j.nn.conf.ConvolutionMode;
+import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.WorkspaceMode;
 import org.deeplearning4j.nn.conf.graph.L2NormalizeVertex;
@@ -26,6 +26,7 @@ import org.deeplearning4j.nn.conf.graph.MergeVertex;
 import org.deeplearning4j.nn.conf.inputs.InputType;
 import org.deeplearning4j.nn.conf.layers.ActivationLayer;
 import org.deeplearning4j.nn.conf.layers.BatchNormalization;
+import org.deeplearning4j.nn.conf.layers.CenterLossOutputLayer;
 import org.deeplearning4j.nn.conf.layers.ConvolutionLayer;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
@@ -35,31 +36,33 @@ import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.api.InvocationType;
 import org.deeplearning4j.optimize.listeners.EvaluativeListener;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
-import org.deeplearning4j.ui.api.UIServer;
-import org.deeplearning4j.ui.stats.StatsListener;
-import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.api.ops.impl.indexaccum.IAMax;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.dataset.api.preprocessor.ImagePreProcessingScaler;
+import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.learning.config.AdaDelta;
 import org.nd4j.linalg.learning.config.RmsProp;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 
 public class AnimalsClassification2 {
     
+	// hyper-parameters
+    protected static int batchSize = 30;
+    protected static double learningRate = 0.01;
+    protected static int epochs = 35;
+    protected static int embedding = 128;
+    
     protected static int height = 100;
     protected static int width = 100;
     protected static int channels = 3;
-    protected static int batchSize = 30;
-    protected static double learningRate = 0.01;
-    protected static int epochs = 40;
-    protected static int embedding = 128;
     
+    protected static boolean save = false;
     protected static double splitTrainTest = 0.9;
-    protected static boolean save = true;
     protected static int maxPathsPerLabel = 90;
     protected static long seed = 83;
     protected static Random rng = new Random(seed);
@@ -67,11 +70,6 @@ public class AnimalsClassification2 {
     private int numLabels;
 
     public void run(String[] args) throws Exception {
-    	UIServer uiServer = UIServer.getInstance();	  
-	    StatsStorage statsStorage = new InMemoryStatsStorage();        
-	    uiServer.attach(statsStorage);
-	    
-	    
         System.out.println("Load data....");
         /**
          * Data Setup -> organize and limit data file paths:
@@ -131,8 +129,7 @@ public class AnimalsClassification2 {
         // listeners
         network.setListeners(new ScoreIterationListener(10), 
         					new EvaluativeListener(testIter, 10, InvocationType.EPOCH_END));
-        
-        network.setListeners(new StatsListener(statsStorage));
+       
         
         System.out.println(network.summary());
 
@@ -182,8 +179,11 @@ public class AnimalsClassification2 {
         	List<String> allClassLabels = iter.getLabels();
             int labelIndex = data.getLabels().argMax(1).getInt(0);
             INDArray [] predictedClasses = network.output(false, data.getFeatures());
+            
+            int expected = Nd4j.getExecutioner().exec(new IAMax(predictedClasses[0])).getInt(0);
+            		
             String expectedResult = allClassLabels.get(labelIndex);
-            String modelPrediction = allClassLabels.get(predictedClasses[0].getInt(0));
+            String modelPrediction = allClassLabels.get(expected);
             
             if (expectedResult.equals(modelPrediction)) {
             	correct++;
@@ -198,6 +198,47 @@ public class AnimalsClassification2 {
         System.out.println("Accuracy: " + correct / total);
     }
 
+    
+    public ComputationGraph playModel() {
+    	
+    	ComputationGraphConfiguration.GraphBuilder graph = new NeuralNetConfiguration.Builder()
+				.seed(seed)
+				.l2(0.005)
+				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
+				.activation(Activation.RELU)
+				.weightInit(WeightInit.XAVIER)
+				.updater(new AdaDelta())
+				.convolutionMode(ConvolutionMode.Same)
+				.inferenceWorkspaceMode(WorkspaceMode.ENABLED)
+				.trainingWorkspaceMode(WorkspaceMode.ENABLED)
+				.graphBuilder();
+
+		ComputationGraphConfiguration conf = graph
+				
+			.addInputs("inputs1").setInputTypes(InputType.convolutional(height, width, channels))
+			
+			.addLayer("1.1-5x5", convolution("5x5c", channels, 50, new int[] { 5, 5 }, new int[] { 1, 1 }), 
+					"inputs1")
+			.addLayer("1.2-maxpool", maxPooling("maxpool", new int[] { 2, 2 }, new int[] {2, 2}), 
+					"1.1-5x5")
+			.addLayer("1.3-5x5", convolution("5x5c", 50, 50, new int[] { 5, 5 }, new int[] { 1, 1 }),
+					"1.2-maxpool")
+			.addLayer("1.4-maxpool", maxPooling("maxpool", new int[] { 2, 2 }, new int[] {2, 2}), 
+					"1.3-5x5")
+			.addLayer("1.5-dense", new DenseLayer.Builder().nOut(500).build(), 
+					"1.4-maxpool")
+			.addLayer("1.6-output", new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
+					.nOut(numLabels)
+	                .activation(Activation.SOFTMAX)
+					.build(), 
+					"1.5-dense")
+			.setOutputs("1.6-output")
+            .build();
+		
+		
+		
+		return new ComputationGraph(conf);
+    }
    
     public ComputationGraph skynetModel() {
     	
@@ -254,24 +295,71 @@ public class AnimalsClassification2 {
 			.addVertex("4.1-vertex", new MergeVertex(),
 					"1.3-activation", "2.6-activation", "3.5-activation")
 			
-			.addLayer("4.2-maxpool", maxPooling("maxpool", new int[] { 2, 2 }), 
+			
+			
+			.addLayer("5.1-1x1", convolution("1x1c", 5, 1, new int[] { 1, 1 }, new int[] { 1, 1 }), 
 					"4.1-vertex")
+			.addLayer("5.2-batch", batchNormalization("batch"), 
+					"5.1-1x1")
+			.addLayer("5.3-activation", activation("activation", Activation.RELU), 
+					"5.2-batch")
 		
-			.addLayer("4.3-dense", new DenseLayer.Builder().name("dense")
-					.nOut(embedding).build(), 
-					"4.2-maxpool")
+			.addLayer("6.1-1x1", convolution("1x1c", 5, 1, new int[] { 1, 1 }, new int[] { 1, 1 }), 
+					"4.1-vertex")
+			.addLayer("6.2-3x3", convolution("3x3c", 1, 1, new int[] { 3, 3 }, new int[] { 1, 1 }), 
+					"6.1-1x1")	
+			.addLayer("6.3-3x1", convolution("3x1c", 1, 1, new int[] { 3, 1 }, new int[] { 1, 1 }), 
+					"6.2-3x3")
+			.addLayer("6.3-1x3", convolution("1x3c", 1, 1, new int[] { 1, 3 }, new int[] { 1, 1 }), 
+					"6.2-3x3")		
+			.addVertex("6.4-vertex", new MergeVertex(), 
+					"6.3-3x1", "6.3-1x3")
+			.addLayer("6.5-batch", batchNormalization("batch"), 
+					"6.4-vertex")
+			.addLayer("6.6-activation", activation("activation", Activation.RELU), 
+					"6.5-batch")
+						
+			.addLayer("7.1-1x1", convolution("1x1c", 5, 1, new int[] { 1, 1 }, new int[] { 1, 1 }),
+					"4.1-vertex")
+			.addLayer("7.2-3x1", convolution("3x1c", 1, 1, new int[] { 3, 1 }, new int[] { 1, 1 }), 
+					"7.1-1x1")
+			.addLayer("7.2-1x3", convolution("1x3c", 1, 1, new int[] { 1, 3 }, new int[] { 1, 1 }), 
+					"7.1-1x1")			
+			.addVertex("7.3-vertex", new MergeVertex(), 
+					"7.2-3x1", "7.2-1x3")
+			.addLayer("7.4-batch", batchNormalization("batch"), 
+					"7.3-vertex")
+			.addLayer("7.5-activation", activation("activation", Activation.RELU), 
+					"7.4-batch")
+		
+			.addVertex("8.1-vertex", new MergeVertex(),
+					"5.3-activation", "6.6-activation", "7.5-activation")
 			
-			.addVertex("4.4-embedding", new L2NormalizeVertex(new int[] {1}, 1e-6),
-					 "4.3-dense")
 			
-			.addLayer("4.4-output", new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
+			
+			
+			.addLayer("8.2-maxpool", maxPooling("maxpool", new int[] { 2, 2 }), 
+					"8.1-vertex")
+		
+			.addLayer("8.3-dense", new DenseLayer.Builder().name("dense")
+					.nOut(500).build(), 
+					"8.2-maxpool")
+			
+			.addVertex("8.4-embedding", new L2NormalizeVertex(new int[] {1}, 1e-6),
+					 "8.3-dense")
+			
+			.addLayer("8.4-output", new CenterLossOutputLayer.Builder(LossFunctions.LossFunction.SQUARED_LOSS)
 					.name("output")
 					.nIn(embedding)
 					.nOut(numLabels)
-                .activation(Activation.SOFTMAX).build(), 
-                "4.4-embedding")
+					.lambda(1e-4)
+					.alpha(0.9)
+					.gradientNormalization(GradientNormalization.RenormalizeL2PerLayer)
+					.activation(Activation.SOFTMAX).build(), 
+					"8.4-embedding")
+
 			
-			.setOutputs("4.4-output")
+			.setOutputs("8.4-output")
             .build();
 		
 		
