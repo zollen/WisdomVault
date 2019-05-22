@@ -7,6 +7,7 @@ import java.util.Random;
 
 import org.datavec.api.io.filters.BalancedPathFilter;
 import org.datavec.api.io.labels.ParentPathLabelGenerator;
+import org.datavec.api.io.labels.PathLabelGenerator;
 import org.datavec.api.io.labels.PatternPathLabelGenerator;
 import org.datavec.api.split.FileSplit;
 import org.datavec.api.split.InputSplit;
@@ -48,12 +49,13 @@ public class AnimalsClassification2 {
 	// hyper-parameters
     protected static int batchSize = 30;
     protected static double learningRate = 0.05;
-    protected static int epochs = 27;
+    protected static int epochs = 25;
     protected static int embedding = 128;
     
     protected static int height = 100;
     protected static int width = 100;
     protected static int channels = 3;
+    protected static int numLabels = 4;
     
     protected static boolean save = false;
     protected static double splitTrainTest = 0.9;
@@ -61,97 +63,49 @@ public class AnimalsClassification2 {
     protected static long seed = 83;
     protected static Random rng = new Random(seed);
 
-    private int numLabels;
 
-    public void run(String[] args) throws Exception {
-        System.out.println("Load data....");
-        /**
-         * Data Setup -> organize and limit data file paths:
-         *  - mainPath = path to image files
-         *  - fileSplit = define basic dataset split with limits on format
-         *  - pathFilter = define additional file load filter to limit size and balance batch content
-         **/
-        ParentPathLabelGenerator labelMaker = new ParentPathLabelGenerator();
-        FileSplit fileSplit = new FileSplit(new File("img/animals"), 
-        							NativeImageLoader.ALLOWED_FORMATS, rng);
-        int numExamples = Math.toIntExact(fileSplit.length());
-        numLabels = fileSplit.getRootDir().listFiles(File::isDirectory).length;
-        BalancedPathFilter pathFilter = new BalancedPathFilter(rng, labelMaker, numExamples, numLabels, maxPathsPerLabel);
+	public void run(String[] args) throws Exception {
 
-        /**
-         * Data Setup -> train test split
-         *  - inputSplit = define train and test split
-         **/
-        InputSplit[] inputSplit = fileSplit.sample(pathFilter, splitTrainTest, 1 - splitTrainTest);
-        InputSplit trainData = inputSplit[0];
-        InputSplit testData = inputSplit[1];
-        
-        
-        /**
-         * Data Setup -> normalization
-         *  - how to normalize images and generate large dataset to train on
-         **/
-        DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
+		System.out.println("Build model....");
 
-        System.out.println("Build model....");
+		// Uncomment below to try AlexNet. Note change height and width to at least 100
+		// MultiLayerNetwork network = new AlexNet(height, width, channels, numLabels,
+		// seed, iterations).init();
 
-        // Uncomment below to try AlexNet. Note change height and width to at least 100
-        // MultiLayerNetwork network = new AlexNet(height, width, channels, numLabels, 
-        // seed, iterations).init();
-
-        ComputationGraph network = playModel();
-        network.init();
-       
-        /**
-         * Data Setup -> define how to load data into net:
-         *  - recordReader = the reader that loads and converts image data pass in inputSplit to initialize
-         *  - dataIter = a generator that only loads one batch at a time into memory to save memory
-         *  - trainIter = uses MultipleEpochsIterator to ensure model runs through the data for all epochs
-         **/
-        ImageRecordReader trainRR = new ImageRecordReader(height, width, channels, labelMaker);
-        DataSetIterator trainIter;
+		ComputationGraph network = playModel();
+		network.init();
+		
+		
+		// test iterator
+		DataSetIterator testIter = getIterator("img/test_animals", new PatternPathLabelGenerator("_", 0));
 
 
-        System.out.println("Train model....");
-        // test iterator
-        ImageRecordReader testRR = new ImageRecordReader(height, width, channels, labelMaker);
-        testRR.initialize(testData);
-        DataSetIterator testIter = new RecordReaderDataSetIterator(testRR, batchSize, 1, numLabels);
-        scaler.fit(testIter);
-        testIter.setPreProcessor(scaler);
+		// listeners
+		network.setListeners(new ScoreIterationListener(10),
+				new EvaluativeListener(testIter, 10, InvocationType.EPOCH_END));
 
-        // listeners
-        network.setListeners(new ScoreIterationListener(10), 
-        					new EvaluativeListener(testIter, 10, InvocationType.EPOCH_END));
-       
-        
-        System.out.println(network.summary());
+		System.out.println(network.summary());
 
-        // Train without transformations
-        trainRR.initialize(trainData);
-        trainIter = new RecordReaderDataSetIterator(trainRR, batchSize, 1, numLabels);
-        scaler.fit(trainIter);
-        trainIter.setPreProcessor(scaler);
-        network.fit(trainIter, epochs);
-        
-        // Train without transformations #10
-       
-        for (int i = 0; i < 1; i++) {       	
-        	network.fit(getIterator(trainRR, trainData), epochs);
-        }
-       
+		// Train without transformations
+		DataSetIterator trainIter1 = getIterator("img/animals", new ParentPathLabelGenerator());
+		
+		ImageTransform transform = new FlipImageTransform(1);
+		DataSetIterator trainIter2 = getIterator("img/animals", new ParentPathLabelGenerator(), transform);
+		
 
-        
-        // Evaluation test samples
-        eval(network);
-        
-       
-        if (save) {
-            System.out.println("Save model....");
-            network.save(new File("data/skynet.model"));
-        }
-        System.out.println("****************Example finished********************");
-    }
+		System.out.println("Train model....");
+		network.fit(trainIter1, epochs);
+		network.fit(trainIter2, epochs);
+
+		// Evaluation test samples
+		eval(network);
+
+		if (save) {
+			System.out.println("Save model....");
+			network.save(new File("data/skynet.model"));
+		}
+		System.out.println("****************Example finished********************");
+	}
     
     private void eval(ComputationGraph network) throws Exception {
     	
@@ -320,32 +274,35 @@ public class AnimalsClassification2 {
     
     	return new ConvolutionLayer.Builder(kernel, stride, pad).name(name).nIn(in).nOut(out).activation(activation).build();   	
     }
-
-    public DataSetIterator getIterator(ImageRecordReader trainRR, InputSplit trainData) throws Exception {
-    	
-    	DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
-        ImageTransform vFlipTransform = new FlipImageTransform(1);
-/*
-        ImageTransform warpTransform = new WarpImageTransform(rng, 30);
-        ImageTransform rotateTransform = new RotateImageTransform(rng, 90);     
-   
-        List<Pair<ImageTransform, Double>> pipeline = Arrays.asList(
-        															new Pair<>(vFlipTransform, 0.5),       														 
-        															new Pair<>(rotateTransform, 0.5),       													
-                                                                    new Pair<>(warpTransform, 0.5)
-        															);
-
-        ImageTransform transform = new PipelineImageTransform(pipeline, true);
-*/       
-        trainRR.initialize(trainData, vFlipTransform);
-        DataSetIterator trainIter = new RecordReaderDataSetIterator(trainRR, batchSize, 1, numLabels);
-        scaler.fit(trainIter);
-        trainIter.setPreProcessor(scaler);
-        
-        return trainIter;
-
+    
+    private DataSetIterator getIterator(String pathName, PathLabelGenerator labelMaker) throws Exception {
+    	return getIterator(pathName, labelMaker, null);
     }
     
+    private DataSetIterator getIterator(String pathName, PathLabelGenerator labelMaker, ImageTransform transform) throws Exception {
+
+		FileSplit fileSplit = new FileSplit(new File(pathName), NativeImageLoader.ALLOWED_FORMATS, rng);
+		int numExamples = Math.toIntExact(fileSplit.length());
+		BalancedPathFilter pathFilter = new BalancedPathFilter(rng, labelMaker, numExamples, numLabels,
+				maxPathsPerLabel);
+
+		/**
+		 * Data Setup -> train test split - inputSplit = define train and test split
+		 **/
+		InputSplit[] inputSplit = fileSplit.sample(pathFilter, 1.0, 0.0);
+		InputSplit data = inputSplit[0];
+
+		ImageRecordReader reader = new ImageRecordReader(height, width, channels, labelMaker);
+		reader.initialize(data, transform);
+		
+		DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
+		DataSetIterator iter = new RecordReaderDataSetIterator(reader, batchSize, 1, numLabels);
+        scaler.fit(iter);
+        iter.setPreProcessor(scaler);
+        
+        return iter;
+	}
+  
     public RecordReaderDataSetIterator getTestData(String path) throws Exception {
     	
     	FileSplit fileSplit = new FileSplit(new File(path), NativeImageLoader.ALLOWED_FORMATS);
