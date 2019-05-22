@@ -48,7 +48,7 @@ public class AnimalsClassification2 {
 	// hyper-parameters
     protected static int batchSize = 30;
     protected static double learningRate = 0.05;
-    protected static int epochs = 26;
+    protected static int epochs = 27;
     protected static int embedding = 128;
     
     protected static int height = 100;
@@ -218,20 +218,25 @@ public class AnimalsClassification2 {
 			.addLayer("1.2-maxpool", maxPooling("maxpool1", new int[] { 2, 2 }, new int[] { 2, 2 }), 
 					"1.1-5x5")
 			
-			.addLayer("1.3-5x5", convolution("5x5c", 32, 64, new int[] { 5, 5 }),
+			.addLayer("1.3-3x3", convolution("3x3c", 32, 64, new int[] { 3, 3 }),
 					"1.2-maxpool")
 			.addLayer("1.4-maxpool", maxPooling("maxpool2", new int[] { 2, 2 }, new int[] { 2, 2 }),
-					"1.3-5x5")
-	
-			.addLayer("1.5-dense", new DenseLayer.Builder().nOut(80).build(), 
+					"1.3-3x3")
+			
+			.addLayer("1.5-3x3", convolution("3x3c", 64, 32, new int[] { 3, 3 }),
 					"1.4-maxpool")
-			.addLayer("1.6-output", new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
+			.addLayer("1.6-maxpool", maxPooling("maxpool2", new int[] { 2, 2 }, new int[] { 2, 2 }),
+					"1.5-3x3")
+	
+			.addLayer("1.7-dense", new DenseLayer.Builder().nOut(80).dropOut(0.5).build(), 
+					"1.6-maxpool")
+			.addLayer("1.8-output", new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
 					.nOut(numLabels)
 	                .activation(Activation.SOFTMAX)
 					.build(), 
-					"1.5-dense")
+					"1.7-dense")
 			
-			.setOutputs("1.6-output")
+			.setOutputs("1.8-output")
             .build();
 		
 		
