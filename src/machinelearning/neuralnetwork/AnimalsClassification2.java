@@ -18,15 +18,10 @@ import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.ComputationGraphConfiguration;
 import org.deeplearning4j.nn.conf.ConvolutionMode;
-import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.WorkspaceMode;
-import org.deeplearning4j.nn.conf.graph.L2NormalizeVertex;
-import org.deeplearning4j.nn.conf.graph.MergeVertex;
 import org.deeplearning4j.nn.conf.inputs.InputType;
 import org.deeplearning4j.nn.conf.layers.ActivationLayer;
 import org.deeplearning4j.nn.conf.layers.BatchNormalization;
-import org.deeplearning4j.nn.conf.layers.CenterLossOutputLayer;
 import org.deeplearning4j.nn.conf.layers.ConvolutionLayer;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
@@ -45,7 +40,6 @@ import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.dataset.api.preprocessor.ImagePreProcessingScaler;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.AdaDelta;
-import org.nd4j.linalg.learning.config.RmsProp;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 
@@ -245,133 +239,6 @@ public class AnimalsClassification2 {
 		return new ComputationGraph(conf);
     }
    
-    public ComputationGraph skynetModel() {
-    	
-		ComputationGraphConfiguration.GraphBuilder graph = new NeuralNetConfiguration.Builder()
-				.seed(seed)
-				.l2(0.005)
-				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-				.activation(Activation.RELU)
-				.weightInit(WeightInit.XAVIER)
-				.updater(new RmsProp(learningRate))
-				.convolutionMode(ConvolutionMode.Same)
-				.inferenceWorkspaceMode(WorkspaceMode.ENABLED)
-				.trainingWorkspaceMode(WorkspaceMode.ENABLED)
-				.graphBuilder();
-
-		ComputationGraphConfiguration conf = graph
-			.addInputs("inputs1").setInputTypes(InputType.convolutional(height, width, channels))
-			
-			.addLayer("1.1-1x1", convolution("1x1c", channels, 1, new int[] { 1, 1 }, new int[] { 1, 1 }), 
-					"inputs1")
-			.addLayer("1.2-batch", batchNormalization("batch"), 
-					"1.1-1x1")
-			.addLayer("1.3-activation", activation("activation", Activation.RELU), 
-					"1.2-batch")
-		
-			.addLayer("2.1-1x1", convolution("1x1c", channels, 1, new int[] { 1, 1 }, new int[] { 1, 1 }), 
-					"inputs1")
-			.addLayer("2.2-3x3", convolution("3x3c", 1, 1, new int[] { 3, 3 }, new int[] { 1, 1 }), 
-					"2.1-1x1")	
-			.addLayer("2.3-3x1", convolution("3x1c", 1, 1, new int[] { 3, 1 }, new int[] { 1, 1 }), 
-					"2.2-3x3")
-			.addLayer("2.3-1x3", convolution("1x3c", 1, 1, new int[] { 1, 3 }, new int[] { 1, 1 }), 
-					"2.2-3x3")		
-			.addVertex("2.4-vertex", new MergeVertex(), 
-					"2.3-3x1", "2.3-1x3")
-			.addLayer("2.5-batch", batchNormalization("batch"), 
-					"2.4-vertex")
-			.addLayer("2.6-activation", activation("activation", Activation.RELU), 
-					"2.5-batch")
-						
-			.addLayer("3.1-1x1", convolution("1x1c", channels, 1, new int[] { 1, 1 }, new int[] { 1, 1 }),
-					"inputs1")
-			.addLayer("3.2-3x1", convolution("3x1c", 1, 1, new int[] { 3, 1 }, new int[] { 1, 1 }), 
-					"3.1-1x1")
-			.addLayer("3.2-1x3", convolution("1x3c", 1, 1, new int[] { 1, 3 }, new int[] { 1, 1 }), 
-					"3.1-1x1")			
-			.addVertex("3.3-vertex", new MergeVertex(), 
-					"3.2-3x1", "3.2-1x3")
-			.addLayer("3.4-batch", batchNormalization("batch"), 
-					"3.3-vertex")
-			.addLayer("3.5-activation", activation("activation", Activation.RELU), 
-					"3.4-batch")
-		
-			.addVertex("4.1-vertex", new MergeVertex(),
-					"1.3-activation", "2.6-activation", "3.5-activation")
-			
-			
-			
-			.addLayer("5.1-1x1", convolution("1x1c", 5, 1, new int[] { 1, 1 }, new int[] { 1, 1 }), 
-					"4.1-vertex")
-			.addLayer("5.2-batch", batchNormalization("batch"), 
-					"5.1-1x1")
-			.addLayer("5.3-activation", activation("activation", Activation.RELU), 
-					"5.2-batch")
-		
-			.addLayer("6.1-1x1", convolution("1x1c", 5, 1, new int[] { 1, 1 }, new int[] { 1, 1 }), 
-					"4.1-vertex")
-			.addLayer("6.2-3x3", convolution("3x3c", 1, 1, new int[] { 3, 3 }, new int[] { 1, 1 }), 
-					"6.1-1x1")	
-			.addLayer("6.3-3x1", convolution("3x1c", 1, 1, new int[] { 3, 1 }, new int[] { 1, 1 }), 
-					"6.2-3x3")
-			.addLayer("6.3-1x3", convolution("1x3c", 1, 1, new int[] { 1, 3 }, new int[] { 1, 1 }), 
-					"6.2-3x3")		
-			.addVertex("6.4-vertex", new MergeVertex(), 
-					"6.3-3x1", "6.3-1x3")
-			.addLayer("6.5-batch", batchNormalization("batch"), 
-					"6.4-vertex")
-			.addLayer("6.6-activation", activation("activation", Activation.RELU), 
-					"6.5-batch")
-						
-			.addLayer("7.1-1x1", convolution("1x1c", 5, 1, new int[] { 1, 1 }, new int[] { 1, 1 }),
-					"4.1-vertex")
-			.addLayer("7.2-3x1", convolution("3x1c", 1, 1, new int[] { 3, 1 }, new int[] { 1, 1 }), 
-					"7.1-1x1")
-			.addLayer("7.2-1x3", convolution("1x3c", 1, 1, new int[] { 1, 3 }, new int[] { 1, 1 }), 
-					"7.1-1x1")			
-			.addVertex("7.3-vertex", new MergeVertex(), 
-					"7.2-3x1", "7.2-1x3")
-			.addLayer("7.4-batch", batchNormalization("batch"), 
-					"7.3-vertex")
-			.addLayer("7.5-activation", activation("activation", Activation.RELU), 
-					"7.4-batch")
-		
-			.addVertex("8.1-vertex", new MergeVertex(),
-					"5.3-activation", "6.6-activation", "7.5-activation")
-			
-			
-			
-			
-			.addLayer("8.2-maxpool", maxPooling("maxpool", new int[] { 2, 2 }), 
-					"8.1-vertex")
-		
-			.addLayer("8.3-dense", new DenseLayer.Builder().name("dense")
-					.nOut(500).build(), 
-					"8.2-maxpool")
-			
-			.addVertex("8.4-embedding", new L2NormalizeVertex(new int[] {1}, 1e-6),
-					 "8.3-dense")
-			
-			.addLayer("8.4-output", new CenterLossOutputLayer.Builder(LossFunctions.LossFunction.SQUARED_LOSS)
-					.name("output")
-					.nIn(embedding)
-					.nOut(numLabels)
-					.lambda(1e-4)
-					.alpha(0.9)
-					.gradientNormalization(GradientNormalization.RenormalizeL2PerLayer)
-					.activation(Activation.SOFTMAX).build(), 
-					"8.4-embedding")
-
-			
-			.setOutputs("8.4-output")
-            .build();
-		
-		
-
-        return new ComputationGraph(conf);
-    }
-    
     private static SubsamplingLayer maxPooling(String name, int [] ... args) {
     	
     	int [] kernel = null;
