@@ -53,8 +53,8 @@ public class AnimalsClassification2 {
     
 	// hyper-parameters
     protected static int batchSize = 30;
-    protected static double learningRate = 0.01;
-    protected static int epochs = 35;
+    protected static double learningRate = 0.05;
+    protected static int epochs = 26;
     protected static int embedding = 128;
     
     protected static int height = 100;
@@ -105,7 +105,7 @@ public class AnimalsClassification2 {
         // MultiLayerNetwork network = new AlexNet(height, width, channels, numLabels, 
         // seed, iterations).init();
 
-        ComputationGraph network = skynetModel();
+        ComputationGraph network = playModel();
         network.init();
        
         /**
@@ -205,33 +205,38 @@ public class AnimalsClassification2 {
 				.seed(seed)
 				.l2(0.005)
 				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-				.activation(Activation.RELU)
 				.weightInit(WeightInit.XAVIER)
+				.activation(Activation.RELU)
 				.updater(new AdaDelta())
+		//		.cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST)
+		//		.gradientNormalization(GradientNormalization.RenormalizeL2PerLayer)
 				.convolutionMode(ConvolutionMode.Same)
-				.inferenceWorkspaceMode(WorkspaceMode.ENABLED)
-				.trainingWorkspaceMode(WorkspaceMode.ENABLED)
+		//		.inferenceWorkspaceMode(WorkspaceMode.ENABLED)
+		//		.trainingWorkspaceMode(WorkspaceMode.ENABLED)
 				.graphBuilder();
 
 		ComputationGraphConfiguration conf = graph
 				
 			.addInputs("inputs1").setInputTypes(InputType.convolutional(height, width, channels))
 			
-			.addLayer("1.1-5x5", convolution("5x5c", channels, 50, new int[] { 5, 5 }, new int[] { 1, 1 }), 
-					"inputs1")
-			.addLayer("1.2-maxpool", maxPooling("maxpool", new int[] { 2, 2 }, new int[] {2, 2}), 
+			.addLayer("1.1-5x5", convolution("5x5c", channels, 32, new int[] { 5, 5 }), 
+					"inputs1")	
+			.addLayer("1.2-maxpool", maxPooling("maxpool1", new int[] { 2, 2 }, new int[] { 2, 2 }), 
 					"1.1-5x5")
-			.addLayer("1.3-5x5", convolution("5x5c", 50, 50, new int[] { 5, 5 }, new int[] { 1, 1 }),
+			
+			.addLayer("1.3-5x5", convolution("5x5c", 32, 64, new int[] { 5, 5 }),
 					"1.2-maxpool")
-			.addLayer("1.4-maxpool", maxPooling("maxpool", new int[] { 2, 2 }, new int[] {2, 2}), 
+			.addLayer("1.4-maxpool", maxPooling("maxpool2", new int[] { 2, 2 }, new int[] { 2, 2 }),
 					"1.3-5x5")
-			.addLayer("1.5-dense", new DenseLayer.Builder().nOut(500).build(), 
+	
+			.addLayer("1.5-dense", new DenseLayer.Builder().nOut(80).build(), 
 					"1.4-maxpool")
 			.addLayer("1.6-output", new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
 					.nOut(numLabels)
 	                .activation(Activation.SOFTMAX)
 					.build(), 
 					"1.5-dense")
+			
 			.setOutputs("1.6-output")
             .build();
 		
@@ -408,6 +413,10 @@ public class AnimalsClassification2 {
     }
     
     public static ConvolutionLayer convolution(String name, int in, int out, int [] ... args) {
+    	return convolution(name, in, out, Activation.RELU, args);
+    }
+        
+    public static ConvolutionLayer convolution(String name, int in, int out, Activation activation, int [] ... args) {
     	
     	
     	int [] kernel = null;
@@ -436,8 +445,8 @@ public class AnimalsClassification2 {
     	if (pad == null) {
     		pad = new int[] { 0, 0 };
     	}
-    	
-    	return new ConvolutionLayer.Builder(kernel, stride, pad).name(name).nIn(in).nOut(out).build();   	
+    
+    	return new ConvolutionLayer.Builder(kernel, stride, pad).name(name).nIn(in).nOut(out).activation(activation).build();   	
     }
 
     public DataSetIterator getIterator(ImageRecordReader trainRR, InputSplit trainData) throws Exception {
