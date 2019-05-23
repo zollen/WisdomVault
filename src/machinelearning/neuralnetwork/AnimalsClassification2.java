@@ -49,7 +49,7 @@ public class AnimalsClassification2 {
     
 	// hyper-parameters
     protected static int batchSize = 30;
-    protected static int epochs = 23;
+    protected static int epochs = 20;
     protected static int embedding = 128;
     
     protected static int height = 100;
@@ -66,10 +66,6 @@ public class AnimalsClassification2 {
 	public void run(String[] args) throws Exception {
 
 		System.out.println("Build model....");
-
-		// Uncomment below to try AlexNet. Note change height and width to at least 100
-		// MultiLayerNetwork network = new AlexNet(height, width, channels, numLabels,
-		// seed, iterations).init();
 
 		ComputationGraph network = playModel();
 		network.init();
