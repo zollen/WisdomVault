@@ -20,8 +20,8 @@ import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.ComputationGraphConfiguration;
 import org.deeplearning4j.nn.conf.ConvolutionMode;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
+import org.deeplearning4j.nn.conf.WorkspaceMode;
 import org.deeplearning4j.nn.conf.inputs.InputType;
-import org.deeplearning4j.nn.conf.layers.ActivationLayer;
 import org.deeplearning4j.nn.conf.layers.BatchNormalization;
 import org.deeplearning4j.nn.conf.layers.ConvolutionLayer;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
@@ -40,8 +40,10 @@ import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.dataset.api.preprocessor.ImagePreProcessingScaler;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.learning.config.AdaDelta;
+import org.nd4j.linalg.learning.config.Nadam;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
+import org.nd4j.linalg.schedule.ScheduleType;
+import org.nd4j.linalg.schedule.StepSchedule;
 
 
 public class AnimalsClassification2 {
@@ -49,7 +51,7 @@ public class AnimalsClassification2 {
 	// hyper-parameters
     protected static int batchSize = 30;
     protected static double learningRate = 0.05;
-    protected static int epochs = 30;
+    protected static int epochs = 23;
     protected static int embedding = 128;
     
     protected static int height = 100;
@@ -153,14 +155,13 @@ public class AnimalsClassification2 {
 				.seed(seed)
 				.l2(0.005)
 				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-				.weightInit(WeightInit.XAVIER)
+				.weightInit(WeightInit.RELU)
 				.activation(Activation.RELU)
-				.updater(new AdaDelta())
-		//		.cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST)
+				.updater(new Nadam(new StepSchedule(ScheduleType.EPOCH, 5e-5, 0.5, 5)))
 		//		.gradientNormalization(GradientNormalization.RenormalizeL2PerLayer)
 				.convolutionMode(ConvolutionMode.Same)
-		//		.inferenceWorkspaceMode(WorkspaceMode.ENABLED)
-		//		.trainingWorkspaceMode(WorkspaceMode.ENABLED)
+				.inferenceWorkspaceMode(WorkspaceMode.ENABLED)
+				.trainingWorkspaceMode(WorkspaceMode.ENABLED)
 				.graphBuilder();
 
 		ComputationGraphConfiguration conf = graph
@@ -169,28 +170,34 @@ public class AnimalsClassification2 {
 			
 			.addLayer("1.1-5x5", convolution("5x5c", channels, 64, new int[] { 5, 5 }), 
 					"inputs1")	
-			.addLayer("1.2-maxpool", maxPooling("maxpool1", new int[] { 2, 2 }, new int[] { 2, 2 }), 
+			.addLayer("1.2-batch", batchNormalization("batch1", Activation.SIGMOID), 
 					"1.1-5x5")
+			.addLayer("1.3-maxpool", maxPooling("maxpool1", new int[] { 2, 2 }, new int[] { 2, 2 }), 
+					"1.2-batch")
 			
-			.addLayer("1.3-3x3", convolution("3x3c", 64, 128, new int[] { 3, 3 }),
-					"1.2-maxpool")
-			.addLayer("1.4-maxpool", maxPooling("maxpool2", new int[] { 2, 2 }, new int[] { 2, 2 }),
-					"1.3-3x3")
-			
-			.addLayer("1.5-3x3", convolution("3x3c", 128, 64, new int[] { 3, 3 }),
-					"1.4-maxpool")
+			.addLayer("1.4-3x3", convolution("3x3c1", 64, 128, new int[] { 3, 3 }),
+					"1.3-maxpool")
+			.addLayer("1.5-batch", batchNormalization("batch2", Activation.SIGMOID), 
+					"1.4-3x3")
 			.addLayer("1.6-maxpool", maxPooling("maxpool2", new int[] { 2, 2 }, new int[] { 2, 2 }),
-					"1.5-3x3")
-	
-			.addLayer("1.7-dense", new DenseLayer.Builder().nOut(50).dropOut(0.5).build(), 
+					"1.5-batch")
+			
+			.addLayer("1.7-3x3", convolution("3x3c2", 128, 64, new int[] { 3, 3 }),
 					"1.6-maxpool")
-			.addLayer("1.8-output", new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
+			.addLayer("1.8-batch", batchNormalization("batch3", Activation.SIGMOID), 
+					"1.7-3x3")
+			.addLayer("1.9-maxpool", maxPooling("maxpool3", new int[] { 2, 2 }, new int[] { 2, 2 }),
+					"1.8-batch")
+	
+			.addLayer("1.10-dense", new DenseLayer.Builder().nOut(80).dropOut(0.5).build(), 
+					"1.9-maxpool")
+			.addLayer("1.11-output", new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
 					.nOut(numLabels)
 	                .activation(Activation.SOFTMAX)
 					.build(), 
-					"1.7-dense")
+					"1.10-dense")
 			
-			.setOutputs("1.8-output")
+			.setOutputs("1.11-output")
             .build();
 		
 		
@@ -229,13 +236,9 @@ public class AnimalsClassification2 {
     	
         return new SubsamplingLayer.Builder(kernel, stride, pad).name(name).build();
     }
-    
-    public static ActivationLayer activation(String name, Activation algo) {
-    	return new ActivationLayer.Builder().name(name).activation(algo).dropOut(0.1).build();
-    }
-    
-    public static BatchNormalization batchNormalization(String name) {
-    	return new BatchNormalization.Builder(false).name(name).build();
+  
+    public static BatchNormalization batchNormalization(String name, Activation activation) {
+    	return new BatchNormalization.Builder(false).name(name).activation(activation).build();
     }
     
     public static ConvolutionLayer convolution(String name, int in, int out, int [] ... args) {
