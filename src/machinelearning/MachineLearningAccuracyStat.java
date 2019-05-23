@@ -5,13 +5,13 @@ public class MachineLearningAccuracyStat {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
-		//                         true positive 
-		// sensitivity = ---------------------------------
-		//                true positive + false negative
+		// recall                   true positive                      true positive                true positive
+		// sensitivity = ------------------------------- or ------------------------------- = -----------------------
+		//                true positive + false negative     true positive + false negative    total actual positive
 		
-		//                         true negative
-		// specificity = ---------------------------------
-		//                true negative + false positive
+		// precision                true negative                      true positive                true positive
+		// specificity = -------------------------------- or ------------------------------- = ------------------------          
+		//                true negative + false positive      true positive + false negative   total predicted positive
 		
 		//                                       true positive
 		// positive predictive value = ---------------------------------
