@@ -152,6 +152,7 @@ public class AnimalsClassification2 {
 				.updater(new AdaDelta())
 				.gradientNormalization(GradientNormalization.RenormalizeL2PerLayer)
 				.convolutionMode(ConvolutionMode.Same)
+				.cudnnAlgoMode(ConvolutionLayer.AlgoMode.NO_WORKSPACE)
 				.inferenceWorkspaceMode(WorkspaceMode.ENABLED)
 				.trainingWorkspaceMode(WorkspaceMode.ENABLED)
 				.graphBuilder();
