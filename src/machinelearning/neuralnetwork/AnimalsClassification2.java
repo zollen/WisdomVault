@@ -27,6 +27,7 @@ import org.deeplearning4j.nn.conf.layers.BatchNormalization;
 import org.deeplearning4j.nn.conf.layers.ConvolutionLayer;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
+import org.deeplearning4j.nn.conf.layers.SeparableConvolution2D;
 import org.deeplearning4j.nn.conf.layers.SubsamplingLayer;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.weights.WeightInit;
@@ -266,7 +267,7 @@ public class AnimalsClassification2 {
     		pad = new int[] { 0, 0 };
     	}
     
-    	return new ConvolutionLayer.Builder(kernel, stride, pad).name(name).nIn(in).nOut(out).activation(activation).build();   	
+    	return new SeparableConvolution2D.Builder(kernel, stride, pad).name(name).nIn(in).nOut(out).depthMultiplier(2).activation(activation).build();   	
     }
     
     private DataSetIterator getIterator(String pathName, PathLabelGenerator labelMaker) throws Exception {
