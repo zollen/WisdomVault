@@ -152,6 +152,23 @@ public class AnimalsClassification2 {
 			UIServer.getInstance().stop();
 			
 		} else {
+			
+			// My own hyper-parameters: 
+			// ========================
+			// 	double learningRate = NA (AdaDelta);
+			// 	double beta1 = NA (AdaDelta);
+			// 	double beta2 = NA (AdaDelta); 
+			// 	double epsilon = NA (AdaDelta);
+			// 	double l2 = 0.005;
+			// 	int layer1 = 64;
+			// 	int layer4 = 128;
+			//  int layer7 = 64;
+			//  int layer10 = 80;
+			// -----------------
+			// Accuracy: 0.825
+			// Precision: 0.800
+			// Recall: 0.825
+			// F1: 0.800
 
 			System.out.println("Build model....");
 
@@ -175,15 +192,17 @@ public class AnimalsClassification2 {
 					new FlipImageTransform(1));
 
 			/*
-			 * List<Pair<ImageTransform,Double>> pipeline = Arrays.asList( new Pair<>(new
-			 * FlipImageTransform(1), 0.6), new Pair<>(new ScaleImageTransform(rng, 30),
-			 * 0.7), new Pair<>(new CropImageTransform(rng, 20), 0.7), new Pair<>(new
-			 * EqualizeHistTransform(rng, 39), 0.7), new Pair<>(new
-			 * ColorConversionTransform(rng, 1), 0.7), new Pair<>(new
-			 * WarpImageTransform(rng, 70), 0.7));
+			 * List<Pair<ImageTransform,Double>> pipeline = Arrays.asList( 
+			 * 					new Pair<>(new FlipImageTransform(1), 0.6), 
+			 * 					new Pair<>(new ScaleImageTransform(rng, 30), 0.7), 
+			 * 					new Pair<>(new CropImageTransform(rng, 20), 0.7), 
+			 * 					new Pair<>(new EqualizeHistTransform(rng, 39), 0.7), 
+			 * 					new Pair<>(new ColorConversionTransform(rng, 1), 0.7), 
+			 * 					new Pair<>(new WarpImageTransform(rng, 70), 0.7));
 			 * 
-			 * DataSetIterator trainIter3 = getIterator("img/animals", new
-			 * ParentPathLabelGenerator(), new PipelineImageTransform(pipeline, true));
+			 * DataSetIterator trainIter3 = getIterator("img/animals", 
+			 * 									new ParentPathLabelGenerator(), 
+			 * 										new PipelineImageTransform(pipeline, true));
 			 */
 
 			System.out.println("Train model....");
@@ -594,7 +613,7 @@ public class AnimalsClassification2 {
 			DataSetIterator trainIter2 = getIterator("img/animals", new ParentPathLabelGenerator(), new FlipImageTransform(1));
 			DataSetIterator testIter1 = getIterator("img/test_animals", new PatternPathLabelGenerator("_", 0));
 					
-			this.training = trainIter1;
+			this.training = new MultIteratorsIterator(trainIter1, trainIter2);
 			this.testing = testIter1;
 		}
 		
