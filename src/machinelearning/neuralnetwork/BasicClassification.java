@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.deeplearning4j.datasets.test.TestDataSetIterator;
 import org.deeplearning4j.earlystopping.EarlyStoppingConfiguration;
@@ -15,8 +14,7 @@ import org.deeplearning4j.earlystopping.EarlyStoppingModelSaver;
 import org.deeplearning4j.earlystopping.EarlyStoppingResult;
 import org.deeplearning4j.earlystopping.saver.InMemoryModelSaver;
 import org.deeplearning4j.earlystopping.scorecalc.DataSetLossCalculator;
-import org.deeplearning4j.earlystopping.termination.MaxEpochsTerminationCondition;
-import org.deeplearning4j.earlystopping.termination.MaxTimeIterationTerminationCondition;
+import org.deeplearning4j.earlystopping.termination.BestScoreEpochTerminationCondition;
 import org.deeplearning4j.earlystopping.trainer.EarlyStoppingTrainer;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -99,8 +97,7 @@ public class BasicClassification {
 		EarlyStoppingModelSaver<MultiLayerNetwork> saver = new InMemoryModelSaver<MultiLayerNetwork>();
 		
 		EarlyStoppingConfiguration<MultiLayerNetwork> eac = new EarlyStoppingConfiguration.Builder<MultiLayerNetwork>()
-				.epochTerminationConditions(new MaxEpochsTerminationCondition(1000))
-				.iterationTerminationConditions(new MaxTimeIterationTerminationCondition(1, TimeUnit.SECONDS))
+				.epochTerminationConditions(new BestScoreEpochTerminationCondition(9.0))
 				.scoreCalculator(new DataSetLossCalculator(testIter, true))
 				.evaluateEveryNEpochs(50)
 				.modelSaver(saver)
