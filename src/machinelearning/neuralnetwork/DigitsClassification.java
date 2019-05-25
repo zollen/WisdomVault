@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.FileUtils;
 import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.arbiter.MultiLayerSpace;
 import org.deeplearning4j.arbiter.conf.updater.NadamSpace;
@@ -65,6 +66,8 @@ public class DigitsClassification {
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
+		FileUtils.cleanDirectory(new File("out")); 
+		
 		System.out.println("Loading Data....");
 		DataSet data = getData("img/digits");
 		
@@ -114,6 +117,8 @@ public class DigitsClassification {
 
         System.out.println("\n\nConfiguration of best model:\n");
         System.out.println(bestModel.getLayerWiseConfigurations().toJson());
+        System.out.println("===========================");
+        System.out.println(bestModel.getLayerWiseConfigurations());
         
    
             
