@@ -16,9 +16,18 @@ public class MultIteratorsIterator implements DataSetIterator {
 	
 	public MultIteratorsIterator(DataSetIterator ... iters) {
 		
+		if (iters == null || iters.length <= 0)
+			throw new RuntimeException("no iterator found!");
+		
+		
 		for (DataSetIterator iter : iters) {
 			this.iterators.add(iter);
 		}
+		
+		this.reset();
+		
+		if (!this.hasNext())
+			throw new RuntimeException("empty DataSet!");
 	}
 
 	@Override

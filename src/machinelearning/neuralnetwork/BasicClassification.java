@@ -13,7 +13,7 @@ import org.deeplearning4j.earlystopping.EarlyStoppingConfiguration;
 import org.deeplearning4j.earlystopping.EarlyStoppingModelSaver;
 import org.deeplearning4j.earlystopping.EarlyStoppingResult;
 import org.deeplearning4j.earlystopping.saver.InMemoryModelSaver;
-import org.deeplearning4j.earlystopping.scorecalc.DataSetLossCalculator;
+import org.deeplearning4j.earlystopping.scorecalc.ClassificationScoreCalculator;
 import org.deeplearning4j.earlystopping.termination.BestScoreEpochTerminationCondition;
 import org.deeplearning4j.earlystopping.trainer.EarlyStoppingTrainer;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
@@ -97,8 +97,9 @@ public class BasicClassification {
 		EarlyStoppingModelSaver<MultiLayerNetwork> saver = new InMemoryModelSaver<MultiLayerNetwork>();
 		
 		EarlyStoppingConfiguration<MultiLayerNetwork> eac = new EarlyStoppingConfiguration.Builder<MultiLayerNetwork>()
-				.epochTerminationConditions(new BestScoreEpochTerminationCondition(9.0))
-				.scoreCalculator(new DataSetLossCalculator(testIter, true))
+				.epochTerminationConditions(new BestScoreEpochTerminationCondition(0.9999))
+				.scoreCalculator(new ClassificationScoreCalculator(
+						org.nd4j.evaluation.classification.Evaluation.Metric.ACCURACY, testIter))
 				.evaluateEveryNEpochs(50)
 				.modelSaver(saver)
 				.build();	
@@ -117,7 +118,7 @@ public class BasicClassification {
         Map<Integer,Double> scoreVsEpoch = result.getScoreVsEpoch();
         List<Integer> list = new ArrayList<Integer>(scoreVsEpoch.keySet());
         Collections.sort(list);
-        System.out.println("Score vs. Epoch:");
+        System.out.println("Epoch\tScore");
         for( Integer i : list){
             System.out.println(i + "\t" + scoreVsEpoch.get(i));
         }

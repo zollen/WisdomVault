@@ -2,11 +2,15 @@ package machinelearning.neuralnetwork;
 
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.FileUtils;
 import org.datavec.api.io.filters.BalancedPathFilter;
 import org.datavec.api.io.labels.ParentPathLabelGenerator;
 import org.datavec.api.io.labels.PathLabelGenerator;
@@ -19,7 +23,6 @@ import org.datavec.image.transform.FlipImageTransform;
 import org.datavec.image.transform.ImageTransform;
 import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.arbiter.ComputationGraphSpace;
-import org.deeplearning4j.arbiter.conf.updater.NadamSpace;
 import org.deeplearning4j.arbiter.layers.BatchNormalizationSpace;
 import org.deeplearning4j.arbiter.layers.DenseLayerSpace;
 import org.deeplearning4j.arbiter.layers.OutputLayerSpace;
@@ -46,6 +49,14 @@ import org.deeplearning4j.arbiter.scoring.impl.EvaluationScoreFunction;
 import org.deeplearning4j.arbiter.task.ComputationGraphTaskCreator;
 import org.deeplearning4j.arbiter.ui.listener.ArbiterStatusListener;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
+import org.deeplearning4j.earlystopping.EarlyStoppingConfiguration;
+import org.deeplearning4j.earlystopping.EarlyStoppingModelSaver;
+import org.deeplearning4j.earlystopping.EarlyStoppingResult;
+import org.deeplearning4j.earlystopping.saver.LocalFileGraphSaver;
+import org.deeplearning4j.earlystopping.scorecalc.ClassificationScoreCalculator;
+import org.deeplearning4j.earlystopping.termination.BestScoreEpochTerminationCondition;
+import org.deeplearning4j.earlystopping.trainer.EarlyStoppingGraphTrainer;
+import org.deeplearning4j.earlystopping.trainer.IEarlyStoppingTrainer;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.CacheMode;
 import org.deeplearning4j.nn.conf.ComputationGraphConfiguration;
@@ -102,6 +113,8 @@ public class AnimalsClassification2 {
 
 	public void run(String[] args) throws Exception {
 		
+		FileUtils.cleanDirectory(new File("out")); 
+		
 		if (args.length > 0 && args[0].indexOf("O") >= 0) {
 
 			System.out.println("Optimize model....");
@@ -115,8 +128,9 @@ public class AnimalsClassification2 {
 			ScoreFunction scoreFunction = new EvaluationScoreFunction(
 					org.deeplearning4j.eval.Evaluation.Metric.ACCURACY);
 
-			TerminationCondition[] terminationConditions = { new MaxTimeCondition(15, TimeUnit.MINUTES),
-					new MaxCandidatesCondition(10) };
+			TerminationCondition[] terminationConditions = { 
+					new MaxTimeCondition(8, TimeUnit.HOURS),
+					new MaxCandidatesCondition(5) };
 
 			ResultSaver modelSaver = new FileModelSaver("out");
 			OptimizationConfiguration configuration = new OptimizationConfiguration.Builder()
@@ -169,7 +183,7 @@ public class AnimalsClassification2 {
 			// Precision: 0.800
 			// Recall: 0.825
 			// F1: 0.800
-
+			
 			System.out.println("Build model....");
 
 			ComputationGraph network = playModel();
@@ -190,6 +204,8 @@ public class AnimalsClassification2 {
 			DataSetIterator trainIter1 = getIterator("img/animals", new ParentPathLabelGenerator());
 			DataSetIterator trainIter2 = getIterator("img/animals", new ParentPathLabelGenerator(),
 					new FlipImageTransform(1));
+			
+			DataSetIterator trainIter = new MultIteratorsIterator(trainIter1, trainIter2);
 
 			/*
 			 * List<Pair<ImageTransform,Double>> pipeline = Arrays.asList( 
@@ -206,15 +222,48 @@ public class AnimalsClassification2 {
 			 */
 
 			System.out.println("Train model....");
-			network.fit(trainIter1, epochs);
-			network.fit(trainIter2, epochs);
-
+			
+			testIter.reset();
+			
+			EarlyStoppingModelSaver<ComputationGraph> saver = new LocalFileGraphSaver("out");
+			
+			EarlyStoppingConfiguration<ComputationGraph> eac = new EarlyStoppingConfiguration.Builder<ComputationGraph>()
+					.epochTerminationConditions(new BestScoreEpochTerminationCondition(0.875))
+					.scoreCalculator(new ClassificationScoreCalculator(
+							org.nd4j.evaluation.classification.Evaluation.Metric.ACCURACY, testIter))
+					.evaluateEveryNEpochs((maxPathsPerLabel * numLabels) / batchSize)
+					.modelSaver(saver)
+					.build();	
+		
+			IEarlyStoppingTrainer<ComputationGraph> trainer = new EarlyStoppingGraphTrainer(eac, network, trainIter);
+			
+			System.out.println("Training model....");
+			EarlyStoppingResult<ComputationGraph> result = trainer.fit();
+			
+			System.out.println("Termination reason: " + result.getTerminationReason());
+	        System.out.println("Termination details: " + result.getTerminationDetails());
+	        System.out.println("Total epochs: " + result.getTotalEpochs());
+	        System.out.println("Best epoch number: " + result.getBestModelEpoch());
+	        System.out.println("Score at best epoch: " + result.getBestModelScore());
+	        
+	        Map<Integer,Double> scoreVsEpoch = result.getScoreVsEpoch();
+	        List<Integer> list = new ArrayList<Integer>(scoreVsEpoch.keySet());
+	        Collections.sort(list);
+	        System.out.println("Epoch\tScore");
+	        for( Integer i : list){
+	            System.out.println(i + "\t" + scoreVsEpoch.get(i));
+	        }
+			
+			
+			
+			
 			// Evaluation test samples
+			System.out.println("My Own Evaluation....");
 			eval(network);
 
 			if (save) {
 				System.out.println("Save model....");
-				network.save(new File("data/playnet.model"));
+				network.save(new File("out/playnet.model"));
 			}
 			System.out.println("****************Example finished********************");
 		}
@@ -261,15 +310,11 @@ public class AnimalsClassification2 {
     
     public ComputationGraphSpace optimizeModel() {
     	
-    	ParameterSpace<Double> learningRateHyperparam = new ContinuousParameterSpace(0.0001, 0.1);  
-		ParameterSpace<Double> beta1Hyperparam = new ContinuousParameterSpace(0.0, 0.999); 
-		ParameterSpace<Double> beta2Hyperparam = new ContinuousParameterSpace(0.0, 0.999); 
-		ParameterSpace<Double> epsilonHyperparam = new ContinuousParameterSpace(0.0, 0.999); 
 		ParameterSpace<Double> l2Hyperparam = new ContinuousParameterSpace(0.0001, 0.09);
-        ParameterSpace<Integer> layer1BandwidthHyperparam = new IntegerParameterSpace(16, 1024); 
-        ParameterSpace<Integer> layer4BandwidthHyperparam = new IntegerParameterSpace(16, 1024); 
-        ParameterSpace<Integer> layer7BandwidthHyperparam = new IntegerParameterSpace(16, 1024);
-        ParameterSpace<Integer> layer10BandwidthHyperparam = new IntegerParameterSpace(16, 1024);
+        ParameterSpace<Integer> layer1BandwidthHyperparam = new IntegerParameterSpace(32, 756); 
+        ParameterSpace<Integer> layer4BandwidthHyperparam = new IntegerParameterSpace(32, 756); 
+        ParameterSpace<Integer> layer7BandwidthHyperparam = new IntegerParameterSpace(32, 756);
+        ParameterSpace<Integer> layer10BandwidthHyperparam = new IntegerParameterSpace(32, 2048);
         
         return new ComputationGraphSpace.Builder() 
 			.seed(seed)
@@ -277,7 +322,7 @@ public class AnimalsClassification2 {
 			.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
 			.weightInit(WeightInit.RELU)
 			.activation(Activation.RELU)
-			.updater(new NadamSpace(learningRateHyperparam, beta1Hyperparam, beta2Hyperparam, epsilonHyperparam))
+			.updater(new AdaDelta())
 			.gradientNormalization(GradientNormalization.RenormalizeL2PerLayer)
 			.convolutionMode(ConvolutionMode.Same)
 			.inferenceWorkspaceMode(WorkspaceMode.ENABLED)
@@ -309,7 +354,7 @@ public class AnimalsClassification2 {
 	
 			.addLayer("1.10-dense", new DenseLayerSpace.Builder()
 					.nOut(layer10BandwidthHyperparam)
-					.dropOut(0.5).build(), 
+					.build(), 
 					"1.9-maxpool")
 			.addLayer("1.11-output", new OutputLayerSpace.Builder()
 					.lossFunction(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
