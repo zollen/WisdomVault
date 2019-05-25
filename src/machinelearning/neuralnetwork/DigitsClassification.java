@@ -40,6 +40,8 @@ import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
+import org.deeplearning4j.optimize.listeners.CheckpointListener;
+import org.deeplearning4j.optimize.listeners.PerformanceListener;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.deeplearning4j.ui.api.UIServer;
 import org.deeplearning4j.ui.storage.FileStatsStorage;
@@ -149,7 +151,9 @@ public class DigitsClassification {
 		MultiLayerConfiguration conf = network(learningRate, beta1, beta2, epsilon, l2, layer1, layer2);
 		
 		MultiLayerNetwork network = new MultiLayerNetwork(conf);
-		network.setListeners(new ScoreIterationListener(1)); 
+		network.setListeners(new ScoreIterationListener(1), 
+						new PerformanceListener(1, true),
+						new CheckpointListener.Builder("out").keepAll().saveEveryNEpochs(1).build()); 
 		
 		System.out.println(network.summary());
 		
