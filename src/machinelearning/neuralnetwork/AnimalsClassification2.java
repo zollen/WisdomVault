@@ -246,12 +246,12 @@ public class AnimalsClassification2 {
 	        System.out.println("Best epoch number: " + result.getBestModelEpoch());
 	        System.out.println("Score at best epoch: " + result.getBestModelScore());
 	        
-	        Map<Integer,Double> scoreVsEpoch = result.getScoreVsEpoch();
-	        List<Integer> list = new ArrayList<Integer>(scoreVsEpoch.keySet());
+	        Map<Integer,Double> epochVsScore = result.getScoreVsEpoch();
+	        List<Integer> list = new ArrayList<Integer>(epochVsScore.keySet());
 	        Collections.sort(list);
 	        System.out.println("Epoch\tScore");
 	        for( Integer i : list){
-	            System.out.println(i + "\t" + scoreVsEpoch.get(i));
+	            System.out.println(i + "\t" + epochVsScore.get(i));
 	        }
 			
 			
