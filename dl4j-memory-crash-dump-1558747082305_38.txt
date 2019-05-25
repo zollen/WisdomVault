@@ -1,0 +1,130 @@
+Deeplearning4j OOM Exception Encountered for ComputationGraph
+Timestamp:                              2019-05-24 21:18:02.305
+Thread ID                               38
+Thread Name                             LocalCandidateExecutor-0
+
+
+Stack Trace:
+java.lang.OutOfMemoryError: Failed to allocate [4788321198] bytes
+	at org.nd4j.linalg.cpu.nativecpu.CpuMemoryManager.allocate(CpuMemoryManager.java:51)
+	at org.nd4j.linalg.cpu.nativecpu.workspace.CpuWorkspace.init(CpuWorkspace.java:99)
+	at org.nd4j.linalg.memory.abstracts.Nd4jWorkspace.initializeWorkspace(Nd4jWorkspace.java:510)
+	at org.nd4j.linalg.memory.abstracts.Nd4jWorkspace.close(Nd4jWorkspace.java:653)
+	at org.deeplearning4j.nn.graph.ComputationGraph.calcBackpropGradients(ComputationGraph.java:2674)
+	at org.deeplearning4j.nn.graph.ComputationGraph.computeGradientAndScore(ComputationGraph.java:1378)
+	at org.deeplearning4j.nn.graph.ComputationGraph.computeGradientAndScore(ComputationGraph.java:1338)
+	at org.deeplearning4j.optimize.solvers.BaseOptimizer.gradientAndScore(BaseOptimizer.java:160)
+	at org.deeplearning4j.optimize.solvers.StochasticGradientDescent.optimize(StochasticGradientDescent.java:63)
+	at org.deeplearning4j.optimize.Solver.optimize(Solver.java:52)
+	at org.deeplearning4j.nn.graph.ComputationGraph.fitHelper(ComputationGraph.java:1162)
+	at org.deeplearning4j.nn.graph.ComputationGraph.fit(ComputationGraph.java:1112)
+	at org.deeplearning4j.nn.graph.ComputationGraph.fit(ComputationGraph.java:1079)
+	at org.deeplearning4j.arbiter.task.ComputationGraphTaskCreator$GraphLearningTask.callHelper(ComputationGraphTaskCreator.java:223)
+	at org.deeplearning4j.arbiter.task.ComputationGraphTaskCreator$GraphLearningTask.call(ComputationGraphTaskCreator.java:137)
+	at org.deeplearning4j.arbiter.task.ComputationGraphTaskCreator$GraphLearningTask.call(ComputationGraphTaskCreator.java:92)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+
+
+========== Memory Information ==========
+----- Version Information -----
+Deeplearning4j Version                  1.0.0-beta4
+Deeplearning4j CUDA                     <not present>
+
+----- System Information -----
+Operating System                        Microsoft Windows 10
+CPU                                     Intel(R) Core(TM) i7-7700 CPU @ 3.60GHz
+CPU Cores - Physical                    4
+CPU Cores - Logical                     8
+Total System Memory                      31.92 GiB (34275692544)
+
+----- ND4J Environment Information -----
+Data Type                               FLOAT
+blas.vendor                             MKL
+os                                      Windows 10
+backend                                 CPU
+
+----- Memory Configuration -----
+JVM Memory: XMX                           8.00 GiB (8589934592)
+JVM Memory: current                       4.00 GiB (4294967296)
+JavaCPP Memory: Max Bytes                 8.00 GiB (8589934592)
+JavaCPP Memory: Max Physical             16.00 GiB (17179869184)
+JavaCPP Memory: Current Bytes           856.03 MiB (897614842)
+JavaCPP Memory: Current Physical         14.77 GiB (15854407680)
+Periodic GC Enabled                     false
+
+----- Workspace Information -----
+Workspaces: # for current thread        4
+Current thread workspaces:
+  Name                      State       Size                          # Cycles            
+  WS_LAYER_WORKING_MEM      CLOSED        4.46 GiB (4788320174)       22                  
+  WS_ALL_LAYERS_ACT         CLOSED        2.12 GiB (2272741884)       1                   
+  WS_LAYER_ACT_0            CLOSED           .00 B                    6                   
+  WS_LAYER_ACT_1            CLOSED           .00 B                    5                   
+Workspaces total size                     6.58 GiB (7061062058)
+
+----- Network Information -----
+Network # Parameters                    111644347
+Parameter Memory                        425.89 MiB (446577388)
+Parameter Gradients Memory              425.89 MiB (446577388)
+Updater Number of Elements              223281266
+Updater Memory                          851.75 MiB (893125064)
+Updater Classes:
+  org.nd4j.linalg.learning.NadamUpdater
+  org.nd4j.linalg.learning.NoOpUpdater
+Params + Gradient + Updater Memory        1.25 GiB (1339702452)
+Iteration Count                         0
+Epoch Count                             0
+Backprop Type                           Standard
+Workspace Mode: Training                ENABLED
+Workspace Mode: Inference               ENABLED
+Number of Layers                        11
+Layer Counts
+  BatchNormalization                      3
+  DenseLayer                              1
+  OutputLayer                             1
+  SeparableConvolution2DLayer             3
+  SubsamplingLayer                        3
+Layer Parameter Breakdown
+  Idx Name                 Layer Type           Layer # Parameters   Layer Parameter Memory
+  1   1.1-5x5              SeparableConvolution2DLayer 4714                  18.41 KiB (18856)  
+  2   1.2-batch            BatchNormalization   2608                  10.19 KiB (10432)  
+  3   1.3-maxpool          SubsamplingLayer     0                         .00 B          
+  4   1.4-3x3              SeparableConvolution2DLayer 481536                 1.84 MiB (1926144)
+  5   1.5-batch            BatchNormalization   1440                   5.62 KiB (5760)   
+  6   1.6-maxpool          SubsamplingLayer     0                         .00 B          
+  7   1.7-3x3              SeparableConvolution2DLayer 615725                 2.35 MiB (2462900)
+  8   1.8-batch            BatchNormalization   3380                  13.20 KiB (13520)  
+  9   1.9-maxpool          SubsamplingLayer     0                         .00 B          
+  10  1.10-dense           DenseLayer           110531844            421.65 MiB (442127376)
+  11  1.11-output          OutputLayer          3100                  12.11 KiB (12400)  
+
+----- Layer Helpers - Memory Use -----
+Total Helper Count                      6
+Helper Count w/ Memory                  0
+Total Helper Persistent Memory Use           .00 B
+
+----- Network Activations: Inferred Activation Shapes -----
+Current Minibatch Size                  30
+Current Input Shape (Input 0)           [30, 3, 100, 100]
+Idx Name                 Layer Type           Activations Type                           Activations Shape    # Elements   Memory      
+0   inputs1              InputVertex          InputTypeConvolutional(h=100,w=100,c=3)    [30, 3, 100, 100]    900000         3.43 MiB (3600000)
+1   1.1-5x5              SeparableConvolution2DLayer InputTypeConvolutional(h=100,w=100,c=652)  [30, 652, 100, 100]  195600000    746.15 MiB (782400000)
+2   1.2-batch            BatchNormalization   InputTypeConvolutional(h=100,w=100,c=652)  [30, 652, 100, 100]  195600000    746.15 MiB (782400000)
+3   1.3-maxpool          SubsamplingLayer     InputTypeConvolutional(h=50,w=50,c=652)    [30, 652, 50, 50]    48900000     186.54 MiB (195600000)
+4   1.4-3x3              SeparableConvolution2DLayer InputTypeConvolutional(h=50,w=50,c=360)    [30, 360, 50, 50]    27000000     103.00 MiB (108000000)
+5   1.5-batch            BatchNormalization   InputTypeConvolutional(h=50,w=50,c=360)    [30, 360, 50, 50]    27000000     103.00 MiB (108000000)
+6   1.6-maxpool          SubsamplingLayer     InputTypeConvolutional(h=25,w=25,c=360)    [30, 360, 25, 25]    6750000       25.75 MiB (27000000)
+7   1.7-3x3              SeparableConvolution2DLayer InputTypeConvolutional(h=25,w=25,c=845)    [30, 845, 25, 25]    15843750      60.44 MiB (63375000)
+8   1.8-batch            BatchNormalization   InputTypeConvolutional(h=25,w=25,c=845)    [30, 845, 25, 25]    15843750      60.44 MiB (63375000)
+9   1.9-maxpool          SubsamplingLayer     InputTypeConvolutional(h=13,w=13,c=845)    [30, 845, 13, 13]    4284150       16.34 MiB (17136600)
+10  1.10-dense           DenseLayer           InputTypeFeedForward(774)                  [30, 774]            23220         90.70 KiB (92880)
+11  1.11-output          OutputLayer          InputTypeFeedForward(4)                    [30, 4]              120            480.00 B  
+Total Activations Memory                  2.00 GiB (2150979960)
+Total Activation Gradient Memory          2.00 GiB (2150979480)
+
+----- Network Training Listeners -----
+Number of Listeners                     1
+Listener 0                              org.deeplearning4j.arbiter.listener.DL4JArbiterStatusReportingListener@11ad4e50
