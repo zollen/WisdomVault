@@ -231,7 +231,7 @@ public class AnimalsClassification2 {
 					.epochTerminationConditions(new BestScoreEpochTerminationCondition(0.875))
 					.scoreCalculator(new ClassificationScoreCalculator(
 							org.nd4j.evaluation.classification.Evaluation.Metric.ACCURACY, testIter))
-					.evaluateEveryNEpochs((maxPathsPerLabel * numLabels) / batchSize)
+					.evaluateEveryNEpochs(1)
 					.modelSaver(saver)
 					.build();	
 		
