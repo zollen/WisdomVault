@@ -219,11 +219,11 @@ public class ICUScenario {
 			
 			SequenceRecordReader testData = new CSVSequenceRecordReader(1, ",");
 			testData.initialize(new NumberedFileInputSplit(
-									featuresPath, NB_TRAIN_EXAMPLES, NB_TRAIN_EXAMPLES + 50));
+									featuresPath, NB_TRAIN_EXAMPLES, NB_TRAIN_EXAMPLES + NB_TEST_EXAMPLES));
 			
 			SequenceRecordReader testLabels = new CSVSequenceRecordReader();
 			testLabels.initialize(new NumberedFileInputSplit(
-									labelsPath, NB_TRAIN_EXAMPLES, NB_TRAIN_EXAMPLES  + 50));
+									labelsPath, NB_TRAIN_EXAMPLES, NB_TRAIN_EXAMPLES  + NB_TEST_EXAMPLES));
 			
 			testing = new SequenceRecordReaderDataSetIterator(testData, testLabels,
 	                1, 2, false, SequenceRecordReaderDataSetIterator.AlignmentMode.ALIGN_END);
