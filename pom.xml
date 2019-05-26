@@ -2,7 +2,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.wisdom.ocean</groupId>
+	<groupId>org.ocean.wisdom</groupId>
 	<artifactId>WisdomVault</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
@@ -50,12 +50,12 @@
 				<dependency>
 					<groupId>org.nd4j</groupId>
 					<artifactId>nd4j-cuda-10.1-platform</artifactId>
-					<version>1.0.0-beta4</version>
+					<version>${nd4j-version}</version>
 				</dependency>
 				<dependency>
 					<groupId>org.deeplearning4j</groupId>
 					<artifactId>deeplearning4j-cuda-10.1</artifactId>
-					<version>1.0.0-beta4</version>
+					<version>${deeplearning-version}</version>
 				</dependency>
 			</dependencies>
 		</profile>
