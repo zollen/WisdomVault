@@ -2,8 +2,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>TestMe</groupId>
-	<artifactId>TestMe</artifactId>
+	<groupId>org.wisdom.ocean</groupId>
+	<artifactId>WisdomVault</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
 	<properties>
@@ -78,22 +78,22 @@
 		<dependency>
 			<groupId>org.ejml</groupId>
 			<artifactId>ejml-all</artifactId>
-			<version>0.38</version>
+			<version>${ejml-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-math3</artifactId>
-			<version>3.6.1</version>
+			<version>${math3-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>
-			<version>1.5</version>
+			<version>${csv-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>jfree</groupId>
 			<artifactId>jfreechart</artifactId>
-			<version>1.0.13</version>
+			<version>${jfree-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.yannrichet</groupId>
@@ -105,12 +105,12 @@
 		<dependency>
 			<groupId>com.github.yannrichet</groupId>
 			<artifactId>JMathIO</artifactId>
-			<version>1.0</version>
+			<version>${jmath-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>nz.ac.waikato.cms.weka</groupId>
 			<artifactId>weka-stable</artifactId>
-			<version>3.8.3</version>
+			<version>${weka-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jujutsu.tsne</groupId>
