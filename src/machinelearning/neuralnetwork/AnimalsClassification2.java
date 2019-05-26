@@ -129,7 +129,7 @@ public class AnimalsClassification2 {
 					org.deeplearning4j.eval.Evaluation.Metric.ACCURACY);
 
 			TerminationCondition[] terminationConditions = { 
-					new MaxTimeCondition(24, TimeUnit.HOURS),
+					new MaxTimeCondition(48, TimeUnit.HOURS),
 					new MaxCandidatesCondition(6)
 			};
 
