@@ -5,6 +5,62 @@
 	<groupId>TestMe</groupId>
 	<artifactId>TestMe</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<deeplearning-version>1.0.0-beta4</deeplearning-version>
+		<nd4j-version>1.0.0-beta4</nd4j-version>
+		<datavec-version>1.0.0-beta4</datavec-version>
+		<ejml-version>0.38</ejml-version>
+		<math3-version>3.6.1</math3-version>
+		<csv-version>1.5</csv-version>
+		<jfree-version>1.0.13</jfree-version>
+		<jmath-version>1.0</jmath-version>
+		<weka-version>3.8.3</weka-version>
+		<smile-version>1.5.2</smile-version>
+	</properties>
+
+	<profiles>
+		<profile>
+			<id>CPU</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+				<property>
+					<name>driver</name>
+					<value>cpu</value>
+				</property>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>org.nd4j</groupId>
+					<artifactId>nd4j-native</artifactId>
+					<version>${nd4j-version}</version>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>CUDA</id>
+			<activation>
+				<property>
+					<name>driver</name>
+					<value>cuda</value>
+				</property>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>org.nd4j</groupId>
+					<artifactId>nd4j-cuda-10.1-platform</artifactId>
+					<version>1.0.0-beta4</version>
+				</dependency>
+				<dependency>
+					<groupId>org.deeplearning4j</groupId>
+					<artifactId>deeplearning4j-cuda-10.1</artifactId>
+					<version>1.0.0-beta4</version>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
+
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
@@ -66,37 +122,32 @@
 		<dependency>
 			<groupId>org.deeplearning4j</groupId>
 			<artifactId>deeplearning4j-core</artifactId>
-			<version>1.0.0-beta4</version>
+			<version>${deeplearning-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.deeplearning4j</groupId>
 			<artifactId>deeplearning4j-ui_2.11</artifactId>
-			<version>1.0.0-beta4</version>
+			<version>${deeplearning-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.deeplearning4j</groupId>
 			<artifactId>arbiter-deeplearning4j</artifactId>
-			<version>1.0.0-beta4</version>
+			<version>${deeplearning-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.deeplearning4j</groupId>
 			<artifactId>arbiter-ui_2.11</artifactId>
-			<version>1.0.0-beta4</version>
-		</dependency>
-		<dependency>
-			<groupId>org.nd4j</groupId>
-			<artifactId>nd4j-native</artifactId>
-			<version>1.0.0-beta4</version>
+			<version>${deeplearning-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.datavec</groupId>
 			<artifactId>datavec-api</artifactId>
-			<version>1.0.0-beta4</version>
+			<version>${datavec-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.haifengl</groupId>
 			<artifactId>smile-core</artifactId>
-			<version>1.5.2</version>
+			<version>${smile-version}</version>
 		</dependency>
 	</dependencies>
 </project>
