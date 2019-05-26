@@ -10,12 +10,15 @@ import org.datavec.api.split.InputSplit;
 import org.datavec.image.loader.NativeImageLoader;
 import org.datavec.image.recordreader.ImageRecordReader;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
-import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
+import org.deeplearning4j.nn.graph.ComputationGraph;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.api.ops.impl.indexaccum.IAMax;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.dataset.api.preprocessor.ImagePreProcessingScaler;
+import org.nd4j.linalg.factory.Nd4j;
 
-public class AnimalsLeNet {
+public class MultiLayerGraphClassifier {
 	
 	public static final int height = 100;
 	public static final int width = 100;
@@ -28,7 +31,7 @@ public class AnimalsLeNet {
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
-		MultiLayerNetwork network = MultiLayerNetwork.load(new File("data/lenet.model"), false);
+		ComputationGraph network = ComputationGraph.load(new File("data/lenet.model"), false);
 		
 		System.out.println(network.summary());
 		
@@ -51,7 +54,7 @@ public class AnimalsLeNet {
     	return new RecordReaderDataSetIterator(reader, 1, 1, 4);
     }
     
-    public static void eval(MultiLayerNetwork network) throws Exception {
+    public static void eval(ComputationGraph network) throws Exception {
     	
     	// Evaluation test samples
     	DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
@@ -70,9 +73,12 @@ public class AnimalsLeNet {
         	
         	List<String> allClassLabels = iter.getLabels();
             int labelIndex = data.getLabels().argMax(1).getInt(0);
-            int[] predictedClasses = network.predict(data.getFeatures());
+            INDArray [] predictedClasses = network.output(false, data.getFeatures());
+            
+            int expected = Nd4j.getExecutioner().exec(new IAMax(predictedClasses[0])).getInt(0);
+            		
             String expectedResult = allClassLabels.get(labelIndex);
-            String modelPrediction = allClassLabels.get(predictedClasses[0]);
+            String modelPrediction = allClassLabels.get(expected);
             
             if (expectedResult.equals(modelPrediction)) {
             	correct++;
@@ -86,4 +92,5 @@ public class AnimalsLeNet {
         
         System.out.println("Accuracy: " + correct / total);
     }
+    
 }
