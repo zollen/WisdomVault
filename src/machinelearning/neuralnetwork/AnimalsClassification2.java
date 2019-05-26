@@ -161,7 +161,7 @@ public class AnimalsClassification2 {
 			MultiLayerNetwork bestModel = (MultiLayerNetwork) bestResult.getResultReference().getResultModel();
 
 			System.out.println("\n\nConfiguration of best model:\n");
-			System.out.println(bestModel.getLayerWiseConfigurations().toJson());
+			System.out.println(bestModel.getLayerWiseConfigurations());
 
 			UIServer.getInstance().stop();
 			
@@ -254,9 +254,7 @@ public class AnimalsClassification2 {
 	            System.out.println(i + "\t" + epochVsScore.get(i));
 	        }
 			
-			
-			
-			
+					
 			// Evaluation test samples
 			System.out.println("My Own Evaluation....");
 			eval(network);
@@ -354,6 +352,7 @@ public class AnimalsClassification2 {
 	
 			.addLayer("1.10-dense", new DenseLayerSpace.Builder()
 					.nOut(layer10BandwidthHyperparam)
+					.dropOut(0.5)
 					.build(), 
 					"1.9-maxpool")
 			.addLayer("1.11-output", new OutputLayerSpace.Builder()
