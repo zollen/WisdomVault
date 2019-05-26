@@ -43,10 +43,21 @@ import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
+import org.deeplearning4j.optimize.api.InvocationType;
+import org.deeplearning4j.optimize.listeners.EvaluativeListener;
+import org.deeplearning4j.optimize.listeners.PerformanceListener;
+import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.deeplearning4j.ui.api.UIServer;
 import org.deeplearning4j.ui.storage.FileStatsStorage;
 import org.nd4j.linalg.activations.Activation;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.dataset.api.DataSet;
+import org.nd4j.linalg.dataset.api.DataSetPreProcessor;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
+import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.indexing.BooleanIndexing;
+import org.nd4j.linalg.indexing.NDArrayIndex;
+import org.nd4j.linalg.indexing.conditions.Conditions;
 import org.nd4j.linalg.learning.config.Sgd;
 
 public class ICUScenario {
@@ -73,7 +84,13 @@ public class ICUScenario {
 	
 	public static void process(ComputationGraph graph) throws Exception {
 		
+		ICUDataSource ds = new ICUDataSource();
+		
 		graph.init();
+		
+		graph.setListeners(new ScoreIterationListener(10), 
+				new PerformanceListener(10, false),
+				new EvaluativeListener((DataSetIterator) ds.testData(), 1, InvocationType.EPOCH_END));
 	}
 	
 	public static void process(ComputationGraphSpace space) throws Exception {
@@ -181,6 +198,7 @@ public class ICUScenario {
 		private SequenceRecordReaderDataSetIterator training = null;
 		private SequenceRecordReaderDataSetIterator testing = null;
 		
+		@SuppressWarnings("unused")
 		public ICUDataSource() throws Exception {
 			
 			String featuresPath = Paths.get(ROOT, "sequence", "%d.csv").toString();
@@ -196,6 +214,7 @@ public class ICUScenario {
 			
 			training = new SequenceRecordReaderDataSetIterator(trainData, trainLabels,
 	                1, 2, false, SequenceRecordReaderDataSetIterator.AlignmentMode.ALIGN_END);
+			training.setPreProcessor(new LastStepPreProcessor());
 			
 			
 			SequenceRecordReader testData = new CSVSequenceRecordReader(1, ",");
@@ -208,6 +227,8 @@ public class ICUScenario {
 			
 			testing = new SequenceRecordReaderDataSetIterator(testData, testLabels,
 	                1, 2, false, SequenceRecordReaderDataSetIterator.AlignmentMode.ALIGN_END);
+			
+			testing.setPreProcessor(new LastStepPreProcessor());
 		}
 		
 		@Override
@@ -231,10 +252,62 @@ public class ICUScenario {
 		public Object trainData() {
 			// TODO Auto-generated method stub
 			return training;
-		}
-		 
-		 
+		}	 
 	}
+	
+	public static class LastStepPreProcessor implements DataSetPreProcessor {
+		
+		private static final long serialVersionUID = 1L;
 
+		public LastStepPreProcessor() {}
+
+		@Override
+		public void preProcess(DataSet toPreProcess) {
+			// TODO Auto-generated method stub
+			INDArray labels = toPreProcess.getLabels();
+			INDArray mask = toPreProcess.getLabelsMaskArray();
+			
+			INDArray labels2d = pullLastTimeSteps(labels, mask);
+			
+			toPreProcess.setLabels(labels2d);
+			toPreProcess.setLabelsMaskArray(null);
+		}
+		
+		private INDArray pullLastTimeSteps(INDArray pullFrom, INDArray mask) {
+			
+			INDArray out = null;
+			
+			if (mask == null) {
+	            //No mask array -> extract same (last) column for all
+	            long lastTS = pullFrom.size(2) - 1;
+	            out = pullFrom.get(NDArrayIndex.all(), NDArrayIndex.all(), NDArrayIndex.point(lastTS));
+	            
+	        } else {
+	            double [] outShape = new double[2];
+	            outShape[0] = pullFrom.size(0);
+	            outShape[1] = pullFrom.size(1);
+	                
+	            out = Nd4j.create(outShape);
+	            
+	            System.err.println("KONGS: " + mask);
+
+	            //Want the index of the last non-zero entry in the mask array
+	            INDArray lastStepArr = BooleanIndexing.lastIndex(mask, Conditions.epsNotEquals(0.0), 1);
+	            
+	            System.err.println("KONGS: " + lastStepArr);
+	            
+	            int [] fwdPassTimeSteps = lastStepArr.toIntVector();
+	            
+	            for (int i = 0; i < fwdPassTimeSteps.length - 1; i++) {
+	            	System.err.println("KONGS: BEFORE " + i);
+	                out.putRow(i, pullFrom.get(NDArrayIndex.point(i), NDArrayIndex.all(),
+	                        NDArrayIndex.point(fwdPassTimeSteps[i])));
+	                System.err.println("KONGS: AFTER " + i);
+	            }
+	        }	
+			
+			return out;
+		}	
+	}
 
 }
