@@ -50,7 +50,6 @@ import org.deeplearning4j.arbiter.task.ComputationGraphTaskCreator;
 import org.deeplearning4j.arbiter.ui.listener.ArbiterStatusListener;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.deeplearning4j.earlystopping.EarlyStoppingConfiguration;
-import org.deeplearning4j.earlystopping.EarlyStoppingModelSaver;
 import org.deeplearning4j.earlystopping.EarlyStoppingResult;
 import org.deeplearning4j.earlystopping.saver.LocalFileGraphSaver;
 import org.deeplearning4j.earlystopping.scorecalc.ClassificationScoreCalculator;
@@ -64,6 +63,7 @@ import org.deeplearning4j.nn.conf.ConvolutionMode;
 import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.WorkspaceMode;
+import org.deeplearning4j.nn.conf.graph.MergeVertex;
 import org.deeplearning4j.nn.conf.inputs.InputType;
 import org.deeplearning4j.nn.conf.layers.BatchNormalization;
 import org.deeplearning4j.nn.conf.layers.ConvolutionLayer;
@@ -80,7 +80,6 @@ import org.deeplearning4j.optimize.listeners.PerformanceListener;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.deeplearning4j.ui.api.UIServer;
 import org.deeplearning4j.ui.storage.FileStatsStorage;
-import org.deeplearning4j.ui.weights.ConvolutionalIterationListener;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.api.ops.impl.indexaccum.IAMax;
@@ -105,7 +104,7 @@ public class AnimalsClassification2 {
     protected static int channels = 3;
     protected static int numLabels = 4;
     
-    protected static boolean save = false;
+    protected static boolean save = true;
     protected static int maxPathsPerLabel = 90;
     protected static long seed = 83;
     protected static Random rng = new Random(seed);
@@ -196,7 +195,6 @@ public class AnimalsClassification2 {
 			// listeners
 			network.setListeners(new ScoreIterationListener(10), 
 					new PerformanceListener(10, false),
-					new ConvolutionalIterationListener(10, true),
 					new EvaluativeListener(testIter, 1, InvocationType.EPOCH_END));
 
 			System.out.println(network.summary());
@@ -222,18 +220,14 @@ public class AnimalsClassification2 {
 			 * 										new PipelineImageTransform(pipeline, true));
 			 */
 
-			System.out.println("Train model....");
-			
 			testIter.reset();
-			
-			EarlyStoppingModelSaver<ComputationGraph> saver = new LocalFileGraphSaver("out");
 			
 			EarlyStoppingConfiguration<ComputationGraph> eac = new EarlyStoppingConfiguration.Builder<ComputationGraph>()
 					.epochTerminationConditions(new BestScoreEpochTerminationCondition(0.875))
 					.scoreCalculator(new ClassificationScoreCalculator(
 							org.nd4j.evaluation.classification.Evaluation.Metric.ACCURACY, testIter))
 					.evaluateEveryNEpochs(1)
-					.modelSaver(saver)
+					.modelSaver(new LocalFileGraphSaver("out"))
 					.build();	
 		
 			IEarlyStoppingTrainer<ComputationGraph> trainer = new EarlyStoppingGraphTrainer(eac, network, trainIter);
@@ -390,29 +384,47 @@ public class AnimalsClassification2 {
 				
 			.addInputs("inputs1").setInputTypes(InputType.convolutional(height, width, channels))
 			
-			.addLayer("1.1-5x5", convolution("5x5c", channels, 64, new int[] { 5, 5 }), 
+			.addLayer("1.1-3x3", convolution("3x3c", channels, 64, 2, new int[] { 3, 3 }), 
 					"inputs1")	
-			.addLayer("1.2-batch", batchNormalization("batch1"), 
-					"1.1-5x5")
-			.addLayer("1.3-maxpool", maxPooling("maxpool1", new int[] { 2, 2 }, new int[] { 2, 2 }), 
+			.addLayer("1.2-batch", batchNormalization("batch"), 
+					"1.1-3x3")
+			.addLayer("1.3-maxpool", maxPooling("maxpool", new int[] { 2, 2 }, new int[] { 2, 2 }), 
 					"1.2-batch")
 			
-			.addLayer("1.4-3x3", convolution("3x3c1", 64, 128, new int[] { 3, 3 }),
-					"1.3-maxpool")
-			.addLayer("1.5-batch", batchNormalization("batch2"), 
-					"1.4-3x3")
-			.addLayer("1.6-maxpool", maxPooling("maxpool2", new int[] { 2, 2 }, new int[] { 2, 2 }),
-					"1.5-batch")
+			.addLayer("1.4-5x5", convolution("5x5c", channels, 64, 2, new int[] { 5, 5 }), 
+					"inputs1")	
+			.addLayer("1.6-batch", batchNormalization("batch"), 
+					"1.4-5x5")
+			.addLayer("1.7-maxpool", maxPooling("maxpool", new int[] { 2, 2 }, new int[] { 2, 2 }), 
+					"1.6-batch")
 			
-			.addLayer("1.7-3x3", convolution("3x3c2", 128, 64, new int[] { 3, 3 }),
-					"1.6-maxpool")
-			.addLayer("1.8-batch", batchNormalization("batch3"), 
-					"1.7-3x3")
-			.addLayer("1.9-maxpool", maxPooling("maxpool3", new int[] { 2, 2 }, new int[] { 2, 2 }),
-					"1.8-batch")
+			.addLayer("1.8-7x7", convolution("7x7c", channels, 64, 3, new int[] { 7, 7 }), 
+					"inputs1")	
+			.addLayer("1.9-batch", batchNormalization("batch"), 
+					"1.8-7x7")
+			.addLayer("1.10-maxpool", maxPooling("maxpool", new int[] { 2, 2 }, new int[] { 2, 2 }), 
+					"1.9-batch")
+			
+			.addVertex("1-vertex", new MergeVertex(), "1.3-maxpool", "1.7-maxpool", "1.10-maxpool")
+			
+			.addLayer("2.1-3x3", convolution("3x3c", 64 * 3, 128, 2, new int[] { 3, 3 }),
+					"1-vertex")
+			.addLayer("2.2-batch", batchNormalization("batch"), 
+					"2.1-3x3")
+			.addLayer("2.3-maxpool", maxPooling("maxpool", new int[] { 2, 2 }, new int[] { 2, 2 }),
+					"2.2-batch")
+			
+			.addLayer("2.4-5x5", convolution("5x5c", 64 * 3, 128, 2, new int[] { 5, 5 }),
+					"1-vertex")
+			.addLayer("2.5-batch", batchNormalization("batch"), 
+					"2.4-5x5")
+			.addLayer("2.6-maxpool", maxPooling("maxpool", new int[] { 2, 2 }, new int[] { 2, 2 }),
+					"2.5-batch")
+			
+			.addVertex("2-vertex", new MergeVertex(), "2.3-maxpool", "2.6-maxpool")
 	
-			.addLayer("1.10-dense", new DenseLayer.Builder().nOut(80).dropOut(0.5).build(), 
-					"1.9-maxpool")
+			.addLayer("1.10-dense", new DenseLayer.Builder().nOut(128).dropOut(0.5).build(), 
+					"2-vertex")
 			.addLayer("1.11-output", new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
 					.nOut(numLabels)
 	                .activation(Activation.SOFTMAX)
@@ -499,11 +511,11 @@ public class AnimalsClassification2 {
     	return new BatchNormalizationSpace.Builder().lockGammaBeta(false).build();
     }
     
-    public static ConvolutionLayer convolution(String name, int in, int out, int [] ... args) {
-    	return convolution(name, in, out, Activation.RELU, args);
+    public static ConvolutionLayer convolution(String name, int in, int out, int multi, int [] ... args) {
+    	return convolution(name, in, out, multi, Activation.RELU, args);
     }
         
-    public static ConvolutionLayer convolution(String name, int in, int out, Activation activation, int [] ... args) {
+    public static ConvolutionLayer convolution(String name, int in, int out, int multi, Activation activation, int [] ... args) {
     	   	
     	int [] kernel = null;
     	int [] stride = null;
@@ -532,7 +544,7 @@ public class AnimalsClassification2 {
     		pad = new int[] { 0, 0 };
     	}
     
-    	return new SeparableConvolution2D.Builder(kernel, stride, pad).name(name).nIn(in).nOut(out).depthMultiplier(2).activation(activation).build();   	
+    	return new SeparableConvolution2D.Builder(kernel, stride, pad).name(name).nIn(in).nOut(out).depthMultiplier(multi).activation(activation).build();   	
     }
     
     public static SeparableConvolution2DLayerSpace convolspace(int in, int out, int [] ... args) {
