@@ -305,8 +305,6 @@ public class AnimalsClassification2 {
     	
 		ParameterSpace<Double> l2Hyperparam = new ContinuousParameterSpace(0.0001, 0.09);
         ParameterSpace<Integer> layer1BandwidthHyperparam = new IntegerParameterSpace(32, 756); 
-        ParameterSpace<Integer> layer4BandwidthHyperparam = new IntegerParameterSpace(32, 756); 
-        ParameterSpace<Integer> layer7BandwidthHyperparam = new IntegerParameterSpace(32, 756);
         ParameterSpace<Integer> layer10BandwidthHyperparam = new IntegerParameterSpace(32, 2048);
         
         return new ComputationGraphSpace.Builder() 
@@ -324,32 +322,34 @@ public class AnimalsClassification2 {
 			
 			.addInputs("inputs1").setInputTypes(InputType.convolutional(height, width, channels))
 			
-			.addLayer("1.1-5x5", convolspace(channels, layer1BandwidthHyperparam, new int[] { 5, 5 }), 
+			.addLayer("1.1-3x3", convolspace(channels, layer1BandwidthHyperparam, 2, new int[] { 3, 3 }), 
 					"inputs1")	
 			.addLayer("1.2-batch", batchspace(), 
-					"1.1-5x5")
+					"1.1-3x3")
 			.addLayer("1.3-maxpool", poolspace(new int[] { 2, 2 }, new int[] { 2, 2 }), 
 					"1.2-batch")
 			
-			.addLayer("1.4-3x3", convolspace(layer1BandwidthHyperparam, layer4BandwidthHyperparam, new int[] { 3, 3 }),
-					"1.3-maxpool")
+			.addLayer("1.4-5x5", convolspace(channels, layer1BandwidthHyperparam, 2, new int[] { 5, 5 }), 
+					"inputs1")	
 			.addLayer("1.5-batch", batchspace(), 
-					"1.4-3x3")
-			.addLayer("1.6-maxpool", poolspace(new int[] { 2, 2 }, new int[] { 2, 2 }),
+					"1.4-5x5")
+			.addLayer("1.6-maxpool", poolspace(new int[] { 2, 2 }, new int[] { 2, 2 }), 
 					"1.5-batch")
 			
-			.addLayer("1.7-3x3", convolspace(layer4BandwidthHyperparam, layer7BandwidthHyperparam, new int[] { 3, 3 }),
-					"1.6-maxpool")
+			.addLayer("1.7-7x7", convolspace(channels, layer1BandwidthHyperparam, 3, new int[] { 7, 7 }), 
+					"inputs1")	
 			.addLayer("1.8-batch", batchspace(), 
-					"1.7-3x3")
-			.addLayer("1.9-maxpool", poolspace(new int[] { 2, 2 }, new int[] { 2, 2 }),
+					"1.7-7x7")
+			.addLayer("1.9-maxpool", poolspace(new int[] { 2, 2 }, new int[] { 2, 2 }), 
 					"1.8-batch")
-	
+			
+			.addVertex("1-vertex", new MergeVertex(), "1.3-maxpool", "1.6-maxpool", "1.9-maxpool")
+			
 			.addLayer("1.10-dense", new DenseLayerSpace.Builder()
 					.nOut(layer10BandwidthHyperparam)
 					.dropOut(0.5)
 					.build(), 
-					"1.9-maxpool")
+					"1-vertex")
 			.addLayer("1.11-output", new OutputLayerSpace.Builder()
 					.lossFunction(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
 					.nIn(layer10BandwidthHyperparam)
@@ -367,6 +367,7 @@ public class AnimalsClassification2 {
     	
     	ComputationGraphConfiguration.GraphBuilder graph = new NeuralNetConfiguration.Builder()
 				.seed(seed)
+				.cacheMode(CacheMode.DEVICE)
 				.l2(0.005)
 				.cacheMode(CacheMode.HOST)
 				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
@@ -375,7 +376,7 @@ public class AnimalsClassification2 {
 				.updater(new AdaDelta())
 				.gradientNormalization(GradientNormalization.RenormalizeL2PerLayer)
 				.convolutionMode(ConvolutionMode.Same)
-				.cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST)
+				.cudnnAlgoMode(ConvolutionLayer.AlgoMode.NO_WORKSPACE)
 				.inferenceWorkspaceMode(WorkspaceMode.ENABLED)
 				.trainingWorkspaceMode(WorkspaceMode.ENABLED)
 				.graphBuilder();
@@ -384,37 +385,37 @@ public class AnimalsClassification2 {
 				
 			.addInputs("inputs1").setInputTypes(InputType.convolutional(height, width, channels))
 			
-			.addLayer("1.1-3x3", convolution("3x3c", channels, 64, 2, new int[] { 3, 3 }), 
+			.addLayer("1.1-3x3", convolution("3x3c", channels, 32, 2, new int[] { 3, 3 }), 
 					"inputs1")	
 			.addLayer("1.2-batch", batchNormalization("batch"), 
 					"1.1-3x3")
 			.addLayer("1.3-maxpool", maxPooling("maxpool", new int[] { 2, 2 }, new int[] { 2, 2 }), 
 					"1.2-batch")
 			
-			.addLayer("1.4-5x5", convolution("5x5c", channels, 64, 2, new int[] { 5, 5 }), 
+			.addLayer("1.4-5x5", convolution("5x5c", channels, 32, 2, new int[] { 5, 5 }), 
 					"inputs1")	
-			.addLayer("1.6-batch", batchNormalization("batch"), 
+			.addLayer("1.5-batch", batchNormalization("batch"), 
 					"1.4-5x5")
-			.addLayer("1.7-maxpool", maxPooling("maxpool", new int[] { 2, 2 }, new int[] { 2, 2 }), 
-					"1.6-batch")
+			.addLayer("1.6-maxpool", maxPooling("maxpool", new int[] { 2, 2 }, new int[] { 2, 2 }), 
+					"1.5-batch")
 			
-			.addLayer("1.8-7x7", convolution("7x7c", channels, 64, 3, new int[] { 7, 7 }), 
+			.addLayer("1.7-7x7", convolution("7x7c", channels, 32, 3, new int[] { 7, 7 }), 
 					"inputs1")	
-			.addLayer("1.9-batch", batchNormalization("batch"), 
-					"1.8-7x7")
-			.addLayer("1.10-maxpool", maxPooling("maxpool", new int[] { 2, 2 }, new int[] { 2, 2 }), 
-					"1.9-batch")
+			.addLayer("1.8-batch", batchNormalization("batch"), 
+					"1.7-7x7")
+			.addLayer("1.9-maxpool", maxPooling("maxpool", new int[] { 2, 2 }, new int[] { 2, 2 }), 
+					"1.8-batch")
 			
-			.addVertex("1-vertex", new MergeVertex(), "1.3-maxpool", "1.7-maxpool", "1.10-maxpool")
+			.addVertex("1-vertex", new MergeVertex(), "1.3-maxpool", "1.6-maxpool", "1.9-maxpool")
 			
-			.addLayer("2.1-3x3", convolution("3x3c", 64 * 3, 128, 2, new int[] { 3, 3 }),
+			.addLayer("2.1-3x3", convolution("3x3c", 32 * 3, 64, 2, new int[] { 3, 3 }),
 					"1-vertex")
 			.addLayer("2.2-batch", batchNormalization("batch"), 
 					"2.1-3x3")
 			.addLayer("2.3-maxpool", maxPooling("maxpool", new int[] { 2, 2 }, new int[] { 2, 2 }),
 					"2.2-batch")
 			
-			.addLayer("2.4-5x5", convolution("5x5c", 64 * 3, 128, 2, new int[] { 5, 5 }),
+			.addLayer("2.4-5x5", convolution("5x5c", 32 * 3, 64, 2, new int[] { 5, 5 }),
 					"1-vertex")
 			.addLayer("2.5-batch", batchNormalization("batch"), 
 					"2.4-5x5")
@@ -547,23 +548,23 @@ public class AnimalsClassification2 {
     	return new SeparableConvolution2D.Builder(kernel, stride, pad).name(name).nIn(in).nOut(out).depthMultiplier(multi).activation(activation).build();   	
     }
     
-    public static SeparableConvolution2DLayerSpace convolspace(int in, int out, int [] ... args) {
-    	return convolspace(in, out, null, null, Activation.RELU, args);
+    public static SeparableConvolution2DLayerSpace convolspace(int in, int out, int multi, int [] ... args) {
+    	return convolspace(in, out, null, null, multi, Activation.RELU, args);
     }
     
-    public static SeparableConvolution2DLayerSpace convolspace(int in, ParameterSpace<Integer> out, int [] ... args) {
-    	return convolspace(in, null, null, out, Activation.RELU, args);
+    public static SeparableConvolution2DLayerSpace convolspace(int in, ParameterSpace<Integer> out, int multi, int [] ... args) {
+    	return convolspace(in, null, null, out, multi, Activation.RELU, args);
     }
     
-    public static SeparableConvolution2DLayerSpace convolspace(ParameterSpace<Integer> in, int out, int [] ... args) {
-    	return convolspace(null, out, in, null, Activation.RELU, args);
+    public static SeparableConvolution2DLayerSpace convolspace(ParameterSpace<Integer> in, int out, int multi, int [] ... args) {
+    	return convolspace(null, out, in, null, multi, Activation.RELU, args);
     }
     
-    public static SeparableConvolution2DLayerSpace convolspace(ParameterSpace<Integer> in, ParameterSpace<Integer> out, int [] ... args) {
-    	return convolspace(null, null, in, out, Activation.RELU, args);
+    public static SeparableConvolution2DLayerSpace convolspace(ParameterSpace<Integer> in, ParameterSpace<Integer> out, int multi, int [] ... args) {
+    	return convolspace(null, null, in, out, multi, Activation.RELU, args);
     }
     
-    public static SeparableConvolution2DLayerSpace convolspace(Integer in, Integer out, ParameterSpace<Integer> ins, ParameterSpace<Integer> outs, Activation activation, int [] ... args) {
+    public static SeparableConvolution2DLayerSpace convolspace(Integer in, Integer out, ParameterSpace<Integer> ins, ParameterSpace<Integer> outs, int multi, Activation activation, int [] ... args) {
     	
     	int [] kernel = null;
     	int [] stride = null;
@@ -594,18 +595,18 @@ public class AnimalsClassification2 {
     	}
     	
     	if (in != null && out != null && ins == null && outs == null) {
-    		return new SeparableConvolution2DLayerSpace.Builder().nIn(in).nOut(out).kernelSize(kernel).stride(stride).padding(pad).depthMultiplier(2).activation(activation).build();   
+    		return new SeparableConvolution2DLayerSpace.Builder().nIn(in).nOut(out).kernelSize(kernel).stride(stride).padding(pad).depthMultiplier(multi).activation(activation).build();   
     	}
     	else
     	if (in != null && out == null && ins == null && outs != null) {   		
-    		return new SeparableConvolution2DLayerSpace.Builder().nIn(in).nOut(outs).kernelSize(kernel).stride(stride).padding(pad).depthMultiplier(2).activation(activation).build();  
+    		return new SeparableConvolution2DLayerSpace.Builder().nIn(in).nOut(outs).kernelSize(kernel).stride(stride).padding(pad).depthMultiplier(multi).activation(activation).build();  
     	}
     	else
     	if (in == null && out != null && ins != null && outs == null) {   		
-    		return new SeparableConvolution2DLayerSpace.Builder().nIn(ins).nOut(out).kernelSize(kernel).stride(stride).padding(pad).depthMultiplier(2).activation(activation).build();
+    		return new SeparableConvolution2DLayerSpace.Builder().nIn(ins).nOut(out).kernelSize(kernel).stride(stride).padding(pad).depthMultiplier(multi).activation(activation).build();
     	}
     	else {
-    		return new SeparableConvolution2DLayerSpace.Builder().nIn(ins).nOut(outs).kernelSize(kernel).stride(stride).padding(pad).depthMultiplier(2).activation(activation).build(); 
+    		return new SeparableConvolution2DLayerSpace.Builder().nIn(ins).nOut(outs).kernelSize(kernel).stride(stride).padding(pad).depthMultiplier(multi).activation(activation).build(); 
     	}
     }
     
