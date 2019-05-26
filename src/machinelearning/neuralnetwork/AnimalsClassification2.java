@@ -35,6 +35,7 @@ import org.deeplearning4j.arbiter.optimize.api.data.DataSource;
 import org.deeplearning4j.arbiter.optimize.api.saving.ResultReference;
 import org.deeplearning4j.arbiter.optimize.api.saving.ResultSaver;
 import org.deeplearning4j.arbiter.optimize.api.score.ScoreFunction;
+import org.deeplearning4j.arbiter.optimize.api.termination.MaxCandidatesCondition;
 import org.deeplearning4j.arbiter.optimize.api.termination.MaxTimeCondition;
 import org.deeplearning4j.arbiter.optimize.api.termination.TerminationCondition;
 import org.deeplearning4j.arbiter.optimize.config.OptimizationConfiguration;
@@ -128,7 +129,8 @@ public class AnimalsClassification2 {
 					org.deeplearning4j.eval.Evaluation.Metric.ACCURACY);
 
 			TerminationCondition[] terminationConditions = { 
-					new MaxTimeCondition(8, TimeUnit.HOURS),
+					new MaxTimeCondition(24, TimeUnit.HOURS),
+					new MaxCandidatesCondition(6)
 			};
 
 			ResultSaver modelSaver = new FileModelSaver("out");
