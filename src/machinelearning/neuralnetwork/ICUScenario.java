@@ -191,14 +191,12 @@ public class ICUScenario {
 	
 	public static class ICUDataSource implements DataSource {
 		
-		private static final long serialVersionUID = 1L;
-		
+		private static final long serialVersionUID = 1L;	
 		private static final String ROOT = "data/physionet";
 		
 		private SequenceRecordReaderDataSetIterator training = null;
 		private SequenceRecordReaderDataSetIterator testing = null;
 		
-		@SuppressWarnings("unused")
 		public ICUDataSource() throws Exception {
 			
 			String featuresPath = Paths.get(ROOT, "sequence", "%d.csv").toString();
@@ -213,7 +211,8 @@ public class ICUScenario {
 									labelsPath, 0, NB_TRAIN_EXAMPLES - 1));
 			
 			training = new SequenceRecordReaderDataSetIterator(trainData, trainLabels,
-	                1, 2, false, SequenceRecordReaderDataSetIterator.AlignmentMode.ALIGN_END);
+					BATCH_SIZE, NUM_LABELS, false, 
+					SequenceRecordReaderDataSetIterator.AlignmentMode.ALIGN_END);
 			training.setPreProcessor(new LastStepPreProcessor());
 			
 			
@@ -226,8 +225,8 @@ public class ICUScenario {
 									labelsPath, NB_TRAIN_EXAMPLES, NB_TRAIN_EXAMPLES  + NB_TEST_EXAMPLES));
 			
 			testing = new SequenceRecordReaderDataSetIterator(testData, testLabels,
-	                1, 2, false, SequenceRecordReaderDataSetIterator.AlignmentMode.ALIGN_END);
-			
+					BATCH_SIZE, NUM_LABELS, false, 
+					SequenceRecordReaderDataSetIterator.AlignmentMode.ALIGN_END);	
 			testing.setPreProcessor(new LastStepPreProcessor());
 		}
 		
@@ -280,6 +279,7 @@ public class ICUScenario {
 			if (mask == null) {
 	            //No mask array -> extract same (last) column for all
 	            long lastTS = pullFrom.size(2) - 1;
+	            
 	            out = pullFrom.get(NDArrayIndex.all(), NDArrayIndex.all(), NDArrayIndex.point(lastTS));
 	            
 	        } else {
@@ -289,20 +289,15 @@ public class ICUScenario {
 	                
 	            out = Nd4j.create(outShape);
 	            
-	            System.err.println("KONGS: " + mask);
-
 	            //Want the index of the last non-zero entry in the mask array
 	            INDArray lastStepArr = BooleanIndexing.lastIndex(mask, Conditions.epsNotEquals(0.0), 1);
 	            
-	            System.err.println("KONGS: " + lastStepArr);
-	            
-	            int [] fwdPassTimeSteps = lastStepArr.toIntVector();
+	            int [] fwdPassTimeSteps = lastStepArr.data().asInt();
 	            
 	            for (int i = 0; i < fwdPassTimeSteps.length - 1; i++) {
-	            	System.err.println("KONGS: BEFORE " + i);
+	     
 	                out.putRow(i, pullFrom.get(NDArrayIndex.point(i), NDArrayIndex.all(),
 	                        NDArrayIndex.point(fwdPassTimeSteps[i])));
-	                System.err.println("KONGS: AFTER " + i);
 	            }
 	        }	
 			
