@@ -324,20 +324,17 @@ public class ICUScenario {
 	            out = pullFrom.get(NDArrayIndex.all(), NDArrayIndex.all(), NDArrayIndex.point(lastTS));
 	            
 	        } else {
-	            double [] outShape = new double[2];
-	            outShape[0] = pullFrom.size(0);
-	            outShape[1] = pullFrom.size(1);
-	                
-	            out = Nd4j.create(outShape, new int[] { 1, 2 });
+	          
+	            out = Nd4j.zeros(pullFrom.size(0), pullFrom.size(1));
 	            
 	            //Want the index of the last non-zero entry in the mask array
 	            INDArray lastStepArr = BooleanIndexing.lastIndex(mask, Conditions.epsNotEquals(0.0), 1);
-	            
+	           
 	            int [] fwdPassTimeSteps = lastStepArr.data().asInt();
 	            
 	            for (int i = 0; i < fwdPassTimeSteps.length; i++) {
-	     
-	                out.putRow(i, pullFrom.get(NDArrayIndex.point(i), NDArrayIndex.all(),
+	            	
+	            	out.putRow(i, pullFrom.get(NDArrayIndex.point(i), NDArrayIndex.all(),
 	                        NDArrayIndex.point(fwdPassTimeSteps[i])));
 	            }
 	        }	
