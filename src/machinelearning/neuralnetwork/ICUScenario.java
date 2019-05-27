@@ -2,7 +2,10 @@ package machinelearning.neuralnetwork;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -33,6 +36,13 @@ import org.deeplearning4j.arbiter.scoring.impl.EvaluationScoreFunction;
 import org.deeplearning4j.arbiter.task.ComputationGraphTaskCreator;
 import org.deeplearning4j.arbiter.ui.listener.ArbiterStatusListener;
 import org.deeplearning4j.datasets.datavec.SequenceRecordReaderDataSetIterator;
+import org.deeplearning4j.earlystopping.EarlyStoppingConfiguration;
+import org.deeplearning4j.earlystopping.EarlyStoppingResult;
+import org.deeplearning4j.earlystopping.saver.LocalFileGraphSaver;
+import org.deeplearning4j.earlystopping.scorecalc.ClassificationScoreCalculator;
+import org.deeplearning4j.earlystopping.termination.BestScoreEpochTerminationCondition;
+import org.deeplearning4j.earlystopping.trainer.EarlyStoppingGraphTrainer;
+import org.deeplearning4j.earlystopping.trainer.IEarlyStoppingTrainer;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.CacheMode;
 import org.deeplearning4j.nn.conf.ComputationGraphConfiguration;
@@ -85,12 +95,43 @@ public class ICUScenario {
 	public static void process(ComputationGraph graph) throws Exception {
 		
 		ICUDataSource ds = new ICUDataSource();
+		DataSetIterator trainIter = (DataSetIterator) ds.trainData();
+		DataSetIterator testIter = (DataSetIterator) ds.testData();
 		
 		graph.init();
 		
 		graph.setListeners(new ScoreIterationListener(10), 
 				new PerformanceListener(10, false),
 				new EvaluativeListener((DataSetIterator) ds.testData(), 1, InvocationType.EPOCH_END));
+		
+		System.out.println(graph.summary());
+		
+		EarlyStoppingConfiguration<ComputationGraph> eac = new EarlyStoppingConfiguration.Builder<ComputationGraph>()
+				.epochTerminationConditions(new BestScoreEpochTerminationCondition(0.9))
+				.scoreCalculator(new ClassificationScoreCalculator(
+						org.nd4j.evaluation.classification.Evaluation.Metric.ACCURACY, testIter))
+				.evaluateEveryNEpochs(1)
+				.modelSaver(new LocalFileGraphSaver("out"))
+				.build();	
+	
+		IEarlyStoppingTrainer<ComputationGraph> trainer = new EarlyStoppingGraphTrainer(eac, graph, trainIter);
+		
+		System.out.println("Training model....");
+		EarlyStoppingResult<ComputationGraph> result = trainer.fit();
+		
+		System.out.println("Termination reason: " + result.getTerminationReason());
+        System.out.println("Termination details: " + result.getTerminationDetails());
+        System.out.println("Total epochs: " + result.getTotalEpochs());
+        System.out.println("Best epoch number: " + result.getBestModelEpoch());
+        System.out.println("Score at best epoch: " + result.getBestModelScore());
+        
+        Map<Integer,Double> epochVsScore = result.getScoreVsEpoch();
+        List<Integer> list = new ArrayList<Integer>(epochVsScore.keySet());
+        Collections.sort(list);
+        System.out.println("Epoch\tScore");
+        for( Integer i : list){
+            System.out.println(i + "\t" + epochVsScore.get(i));
+        }	
 	}
 	
 	public static void process(ComputationGraphSpace space) throws Exception {
