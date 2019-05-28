@@ -52,7 +52,7 @@ import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.deeplearning4j.earlystopping.EarlyStoppingConfiguration;
 import org.deeplearning4j.earlystopping.EarlyStoppingResult;
 import org.deeplearning4j.earlystopping.saver.LocalFileGraphSaver;
-import org.deeplearning4j.earlystopping.scorecalc.ClassificationScoreCalculator;
+import org.deeplearning4j.earlystopping.scorecalc.DataSetLossCalculator;
 import org.deeplearning4j.earlystopping.termination.BestScoreEpochTerminationCondition;
 import org.deeplearning4j.earlystopping.trainer.EarlyStoppingGraphTrainer;
 import org.deeplearning4j.earlystopping.trainer.IEarlyStoppingTrainer;
@@ -224,8 +224,7 @@ public class AnimalsClassification2 {
 			
 			EarlyStoppingConfiguration<ComputationGraph> eac = new EarlyStoppingConfiguration.Builder<ComputationGraph>()
 					.epochTerminationConditions(new BestScoreEpochTerminationCondition(0.875))
-					.scoreCalculator(new ClassificationScoreCalculator(
-							org.nd4j.evaluation.classification.Evaluation.Metric.ACCURACY, testIter))
+					.scoreCalculator(new DataSetLossCalculator(testIter, true))
 					.evaluateEveryNEpochs(1)
 					.modelSaver(new LocalFileGraphSaver("out"))
 					.build();	
