@@ -104,7 +104,14 @@ public class ICUScenario {
 		graph.init();
 		
 		graph.setListeners(new ScoreIterationListener(10), 
-				new PerformanceListener(10, false),
+				new PerformanceListener.Builder()
+                			.reportSample(true)
+                			.reportScore(true)
+                			.reportTime(true)
+                			.reportETL(true)
+                			.reportBatch(true)
+                			.reportIteration(true)
+                			.setFrequency(10).build(),
 				new EvaluativeListener(testIter, 1, InvocationType.EPOCH_END));
 		
 		System.out.println(graph.summary());
@@ -185,7 +192,7 @@ public class ICUScenario {
 		ComputationGraphConfiguration conf = new NeuralNetConfiguration.Builder()
 				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
 				.l2(0.01)
-				.cacheMode(CacheMode.DEVICE)
+				.cacheMode(CacheMode.HOST)
 				.weightInit(WeightInit.XAVIER)
 				.activation(Activation.TANH)
 				.updater(new Sgd(LEARNING_RATE))
@@ -209,7 +216,6 @@ public class ICUScenario {
 		
 		ParameterSpace<Double> l2Param = new ContinuousParameterSpace(0.0001, 0.09);
 		ParameterSpace<Double> learnParam = new ContinuousParameterSpace(0.001, 0.09);
-        ParameterSpace<Integer> layer1Param = new IntegerParameterSpace(8, 256); 
         ParameterSpace<Integer> layer2Param = new IntegerParameterSpace(8, 256);
 		
 		return new ComputationGraphSpace.Builder() 
@@ -223,7 +229,7 @@ public class ICUScenario {
 				.addInputs("in")
 				
 				.addLayer("lstm", new LSTMLayerSpace.Builder()
-										.nIn(layer1Param).nOut(layer2Param).build(), "in")
+										.nIn(NB_INPUTS).nOut(layer2Param).build(), "in")
 				.addVertex("lastStep", new LastTimeStepVertex("in"), "lstm")
 				
 				.addLayer("out", new OutputLayerSpace.Builder()
