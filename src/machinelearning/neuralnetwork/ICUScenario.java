@@ -40,6 +40,7 @@ import org.deeplearning4j.earlystopping.EarlyStoppingConfiguration;
 import org.deeplearning4j.earlystopping.EarlyStoppingResult;
 import org.deeplearning4j.earlystopping.saver.LocalFileGraphSaver;
 import org.deeplearning4j.earlystopping.scorecalc.DataSetLossCalculator;
+import org.deeplearning4j.earlystopping.termination.MaxTimeIterationTerminationCondition;
 import org.deeplearning4j.earlystopping.termination.ScoreImprovementEpochTerminationCondition;
 import org.deeplearning4j.earlystopping.trainer.EarlyStoppingGraphTrainer;
 import org.deeplearning4j.earlystopping.trainer.IEarlyStoppingTrainer;
@@ -69,6 +70,7 @@ import org.nd4j.linalg.indexing.BooleanIndexing;
 import org.nd4j.linalg.indexing.NDArrayIndex;
 import org.nd4j.linalg.indexing.conditions.Conditions;
 import org.nd4j.linalg.learning.config.Sgd;
+import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 public class ICUScenario {
 
@@ -97,18 +99,20 @@ public class ICUScenario {
 		ICUDataSource ds = new ICUDataSource();
 		DataSetIterator trainIter = (DataSetIterator) ds.trainData();
 		DataSetIterator testIter = (DataSetIterator) ds.testData();
+		DataSetIterator testIter2 = (DataSetIterator) ds.testData2();
 		
 		graph.init();
 		
 		graph.setListeners(new ScoreIterationListener(10), 
 				new PerformanceListener(10, false),
-				new EvaluativeListener((DataSetIterator) ds.testData(), 1, InvocationType.EPOCH_END));
+				new EvaluativeListener(testIter, 1, InvocationType.EPOCH_END));
 		
 		System.out.println(graph.summary());
 		
 		EarlyStoppingConfiguration<ComputationGraph> eac = new EarlyStoppingConfiguration.Builder<ComputationGraph>()
 				.epochTerminationConditions(new ScoreImprovementEpochTerminationCondition(2))
-				.scoreCalculator(new DataSetLossCalculator(testIter, true))
+				.iterationTerminationConditions(new MaxTimeIterationTerminationCondition(5, TimeUnit.MINUTES))
+				.scoreCalculator(new DataSetLossCalculator(testIter2, true))
 				.evaluateEveryNEpochs(1)
 				.modelSaver(new LocalFileGraphSaver("out"))
 				.build();	
@@ -193,7 +197,7 @@ public class ICUScenario {
 										.nIn(NB_INPUTS).nOut(30).build(), "in")
 				.addVertex("lastStep", new LastTimeStepVertex("in"), "lstm")
 				
-				.addLayer("out", new OutputLayer.Builder()
+				.addLayer("out", new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
 									.activation(Activation.SOFTMAX).nIn(30).nOut(NUM_LABELS).build(), "lastStep")
 				
 				.setOutputs("out").build();
@@ -235,39 +239,58 @@ public class ICUScenario {
 		private static final String ROOT = "data/physionet";
 		
 		private SequenceRecordReaderDataSetIterator training = null;
-		private SequenceRecordReaderDataSetIterator testing = null;
+		private SequenceRecordReaderDataSetIterator testing1 = null;
+		private SequenceRecordReaderDataSetIterator testing2 = null;
 		
 		public ICUDataSource() throws Exception {
 			
 			String featuresPath = Paths.get(ROOT, "sequence", "%d.csv").toString();
 			String labelsPath = Paths.get(ROOT, "mortality", "%d.csv").toString();
 			
-			SequenceRecordReader trainData = new CSVSequenceRecordReader(1, ",");
-			trainData.initialize( new NumberedFileInputSplit(
+			{
+				SequenceRecordReader trainData = new CSVSequenceRecordReader(1, ",");
+				trainData.initialize( new NumberedFileInputSplit(
 									featuresPath, 0, NB_TRAIN_EXAMPLES - 1));
 			
-			SequenceRecordReader trainLabels = new CSVSequenceRecordReader();
-			trainLabels.initialize(new NumberedFileInputSplit(
+				SequenceRecordReader trainLabels = new CSVSequenceRecordReader();
+				trainLabels.initialize(new NumberedFileInputSplit(
 									labelsPath, 0, NB_TRAIN_EXAMPLES - 1));
 			
-			training = new SequenceRecordReaderDataSetIterator(trainData, trainLabels,
+				training = new SequenceRecordReaderDataSetIterator(trainData, trainLabels,
 					BATCH_SIZE, NUM_LABELS, false, 
 					SequenceRecordReaderDataSetIterator.AlignmentMode.ALIGN_END);
-			training.setPreProcessor(new LastStepPreProcessor());
+				training.setPreProcessor(new LastStepPreProcessor());
+			}
 			
-			
-			SequenceRecordReader testData = new CSVSequenceRecordReader(1, ",");
-			testData.initialize(new NumberedFileInputSplit(
+			{
+				SequenceRecordReader testData = new CSVSequenceRecordReader(1, ",");
+				testData.initialize(new NumberedFileInputSplit(
 									featuresPath, NB_TRAIN_EXAMPLES, NB_TRAIN_EXAMPLES + NB_TEST_EXAMPLES));
 			
-			SequenceRecordReader testLabels = new CSVSequenceRecordReader();
-			testLabels.initialize(new NumberedFileInputSplit(
+				SequenceRecordReader testLabels = new CSVSequenceRecordReader();
+				testLabels.initialize(new NumberedFileInputSplit(
 									labelsPath, NB_TRAIN_EXAMPLES, NB_TRAIN_EXAMPLES  + NB_TEST_EXAMPLES));
 			
-			testing = new SequenceRecordReaderDataSetIterator(testData, testLabels,
+				testing1 = new SequenceRecordReaderDataSetIterator(testData, testLabels,
 					BATCH_SIZE, NUM_LABELS, false, 
 					SequenceRecordReaderDataSetIterator.AlignmentMode.ALIGN_END);	
-			testing.setPreProcessor(new LastStepPreProcessor());
+				testing1.setPreProcessor(new LastStepPreProcessor());
+			}
+			
+			{
+				SequenceRecordReader testData = new CSVSequenceRecordReader(1, ",");
+				testData.initialize(new NumberedFileInputSplit(
+									featuresPath, NB_TRAIN_EXAMPLES, NB_TRAIN_EXAMPLES + NB_TEST_EXAMPLES));
+			
+				SequenceRecordReader testLabels = new CSVSequenceRecordReader();
+				testLabels.initialize(new NumberedFileInputSplit(
+									labelsPath, NB_TRAIN_EXAMPLES, NB_TRAIN_EXAMPLES  + NB_TEST_EXAMPLES));
+			
+				testing2 = new SequenceRecordReaderDataSetIterator(testData, testLabels,
+					BATCH_SIZE, NUM_LABELS, false, 
+					SequenceRecordReaderDataSetIterator.AlignmentMode.ALIGN_END);	
+				testing2.setPreProcessor(new LastStepPreProcessor());
+			}
 		}
 		
 		@Override
@@ -284,7 +307,11 @@ public class ICUScenario {
 		@Override
 		public Object testData() {
 			// TODO Auto-generated method stub
-			return testing;
+			return testing1;
+		}
+		
+		public Object testData2() {
+			return testing2;
 		}
 
 		@Override
