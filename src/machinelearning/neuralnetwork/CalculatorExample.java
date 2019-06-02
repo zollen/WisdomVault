@@ -1,0 +1,290 @@
+package machinelearning.neuralnetwork;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import org.deeplearning4j.nn.api.OptimizationAlgorithm;
+import org.deeplearning4j.nn.conf.CacheMode;
+import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
+import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
+import org.deeplearning4j.nn.conf.WorkspaceMode;
+import org.deeplearning4j.nn.conf.layers.ConvolutionLayer;
+import org.deeplearning4j.nn.conf.layers.LSTM;
+import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
+import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
+import org.deeplearning4j.nn.weights.WeightInit;
+import org.deeplearning4j.optimize.api.InvocationType;
+import org.deeplearning4j.optimize.listeners.CheckpointListener;
+import org.deeplearning4j.optimize.listeners.EvaluativeListener;
+import org.deeplearning4j.optimize.listeners.PerformanceListener;
+import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
+import org.nd4j.linalg.activations.Activation;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.dataset.DataSet;
+import org.nd4j.linalg.dataset.api.DataSetPreProcessor;
+import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
+import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.learning.config.RmsProp;
+import org.nd4j.linalg.lossfunctions.LossFunctions;
+
+public class CalculatorExample {
+	
+	private static final double LEARNING_RATE = 0.005;
+	private static final int EPOCHS = 10;
+	
+	private static final int SEED = 83;
+	private static final int BATCH_SIZE = 10;
+	private static final int TOTAL_BATCH = 20;
+	private static final int LAYER_SIZE = 32;
+	private static final int TIME_STEP = 5;
+	
+	
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		MultiLayerNetwork network = build();
+		
+		MathIterator trainIter = new MathIterator(BATCH_SIZE, TOTAL_BATCH, SEED);
+		MathIterator testIter = new MathIterator(BATCH_SIZE, TOTAL_BATCH, SEED + 5);
+		
+		network.setListeners(new ScoreIterationListener(1), 
+				new PerformanceListener(1, true),
+				new EvaluativeListener(testIter, 1, InvocationType.EPOCH_END),
+				new CheckpointListener.Builder("out").keepAll().saveEveryNEpochs(1).build()); 
+		
+		System.out.println(network.summary());
+		
+		network.fit(trainIter, EPOCHS);
+	}
+	
+	public static MultiLayerNetwork build() {
+		
+		
+		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
+				.seed(SEED)
+				.cacheMode(CacheMode.HOST)
+				.weightInit(WeightInit.XAVIER)
+				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
+				.updater(new RmsProp(LEARNING_RATE))
+				.activation(Activation.TANH)
+				.l2(0.0001)
+				.cudnnAlgoMode(ConvolutionLayer.AlgoMode.NO_WORKSPACE)
+				.inferenceWorkspaceMode(WorkspaceMode.ENABLED)
+				.trainingWorkspaceMode(WorkspaceMode.ENABLED)
+				.list()
+				
+				.layer(0, new LSTM.Builder()
+								.nIn(MathIterator.INPUT_SIZE)
+								.nOut(LAYER_SIZE).build())
+				.layer(1, new LSTM.Builder()
+								.nIn(LAYER_SIZE).nOut(LAYER_SIZE).build())
+				.layer(2, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
+								.activation(Activation.SOFTMAX)        
+								.nIn(LAYER_SIZE).nOut(MathIterator.OUTPUT_SIZE).build())
+				.build();
+				
+								
+		return new MultiLayerNetwork(conf);
+	}
+	
+	
+	
+	public static class MathIterator implements DataSetIterator {
+		
+		private static final long serialVersionUID = 1L;
+			
+		private static Map<String, Integer> str2Idx = new HashMap<String, Integer>();
+		private static Map<Integer, String> idx2Str = new HashMap<Integer, String>();
+		
+		
+		static {
+			
+			for (int i = 0; i < 9; i++) {
+				str2Idx.put(String.valueOf(i), i);
+				idx2Str.put(i, String.valueOf(i));
+			}
+			
+			str2Idx.put("+", 10);
+			idx2Str.put(10, "+");
+		}
+		
+		public static final int INPUT_SIZE = str2Idx.size();
+		public static final int OUTPUT_SIZE = INPUT_SIZE - 1;
+		
+		private int current;
+		private int batchSize;
+		private int totalBatch;
+		private int seed;
+		private Random rand;
+
+		public MathIterator(int batchSize, int totalBatch, int seed) {
+			this.batchSize = batchSize;
+			this.totalBatch = totalBatch;
+			this.current = 0;
+			this.seed = seed;
+			this.rand = new Random(seed);
+		}
+
+		@Override
+		public boolean hasNext() {
+			// TODO Auto-generated method stub
+			return current < totalBatch;
+		}
+
+		@Override
+		public DataSet next() {
+			// TODO Auto-generated method stub
+			return next(current);
+		}
+
+		@Override
+		public DataSet next(int num) {
+			// TODO Auto-generated method stub
+			current++;		
+			try {
+				return generate(batchSize, rand);
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			return null;
+		}
+		
+		public static INDArray toINDArray(String stmt) throws Exception  {
+			
+			INDArray arr = Nd4j.zeros(new int[] { INPUT_SIZE, TIME_STEP });
+			
+			for (int i = 0; i < TIME_STEP; i++) {
+				
+				int idx = toIndex(stmt.charAt(i));
+				arr.putScalar(new int[] { idx, i }, 1.0);
+			}
+			
+			return arr;
+		}
+		
+		public static char toChar(int index) throws Exception {
+			
+			String tmp = idx2Str.get(index);
+			
+			if (tmp != null)
+				return tmp.charAt(0);
+						
+			throw new RuntimeException("Invalid Index: " + index);		
+		}
+		
+		public static int toIndex(char ch) throws Exception {
+		
+			Integer num = str2Idx.get(String.valueOf(ch));
+			
+			if (num != null)
+				return num.intValue();
+			
+			throw new RuntimeException("Invalid char: " + ch);
+		}
+		
+		public static DataSet generate(int sampleSize, Random rand) throws Exception {
+			
+			INDArray input = Nd4j.zeros(new int[] { sampleSize, INPUT_SIZE, TIME_STEP });
+			INDArray label = Nd4j.zeros(new int[] { sampleSize, OUTPUT_SIZE, TIME_STEP });
+			
+			INDArray fmask = Nd4j.ones(new int [] { sampleSize, TIME_STEP });
+			INDArray lmask = Nd4j.zeros(new int[] { sampleSize, TIME_STEP });
+			
+			for (int i = 0; i < sampleSize; i++) {
+				lmask.putScalar(new int [] { i, TIME_STEP - 2 }, 1.0);
+				lmask.putScalar(new int [] { i, TIME_STEP - 1 }, 1.0);
+			}
+
+			for (int i = 0; i < sampleSize; i++) {
+				
+				int num1 = redo(rand, rand.nextInt(100), 100);
+				int num2 = rand.nextInt(99 - num1);
+				
+				String in = String.format("%02d", num1) + ", " + String.format("%02d", num2);
+				String out = String.format("%02d", (num1 + num2));
+				
+				INDArray arrIn = toINDArray(in);
+				INDArray arrOut = toINDArray(out);
+				
+				input.putRow(i, arrIn);
+				label.putRow(i, arrOut);
+			}	
+			
+			return new DataSet(input, label, fmask, lmask);
+		}
+		
+		private static int redo(Random rand, int num, int limit) {
+			
+			switch(num) {
+			case 95:
+			case 96:
+			case 97:
+			case 98:
+			case 99:
+				num = num - rand.nextInt(50);
+			break;
+			default:
+			}
+			
+			return num < 99 ? num : 97;
+		}
+
+		@Override
+		public int inputColumns() {
+			// TODO Auto-generated method stub
+			return str2Idx.size();
+		}
+
+		@Override
+		public int totalOutcomes() {
+			// TODO Auto-generated method stub
+			return str2Idx.size() - 1;
+		}
+
+		@Override
+		public boolean resetSupported() {
+			// TODO Auto-generated method stub
+			return true;
+		}
+
+		@Override
+		public boolean asyncSupported() {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public void reset() {
+			// TODO Auto-generated method stub
+			this.current = 0;
+			this.rand = new Random(seed);
+		}
+
+		@Override
+		public int batch() {
+			// TODO Auto-generated method stub
+			return batchSize;
+		}
+
+		@Override
+		public void setPreProcessor(DataSetPreProcessor preProcessor) {
+			throw new UnsupportedOperationException("Not implemented");
+			
+		}
+
+		@Override
+		public DataSetPreProcessor getPreProcessor() {
+			throw new UnsupportedOperationException("Not implemented");
+		}
+
+		@Override
+		public List<String> getLabels() {
+			// TODO Auto-generated method stub
+			throw new UnsupportedOperationException("Not implemented");
+		}
+	}
+
+}

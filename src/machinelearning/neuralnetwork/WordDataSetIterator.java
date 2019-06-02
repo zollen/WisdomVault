@@ -1,4 +1,4 @@
-package machinelearning.neuralnetwork.words;
+package machinelearning.neuralnetwork;
 
 import java.io.File;
 import java.io.IOException;

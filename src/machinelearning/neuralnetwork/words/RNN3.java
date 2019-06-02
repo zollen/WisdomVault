@@ -18,6 +18,8 @@ import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.Adam;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
+import machinelearning.neuralnetwork.WordDataSetIterator;
+
 public class RNN3 {
 	
 	private static final Random rand = new Random(0);
