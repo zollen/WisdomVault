@@ -28,20 +28,18 @@ import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.DataSetPreProcessor;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.learning.config.Nesterovs;
+import org.nd4j.linalg.learning.config.AdaDelta;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 public class CalculatorExample {
 	
-	private static final double LEARNING_RATE = 0.1;
-	private static final double MOMENTUM = 0.9;
-	private static final int EPOCHS = 10;
+	private static final int EPOCHS = 30;
 	
 	private static final int SEED = 83;
-	private static final int BATCH_SIZE = 10;
-	private static final int TOTAL_BATCH = 20;
+	private static final int BATCH_SIZE = 20;
+	private static final int TOTAL_BATCH = 100;
 	private static final int LAYER_SIZE = 64;
-	private static final int TIME_STEP = 5;
+	private static final int TIME_STEP = 6;
 	
 	
 	public static void main(String[] args) throws Exception {
@@ -53,9 +51,9 @@ public class CalculatorExample {
 		MathIterator trainIter = new MathIterator(BATCH_SIZE, TOTAL_BATCH, SEED);
 		MathIterator testIter = new MathIterator(10, 1, SEED + 5);
 		
-		network.setListeners(new ScoreIterationListener(1), 
-				new PerformanceListener(1, true),
-				new EvaluativeListener(testIter, 1, InvocationType.EPOCH_END),
+		network.setListeners(new ScoreIterationListener(500), 
+				new PerformanceListener(500, true),
+				new EvaluativeListener(testIter, 5, InvocationType.EPOCH_END),
 				new CheckpointListener.Builder("out").keepAll().saveEveryNEpochs(1).build()); 
 		
 		System.out.println(network.summary());
@@ -65,8 +63,8 @@ public class CalculatorExample {
 		System.out.println("=====================");
 		INDArray inArr = Nd4j.zeros(new int[] { 1, MathIterator.INPUT_SIZE, TIME_STEP });
 		INDArray outArr = Nd4j.zeros(new int[] { 1, MathIterator.OUTPUT_SIZE, TIME_STEP });
-		INDArray in = MathIterator.toINDArray(MathIterator.INPUT_SIZE, "37+46");
-		INDArray out = MathIterator.toINDArray(MathIterator.OUTPUT_SIZE, "37");
+		INDArray in = MathIterator.toInINDArray(MathIterator.INPUT_SIZE, "39+23=");
+		INDArray out = MathIterator.toOutINDArray(MathIterator.OUTPUT_SIZE, "62");
 		
 		inArr.putRow(0, in);
 		outArr.putRow(0, out);
@@ -84,7 +82,7 @@ public class CalculatorExample {
 				.cacheMode(CacheMode.HOST)
 				.weightInit(WeightInit.XAVIER)
 				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-				.updater(new Nesterovs(LEARNING_RATE, MOMENTUM))
+				.updater(new AdaDelta())
 				.activation(Activation.TANH)
 				.l2(0.0001)
 				.cudnnAlgoMode(ConvolutionLayer.AlgoMode.NO_WORKSPACE)
@@ -125,10 +123,13 @@ public class CalculatorExample {
 			
 			str2Idx.put("+", 10);
 			idx2Str.put(10, "+");
+			
+			str2Idx.put("=", 11);
+			idx2Str.put(11, "=");
 		}
 		
 		public static final int INPUT_SIZE = str2Idx.size();
-		public static final int OUTPUT_SIZE = INPUT_SIZE - 1;
+		public static final int OUTPUT_SIZE = INPUT_SIZE - 2;
 		
 		private int current;
 		private int batchSize;
@@ -170,7 +171,7 @@ public class CalculatorExample {
 			return null;
 		}
 		
-		public static INDArray toINDArray(int size, String stmt) throws Exception  {
+		public static INDArray toInINDArray(int size, String stmt) throws Exception  {
 			
 			INDArray arr = Nd4j.zeros(new int[] { size, TIME_STEP });
 			
@@ -178,6 +179,18 @@ public class CalculatorExample {
 				
 				int idx = toIndex(stmt.charAt(i));		
 				arr.putScalar(new int[] { idx, i }, 1.0);		
+			}
+			
+			return arr;
+		}
+		
+		public static INDArray toOutINDArray(int size, String stmt) throws Exception {
+			
+			INDArray arr = Nd4j.zeros(new int[] { size, TIME_STEP });
+			
+			for (int i = 0; i < stmt.length(); i++) {
+				int idx = toIndex(stmt.charAt(i));
+				arr.putScalar(new int[] { idx, TIME_STEP - (2 - i) }, 1.0);
 			}
 			
 			return arr;
@@ -212,8 +225,8 @@ public class CalculatorExample {
 			INDArray lmask = Nd4j.zeros(new int[] { sampleSize, TIME_STEP });
 			
 			for (int i = 0; i < sampleSize; i++) {
-				lmask.putScalar(new int [] { i, 0 }, 1.0);
-				lmask.putScalar(new int [] { i, 1 }, 1.0);
+				lmask.putScalar(new int [] { i, TIME_STEP - 2 }, 1.0);
+				lmask.putScalar(new int [] { i, TIME_STEP - 1 }, 1.0);
 			}
 
 			for (int i = 0; i < sampleSize; i++) {
@@ -221,11 +234,13 @@ public class CalculatorExample {
 				int num1 = redo(rand, rand.nextInt(100), 100);
 				int num2 = rand.nextInt(99 - num1);
 				
-				String in = String.format("%02d", num1) + "+" + String.format("%02d", num2);
+				String in = String.format("%02d", num1) + "+" + String.format("%02d", num2) + "=";
 				String out = String.format("%02d", (num1 + num2));
 				
-				INDArray arrIn = toINDArray(INPUT_SIZE, in);
-				INDArray arrOut = toINDArray(OUTPUT_SIZE, out);
+				INDArray arrIn = toInINDArray(INPUT_SIZE, in);
+				INDArray arrOut = toOutINDArray(OUTPUT_SIZE, out);
+				
+				
 				
 				input.putRow(i, arrIn);
 				label.putRow(i, arrOut);
