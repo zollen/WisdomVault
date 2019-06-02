@@ -1,10 +1,12 @@
 package machinelearning.neuralnetwork;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.apache.commons.io.FileUtils;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.CacheMode;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -26,27 +28,30 @@ import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.DataSetPreProcessor;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.learning.config.RmsProp;
+import org.nd4j.linalg.learning.config.Nesterovs;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 public class CalculatorExample {
 	
-	private static final double LEARNING_RATE = 0.005;
+	private static final double LEARNING_RATE = 0.1;
+	private static final double MOMENTUM = 0.9;
 	private static final int EPOCHS = 10;
 	
 	private static final int SEED = 83;
 	private static final int BATCH_SIZE = 10;
 	private static final int TOTAL_BATCH = 20;
-	private static final int LAYER_SIZE = 32;
+	private static final int LAYER_SIZE = 64;
 	private static final int TIME_STEP = 5;
 	
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
+		FileUtils.cleanDirectory(new File("out")); 
+		
 		MultiLayerNetwork network = build();
 		
 		MathIterator trainIter = new MathIterator(BATCH_SIZE, TOTAL_BATCH, SEED);
-		MathIterator testIter = new MathIterator(BATCH_SIZE, TOTAL_BATCH, SEED + 5);
+		MathIterator testIter = new MathIterator(10, 1, SEED + 5);
 		
 		network.setListeners(new ScoreIterationListener(1), 
 				new PerformanceListener(1, true),
@@ -56,6 +61,19 @@ public class CalculatorExample {
 		System.out.println(network.summary());
 		
 		network.fit(trainIter, EPOCHS);
+		
+		System.out.println("=====================");
+		INDArray inArr = Nd4j.zeros(new int[] { 1, MathIterator.INPUT_SIZE, TIME_STEP });
+		INDArray outArr = Nd4j.zeros(new int[] { 1, MathIterator.OUTPUT_SIZE, TIME_STEP });
+		INDArray in = MathIterator.toINDArray(MathIterator.INPUT_SIZE, "37+46");
+		INDArray out = MathIterator.toINDArray(MathIterator.OUTPUT_SIZE, "37");
+		
+		inArr.putRow(0, in);
+		outArr.putRow(0, out);
+		
+		INDArray res = network.rnnTimeStep(inArr);
+		
+		System.out.println(res);
 	}
 	
 	public static MultiLayerNetwork build() {
@@ -66,7 +84,7 @@ public class CalculatorExample {
 				.cacheMode(CacheMode.HOST)
 				.weightInit(WeightInit.XAVIER)
 				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-				.updater(new RmsProp(LEARNING_RATE))
+				.updater(new Nesterovs(LEARNING_RATE, MOMENTUM))
 				.activation(Activation.TANH)
 				.l2(0.0001)
 				.cudnnAlgoMode(ConvolutionLayer.AlgoMode.NO_WORKSPACE)
@@ -100,7 +118,7 @@ public class CalculatorExample {
 		
 		static {
 			
-			for (int i = 0; i < 9; i++) {
+			for (int i = 0; i <= 9; i++) {
 				str2Idx.put(String.valueOf(i), i);
 				idx2Str.put(i, String.valueOf(i));
 			}
@@ -152,14 +170,14 @@ public class CalculatorExample {
 			return null;
 		}
 		
-		public static INDArray toINDArray(String stmt) throws Exception  {
+		public static INDArray toINDArray(int size, String stmt) throws Exception  {
 			
-			INDArray arr = Nd4j.zeros(new int[] { INPUT_SIZE, TIME_STEP });
+			INDArray arr = Nd4j.zeros(new int[] { size, TIME_STEP });
 			
-			for (int i = 0; i < TIME_STEP; i++) {
+			for (int i = 0; i < stmt.length(); i++) {
 				
-				int idx = toIndex(stmt.charAt(i));
-				arr.putScalar(new int[] { idx, i }, 1.0);
+				int idx = toIndex(stmt.charAt(i));		
+				arr.putScalar(new int[] { idx, i }, 1.0);		
 			}
 			
 			return arr;
@@ -172,7 +190,7 @@ public class CalculatorExample {
 			if (tmp != null)
 				return tmp.charAt(0);
 						
-			throw new RuntimeException("Invalid Index: " + index);		
+			throw new RuntimeException("<< toChar >> Invalid Index: " + index);		
 		}
 		
 		public static int toIndex(char ch) throws Exception {
@@ -182,11 +200,11 @@ public class CalculatorExample {
 			if (num != null)
 				return num.intValue();
 			
-			throw new RuntimeException("Invalid char: " + ch);
+			throw new RuntimeException("<< toIndex >> Invalid char: " + ch);
 		}
 		
 		public static DataSet generate(int sampleSize, Random rand) throws Exception {
-			
+				
 			INDArray input = Nd4j.zeros(new int[] { sampleSize, INPUT_SIZE, TIME_STEP });
 			INDArray label = Nd4j.zeros(new int[] { sampleSize, OUTPUT_SIZE, TIME_STEP });
 			
@@ -194,8 +212,8 @@ public class CalculatorExample {
 			INDArray lmask = Nd4j.zeros(new int[] { sampleSize, TIME_STEP });
 			
 			for (int i = 0; i < sampleSize; i++) {
-				lmask.putScalar(new int [] { i, TIME_STEP - 2 }, 1.0);
-				lmask.putScalar(new int [] { i, TIME_STEP - 1 }, 1.0);
+				lmask.putScalar(new int [] { i, 0 }, 1.0);
+				lmask.putScalar(new int [] { i, 1 }, 1.0);
 			}
 
 			for (int i = 0; i < sampleSize; i++) {
@@ -203,14 +221,15 @@ public class CalculatorExample {
 				int num1 = redo(rand, rand.nextInt(100), 100);
 				int num2 = rand.nextInt(99 - num1);
 				
-				String in = String.format("%02d", num1) + ", " + String.format("%02d", num2);
+				String in = String.format("%02d", num1) + "+" + String.format("%02d", num2);
 				String out = String.format("%02d", (num1 + num2));
 				
-				INDArray arrIn = toINDArray(in);
-				INDArray arrOut = toINDArray(out);
+				INDArray arrIn = toINDArray(INPUT_SIZE, in);
+				INDArray arrOut = toINDArray(OUTPUT_SIZE, out);
 				
 				input.putRow(i, arrIn);
 				label.putRow(i, arrOut);
+				
 			}	
 			
 			return new DataSet(input, label, fmask, lmask);
@@ -286,5 +305,4 @@ public class CalculatorExample {
 			throw new UnsupportedOperationException("Not implemented");
 		}
 	}
-
 }
