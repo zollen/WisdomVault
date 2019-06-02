@@ -28,18 +28,17 @@ import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.DataSetPreProcessor;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.learning.config.AdaDelta;
+import org.nd4j.linalg.learning.config.Nadam;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 public class CalculatorExample {
 	
 	private static final int EPOCHS = 30;
-	
-	private static final int SEED = 83;
 	private static final int BATCH_SIZE = 20;
 	private static final int TOTAL_BATCH = 100;
 	private static final int LAYER_SIZE = 64;
 	private static final int TIME_STEP = 6;
+	private static final int SEED = 83;
 	
 	
 	public static void main(String[] args) throws Exception {
@@ -82,7 +81,7 @@ public class CalculatorExample {
 				.cacheMode(CacheMode.HOST)
 				.weightInit(WeightInit.XAVIER)
 				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-				.updater(new AdaDelta())
+				.updater(new Nadam())
 				.activation(Activation.TANH)
 				.l2(0.0001)
 				.cudnnAlgoMode(ConvolutionLayer.AlgoMode.NO_WORKSPACE)
