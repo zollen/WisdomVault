@@ -24,10 +24,12 @@ import org.deeplearning4j.optimize.listeners.PerformanceListener;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.api.ops.impl.indexaccum.IMax;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.DataSetPreProcessor;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.indexing.NDArrayIndex;
 import org.nd4j.linalg.learning.config.Nadam;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
@@ -41,14 +43,17 @@ public class CalculatorExample {
 	private static final int SEED = 83;
 	
 	
+	private static final int [] INPUT_MASK = { 1, 1, 1, 1, 1, 1 };
+	private static final int [] OUTPUT_MASK = { 0, 0, 0, 0, 1, 1 };
+	
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
 		FileUtils.cleanDirectory(new File("out")); 
-		
+
 		MultiLayerNetwork network = build();
 		
 		MathIterator trainIter = new MathIterator(BATCH_SIZE, TOTAL_BATCH, SEED);
-		MathIterator testIter = new MathIterator(10, 1, SEED + 5);
+		MathIterator testIter = new MathIterator(20, 1, SEED + 5);
 		
 		network.setListeners(new ScoreIterationListener(500), 
 				new PerformanceListener(500, true),
@@ -58,17 +63,22 @@ public class CalculatorExample {
 		System.out.println(network.summary());
 		
 		network.fit(trainIter, EPOCHS);
-		
+
 		System.out.println("=====================");
 		INDArray inArr = Nd4j.zeros(new int[] { 1, MathIterator.INPUT_SIZE, TIME_STEP });
 		INDArray outArr = Nd4j.zeros(new int[] { 1, MathIterator.OUTPUT_SIZE, TIME_STEP });
-		INDArray in = MathIterator.toInINDArray(MathIterator.INPUT_SIZE, "39+23=");
-		INDArray out = MathIterator.toOutINDArray(MathIterator.OUTPUT_SIZE, "62");
+		
+		INDArray in = MathIterator.toINDArray(MathIterator.INPUT_SIZE, "39+23=", INPUT_MASK);
+		INDArray out = MathIterator.toINDArray(MathIterator.OUTPUT_SIZE, "62", OUTPUT_MASK);
 		
 		inArr.putRow(0, in);
 		outArr.putRow(0, out);
 		
 		INDArray res = network.rnnTimeStep(inArr);
+		
+		System.out.println("INPUTS: " + MathIterator.toString(in, INPUT_MASK));
+		System.out.println("EXPECTED: " + MathIterator.toString(out, OUTPUT_MASK));
+		System.out.println("ACTUAL: " + MathIterator.toString(res.transpose(), OUTPUT_MASK));
 		
 		System.out.println(res);
 	}
@@ -170,29 +180,39 @@ public class CalculatorExample {
 			return null;
 		}
 		
-		public static INDArray toInINDArray(int size, String stmt) throws Exception  {
+		public static INDArray toINDArray(int size, String stmt, int [] mask) throws Exception  {
 			
 			INDArray arr = Nd4j.zeros(new int[] { size, TIME_STEP });
 			
-			for (int i = 0; i < stmt.length(); i++) {
+			for (int i = 0, j = 0; i < TIME_STEP; i++) {
 				
-				int idx = toIndex(stmt.charAt(i));		
-				arr.putScalar(new int[] { idx, i }, 1.0);		
+				if (mask[i] == 1 || mask == null) {
+
+					int idx = toIndex(stmt.charAt(j));		
+					arr.putScalar(new int[] { idx, i }, 1.0);	
+					j++;
+				}
 			}
 			
 			return arr;
 		}
-		
-		public static INDArray toOutINDArray(int size, String stmt) throws Exception {
 			
-			INDArray arr = Nd4j.zeros(new int[] { size, TIME_STEP });
+		public static String toString(INDArray arr, int [] mask) throws Exception {
 			
-			for (int i = 0; i < stmt.length(); i++) {
-				int idx = toIndex(stmt.charAt(i));
-				arr.putScalar(new int[] { idx, TIME_STEP - (2 - i) }, 1.0);
+					
+			StringBuilder builder = new StringBuilder();
+			for (int i = 0; i < TIME_STEP; i++) {
+				
+				if (mask[i] == 1 || mask == null) {
+					
+					int idx = Nd4j.getExecutioner().exec(new IMax(
+							arr.get(NDArrayIndex.all(), NDArrayIndex.point(i)))).getInt(0);
+	
+					builder.append(toChar(idx));
+				}
 			}
-			
-			return arr;
+		
+			return builder.toString();
 		}
 		
 		public static char toChar(int index) throws Exception {
@@ -236,11 +256,9 @@ public class CalculatorExample {
 				String in = String.format("%02d", num1) + "+" + String.format("%02d", num2) + "=";
 				String out = String.format("%02d", (num1 + num2));
 				
-				INDArray arrIn = toInINDArray(INPUT_SIZE, in);
-				INDArray arrOut = toOutINDArray(OUTPUT_SIZE, out);
-				
-				
-				
+				INDArray arrIn = toINDArray(INPUT_SIZE, in, INPUT_MASK);
+				INDArray arrOut = toINDArray(OUTPUT_SIZE, out, OUTPUT_MASK);
+							
 				input.putRow(i, arrIn);
 				label.putRow(i, arrOut);
 				
