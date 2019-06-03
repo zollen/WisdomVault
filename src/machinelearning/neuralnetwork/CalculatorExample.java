@@ -1,12 +1,44 @@
 package machinelearning.neuralnetwork;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
+import org.deeplearning4j.api.storage.StatsStorage;
+import org.deeplearning4j.arbiter.MultiLayerSpace;
+import org.deeplearning4j.arbiter.layers.LSTMLayerSpace;
+import org.deeplearning4j.arbiter.layers.RnnOutputLayerSpace;
+import org.deeplearning4j.arbiter.optimize.api.OptimizationResult;
+import org.deeplearning4j.arbiter.optimize.api.ParameterSpace;
+import org.deeplearning4j.arbiter.optimize.api.data.DataSource;
+import org.deeplearning4j.arbiter.optimize.api.saving.ResultReference;
+import org.deeplearning4j.arbiter.optimize.api.termination.MaxCandidatesCondition;
+import org.deeplearning4j.arbiter.optimize.api.termination.MaxTimeCondition;
+import org.deeplearning4j.arbiter.optimize.api.termination.TerminationCondition;
+import org.deeplearning4j.arbiter.optimize.config.OptimizationConfiguration;
+import org.deeplearning4j.arbiter.optimize.generator.RandomSearchGenerator;
+import org.deeplearning4j.arbiter.optimize.parameter.continuous.ContinuousParameterSpace;
+import org.deeplearning4j.arbiter.optimize.parameter.integer.IntegerParameterSpace;
+import org.deeplearning4j.arbiter.optimize.runner.IOptimizationRunner;
+import org.deeplearning4j.arbiter.optimize.runner.LocalOptimizationRunner;
+import org.deeplearning4j.arbiter.saver.local.FileModelSaver;
+import org.deeplearning4j.arbiter.scoring.impl.TestSetLossScoreFunction;
+import org.deeplearning4j.arbiter.task.MultiLayerNetworkTaskCreator;
+import org.deeplearning4j.arbiter.ui.listener.ArbiterStatusListener;
+import org.deeplearning4j.earlystopping.EarlyStoppingConfiguration;
+import org.deeplearning4j.earlystopping.EarlyStoppingResult;
+import org.deeplearning4j.earlystopping.saver.LocalFileModelSaver;
+import org.deeplearning4j.earlystopping.scorecalc.ClassificationScoreCalculator;
+import org.deeplearning4j.earlystopping.termination.BestScoreEpochTerminationCondition;
+import org.deeplearning4j.earlystopping.termination.ScoreImprovementEpochTerminationCondition;
+import org.deeplearning4j.earlystopping.trainer.EarlyStoppingTrainer;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.CacheMode;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -22,6 +54,9 @@ import org.deeplearning4j.optimize.listeners.CheckpointListener;
 import org.deeplearning4j.optimize.listeners.EvaluativeListener;
 import org.deeplearning4j.optimize.listeners.PerformanceListener;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
+import org.deeplearning4j.ui.api.UIServer;
+import org.deeplearning4j.ui.storage.FileStatsStorage;
+import org.nd4j.evaluation.classification.Evaluation;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.api.ops.impl.indexaccum.IMax;
@@ -35,7 +70,7 @@ import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 public class CalculatorExample {
 	
-	private static final int EPOCHS = 30;
+	private static final int EPOCHS = 35;
 	private static final int BATCH_SIZE = 20;
 	private static final int TOTAL_BATCH = 100;
 	private static final int LAYER_SIZE = 64;
@@ -50,26 +85,23 @@ public class CalculatorExample {
 		// TODO Auto-generated method stub
 		FileUtils.cleanDirectory(new File("out")); 
 
-		MultiLayerNetwork network = build();
+		if (args.length > 0 && args[0].equalsIgnoreCase("O")) {
+			optimize();
+		}
+		else {
+			MultiLayerNetwork network = train();		
+			eval(network);
+		}
+	}
+	
+	public static void eval(MultiLayerNetwork network) throws Exception {
 		
-		MathIterator trainIter = new MathIterator(BATCH_SIZE, TOTAL_BATCH, SEED);
-		MathIterator testIter = new MathIterator(20, 1, SEED + 5);
-		
-		network.setListeners(new ScoreIterationListener(500), 
-				new PerformanceListener(500, true),
-				new EvaluativeListener(testIter, 5, InvocationType.EPOCH_END),
-				new CheckpointListener.Builder("out").keepAll().saveEveryNEpochs(1).build()); 
-		
-		System.out.println(network.summary());
-		
-		network.fit(trainIter, EPOCHS);
-
-		System.out.println("=====================");
+		System.err.println("========== MY OWN TEST ===========");
 		INDArray inArr = Nd4j.zeros(new int[] { 1, MathIterator.INPUT_SIZE, TIME_STEP });
 		INDArray outArr = Nd4j.zeros(new int[] { 1, MathIterator.OUTPUT_SIZE, TIME_STEP });
 		
-		INDArray in = MathIterator.toINDArray(MathIterator.INPUT_SIZE, "39+23=", INPUT_MASK);
-		INDArray out = MathIterator.toINDArray(MathIterator.OUTPUT_SIZE, "62", OUTPUT_MASK);
+		INDArray in = MathIterator.toINDArray(MathIterator.INPUT_SIZE, "39+24=", INPUT_MASK);
+		INDArray out = MathIterator.toINDArray(MathIterator.OUTPUT_SIZE, "63", OUTPUT_MASK);
 		
 		inArr.putRow(0, in);
 		outArr.putRow(0, out);
@@ -78,14 +110,127 @@ public class CalculatorExample {
 		
 		System.out.println("INPUTS: " + MathIterator.toString(in, INPUT_MASK));
 		System.out.println("EXPECTED: " + MathIterator.toString(out, OUTPUT_MASK));
-		System.out.println("ACTUAL: " + MathIterator.toString(res.transpose(), OUTPUT_MASK));
+		System.out.println("ACTUAL: " + MathIterator.toString(res, OUTPUT_MASK));
+	}
+	
+	public static void optimize() throws Exception {
 		
-		System.out.println(res);
+		MultiLayerSpace space = plan();
+		
+		TerminationCondition[] terminationConditions = { 
+				new MaxTimeCondition(6, TimeUnit.HOURS),
+				new MaxCandidatesCondition(6)
+		};
+	
+		OptimizationConfiguration configuration = new OptimizationConfiguration.Builder()
+				.candidateGenerator(new RandomSearchGenerator(space, null))
+				.dataSource(CalculatorDataSource.class, new Properties())
+				.modelSaver(new FileModelSaver("out"))
+				.scoreFunction(new TestSetLossScoreFunction(true))
+				.terminationConditions(terminationConditions)
+				.build();
+		
+		IOptimizationRunner runner = new LocalOptimizationRunner(configuration, new MultiLayerNetworkTaskCreator());
+
+		StatsStorage ss = new FileStatsStorage(new File("out/calculator.dl4j"));
+		runner.addListeners(new ArbiterStatusListener(ss));
+		UIServer.getInstance().attach(ss);
+
+		runner.execute();
+
+		String s = "Best score: " + runner.bestScore() + "\n" + "Index of model with best score: "
+				+ runner.bestScoreCandidateIndex() + "\n" + "Number of configurations evaluated: "
+				+ runner.numCandidatesCompleted() + "\n";
+		System.out.println(s);
+
+		int indexOfBestResult = runner.bestScoreCandidateIndex();
+		List<ResultReference> allResults = runner.getResults();
+
+		OptimizationResult bestResult = allResults.get(indexOfBestResult).getResult();
+		MultiLayerNetwork bestModel = (MultiLayerNetwork) bestResult.getResultReference().getResultModel();
+
+		System.out.println("\n\nConfiguration of best model:\n");
+		System.out.println(bestModel.getLayerWiseConfigurations());
+
+		UIServer.getInstance().stop();
+	}
+	
+	public static MultiLayerNetwork train() {
+		
+		MultiLayerNetwork network = build();
+		
+		MathIterator trainIter = new MathIterator(BATCH_SIZE, TOTAL_BATCH, SEED);
+		MathIterator testIter = new MathIterator(20, 1, SEED + 5);
+		
+		network.setListeners(new ScoreIterationListener(1000), 
+				new PerformanceListener(1000, true),
+				new EvaluativeListener(testIter, 5, InvocationType.EPOCH_END),
+				new CheckpointListener.Builder("out").keepAll().saveEveryNEpochs(1).build()); 
+		
+		System.out.println(network.summary());
+			
+		
+		EarlyStoppingConfiguration<MultiLayerNetwork> eac = new EarlyStoppingConfiguration.Builder<MultiLayerNetwork>()
+				.epochTerminationConditions(new BestScoreEpochTerminationCondition(0.975),
+										new ScoreImprovementEpochTerminationCondition(3))
+				.scoreCalculator(new ClassificationScoreCalculator(Evaluation.Metric.ACCURACY, testIter))
+				.evaluateEveryNEpochs(1)
+				.modelSaver(new LocalFileModelSaver("out"))
+				.build();	
+	
+		EarlyStoppingTrainer trainer = new EarlyStoppingTrainer(eac, network, trainIter);
+		
+		System.out.println("Training model....");
+		EarlyStoppingResult<MultiLayerNetwork> result = trainer.fit();
+		
+		System.out.println("Termination reason: " + result.getTerminationReason());
+        System.out.println("Termination details: " + result.getTerminationDetails());
+        System.out.println("Total epochs: " + result.getTotalEpochs());
+        System.out.println("Best epoch number: " + result.getBestModelEpoch());
+        System.out.println("Best Accuracy at epoch: " + result.getBestModelScore());
+        
+        Map<Integer,Double> epochVsScore = result.getScoreVsEpoch();
+        List<Integer> list = new ArrayList<Integer>(epochVsScore.keySet());
+        Collections.sort(list);
+        System.out.println("Epoch\tAccuracy");
+        for( Integer i : list){
+            System.out.println(i + "\t" + epochVsScore.get(i));
+        }
+        
+        return network;
+	}
+	
+	public static MultiLayerSpace plan() {
+		
+		ParameterSpace<Double> l2Hyperparam = new ContinuousParameterSpace(0.00001, 0.9);
+        ParameterSpace<Integer> layer1Hyperparam = new IntegerParameterSpace(16, 1024); 
+        ParameterSpace<Integer> layer2Hyperparam = new IntegerParameterSpace(16, 1024);
+		
+		return new MultiLayerSpace.Builder()
+				.seed(SEED)
+				.weightInit(WeightInit.XAVIER)
+				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
+				.updater(new Nadam())
+				.activation(Activation.TANH)
+				.l2(l2Hyperparam)
+				.inferenceWorkspaceMode(WorkspaceMode.ENABLED)
+				.trainingWorkspaceMode(WorkspaceMode.ENABLED)
+				.numEpochs(EPOCHS)
+				
+				.layer(new LSTMLayerSpace.Builder()
+								.nIn(MathIterator.INPUT_SIZE)
+								.nOut(layer1Hyperparam).build())
+				.layer(new LSTMLayerSpace.Builder()
+								.nIn(layer1Hyperparam).nOut(layer2Hyperparam).build())
+				.layer(new RnnOutputLayerSpace.Builder()
+								.activation(Activation.SOFTMAX)  
+								.lossFunction(LossFunctions.LossFunction.MCXENT)
+								.nIn(layer2Hyperparam).nOut(MathIterator.OUTPUT_SIZE).build())
+				.build();
 	}
 	
 	public static MultiLayerNetwork build() {
-		
-		
+				
 		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
 				.seed(SEED)
 				.cacheMode(CacheMode.HOST)
@@ -198,6 +343,10 @@ public class CalculatorExample {
 		}
 			
 		public static String toString(INDArray arr, int [] mask) throws Exception {
+			
+			if (arr.rank() == 3) {
+				arr = arr.get(NDArrayIndex.point(0));
+			}
 			
 					
 			StringBuilder builder = new StringBuilder();
@@ -336,5 +485,42 @@ public class CalculatorExample {
 			// TODO Auto-generated method stub
 			throw new UnsupportedOperationException("Not implemented");
 		}
+	}
+	
+	public static class CalculatorDataSource implements DataSource {
+		
+		private static final long serialVersionUID = 1L;
+		
+		private DataSetIterator training = null;
+		private DataSetIterator testing = null;
+		
+		public CalculatorDataSource () {
+			training = new MathIterator(BATCH_SIZE, TOTAL_BATCH, SEED + 14);
+			testing = new MathIterator(20, 1, SEED + 6);
+		}
+
+		@Override
+		public void configure(Properties properties) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public Object trainData() {
+			// TODO Auto-generated method stub
+			return training;
+		}
+
+		@Override
+		public Object testData() {
+			// TODO Auto-generated method stub
+			return testing;
+		}
+
+		@Override
+		public Class<?> getDataType() {
+			// TODO Auto-generated method stub
+			return DataSetIterator.class;
+		}		
 	}
 }
