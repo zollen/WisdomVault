@@ -1,36 +1,36 @@
 import java.util.Random;
 
+import org.deeplearning4j.datasets.iterator.CombinedPreProcessor;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.dataset.DataSet;
+import org.nd4j.linalg.dataset.api.DataSetPreProcessor;
+import org.nd4j.linalg.dataset.api.preprocessor.NormalizerMinMaxScaler;
+import org.nd4j.linalg.dataset.api.preprocessor.NormalizerStandardize;
 import org.nd4j.linalg.factory.Nd4j;
-
 
 public class TestMe {
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
 
-		INDArray arr = Nd4j.zeros(2, 3, 4);
+		INDArray arr = Nd4j.zeros(new int[] { 1, 10 });
+		INDArray mask = Nd4j.ones(new int[] { 1, 10 });
 		Random rand = new Random(0);
 		
-		for (int i = 0; i < 2; i++) {
-			for (int j = 0; j < 3; j++) {
-				for (int k = 0; k < 4; k++) {
-					arr.putScalar(new int[] { i, j, k }, Math.abs(rand.nextInt()) % 1000); 
-				}
-			}
+		for (int i = 0; i < 10; i++) {
+			arr.putScalar(new int[] { 0, i }, rand.nextInt(500));
 		}
 		
-		System.out.println(arr);
-		System.out.println("======================");
-		INDArray me = arr.tensorAlongDimension(0, 2, 0);
-		System.out.println(me);
-		System.out.println("======================");
-		INDArray you = arr.tensorAlongDimension(0, 0, 2);
-		System.out.println(you);
-
-		
 	
+		DataSetPreProcessor processor = new CombinedPreProcessor.Builder()
+								.addPreProcessor(new NormalizerStandardize())
+								.addPreProcessor(new NormalizerMinMaxScaler())
+								.build();
 		
+		System.out.println(arr);
 		
+		processor.preProcess(new DataSet(arr, mask));
+		
+		System.out.println(arr);
 	}
 }
