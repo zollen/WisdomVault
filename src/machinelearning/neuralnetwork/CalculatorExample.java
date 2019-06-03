@@ -119,7 +119,7 @@ public class CalculatorExample {
 		
 		TerminationCondition[] terminationConditions = { 
 				new MaxTimeCondition(6, TimeUnit.HOURS),
-				new MaxCandidatesCondition(6)
+				new MaxCandidatesCondition(64)
 		};
 	
 		OptimizationConfiguration configuration = new OptimizationConfiguration.Builder()
