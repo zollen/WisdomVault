@@ -70,7 +70,7 @@ import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 public class CalculatorExample {
 	
-	private static final int EPOCHS = 35;
+	private static final int EPOCHS = 15;
 	private static final int BATCH_SIZE = 20;
 	private static final int TOTAL_BATCH = 100;
 	private static final int LAYER_SIZE = 64;
@@ -96,21 +96,36 @@ public class CalculatorExample {
 	
 	public static void eval(MultiLayerNetwork network) throws Exception {
 		
-		System.err.println("========== MY OWN TEST ===========");
-		INDArray inArr = Nd4j.zeros(new int[] { 1, MathIterator.INPUT_SIZE, TIME_STEP });
-		INDArray outArr = Nd4j.zeros(new int[] { 1, MathIterator.OUTPUT_SIZE, TIME_STEP });
+		System.out.println("\n========== MY OWN TEST ===========\n");
 		
-		INDArray in = MathIterator.toINDArray(MathIterator.INPUT_SIZE, "39+24=", INPUT_MASK);
-		INDArray out = MathIterator.toINDArray(MathIterator.OUTPUT_SIZE, "63", OUTPUT_MASK);
+		String [] eq = { "39+24=", "21+54=", "33+27=", "69+12=", "54+33=", 
+				"11+65=", "22+33=", "17+58=", "46+51=", "32+18="};
+		String [] ans = { "63", "75", "60", "81", "87", "76", "55", "75", "97", "50" };
 		
-		inArr.putRow(0, in);
-		outArr.putRow(0, out);
+		for (int i = 0; i < 10; i++) {
+			
+			INDArray inArr = Nd4j.zeros(new int[] { 1, MathIterator.INPUT_SIZE, TIME_STEP });
+			INDArray outArr = Nd4j.zeros(new int[] { 1, MathIterator.OUTPUT_SIZE, TIME_STEP });
 		
-		INDArray res = network.rnnTimeStep(inArr);
+			INDArray in = MathIterator.toINDArray(MathIterator.INPUT_SIZE, eq[i], INPUT_MASK);
+			INDArray out = MathIterator.toINDArray(MathIterator.OUTPUT_SIZE, ans[i], OUTPUT_MASK);
 		
-		System.out.println("INPUTS: " + MathIterator.toString(in, INPUT_MASK));
-		System.out.println("EXPECTED: " + MathIterator.toString(out, OUTPUT_MASK));
-		System.out.println("ACTUAL: " + MathIterator.toString(res, OUTPUT_MASK));
+			inArr.putRow(0, in);
+			outArr.putRow(0, out);
+		
+			INDArray res = network.rnnTimeStep(inArr);
+			
+			String formula = MathIterator.toString(in, INPUT_MASK);
+			String expected = MathIterator.toString(out, OUTPUT_MASK);
+			String actual = MathIterator.toString(res, OUTPUT_MASK);
+		
+			if (expected.equals(actual))
+				System.out.println("INPUTS: " + formula + " EXPECTED: " + expected + " ACTUAL: " + actual);
+			else
+				System.err.println("INPUTS: " + formula + " EXPECTED: " + expected + " ACTUAL: " + actual);
+			
+			network.rnnClearPreviousState();
+		}
 	}
 	
 	public static void optimize() throws Exception {
@@ -118,8 +133,8 @@ public class CalculatorExample {
 		MultiLayerSpace space = plan();
 		
 		TerminationCondition[] terminationConditions = { 
-				new MaxTimeCondition(6, TimeUnit.HOURS),
-				new MaxCandidatesCondition(64)
+				new MaxTimeCondition(15, TimeUnit.HOURS),
+				new MaxCandidatesCondition(32)
 		};
 	
 		OptimizationConfiguration configuration = new OptimizationConfiguration.Builder()
@@ -168,8 +183,8 @@ public class CalculatorExample {
 				new CheckpointListener.Builder("out").keepAll().saveEveryNEpochs(1).build()); 
 		
 		System.out.println(network.summary());
-			
 		
+	
 		EarlyStoppingConfiguration<MultiLayerNetwork> eac = new EarlyStoppingConfiguration.Builder<MultiLayerNetwork>()
 				.epochTerminationConditions(new BestScoreEpochTerminationCondition(0.975),
 										new ScoreImprovementEpochTerminationCondition(3))
