@@ -14,6 +14,7 @@
 		<ejml-version>0.38</ejml-version>
 		<math3-version>3.6.1</math3-version>
 		<csv-version>1.5</csv-version>
+		<cmp-version>1.18</cmp-version>
 		<jfree-version>1.0.13</jfree-version>
 		<jmath-version>1.0</jmath-version>
 		<weka-version>3.8.3</weka-version>
@@ -128,6 +129,16 @@
 			<groupId>org.deeplearning4j</groupId>
 			<artifactId>deeplearning4j-ui_2.11</artifactId>
 			<version>${deeplearning-version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>xerces</groupId>
+					<artifactId>xercesImpl</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.deeplearning4j</groupId>
@@ -153,6 +164,11 @@
 			<groupId>com.github.haifengl</groupId>
 			<artifactId>smile-core</artifactId>
 			<version>${smile-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>${cmp-version}</version>
 		</dependency>
 	</dependencies>
 </project>
