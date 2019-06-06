@@ -85,6 +85,8 @@ public class CalculatorExample {
 		// TODO Auto-generated method stub
 		FileUtils.deleteQuietly(new File("out"));
         FileUtils.forceMkdir(new File("out"));
+        
+        Nd4j.getMemoryManager().togglePeriodicGc(false);
 
 		if (args.length > 0 && args[0].equalsIgnoreCase("O")) {
 			optimize();
@@ -350,7 +352,7 @@ public class CalculatorExample {
 		
 		public static INDArray toINDArray(int size, String stmt, int [] mask) throws Exception  {
 			
-			INDArray arr = Nd4j.zeros(new int[] { size, TIME_STEP });
+			INDArray arr = Nd4j.zeros(new int[] { size, TIME_STEP }, 'f');
 			
 			for (int i = 0, j = 0; i < TIME_STEP; i++) {
 				
@@ -409,8 +411,8 @@ public class CalculatorExample {
 		
 		public static DataSet generate(int sampleSize, Random rand) throws Exception {
 				
-			INDArray input = Nd4j.zeros(new int[] { sampleSize, INPUT_SIZE, TIME_STEP });
-			INDArray label = Nd4j.zeros(new int[] { sampleSize, OUTPUT_SIZE, TIME_STEP });
+			INDArray input = Nd4j.zeros(new int[] { sampleSize, INPUT_SIZE, TIME_STEP }, 'f');
+			INDArray label = Nd4j.zeros(new int[] { sampleSize, OUTPUT_SIZE, TIME_STEP }, 'f');
 			
 			INDArray fmask = Nd4j.ones(new int [] { sampleSize, TIME_STEP });
 			INDArray lmask = Nd4j.zeros(new int[] { sampleSize, TIME_STEP });
