@@ -36,11 +36,11 @@ public class CompressionExercise {
 		System.out.println(test);
 
 		System.out.println("INPUTS: " + test.length());
-		System.out.println("Deflator: " + deflater(test).length());
-		System.out.println("GZIP: " + gzip(test).length());
-		System.out.println("BZIP2: " + compress(test, CompressorStreamFactory.BZIP2).length());
-		System.out.println("LZ4_BLOCK: " + compress(test, CompressorStreamFactory.LZ4_BLOCK).length());
-		System.out.println("LZ4_FRAMED: " + compress(test, CompressorStreamFactory.LZ4_FRAMED).length());
+		System.out.println("Deflator: " + encode64(deflater(test)).length());
+		System.out.println("GZIP: " + encode64(gzip(test)).length());
+		System.out.println("BZIP2: " + encode64(compress(test, CompressorStreamFactory.BZIP2)).length());
+		System.out.println("LZ4_BLOCK: " + encode64(compress(test, CompressorStreamFactory.LZ4_BLOCK)).length());
+		System.out.println("LZ4_FRAMED: " + encode64(compress(test, CompressorStreamFactory.LZ4_FRAMED)).length());
 	
 	}
 
