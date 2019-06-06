@@ -83,7 +83,8 @@ public class CalculatorExample {
 	
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
-		FileUtils.cleanDirectory(new File("out")); 
+		FileUtils.deleteQuietly(new File("out"));
+        FileUtils.forceMkdir(new File("out"));
 
 		if (args.length > 0 && args[0].equalsIgnoreCase("O")) {
 			optimize();
@@ -178,7 +179,14 @@ public class CalculatorExample {
 		MathIterator testIter = new MathIterator(20, 1, SEED + 5);
 		
 		network.setListeners(new ScoreIterationListener(1000), 
-				new PerformanceListener(1000, true),
+				new PerformanceListener.Builder()
+				.reportSample(true)
+                .reportScore(true)
+                .reportTime(true)
+                .reportETL(true)
+                .reportBatch(true)
+                .reportIteration(true)
+                .setFrequency(100).build(),
 				new EvaluativeListener(testIter, 5, InvocationType.EPOCH_END),
 				new CheckpointListener.Builder("out").keepAll().saveEveryNEpochs(1).build()); 
 		
