@@ -89,6 +89,7 @@ import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.dataset.api.preprocessor.ImagePreProcessingScaler;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.AdaDelta;
+import org.nd4j.linalg.learning.config.Nadam;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 import machinelearning.neuralnetwork.MultIteratorsIterator;
@@ -185,6 +186,7 @@ public class AnimalsClassification2 {
 			// Precision: 0.800
 			// Recall: 0.825
 			// F1: 0.800
+			Nd4j.getMemoryManager().togglePeriodicGc(false);
 			
 			System.out.println("Build model....");
 
@@ -196,7 +198,14 @@ public class AnimalsClassification2 {
 
 			// listeners
 			network.setListeners(new ScoreIterationListener(10), 
-					new PerformanceListener(10, false),
+					new PerformanceListener.Builder()
+					.reportSample(true)
+	                .reportScore(true)
+	                .reportTime(true)
+	                .reportETL(true)
+	                .reportBatch(true)
+	                .reportIteration(true)
+	                .setFrequency(10).build(),
 					new EvaluativeListener(testIter, 1, InvocationType.EPOCH_END));
 
 			System.out.println(network.summary());
@@ -225,7 +234,7 @@ public class AnimalsClassification2 {
 			testIter.reset();
 			
 			EarlyStoppingConfiguration<ComputationGraph> eac = new EarlyStoppingConfiguration.Builder<ComputationGraph>()
-					.epochTerminationConditions(new BestScoreEpochTerminationCondition(0.875))
+					.epochTerminationConditions(new BestScoreEpochTerminationCondition(0.1))
 					.scoreCalculator(new DataSetLossCalculator(testIter, true))
 					.evaluateEveryNEpochs(1)
 					.modelSaver(new LocalFileGraphSaver("out"))
@@ -368,16 +377,15 @@ public class AnimalsClassification2 {
     	
     	ComputationGraphConfiguration.GraphBuilder graph = new NeuralNetConfiguration.Builder()
 				.seed(seed)
-				.cacheMode(CacheMode.DEVICE)
 				.l2(0.005)
 				.cacheMode(CacheMode.HOST)
 				.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
 				.weightInit(WeightInit.RELU)
 				.activation(Activation.RELU)
-				.updater(new AdaDelta())
+				.updater(new Nadam())
 				.gradientNormalization(GradientNormalization.RenormalizeL2PerLayer)
 				.convolutionMode(ConvolutionMode.Same)
-				.cudnnAlgoMode(ConvolutionLayer.AlgoMode.NO_WORKSPACE)
+				.cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST)
 				.inferenceWorkspaceMode(WorkspaceMode.ENABLED)
 				.trainingWorkspaceMode(WorkspaceMode.ENABLED)
 				.graphBuilder();
