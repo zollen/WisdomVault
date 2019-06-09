@@ -1,0 +1,355 @@
+package simulations;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.nd4j.linalg.primitives.Pair;
+
+public class TicTacTocExercise {
+	
+
+	private static final char PLAYER_ONE = '\u2660';
+	private static final char PLAYER_TWO = '\u2665';
+	
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		TicTacToc game = new TicTacToc(PLAYER_ONE, PLAYER_TWO);
+		
+		game.apply(new Move(PLAYER_ONE, 1, 1));
+		game.apply(new Move(PLAYER_TWO, 0, 0));
+		game.apply(new Move(PLAYER_ONE, 2, 0));
+		game.apply(new Move(PLAYER_TWO, 0, 2));
+		game.apply(new Move(PLAYER_ONE, 0, 1));
+		
+		System.out.println(game.toString(true));
+		
+		System.out.println("===================================");
+				
+		System.out.println("RESULTL: "  + game.eval(PLAYER_TWO, 0));
+	
+	}
+	
+
+
+	public static class Move extends Position {
+
+		private static final long serialVersionUID = 1L;
+
+		public Move(char player, Integer x, Integer y) {
+			super(player, x, y);
+			// TODO Auto-generated constructor stub
+		}	
+		
+		public String toString() {
+			return "Player[" + player + "] applied move(" + 
+							this.getX() + ", " + this.getY() + ")"; 
+		}
+	}
+
+	public static class Position extends Pair<Integer, Integer> {
+	
+		private static final long serialVersionUID = 1L;
+		
+		protected char player;
+
+		public Position (char player, Integer x, Integer y) {
+			super(x, y);
+			this.player = player;
+		}
+		
+		public char getPlayer() {
+			return player;
+		}
+		
+		public int getX() {
+			return getFirst();
+		}
+		
+		public int getY() {
+			return getSecond();
+		}
+		
+		public String toString() {
+			return "Player[" + player + "] position at (" + 
+							this.getX() + ", " + this.getY() + ")"; 
+		}
+	}
+	
+	public static class TicTacToc {
+		
+		private final int WIDTH = 3;
+		private final int HEIGHT = 3;
+		private final int MAX_DEPTH = 3;
+		
+		
+		
+		private char [][] board = null;
+		private char [] players = null;
+		private List<Move> history = null;
+		
+		public TicTacToc(char player1, char player2) {
+			this.board = new char[WIDTH][HEIGHT];
+			this.history = new ArrayList<Move>();
+			
+			this.players = new char[2];
+			
+			this.players[0] = player1;
+			this.players[1] = player2;
+		}
+		
+		public TicTacToc(TicTacToc original) {
+			this.board = new char[WIDTH][HEIGHT];
+			this.history = new ArrayList<Move>();
+			
+			for (int i = 0; i < WIDTH; i++) {
+				for (int j = 0; j < HEIGHT; j++) {
+					this.board[i][j] = original.board[i][j];
+				}
+			}
+			
+			this.players = original.players;
+		}
+		
+		public char other(char player) {
+			
+			if (player == this.players[0])
+				return this.players[1];
+			else
+				return this.players[0];
+		}
+		
+		public void apply(Move move) {
+			board[move.getX()][move.getY()] = move.getPlayer();
+			history.add(move);
+		}
+		
+		public int eval(char player, int depth) {
+			
+			if (depth >= MAX_DEPTH) {				
+				return 0;
+			}
+			
+			
+			int maxScore = Integer.MIN_VALUE;
+			Move bestMove = null;
+			
+			for (int i = 0; i < WIDTH; i++) {	
+				
+				for (int j = 0; j < HEIGHT; j++) {
+					
+					if (board[i][j] == 0) {
+						
+						TicTacToc cloned = new TicTacToc(this);
+						
+						Checker checker = new Checker(player, i, j);		
+						Set<Range> ranges = checker.check();
+					
+						for (Range range : ranges) {
+															
+							Move nextMove = new Move(player, i, j);
+							
+							cloned.apply(nextMove);
+							
+							int score = range.score() + cloned.eval(other(player), depth + 1) * -1;
+						
+							if (score >= maxScore) {
+								maxScore = score;
+								bestMove = nextMove;
+							}
+							
+							return score;
+						}
+					}
+				}
+			}
+			
+			if (bestMove != null && depth == 0)
+				System.err.println(bestMove);
+			
+		
+			return 0;
+		}
+		
+		public String toString() {
+			return toString(false);
+		}
+		
+		public String toString(boolean withMoves) {
+			
+			StringBuilder builder = new StringBuilder();
+			for (int i = 0; i < WIDTH; i++) {
+				
+				builder.append("-----------\n");
+				
+				for (int j = 0; j < HEIGHT; j++) {
+					
+					if (j > 0)
+						builder.append("| ");
+					
+					builder.append(" " + board[i][j]);
+				}
+
+				builder.append("|\n");
+			}
+			
+			builder.append("-----------\n");
+			
+			AtomicInteger index = new AtomicInteger(1);
+			if (withMoves)
+				history.stream().forEach(p -> builder.append(index.getAndIncrement() + ". " + p + "\n")); 
+			
+			return builder.toString();
+		}
+		
+		public class Range extends HashSet<Position> {
+			
+			private static final long serialVersionUID = 1L;
+			
+			private char player;
+			
+			public Range(char player) {
+				this.player = player;
+			}
+			
+			public int score() {
+				
+				int winning = 0;
+				
+				for (Position position : this) {
+					if (board[position.getX()][position.getY()] == player) {
+						winning++;
+					}
+				}
+								
+				return winning;
+			}
+		}
+		
+		public class Checker {
+			
+			private char player;
+			private int x;
+			private int y;
+			
+			public Checker(char player, int x, int y) {
+				this.player = player;
+				this.x = x;
+				this.y = y;
+			}
+			
+			public Set<Range> check() {
+				
+				Set<Range> bag = new HashSet<Range>();
+				
+				int width = board.length;
+				int height = board[0].length;
+				
+				if (x - 2 >= 0) {
+					Range range = new Range(player);
+					range.add(new Position(player, x - 2, y));
+					range.add(new Position(player, x - 1, y));
+					range.add(new Position(player, x, y));
+					bag.add(range);
+				}
+				
+				if (x - 1 >= 0 && x + 1 < width) {
+					Range range = new Range(player);
+					range.add(new Position(player, x - 1, y));
+					range.add(new Position(player, x, y));
+					range.add(new Position(player, x + 1, y));
+					bag.add(range);
+					
+				}
+				
+				if (x + 2 < width) {
+					Range range = new Range(player);
+					range.add(new Position(player, x, y));
+					range.add(new Position(player, x + 1, y));
+					range.add(new Position(player, x + 2, y));
+					bag.add(range);
+				}
+				
+				if (y - 2 >= 0) {
+					Range range = new Range(player);
+					range.add(new Position(player, x, y - 2));
+					range.add(new Position(player, x, y - 1));
+					range.add(new Position(player, x, y));
+					bag.add(range);
+				}
+				
+				if (y - 1 >= 0 && y + 1 < height) {
+					Range range = new Range(player);
+					range.add(new Position(player, x, y - 1));
+					range.add(new Position(player, x, y));
+					range.add(new Position(player, x, y + 1));
+					bag.add(range);
+				}
+				
+				if (y + 2 < height) {
+					Range range = new Range(player);
+					range.add(new Position(player, x, y));
+					range.add(new Position(player, x, y + 1));
+					range.add(new Position(player, x, y + 2));
+					bag.add(range);
+				}
+				
+				if (x - 2 >= 0 && y - 2 >= 0) {
+					Range range = new Range(player);
+					range.add(new Position(player, x - 2, y - 2));
+					range.add(new Position(player, x - 1, y - 1));
+					range.add(new Position(player, x, y));
+					bag.add(range);
+				}
+				
+				if (x - 1 >= 0 && y - 1 >= 0 &&
+						x + 1 < width && y + 1 < height) {
+					Range range = new Range(player);
+					range.add(new Position(player, x - 1, y - 1));
+					range.add(new Position(player, x, y + 1));
+					range.add(new Position(player, x + 1, y + 1));
+					bag.add(range);
+				}
+				
+				if (x + 2 < width && y + 2 < height) {
+					Range range = new Range(player);
+					range.add(new Position(player, x, y));
+					range.add(new Position(player, x + 1, y + 1));
+					range.add(new Position(player, x + 2, y + 2));
+					bag.add(range);
+				}
+				
+				if (x + 2 < width && y - 2 >= 0) {
+					Range range = new Range(player);
+					range.add(new Position(player, x + 2, y - 2));
+					range.add(new Position(player, x + 1, y - 1));
+					range.add(new Position(player, x, y));
+					bag.add(range);
+				}
+				
+				if (x + 1 < width && y - 1 >= 0 &&
+						x - 1 >= 0 && y + 1 < height) {
+					Range range = new Range(player);
+					range.add(new Position(player, x + 1, y - 1));
+					range.add(new Position(player, x, y));
+					range.add(new Position(player, x - 1, y + 1));
+					bag.add(range);
+				}
+				
+				if (x + 2 < width && y - 2 >= 0) {
+					Range range = new Range(player);
+					range.add(new Position(player, x + 2, y - 2));
+					range.add(new Position(player, x + 1, y - 1));
+					range.add(new Position(player, x, y));
+					bag.add(range);
+				}
+								
+				return bag;
+			}
+		}
+		
+	}
+	
+}
