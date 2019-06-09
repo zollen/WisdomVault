@@ -144,37 +144,45 @@ public class TicTacTocExercise {
 						
 						TicTacToc cloned = new TicTacToc(this);
 						
-						Checker checker = new Checker(player, i, j);		
-						Set<Range> ranges = checker.check();
-					
-						for (Range range : ranges) {
-															
-							Move nextMove = new Move(player, i, j);
-							
-							cloned.apply(nextMove);
-							
-							int score = range.score() + cloned.eval(other(player), depth + 1) * -1;
+						Move nextMove = new Move(player, i, j);
 						
-							if (score >= maxScore) {
-								maxScore = score;
-								bestMove = nextMove;
-							}
+						cloned.apply(nextMove);
 							
-							return score;
+						int score1 = cloned.newChecker(player, i, j).check()
+										.stream().mapToInt(p -> p.score()).sum();
+						
+						int score2 = 0;
+						
+						if (score1 < 27)
+							score2 = cloned.eval(other(player), depth + 1) * -1;
+						
+						int score = score1 + score2;
+					
+						System.out.println("depth: " + depth + " player: " + player + " " + score1 + " + " + score2 + " = " + score + " " + nextMove);
+						if (depth == 0)
+							System.out.println("===============================");
+						
+						if (score >= maxScore) {
+							maxScore = score;
+							bestMove = nextMove;
 						}
 					}
 				}
 			}
 			
-			if (bestMove != null && depth == 0)
-				System.err.println(bestMove);
 			
-		
+			if (maxScore > Integer.MIN_VALUE)
+				return maxScore;
+			
 			return 0;
 		}
 		
 		public String toString() {
 			return toString(false);
+		}
+		
+		public Checker newChecker(char player, int i, int j) {
+			return new Checker(player, i, j);
 		}
 		
 		public String toString(boolean withMoves) {
@@ -224,7 +232,7 @@ public class TicTacTocExercise {
 					}
 				}
 								
-				return winning;
+				return (int) Math.pow(winning, winning);
 			}
 		}
 		
