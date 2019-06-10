@@ -80,9 +80,10 @@ public class TicTacTocExercise {
 	
 	public static class TicTacToc {
 		
-		private final int WIDTH = 3;
-		private final int HEIGHT = 3;
-		private final int MAX_DEPTH = 3;
+		private static final int WIDTH = 3;
+		private static final int HEIGHT = 3;
+		private static final int MAX_DEPTH = 3;
+		private static final int THRESHOLD = (int) Math.pow(3, 3);
 		
 		
 		
@@ -153,7 +154,7 @@ public class TicTacTocExercise {
 						
 						int score2 = 0;
 						
-						if (score1 < 27)
+						if (score1 < THRESHOLD)
 							score2 = cloned.eval(other(player), depth + 1) * -1;
 						
 						int score = score1 + score2;
