@@ -18,17 +18,13 @@ public class TicTacTocExercise {
 		// TODO Auto-generated method stub
 		TicTacToc game = new TicTacToc(PLAYER_ONE, PLAYER_TWO);
 		
-		game.apply(new Move(PLAYER_ONE, 1, 1));
-		game.apply(new Move(PLAYER_TWO, 0, 0));
-		game.apply(new Move(PLAYER_ONE, 2, 0));
-		game.apply(new Move(PLAYER_TWO, 0, 2));
-		game.apply(new Move(PLAYER_ONE, 0, 1));
-		
-		System.out.println(game.toString(true));
-		
-		System.out.println("===================================");
-				
-		System.out.println("RESULTL: "  + game.eval(PLAYER_TWO, 0));
+		char player = PLAYER_ONE;
+		while (!game.over()) {
+	
+			game.eval(player, 0);
+			System.out.println(game.toString(true));
+			player = game.other(player);
+		}
 	
 	}
 	
@@ -127,6 +123,23 @@ public class TicTacTocExercise {
 			history.add(move);
 		}
 		
+		public boolean over() {
+			
+			int count = 0;
+			for (int i = 0; i < WIDTH; i++) {
+				for (int j = 0; j < HEIGHT; j++) {
+					if (board[i][j] == 0) {
+						count++;
+					}
+				}
+			}
+			
+			if (count > 0)
+				return false;
+			
+			return true;
+		}
+		
 		public int eval(char player, int depth) {
 			
 			if (depth >= MAX_DEPTH) {				
@@ -159,9 +172,6 @@ public class TicTacTocExercise {
 						
 						int score = score1 + score2;
 					
-						System.out.println("depth: " + depth + " player: " + player + " " + score1 + " + " + score2 + " = " + score + " " + nextMove);
-						if (depth == 0)
-							System.out.println("===============================");
 						
 						if (score >= maxScore) {
 							maxScore = score;
@@ -172,8 +182,12 @@ public class TicTacTocExercise {
 			}
 			
 			
-			if (maxScore > Integer.MIN_VALUE)
+			if (bestMove != null) {
+				
+				apply(bestMove);
+				
 				return maxScore;
+			}
 			
 			return 0;
 		}
