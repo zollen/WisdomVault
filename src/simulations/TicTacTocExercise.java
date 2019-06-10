@@ -19,9 +19,10 @@ public class TicTacTocExercise {
 		TicTacToc game = new TicTacToc(PLAYER_ONE, PLAYER_TWO);
 		
 		char player = PLAYER_ONE;
+		
 		while (!game.over()) {
 	
-			game.eval(player, 0);
+			game.eval(player);
 			System.out.println(game.toString(true));
 			player = game.other(player);
 		}
@@ -69,7 +70,7 @@ public class TicTacTocExercise {
 		}
 		
 		public String toString() {
-			return "Player[" + player + "] position at (" + 
+			return "Player [" + player + "] position at (" + 
 							this.getX() + ", " + this.getY() + ")"; 
 		}
 	}
@@ -79,7 +80,8 @@ public class TicTacTocExercise {
 		private static final int WIDTH = 3;
 		private static final int HEIGHT = 3;
 		private static final int MAX_DEPTH = 3;
-		private static final int THRESHOLD = (int) Math.pow(3, 3);
+		private static final int WIN_CONDITION = 3;
+		private static final int WIN_THRESHOLD = (int) Math.pow(WIN_CONDITION, WIN_CONDITION);
 		
 		
 		
@@ -124,13 +126,21 @@ public class TicTacTocExercise {
 		}
 		
 		public boolean over() {
-			
+						
 			int count = 0;
+			
 			for (int i = 0; i < WIDTH; i++) {
+				
 				for (int j = 0; j < HEIGHT; j++) {
-					if (board[i][j] == 0) {
+					
+					if (board[i][j] == 0)
 						count++;
-					}
+					
+					boolean won1 = newReferee(players[0], i, j).check().parallelStream().anyMatch(p -> p.won());
+					boolean won2 = newReferee(players[1], i, j).check().parallelStream().anyMatch(p -> p.won());
+							
+					if (won1 || won2)
+						return true;
 				}
 			}
 			
@@ -138,6 +148,10 @@ public class TicTacTocExercise {
 				return false;
 			
 			return true;
+		}
+		
+		public int eval(char player) {
+			return eval(player, 0);
 		}
 		
 		public int eval(char player, int depth) {
@@ -162,13 +176,14 @@ public class TicTacTocExercise {
 						
 						cloned.apply(nextMove);
 							
-						int score1 = cloned.newChecker(player, i, j).check()
+						int score1 = cloned.newReferee(player, i, j).check()
 										.stream().mapToInt(p -> p.score()).sum();
 						
 						int score2 = 0;
 						
-						if (score1 < THRESHOLD)
+						if (score1 < WIN_THRESHOLD)
 							score2 = cloned.eval(other(player), depth + 1) * -1;
+						
 						
 						int score = score1 + score2;
 					
@@ -196,29 +211,33 @@ public class TicTacTocExercise {
 			return toString(false);
 		}
 		
-		public Checker newChecker(char player, int i, int j) {
-			return new Checker(player, i, j);
+		public Referee newReferee(char player, int i, int j) {
+			return new Referee(player, i, j);
 		}
 		
 		public String toString(boolean withMoves) {
 			
 			StringBuilder builder = new StringBuilder();
-			for (int i = 0; i < WIDTH; i++) {
+			
+			StringBuilder boarder = new StringBuilder();
+			for (int i = 0; i < WIDTH; i++)
+				boarder.append("----");
+			boarder.append("-\n");
+			
+			for (int j = 0; j < HEIGHT; j++) {
 				
-				builder.append("-----------\n");
+				builder.append(boarder.toString());
 				
-				for (int j = 0; j < HEIGHT; j++) {
+				for (int i = 0; i < WIDTH; i++) {
 					
-					if (j > 0)
-						builder.append("| ");
-					
-					builder.append(" " + board[i][j]);
+					builder.append("|  " + board[i][j]);			
 				}
-
-				builder.append("|\n");
+				
+				builder.append("|\n");				
 			}
 			
-			builder.append("-----------\n");
+			builder.append(boarder.toString());
+			builder.append("\n");
 			
 			AtomicInteger index = new AtomicInteger(1);
 			if (withMoves)
@@ -249,15 +268,31 @@ public class TicTacTocExercise {
 								
 				return (int) Math.pow(winning, winning);
 			}
+			
+			public boolean won() {
+				
+				AtomicInteger count = new AtomicInteger(0);
+				
+				this.stream().forEach(p -> {
+					
+					if (board[p.getX()][p.getY()] == player)
+						count.incrementAndGet();
+				});
+				
+				if (count.get() == WIN_CONDITION)
+					return true;
+				
+				return false;
+			}
 		}
 		
-		public class Checker {
+		public class Referee {
 			
 			private char player;
 			private int x;
 			private int y;
 			
-			public Checker(char player, int x, int y) {
+			public Referee(char player, int x, int y) {
 				this.player = player;
 				this.x = x;
 				this.y = y;
