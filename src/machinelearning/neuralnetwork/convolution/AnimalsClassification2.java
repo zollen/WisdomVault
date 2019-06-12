@@ -66,9 +66,9 @@ import org.deeplearning4j.nn.conf.WorkspaceMode;
 import org.deeplearning4j.nn.conf.graph.MergeVertex;
 import org.deeplearning4j.nn.conf.inputs.InputType;
 import org.deeplearning4j.nn.conf.layers.BatchNormalization;
+import org.deeplearning4j.nn.conf.layers.CenterLossOutputLayer;
 import org.deeplearning4j.nn.conf.layers.ConvolutionLayer;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
-import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.conf.layers.SeparableConvolution2D;
 import org.deeplearning4j.nn.conf.layers.SubsamplingLayer;
 import org.deeplearning4j.nn.graph.ComputationGraph;
@@ -435,8 +435,9 @@ public class AnimalsClassification2 {
 	
 			.addLayer("1.10-dense", new DenseLayer.Builder().nOut(128).dropOut(0.5).build(), 
 					"2-vertex")
-			.addLayer("1.11-output", new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
+			.addLayer("1.11-output", new CenterLossOutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
 					.nOut(numLabels)
+					.weightInit(WeightInit.XAVIER)
 	                .activation(Activation.SOFTMAX)
 					.build(), 
 					"1.10-dense")
