@@ -103,7 +103,8 @@ public class AutoEncoder2 {
 				.list()
 				.layer(0, new AutoEncoder.Builder().nIn(4).nOut(2).build())
 				.layer(1, new OutputLayer.Builder().nIn(2).nOut(2)
-								.lossFunction(LossFunctions.LossFunction.MSE).build())
+							.activation(Activation.SIGMOID)
+							.lossFunction(LossFunctions.LossFunction.MSE).build())
 				.build();
 		
 		MultiLayerNetwork network = new MultiLayerNetwork(conf);

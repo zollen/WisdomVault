@@ -1,9 +1,7 @@
 package machinelearning.neuralnetwork.autoencoder;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
+import org.deeplearning4j.nn.conf.CacheMode;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.layers.AutoEncoder;
@@ -14,25 +12,34 @@ import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
+import org.nd4j.linalg.dataset.api.preprocessor.NormalizerMinMaxScaler;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.Nadam;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
-
-import weka.core.Instances;
-import weka.core.converters.ArffLoader.ArffReader;
 
 public class AutoEncoder4 {
 	
 	public static void main(String [] args) throws Exception {
 		
-		DataSet data = generateData("data/iris.arff.txt");
+		INDArray expected = Nd4j.zeros(new int[] { 5, 4 });
 		
-		INDArray expected = data.getFeatures();
+		for (int i = 0; i < 5; i++) {
+			
+			for (int j = 0; j < 4; j++) {
+				expected.putScalar(new int[] { i, j }, i + j);
+			}
+		}
 		
+		DataSet data = new DataSet(expected, expected);
+		
+		NormalizerMinMaxScaler preprocessor = new NormalizerMinMaxScaler();
+		preprocessor.fit(data);
+		preprocessor.preProcess(data);
 		
         System.out.println("Building model....");
 		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
 				.seed(0)
+				.cacheMode(CacheMode.HOST)
 				.weightInit(WeightInit.XAVIER)
 				.updater(new Nadam())
 				.activation(Activation.TANH)
@@ -42,7 +49,8 @@ public class AutoEncoder4 {
 				.layer(0, new AutoEncoder.Builder().nIn(4).nOut(2).build())
 				.layer(1, new AutoEncoder.Builder().nIn(2).nOut(2).build())
 				.layer(2, new OutputLayer.Builder().nIn(2).nOut(4)
-								.lossFunction(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).build())
+						.activation(Activation.SIGMOID)
+						.lossFunction(LossFunctions.LossFunction.XENT).build())
 				.build();
 		
 		MultiLayerNetwork network = new MultiLayerNetwork(conf);
@@ -53,44 +61,16 @@ public class AutoEncoder4 {
 		
 		System.out.println(network.summary());
 		
-		for (int i = 0; i < 30; i++) {
-			network.fit(data);
+		for (int i = 0; i < 10000; i++) {
+			network.fit(expected, expected);
 		}
 
 		INDArray actual = network.output(expected);
 		
-		if (actual.equalsWithEps(expected, 0.001))
-			System.out.println("INPUTS AND OUTPUTS ARE IDENTIAL!!!");
-		else
-			System.err.println("INPUTS AND OUTPUTS ARE NOT THE SAME!!!");	
-		
-		System.out.println(expected.getRow(0));
-		System.out.println(actual.getRow(0));
+		System.out.println(expected);
+		System.out.println("===============================");
+		System.out.println(actual);
 	}
 	
-	public static DataSet generateData(String fileName) {
 	
-		try {
-			
-			BufferedReader reader = new BufferedReader(new FileReader(fileName));
-			ArffReader arff = new ArffReader(reader);
-			Instances training = arff.getData();
-			
-			INDArray data = Nd4j.zeros(new int[] { training.size(), 4 });
-			
-			for (int i = 0; i < training.size(); i++) {		
-				
-				for (int j = 0; j < 4; j++) {					
-					data.putScalar(new int[] { i, j }, training.get(i).value(j));
-				}
-			}
-			
-			return new DataSet(data, data);
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return null;
-	}
 }

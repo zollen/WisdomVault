@@ -70,7 +70,8 @@ public class AutoEncoder1 {
 				.layer(1, new AutoEncoder.Builder().nIn(250).nOut(10).build())
 				.layer(2, new AutoEncoder.Builder().nIn(10).nOut(250).build())
 				.layer(3, new OutputLayer.Builder().nIn(250).nOut(784)
-								.lossFunction(LossFunctions.LossFunction.MSE).build())
+							.activation(Activation.SIGMOID)
+							.lossFunction(LossFunctions.LossFunction.MSE).build())
 				.build();
 		
 		
