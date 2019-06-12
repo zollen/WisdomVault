@@ -5,7 +5,7 @@ import org.deeplearning4j.nn.conf.CacheMode;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.layers.AutoEncoder;
-import org.deeplearning4j.nn.conf.layers.OutputLayer;
+import org.deeplearning4j.nn.conf.layers.CenterLossOutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
@@ -48,7 +48,14 @@ public class AutoEncoder4 {
 				.list()
 				.layer(0, new AutoEncoder.Builder().nIn(4).nOut(2).corruptionLevel(0.3).build())
 				.layer(1, new AutoEncoder.Builder().nIn(2).nOut(2).corruptionLevel(0.3).build())
-				.layer(2, new OutputLayer.Builder().nIn(2).nOut(4)
+				.layer(2, new CenterLossOutputLayer.Builder().nIn(2).nOut(4)
+						// Alpha can be thought of as the learning rate for the centers for 
+						// each class
+						.alpha(0.01)
+						// Lambda defines the relative strength of the center loss component.
+				        // lambda = 0.0 is equivalent to training with standard softmax only
+						.lambda(0.0)
+						.weightInit(WeightInit.NORMAL)
 						.activation(Activation.SIGMOID)
 						.lossFunction(LossFunctions.LossFunction.XENT).build())
 				.build();
