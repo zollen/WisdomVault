@@ -45,8 +45,11 @@ import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.WorkspaceMode;
 import org.deeplearning4j.nn.conf.layers.ConvolutionLayer;
+import org.deeplearning4j.nn.conf.layers.EmbeddingLayer;
 import org.deeplearning4j.nn.conf.layers.LSTM;
 import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
+import org.deeplearning4j.nn.conf.preprocessor.FeedForwardToRnnPreProcessor;
+import org.deeplearning4j.nn.conf.preprocessor.RnnToFeedForwardPreProcessor;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.api.InvocationType;
@@ -70,10 +73,11 @@ import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 public class CalculatorExample {
 	
-	private static final int EPOCHS = 15;
+	private static final int EPOCHS = 14;
 	private static final int BATCH_SIZE = 20;
 	private static final int TOTAL_BATCH = 100;
-	private static final int LAYER_SIZE = 64;
+	private static final int LAYER_SIZE1 = 48;
+	private static final int LAYER_SIZE2 = 64;
 	private static final int TIME_STEP = 6;
 	private static final int SEED = 83;
 	
@@ -107,10 +111,10 @@ public class CalculatorExample {
 		
 		for (int i = 0; i < 10; i++) {
 			
-			INDArray inArr = Nd4j.zeros(new int[] { 1, MathIterator.INPUT_SIZE, TIME_STEP });
+			INDArray inArr = Nd4j.zeros(new int[] { 1, 1, TIME_STEP });
 			INDArray outArr = Nd4j.zeros(new int[] { 1, MathIterator.OUTPUT_SIZE, TIME_STEP });
 		
-			INDArray in = MathIterator.toINDArray(MathIterator.INPUT_SIZE, eq[i], INPUT_MASK);
+			INDArray in = MathIterator.toINDArray(eq[i], INPUT_MASK);
 			INDArray out = MathIterator.toINDArray(MathIterator.OUTPUT_SIZE, ans[i], OUTPUT_MASK);
 		
 			inArr.putRow(0, in);
@@ -194,10 +198,9 @@ public class CalculatorExample {
 		
 		System.out.println(network.summary());
 		
-	
 		EarlyStoppingConfiguration<MultiLayerNetwork> eac = new EarlyStoppingConfiguration.Builder<MultiLayerNetwork>()
 				.epochTerminationConditions(new BestScoreEpochTerminationCondition(0.975),
-										new ScoreImprovementEpochTerminationCondition(3))
+										new ScoreImprovementEpochTerminationCondition(5))
 				.scoreCalculator(new ClassificationScoreCalculator(Evaluation.Metric.ACCURACY, testIter))
 				.evaluateEveryNEpochs(1)
 				.modelSaver(new LocalFileModelSaver("out"))
@@ -269,14 +272,26 @@ public class CalculatorExample {
 				.trainingWorkspaceMode(WorkspaceMode.ENABLED)
 				.list()
 				
-				.layer(0, new LSTM.Builder()
+
+				.layer(0, new EmbeddingLayer.Builder()
 								.nIn(MathIterator.INPUT_SIZE)
-								.nOut(LAYER_SIZE).build())
+								.nOut(LAYER_SIZE1)
+								.activation(Activation.TANH).build())
+				
 				.layer(1, new LSTM.Builder()
-								.nIn(LAYER_SIZE).nOut(LAYER_SIZE).build())
-				.layer(2, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
+						.nIn(LAYER_SIZE1).nOut(LAYER_SIZE2)
+						.activation(Activation.TANH).build())
+				 
+				.layer(2, new LSTM.Builder()
+								.nIn(LAYER_SIZE2).nOut(LAYER_SIZE1)
+								.activation(Activation.TANH).build())
+				.layer(3, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
 								.activation(Activation.SOFTMAX)        
-								.nIn(LAYER_SIZE).nOut(MathIterator.OUTPUT_SIZE).build())
+								.nIn(LAYER_SIZE1).nOut(MathIterator.OUTPUT_SIZE).build())
+				
+				.inputPreProcessor(0, new RnnToFeedForwardPreProcessor())
+	            .inputPreProcessor(1, new FeedForwardToRnnPreProcessor())
+	            
 				.build();
 				
 								
@@ -350,6 +365,23 @@ public class CalculatorExample {
 			return null;
 		}
 		
+		public static INDArray toINDArray(String stmt, int [] mask) throws Exception  {
+			
+			INDArray arr = Nd4j.zeros(new int[] { 1, TIME_STEP }, 'f');
+			
+			for (int i = 0, j = 0; i < TIME_STEP; i++) {
+				
+				if (mask[i] == 1 || mask == null) {
+	
+					arr.putScalar(new int[] { 0, i }, MathIterator.toIndex(stmt.charAt(j)));	
+					
+					j++;
+				}
+			}
+			
+			return arr;
+		}
+		
 		public static INDArray toINDArray(int size, String stmt, int [] mask) throws Exception  {
 			
 			INDArray arr = Nd4j.zeros(new int[] { size, TIME_STEP }, 'f');
@@ -357,9 +389,11 @@ public class CalculatorExample {
 			for (int i = 0, j = 0; i < TIME_STEP; i++) {
 				
 				if (mask[i] == 1 || mask == null) {
-
-					int idx = toIndex(stmt.charAt(j));		
+	
+					int idx = toIndex(stmt.charAt(j));
+					
 					arr.putScalar(new int[] { idx, i }, 1.0);	
+					
 					j++;
 				}
 			}
@@ -379,10 +413,15 @@ public class CalculatorExample {
 				
 				if (mask[i] == 1 || mask == null) {
 					
-					int idx = Nd4j.getExecutioner().exec(new IMax(
+					if (arr.size(0) > 1) {
+						int idx = Nd4j.getExecutioner().exec(new IMax(
 							arr.get(NDArrayIndex.all(), NDArrayIndex.point(i)))).getInt(0);
 	
-					builder.append(toChar(idx));
+						builder.append(toChar(idx));
+					}
+					else {
+						builder.append(String.valueOf(MathIterator.toChar(arr.getInt(i))));
+					}
 				}
 			}
 		
@@ -411,7 +450,7 @@ public class CalculatorExample {
 		
 		public static DataSet generate(int sampleSize, Random rand) throws Exception {
 				
-			INDArray input = Nd4j.zeros(new int[] { sampleSize, INPUT_SIZE, TIME_STEP }, 'f');
+			INDArray input = Nd4j.zeros(new int[] { sampleSize, 1, TIME_STEP }, 'f');
 			INDArray label = Nd4j.zeros(new int[] { sampleSize, OUTPUT_SIZE, TIME_STEP }, 'f');
 			
 			INDArray fmask = Nd4j.ones(new int [] { sampleSize, TIME_STEP });
@@ -430,12 +469,11 @@ public class CalculatorExample {
 				String in = String.format("%02d", num1) + "+" + String.format("%02d", num2) + "=";
 				String out = String.format("%02d", (num1 + num2));
 				
-				INDArray arrIn = toINDArray(INPUT_SIZE, in, INPUT_MASK);
+				INDArray arrIn = toINDArray(in, INPUT_MASK);
 				INDArray arrOut = toINDArray(OUTPUT_SIZE, out, OUTPUT_MASK);
 							
 				input.putRow(i, arrIn);
-				label.putRow(i, arrOut);
-				
+				label.putRow(i, arrOut);				
 			}	
 			
 			return new DataSet(input, label, fmask, lmask);
