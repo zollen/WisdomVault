@@ -8,7 +8,8 @@ import java.util.concurrent.atomic.DoubleAdder;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
-import org.nd4j.linalg.primitives.Pair;
+import org.apache.commons.math3.distribution.EnumeratedDistribution;
+import org.apache.commons.math3.util.Pair;
 
 public class PolynomialApprox {
 	
@@ -133,20 +134,16 @@ public class PolynomialApprox {
 						p.getFirst() / total.doubleValue(), p.getSecond()));
 			});
 			
-			List<Pair<Double, Individual>> list3 = new ArrayList<Pair<Double, Individual>>();
-			final DoubleAdder percent = new DoubleAdder();
+			List<Pair<Individual, Double>> pmf = new ArrayList<Pair<Individual, Double>>();
+			
 			list2.stream().forEach(p -> {
-				percent.add(p.getFirst());
-				list3.add(new Pair<Double, Individual>(percent.doubleValue(), p.getSecond()));
+				pmf.add(new Pair<Individual, Double>(p.getSecond(), p.getFirst()));
 			});
 			
+			EnumeratedDistribution<Individual> dist = new EnumeratedDistribution<Individual>(pmf);
 	
-			for (int i = 0; i < MAX_NUM_COFFICIENTS; i++) {	
-				
-				
-				
-				newcoeffs[i] = ((PolynomialFunc) 
-						subjects.get(rand.nextInt(subjects.size()))).coeffs()[i];
+			for (int i = 0; i < MAX_NUM_COFFICIENTS; i++) {				
+				newcoeffs[i] = ((PolynomialFunc) dist.sample()).coeffs()[i];
 			}
 			
 			return new PolynomialFunc(newcoeffs).mutation(MUTATION_RATE);
