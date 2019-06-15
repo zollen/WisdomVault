@@ -29,7 +29,7 @@ public class SimpleGeneticAlgorthim {
 		this.mutationRate = mutationRate;
 	}
 	
-	public void begin(Population population) {
+	public Individual begin(Population population) {
 		
 		System.out.println("Generation #1: " + ff.format(population.score(target)));
 		
@@ -41,8 +41,7 @@ public class SimpleGeneticAlgorthim {
 			parents = children;
 		}	
 		
-		System.out.println("TARGET: " + target);
-		System.out.println("BEST  : " + parents.fittness(target, 1).get(0));
+		return parents.fittness(target, 1).get(0);
 	}
 	
 	public Population evolve(Population population) {

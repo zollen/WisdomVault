@@ -33,7 +33,10 @@ public class GeneticBasic {
 		
 		SimpleGeneticAlgorthim genetic = new SimpleGeneticAlgorthim(rand, ideal, 
 				GENERATIONS, SELECTION_SIZE, MATING_PARTNERS, CROSSOVER_RATE, MUTATION_RATE);
-		genetic.begin(population);
+		Individual best = genetic.begin(population);
+		
+		System.out.println("TARGET: " + ideal);
+		System.out.println("BEST  : " + best);
 	}
 	
 	private static class CharacterString implements Individual {
@@ -63,14 +66,14 @@ public class GeneticBasic {
 		}
 
 		@Override
-		public Individual mate(double crossOverRate, double mutationRate, List<Individual> individuals) {
+		public Individual mate(double mutationRate, List<Individual> individuals) {
 			// TODO Auto-generated method stub
 			StringBuilder builder = new StringBuilder();
 			
 			for (int i = 0; i < GENE_LENGTH; i++) {
 				
 				if (individuals.size() < 2) {
-					if (rand.nextDouble() < crossOverRate) {
+					if (rand.nextDouble() < CROSSOVER_RATE) {
 						builder.append(this.gene.charAt(i));
 					}
 					else {

@@ -6,7 +6,7 @@ public interface Individual {
 	
 	public Double score(Individual ideal);
 	
-	public Individual mate(double crossOverRate, double mutationRate, 
+	public Individual mate(double mutationRate, 
 						List<Individual> individuals);
 	
 	public Individual variation(double param);
