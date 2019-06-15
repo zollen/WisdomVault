@@ -34,7 +34,7 @@ public class GeneticBasic {
 
 	}
 	
-	public static class SimpleGenetic {
+	private static class SimpleGenetic {
 			
 		private Individual target = null;
 		
@@ -134,7 +134,7 @@ public class GeneticBasic {
 		}
 	}
 	
-	public static class Individual {
+	private static class Individual {
 			
 		private String gene = null;
 		
@@ -170,7 +170,7 @@ public class GeneticBasic {
 		}
 	}
 	
-	public static class Population {
+	private static class Population {
 		
 		List<Individual> individuals = new ArrayList<Individual>();
 		
