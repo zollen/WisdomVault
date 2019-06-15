@@ -40,7 +40,7 @@ public class PolynomialApprox {
 		
 		
 		SimpleGeneticAlgorthim genetic = new SimpleGeneticAlgorthim(rand, IDEAL, 
-				GENERATIONS, SELECTION_SIZE, MATING_PARTNERS, MUTATION_RATE);
+				GENERATIONS, SELECTION_SIZE, MATING_PARTNERS);
 		PolynomialFunc best = (PolynomialFunc) genetic.begin(population);
 		
 		
@@ -70,7 +70,7 @@ public class PolynomialApprox {
 	private static class PolynomialFunc implements Individual {
 		
 		private static final int MAX_NUM_COFFICIENTS = 4;
-		private static final int MAX_COEFFICIENT_NUMBER = 200;
+		private static final int MAX_COEFFICIENT_NUMBER = 10;
 		private static final int MAX_VARIANCE = 100000;
 		private static final double MUTATION_RATE = 0.1;
 		private static final double TORLANCE = 0.0001;

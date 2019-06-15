@@ -32,7 +32,7 @@ public class GeneticBasic {
 	
 		
 		SimpleGeneticAlgorthim genetic = new SimpleGeneticAlgorthim(rand, ideal, 
-				GENERATIONS, SELECTION_SIZE, MATING_PARTNERS, MUTATION_RATE);
+				GENERATIONS, SELECTION_SIZE, MATING_PARTNERS);
 		Individual best = genetic.begin(population);
 		
 		System.out.println("TARGET: " + ideal);
