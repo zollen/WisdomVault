@@ -15,17 +15,15 @@ public class SimpleGeneticAlgorthim {
 	private int generations = 0;
 	private int selectionSize = 0;
 	private int matingPartners = 0;
-	private double crossOverRate = 0.0;
 	private double mutationRate = 0.0;
 	
 	public SimpleGeneticAlgorthim(Random rand, Individual target, int generations,
-			int selectionSize, int matingPartners, double crossOverRate, double mutationRate) {
+			int selectionSize, int matingPartners, double mutationRate) {
 		this.target = target;
 		this.rand = rand;
 		this.selectionSize = selectionSize;
 		this.generations = generations;
 		this.matingPartners = matingPartners;
-		this.crossOverRate = crossOverRate;
 		this.mutationRate = mutationRate;
 	}
 	
@@ -53,7 +51,7 @@ public class SimpleGeneticAlgorthim {
 			List<Individual> parents = new Population(rand, population.chosen(selectionSize))
 											.fittness(target, matingPartners);
 			
-			Individual child = parents.remove(0).mate(crossOverRate, mutationRate, parents);
+			Individual child = parents.remove(0).mate(mutationRate, parents);
 			children.add(child);
 		}
 		

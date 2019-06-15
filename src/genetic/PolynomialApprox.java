@@ -39,7 +39,7 @@ public class PolynomialApprox {
 		
 		
 		SimpleGeneticAlgorthim genetic = new SimpleGeneticAlgorthim(rand, IDEAL, 
-				GENERATIONS, SELECTION_SIZE, MATING_PARTNERS, CROSSOVER_RATE, MUTATION_RATE);
+				GENERATIONS, SELECTION_SIZE, MATING_PARTNERS, MUTATION_RATE);
 		PolynomialFunc best = (PolynomialFunc) genetic.begin(population);
 		
 		
