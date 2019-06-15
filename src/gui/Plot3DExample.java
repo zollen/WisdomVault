@@ -31,6 +31,7 @@ public class Plot3DExample {
 		JFrame frame3D = new JFrame("A 3D Plot Panel");
 		frame3D.setContentPane(plot3D);
 		frame3D.setBounds(100, 100, 500, 500);
+		frame3D.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame3D.setVisible(true);
 	}
 
