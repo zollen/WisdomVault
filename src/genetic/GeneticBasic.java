@@ -66,7 +66,7 @@ public class GeneticBasic {
 		}
 
 		@Override
-		public Individual mate(double mutationRate, List<Individual> individuals) {
+		public Individual mate(List<Individual> individuals) {
 			// TODO Auto-generated method stub
 			StringBuilder builder = new StringBuilder();
 			
@@ -91,7 +91,7 @@ public class GeneticBasic {
 				}
 			}
 			
-			return new CharacterString(builder.toString()).mutation(mutationRate);
+			return new CharacterString(builder.toString()).mutation(MUTATION_RATE);
 		}
 
 		@Override

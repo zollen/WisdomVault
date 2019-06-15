@@ -112,7 +112,7 @@ public class PolynomialApprox {
 		}
 
 		@Override
-		public Individual mate(double mutationRate, List<Individual> individuals) {
+		public Individual mate(List<Individual> individuals) {
 			// TODO Auto-generated method stub
 			double [] newcoeffs = new double[MAX_NUM_COFFICIENTS];
 			
