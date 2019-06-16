@@ -16,10 +16,10 @@ public class PolynomialApprox {
 	private static final DecimalFormat ff = new DecimalFormat("0.000");
 	
 	
-	public static final int GENERATIONS = 150;
+	public static final int GENERATIONS = 30;
 	public static final int POPULATION_SIZE = 1000;
-	public static final int SELECTION_SIZE = 25;
-	public static final int MATING_PARTNERS = 15;
+	public static final int SELECTION_SIZE = 100;
+	public static final int MATING_PARTNERS = 50;
 	
 	
 	private static final Random rand = new Random(83);
@@ -68,7 +68,7 @@ public class PolynomialApprox {
 	private static class PolynomialFunc implements Individual {
 		
 		private static final int MAX_NUM_COFFICIENTS = 4;
-		private static final int MAX_COEFFICIENT_NUMBER = 30;
+		private static final int MAX_COEFFICIENT_NUMBER = 50;
 		private static final int MAX_VARIANCE = 100000;
 		private static final double MUTATION_RATE = 0.1;
 		private static final double TORLANCE = 0.0001;
