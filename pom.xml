@@ -176,5 +176,15 @@
 			<artifactId>jenetics</artifactId>
 			<version>${jenetic-version}</version>
 		</dependency>
+		<dependency>
+			<groupId>io.jenetics</groupId>
+			<artifactId>jenetics.prog</artifactId>
+			<version>${jenetic-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jenetics</groupId>
+			<artifactId>jenetics.ext</artifactId>
+			<version>${jenetic-version}</version>
+		</dependency>
 	</dependencies>
 </project>
