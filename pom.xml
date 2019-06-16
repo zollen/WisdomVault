@@ -19,6 +19,7 @@
 		<jmath-version>1.0</jmath-version>
 		<weka-version>3.8.3</weka-version>
 		<smile-version>1.5.2</smile-version>
+		<jenetic-version>4.4.0</jenetic-version>
 	</properties>
 
 	<profiles>
@@ -169,6 +170,11 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-compress</artifactId>
 			<version>${cmp-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jenetics</groupId>
+			<artifactId>jenetics</artifactId>
+			<version>${jenetic-version}</version>
 		</dependency>
 	</dependencies>
 </project>
