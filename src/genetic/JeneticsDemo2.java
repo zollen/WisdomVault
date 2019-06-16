@@ -9,6 +9,7 @@ import io.jenetics.Optimize;
 import io.jenetics.Phenotype;
 import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
+import io.jenetics.engine.Limits;
 
 public class JeneticsDemo2 {
 
@@ -25,11 +26,11 @@ public class JeneticsDemo2 {
 		final Phenotype<DoubleGene, Double> result = engine.stream()
 				// Truncate the evolution stream if no better individual could
 				// be found after 5 consecutive generations.
-		//		.limit(bySteadyFitness(5))
+				.limit(Limits.bySteadyFitness(5))
 				// Terminate the evolution after maximal 100 generations.
 				.limit(100).collect(EvolutionResult.toBestPhenotype());
 		
-		System.out.println(result);
+		System.out.println("Best GenoType: " + result);
 	}
 
 	private static Double eval(final Genotype<DoubleGene> gt) {
