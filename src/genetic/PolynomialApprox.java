@@ -158,7 +158,7 @@ public class PolynomialApprox {
 			// TODO Auto-generated method stub
 			for (int i = 0; i < MAX_NUM_COFFICIENTS; i++) {
 				if (rand.nextDouble() <= param)
-					coeffs[i] = coeffs[i] + rand.nextInt(2);
+					coeffs[i] = coeffs[i] + rand.nextInt(10);
 			}
 			
 			return new PolynomialFunc(coeffs);
