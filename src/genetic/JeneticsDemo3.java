@@ -3,10 +3,11 @@ package genetic;
 
 import java.util.Arrays;
 
+import io.jenetics.BoltzmannSelector;
 import io.jenetics.Genotype;
 import io.jenetics.Mutator;
 import io.jenetics.Optimize;
-import io.jenetics.RouletteWheelSelector;
+import io.jenetics.TournamentSelector;
 import io.jenetics.engine.Codec;
 import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
@@ -82,8 +83,8 @@ public class JeneticsDemo3 {
 		        .minimizing()
 		        .populationSize(8000)
 		        .optimize(Optimize.MINIMUM)
-		        .offspringSelector(new RouletteWheelSelector<>())
-		     // .offspringSelector(new TournamentSelector<>(100))
+		        .survivorsSelector(new BoltzmannSelector<>())
+		        .offspringSelector(new TournamentSelector<>(800))
 		        .alterers(
 		            new SingleNodeCrossover<>(),
 		            new Mutator<>())

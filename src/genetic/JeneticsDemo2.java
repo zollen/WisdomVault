@@ -5,6 +5,7 @@ import io.jenetics.MeanAlterer;
 import io.jenetics.Mutator;
 import io.jenetics.Optimize;
 import io.jenetics.Phenotype;
+import io.jenetics.StochasticUniversalSelector;
 import io.jenetics.engine.Codecs;
 import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
@@ -27,6 +28,7 @@ public class JeneticsDemo2 {
 				.builder(JeneticsDemo2::eval, Codecs.ofScalar(DoubleRange.of(0, 2 * Math.PI)))
 					.populationSize(500)
 					.optimize(Optimize.MINIMUM)
+					.offspringSelector(new StochasticUniversalSelector<>())
 					.alterers(new Mutator<>(0.03), new MeanAlterer<>(0.6))
 					.build();
 
