@@ -5,6 +5,8 @@ import java.util.Arrays;
 
 import io.jenetics.Genotype;
 import io.jenetics.Mutator;
+import io.jenetics.Optimize;
+import io.jenetics.RouletteWheelSelector;
 import io.jenetics.engine.Codec;
 import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
@@ -78,6 +80,10 @@ public class JeneticsDemo3 {
 		final Engine<ProgramGene<Double>, Double> engine = Engine
 		        .builder(JeneticsDemo3::error, CODEC)
 		        .minimizing()
+		        .populationSize(8000)
+		        .optimize(Optimize.MINIMUM)
+		        .offspringSelector(new RouletteWheelSelector<>())
+		     // .offspringSelector(new TournamentSelector<>(20))
 		        .alterers(
 		            new SingleNodeCrossover<>(),
 		            new Mutator<>())
