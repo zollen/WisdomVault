@@ -83,7 +83,7 @@ public class JeneticsDemo3 {
 		        .populationSize(8000)
 		        .optimize(Optimize.MINIMUM)
 		        .offspringSelector(new RouletteWheelSelector<>())
-		     // .offspringSelector(new TournamentSelector<>(20))
+		     // .offspringSelector(new TournamentSelector<>(100))
 		        .alterers(
 		            new SingleNodeCrossover<>(),
 		            new Mutator<>())
