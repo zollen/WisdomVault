@@ -3,7 +3,6 @@ package genetic;
 
 import java.util.Arrays;
 
-import io.jenetics.BoltzmannSelector;
 import io.jenetics.Genotype;
 import io.jenetics.Mutator;
 import io.jenetics.Optimize;
@@ -83,8 +82,8 @@ public class JeneticsDemo3 {
 		        .minimizing()
 		        .populationSize(8000)
 		        .optimize(Optimize.MINIMUM)
-		        .survivorsSelector(new BoltzmannSelector<>())
-		        .offspringSelector(new TournamentSelector<>(800))
+		        .survivorsSelector(new TournamentSelector<>(1000))
+		        .offspringSelector(new TournamentSelector<>(600))
 		        .alterers(
 		            new SingleNodeCrossover<>(),
 		            new Mutator<>())
