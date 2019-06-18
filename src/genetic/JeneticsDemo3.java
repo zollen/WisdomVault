@@ -10,6 +10,7 @@ import io.jenetics.TournamentSelector;
 import io.jenetics.engine.Codec;
 import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
+import io.jenetics.engine.EvolutionStatistics;
 import io.jenetics.ext.SingleNodeCrossover;
 import io.jenetics.ext.util.Tree;
 import io.jenetics.prog.ProgramChromosome;
@@ -18,6 +19,7 @@ import io.jenetics.prog.op.EphemeralConst;
 import io.jenetics.prog.op.MathOp;
 import io.jenetics.prog.op.Op;
 import io.jenetics.prog.op.Var;
+import io.jenetics.stat.DoubleMomentStatistics;
 import io.jenetics.util.ISeq;
 import io.jenetics.util.RandomRegistry;
 
@@ -88,13 +90,18 @@ public class JeneticsDemo3 {
 		            new SingleNodeCrossover<>(),
 		            new Mutator<>())
 		        .build();
+		
+		final EvolutionStatistics<Double, DoubleMomentStatistics> statistics =
+			     EvolutionStatistics.ofNumber();
 
-		    final ProgramGene<Double> program = engine.stream()
+		final ProgramGene<Double> program = engine.stream()
 		        .limit(500)
+		        .peek(statistics)
 		        .collect(EvolutionResult.toBestGenotype())
 		        .getGene();
 
-		    System.out.println(Tree.toString(program));
+		System.out.println(Tree.toString(program));
+		System.out.println(statistics);
 	}
 	
 	public static double error(final ProgramGene<Double> program) {
