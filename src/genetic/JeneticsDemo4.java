@@ -9,7 +9,9 @@ import io.jenetics.RouletteWheelSelector;
 import io.jenetics.engine.Codec;
 import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
+import io.jenetics.engine.EvolutionStatistics;
 import io.jenetics.engine.Limits;
+import io.jenetics.stat.DoubleMomentStatistics;
 import io.jenetics.util.RandomRegistry;
 
 /**
@@ -34,12 +36,17 @@ public class JeneticsDemo4 {
 						.build();
 		
 
+		final EvolutionStatistics<Integer, DoubleMomentStatistics> statistics =
+			     EvolutionStatistics.ofNumber();
+		
 		final Phenotype<AnyGene<ABC>, Integer> best = engine.stream()
 											.limit(Limits.bySteadyFitness(10))
+											.peek(statistics)
 											.limit(100)
 											.collect(EvolutionResult.toBestPhenotype());
 		
 		System.out.println(best);
+		System.out.println(statistics);
 
 	}
 	
