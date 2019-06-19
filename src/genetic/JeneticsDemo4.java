@@ -54,7 +54,7 @@ public class JeneticsDemo4 {
 	
 	
 	// The 1st method to create a custom gene
-	private static class ABC implements Comparable<ABC> {
+	private static class ABC {
 		
 		private int value;
 		
@@ -65,35 +65,11 @@ public class JeneticsDemo4 {
 		public int get() {
 			return value;
 		}
-
-		@Override
-		public int compareTo(ABC o) {
-			// TODO Auto-generated method stub
-			return Integer.valueOf(value).compareTo(o.value);
-		}
-		
-		@Override
-		public int hashCode() {
-			return String.valueOf(value).hashCode();
-		}
 		
 		@Override
 		public String toString() {
-			return String.valueOf(value);
+			return String.valueOf(get());
 		}
-		
-		@Override
-		public boolean equals(Object obj) {
-			
-			if (obj instanceof ABC) {
-				
-				ABC abc = (ABC) obj;
-				
-				return this.value == abc.value;				
-			}		
-			
-			return false;
-		}	
 	}
 
 }
