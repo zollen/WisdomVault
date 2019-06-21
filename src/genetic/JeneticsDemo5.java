@@ -12,7 +12,9 @@ import io.jenetics.TournamentSelector;
 import io.jenetics.engine.Codecs;
 import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
+import io.jenetics.engine.EvolutionStatistics;
 import io.jenetics.engine.Limits;
+import io.jenetics.stat.DoubleMomentStatistics;
 import io.jenetics.util.ISeq;
 
 public class JeneticsDemo5 {
@@ -50,17 +52,23 @@ public class JeneticsDemo5 {
 					.offspringSelector(new TournamentSelector<>(100))
 					.alterers(new Mutator<>())
 					.build();
+		
+		final EvolutionStatistics<Double, DoubleMomentStatistics> statistics =
+			     EvolutionStatistics.ofNumber();
 				
 		final Phenotype<AnyGene<ISeq<String>>, Double> result = engine.stream()
 				// Truncate the evolution stream if no better individual could
 				// be found after 5 consecutive generations.
 				.limit(Limits.bySteadyFitness(20))
+				.peek(statistics)
 				// Terminate the evolution after maximal 100 generations.
 				.limit(100).collect(EvolutionResult.toBestPhenotype());
 		
 		System.out.println();
 		System.out.println("Ideal PhenoType: " + IDEAL);
 		System.out.println("Best PhenoType: " + result);
+		
+		System.out.println(statistics);
 	}
 	
 	public static ISeq<String> random() {
