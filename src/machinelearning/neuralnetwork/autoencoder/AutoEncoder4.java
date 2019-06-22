@@ -132,16 +132,7 @@ public class AutoEncoder4 {
 						.reconstructionDistribution(new GaussianReconstructionDistribution(Activation.SIGMOID))
 						.lossFunction(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
 						.build())
-				.layer(1, new VariationalAutoencoder.Builder()
-						.nIn(2).nOut(2)
-						.encoderLayerSizes(256, 256)            
-		                .decoderLayerSizes(256, 256)   
-						.activation(Activation.TANH)
-						.pzxActivationFunction(Activation.IDENTITY)
-						.reconstructionDistribution(new GaussianReconstructionDistribution(Activation.SIGMOID))
-						.lossFunction(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
-						.build())
-				.layer(2, new CenterLossOutputLayer.Builder().nIn(2).nOut(4)
+				.layer(1, new CenterLossOutputLayer.Builder().nIn(2).nOut(4)
 						// Alpha can be thought of as the learning rate for the centers for 
 						// each class
 						.alpha(0.01)
