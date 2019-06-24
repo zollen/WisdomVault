@@ -1,11 +1,14 @@
 package optimization;
 
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunctionLagrangeForm;
 
 public class LagrangePolynomial {
+	
+	private static final DecimalFormat ff = new DecimalFormat("0.000");
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -46,6 +49,7 @@ public class LagrangePolynomial {
 	
 	public static void lagrangeForm(double [] x, double [] y, double ... tests) {
 		
+		// input array x of length n returns polynomial equation with n - 1 order.
 		PolynomialFunctionLagrangeForm p = new PolynomialFunctionLagrangeForm(x, y);
 
 		for (int i = 0; i < tests.length; i++)
@@ -55,7 +59,7 @@ public class LagrangePolynomial {
 		System.out.println(p.degree());
 
 		double [] c = p.getCoefficients();
-		System.out.println("coeffs: " + Arrays.stream(c).mapToObj(Double::toString).collect(Collectors.joining(", ")));
+		System.out.println("coeffs: " + Arrays.stream(c).mapToObj(element -> ff.format(element)).collect(Collectors.joining(", ")));
 	
 	}
 
