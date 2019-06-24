@@ -130,16 +130,6 @@
 			<groupId>org.deeplearning4j</groupId>
 			<artifactId>deeplearning4j-ui_2.11</artifactId>
 			<version>${deeplearning-version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>xerces</groupId>
-					<artifactId>xercesImpl</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xml-apis</groupId>
-					<artifactId>xml-apis</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.deeplearning4j</groupId>
