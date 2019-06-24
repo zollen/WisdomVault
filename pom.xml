@@ -122,27 +122,6 @@
 			<systemPath>${project.basedir}/lib/tsne-2.5.0-KONGS.jar</systemPath>
 		</dependency>
 		<dependency>
-			<groupId>org.jom</groupId>
-			<artifactId>jom</artifactId>
-			<version>0.4.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/jom-0.4.0.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>org.jom</groupId>
-			<artifactId>colt</artifactId>
-			<version>0.9.5</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/parallelcolt-0.9.4.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>org.jom</groupId>
-			<artifactId>jna</artifactId>
-			<version>4.0.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/jna-4.0.0.jar</systemPath>
-		</dependency>
-		<dependency>
 			<groupId>org.deeplearning4j</groupId>
 			<artifactId>deeplearning4j-core</artifactId>
 			<version>${deeplearning-version}</version>
