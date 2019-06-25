@@ -129,7 +129,7 @@ public class SVM {
 		
 		final double ALPHA = 0.0001;
 		final int EPOCHS = 10000;
-		
+	
 		for (int epoch = 1; epoch <= EPOCHS; epoch++) {
 			
 			DMatrixRMaj actual = new DMatrixRMaj(A.numRows, 1);
@@ -138,19 +138,20 @@ public class SVM {
 			
 
 			double val = CommonOps_DDRM.dot(expected, actual);
+			double lambda = (double) 1.0 / epoch;   // regularizing value
 			
 				
 			if (val >= 1.0) {
 				// classify correctly
 				// w = w - α * (2 λ w)
-				W.set(0, 0, W.get(0, 0) - ALPHA * (2.0 * (1.0 / epoch) * W.get(0, 0)));
-				W.set(1, 0, W.get(1, 0) - ALPHA * (2.0 * (1.0 / epoch) * W.get(1, 0)));
+				W.set(0, 0, W.get(0, 0) - ALPHA * (2.0 * lambda * W.get(0, 0)));
+				W.set(1, 0, W.get(1, 0) - ALPHA * (2.0 * lambda * W.get(1, 0)));
 			}
 			else {
 				// classify incorrectly
 				// w = w + α * (yi * xi - 2 λ w)
-				W.set(0, 0, W.get(0, 0) + ALPHA * (CommonOps_DDRM.dot(A1, expected) - 2.0 * (1.0 / epoch) * W.get(0, 0)));
-				W.set(1, 0, W.get(1, 0) + ALPHA * (CommonOps_DDRM.dot(A2, expected) - 2.0 * (1.0 / epoch) * W.get(1, 0)));
+				W.set(0, 0, W.get(0, 0) + ALPHA * (CommonOps_DDRM.dot(A1, expected) - 2.0 * lambda * W.get(0, 0)));
+				W.set(1, 0, W.get(1, 0) + ALPHA * (CommonOps_DDRM.dot(A2, expected) - 2.0 * lambda * W.get(1, 0)));
 			}			
 		}
 		
