@@ -129,7 +129,16 @@ public class SVM {
 		
 		final double ALPHA = 0.0001;
 		final int EPOCHS = 10000;
-	
+		
+		// Min(λ ||w||^2) + Σ ( 1 - yi<xi, wi> )
+		// 	∂/∂w(λ ||w||^2)      = 2 λ w
+		// 	∂/∂w(1 - yi<xi, wi>) = 0 if yi<xi, wi> >= 1, else - yi * xi
+		// 
+		// The gradient update for classification correctly
+		// 	2 λ w + 0
+		// The gradient update for classification incorrectly
+		//  2 λ w + yi * xi
+		
 		for (int epoch = 1; epoch <= EPOCHS; epoch++) {
 			
 			DMatrixRMaj actual = new DMatrixRMaj(A.numRows, 1);
