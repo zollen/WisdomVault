@@ -18,8 +18,6 @@ public class LagrangePolynomial {
 		// p(0) = -4.0
 		// p(3.0) = 0.5
 		lagrangeForm(new double[] { 0.0, 3.0 }, new double[] { -4.0, 0.5 }, 2.0, 4.5, 6.0);
-		
-		System.out.println();
 	
 		System.out.println("p(x) = 2x^2 + 5x - 3");
 		
@@ -29,7 +27,6 @@ public class LagrangePolynomial {
 		// p(0.5) = 0.0
 		lagrangeForm(new double[] { 0.0, -1.0, 0.5 }, new double[] { -3.0, -6.0, 0.0 }, 1.0, 2.5, -2.0);
 		
-		System.out.println();
 		
 		// p(x) = 6x^4 + 3x^2 + 8x + 5
 		double [] x = { 0.0, -1.0, -1.5, 2.0, -3.5 };
@@ -60,7 +57,8 @@ public class LagrangePolynomial {
 
 		double [] c = p.getCoefficients();
 		System.out.println("coeffs: " + Arrays.stream(c).mapToObj(element -> ff.format(element)).collect(Collectors.joining(", ")));
-	
+		System.out.println();
+		System.out.println();
 	}
 
 }
