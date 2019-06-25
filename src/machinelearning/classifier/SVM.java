@@ -37,9 +37,9 @@ public class SVM {
 	 * 
 	 * Width of the margin = ({x+} - {x-}) * w / ||w||    <-- turn into a unit vector
 	 * 
-	 * From #2, we know {x+} = 1 - b, {x-} = 1 + b
+	 * From #2, we know {x+} = 1 - b, {x-} = -1 - b
 	 * 
-	 * Width of the margin = (1 - b - 1 + b) * 1 / ||w|| = 2 / ||w||
+	 * Width of the margin = (1 - b + b + 1) * 1 / ||w|| = 2 / ||w||
 	 * 
 	 * Max(2 / ||w||), or.. Min(||w||), or.. it is roughly equivalent to Min(1/2||W||^2) for easy math later
 	 * 
