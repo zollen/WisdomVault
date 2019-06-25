@@ -35,7 +35,7 @@ public class SVM {
 	 * Lets find out the exact distance between the two boundaries of the middle margin
 	 * by using vector addition/subtraction.
 	 * 
-	 * Width of the margin = ({x+} - {x-} * w / ||w||    <-- turn into a unit vector
+	 * Width of the margin = ({x+} - {x-}) * w / ||w||    <-- turn into a unit vector
 	 * 
 	 * From #2, we know {x+} = 1 - b, {x-} = 1 + b
 	 * 
