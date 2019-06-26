@@ -1,5 +1,7 @@
 package machinelearning.classifier;
 
+import java.text.DecimalFormat;
+
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.equation.Equation;
@@ -102,6 +104,8 @@ public class SVM {
 	 * 
 	 */
 	
+	private static final DecimalFormat ff = new DecimalFormat("0");
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Equation eq = new Equation();
@@ -145,7 +149,7 @@ public class SVM {
 		
 	
 		
-		final double ALPHA = 0.0001;
+		final double ALPHA = 0.0001;  // learning rate
 		final int EPOCHS = 10000;
 		
 		// Min(λ ||w||^2) + Σ ( 1 - yi<xi, wi> )
@@ -198,7 +202,7 @@ public class SVM {
 		
 	
 		for (int i = 0; i < T.numRows; i++) 
-			System.out.println("(" + T.get(i, 0) + ", " + T.get(i, 1) + ") ===> " + (int) R.get(i, 0));
+			System.out.println("(" + T.get(i, 0) + ", " + T.get(i, 1) + ") ===> " + ff.format(R.get(i, 0)));
 	}
 
 }
