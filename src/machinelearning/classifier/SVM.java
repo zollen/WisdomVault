@@ -84,6 +84,24 @@ public class SVM {
 	 * separate the inter-mangled sample points)
 	 */
 	
+	/**
+	 * Another Good Example:
+	 * https://www.youtube.com/watch?v=1NxnPkZM9bc
+	 * Three sample points: (1,1), (2,0), (2,3)
+	 * weight vector: w = (2, 3) - (1, 1) = (a, 2a) <-- line parallel to both (1,1) and (2,3)
+	 * Two equations and two unknowns
+	 * a + 2a + w = -1 for (1, 1)
+	 * 2a + 6a + w = 1  for (2, 3)
+	 * --------------------------
+	 * a = 2/5, w = -11/5
+	 * Support Vector: w = (2/5, 4/5)
+	 * g(x) = 2/5 x1 + 4/5 x2 - 11/5
+	 * g(x) = x1 + 2 x2 - 5.5
+	 * g(2,0) = 2 + 2 (0) - 5.5 = -3.8
+	 *
+	 * 
+	 */
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Equation eq = new Equation();
