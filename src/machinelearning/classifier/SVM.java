@@ -59,8 +59,8 @@ public class SVM {
 	 * ∂L/∂b = - Σ αi yi = 0,        Σ αi yi = 0      with b when L is extreme
 	 * 
 	 * -----------------------------------------
-	 * w = Σ αi yi xi   <--- w is a linear sum of all samples
-	 * 0 = Σ αi yi
+	 * w = Σ αi yi xi   <--- w is a linear sum of all samples - some αi are zeros, others non-zeros αi - xi are support vectors
+	 * 0 = Σ αi yi <-- all support vectors αi yi are sum up to zero.
 	 * -----------------------------------------
 	 * 
 	 * Let's plug the above expressions back into the Lagrange optimization equation
