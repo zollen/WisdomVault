@@ -178,6 +178,7 @@ public class AdaBoostBasic {
 		}
 		
 		// standard Adaboost weight calculation
+		@SuppressWarnings("unused")
 		private DMatrixRMaj update(DMatrixRMaj data, Result result) {
 			
 			DMatrixRMaj data2 = data.copy();
