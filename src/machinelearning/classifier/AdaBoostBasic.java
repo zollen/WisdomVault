@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
 
+// AdaBoost or its varations are best for classification problems. Boosting NEVER OVERFITTED!!
 public class AdaBoostBasic {
 	
 	public static void main(String[] args) {
@@ -138,10 +139,45 @@ public class AdaBoostBasic {
 				if (target.getErrorRate() <= 0 || target.getErrorRate() >= 0.99999)
 					break;
 				
-				data = update(data, target);
+				data = update2(data, target);
 			}		
 		}
 		
+		// MIT professor discovered better method for calculating weight
+		private DMatrixRMaj update2(DMatrixRMaj data, Result result) {
+			
+			DMatrixRMaj data2 = data.copy();
+			
+			for (int row = 0; row < data2.numRows; row++) {
+				
+				double w = 0.0;
+	
+				if (result.getErrorIndex().contains(row)) {				
+					w = 0.5 * (double) 1.0 / result.getErrorIndex().size();
+				}
+				else {
+					w = 0.5 * (double) 1.0 / (data.numRows - result.getErrorIndex().size());
+				}
+				
+				data2.set(row, 3, w);
+			}
+			
+			DMatrixRMaj data3 = new DMatrixRMaj(data.numRows, data.numCols);
+			
+			for (int row = 0; row < data3.numRows; row++) {
+				
+				int index = random(data2);
+				
+				data3.set(row, 0, data.get(index, 0));
+				data3.set(row, 1, data.get(index, 1));
+				data3.set(row, 2, data.get(index, 2));
+				data3.set(row, 3, 1.0 / data.numRows);		
+			}
+				
+			return data3;	
+		}
+		
+		// standard Adaboost weight calculation
 		private DMatrixRMaj update(DMatrixRMaj data, Result result) {
 			
 			DMatrixRMaj data2 = data.copy();
