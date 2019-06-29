@@ -120,6 +120,9 @@ public class AdaBoostBasic {
 				double min = Double.MAX_VALUE;
 				Result target = null;
 				
+				
+				// Not necessary to go through all classifiers
+				// In each epoch, only a few classifiers actual matter
 				for (Classifier classifier : clsifiers) {
 				
 					Result result = classifier.classify(data);
