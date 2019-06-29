@@ -21,31 +21,48 @@ public class AdaBoostBasic {
 		eq.process("A = [ " + 
 						//		x,    y,  cls,  weight
 						//  ---------------------------
-							" 1.0,  1.0,   1,   1./8;" +
-							" 1.5,  1.5,   1,   1./8;" +
-							" 1.0,  2.0,   1,   1./8;" + 
-							" 3.0,  1.0,   1,   1./8;" +
-							" 2.0,  2.0,   1,   1./8;" +
+							" 1.0,  1.0,   1,   1./10;" +
+							" 1.5,  1.5,   1,   1./10;" +
+							" 1.0,  2.0,   1,   1./10;" + 
+							" 3.0,  1.0,   1,   1./10;" +
+							" 2.0,  2.0,   1,   1./10;" +
 							
-							" 7.0,  8.0,  -1,   1./8;" +
-							" 8.0,  9.0,  -1,   1./8;" +
-							" 8.0,  8.0,  -1,   1./8;" +
-							" 7.5,  8.5,  -1,   1./8;" +
-							" 7.0, 10.0,  -1,   1./8 " +
+							" 7.0,  8.0,  -1,   1./10;" +
+							" 8.0,  9.0,  -1,   1./10;" +
+							" 8.0,  8.0,  -1,   1./10;" +
+							" 7.5,  8.5,  -1,   1./10;" +
+							" 7.0, 10.0,  -1,   1./10 " +
 						"]");
 		
 		DMatrixRMaj A = eq.lookupDDRM("A");
 		
 		Classifiers classifiers =  new Classifiers(
-				new Classifier(13),
-				new Classifier(29),
-				new Classifier(83),
-				new Classifier(89)	
+				new Classifier(3.5),
+				new Classifier(4.0),
+				new Classifier(4.5),
+				new Classifier(5.0),
+				new Classifier(5.5),
+				new Classifier(6.0),
+				new Classifier(6.5),
+				new Classifier(7.0),
+				new Classifier(8.5),
+				new Classifier(9.0)	
 		);
 		
 		
 		classifiers.fit(A, 10);
-			
+		
+		eq.process("T = [ " + 
+						//		 x,    y,  expected,  actual
+						//  ---------------------------------
+							" -1.0,  -1.0,        1,      0;" +
+							"  6.6,   7.8,       -1,      0;" +
+							"  9.2,   8.8,       -1,      0 " + 
+							"]");
+		
+		DMatrixRMaj T = eq.lookupDDRM("T");
+		
+		System.out.println(classifiers.classify(T));
 	}
 	
 	
@@ -57,20 +74,52 @@ public class AdaBoostBasic {
 		Map<Double, Classifier> says = new LinkedHashMap<Double, Classifier>();
 		
 		public Classifiers(Classifier ...clsifier) {
+			
 			for (int i = 0; i < clsifier.length; i++) {
 				classifiers.add(clsifier[i]);
 			}
 		}
 		
+		public Result classify(DMatrixRMaj data) {
+			
+			double errors = 0;
+			Set<Integer> index = new HashSet<Integer>();
+			
+			for (int row = 0; row < data.numRows; row++) {
+			
+				data.set(row, 3, classify(data.get(row, 0), data.get(row, 1)));
+			}
+			
+			return new Result(says, data, errors, index);
+		}
+		
+		public int classify(double x, double y) {
+			
+			double sum = says.entrySet().stream().mapToDouble(say -> {
+				
+				return say.getKey() * say.getValue().classify(x, y);
+			}).sum();
+					
+			if (sum >= 0)
+				return 1;
+			
+			return -1;
+		}
+		
 		public void fit(DMatrixRMaj data, int epochs) {
 			
-			double min = Double.MAX_VALUE;
-			Result target = null;
+			List<Classifier> clsifiers = new ArrayList<Classifier>(classifiers);
+			
+			if (clsifiers.size() < epochs)
+				epochs = clsifiers.size();
 			
 			
 			for (int i = 0; i < epochs; i++) {
 				
-				for (Classifier classifier : classifiers) {
+				double min = Double.MAX_VALUE;
+				Result target = null;
+				
+				for (Classifier classifier : clsifiers) {
 				
 					Result result = classifier.classify(data);
 					
@@ -83,6 +132,11 @@ public class AdaBoostBasic {
 				says.put(alpha(min), target.getClassifier());	
 				
 				System.out.println("EPOCH: " + (i + 1) + "   " + target);
+				
+				clsifiers.remove(target.getClassifier());
+				
+				if (target.getErrorRate() <= 0 || target.getErrorRate() >= 0.99999)
+					break;
 				
 				data = update(data, target);
 			}		
@@ -121,7 +175,7 @@ public class AdaBoostBasic {
 				data3.set(row, 0, data.get(index, 0));
 				data3.set(row, 1, data.get(index, 1));
 				data3.set(row, 2, data.get(index, 2));
-				data3.set(row, 3, 1.0 / 8.0);		
+				data3.set(row, 3, 1.0 / data.numRows);		
 			}
 				
 			return data3;
@@ -161,9 +215,17 @@ public class AdaBoostBasic {
 		private static final DecimalFormat ff = new DecimalFormat("0.000");
 		
 		private Classifier classifier;
+		private Map<Double, Classifier> classifiers;
 		private DMatrixRMaj inputs;
 		private double errorRate;
 		private Set<Integer> errorIndex;
+		
+		public Result(Map<Double, Classifier> classifiers, DMatrixRMaj inputs, double errorRate, Set<Integer> errorIndex) {
+			this.classifiers = classifiers;
+			this.inputs = inputs;
+			this.errorRate = errorRate;
+			this.errorIndex = errorIndex;		
+		}
 		
 		public Result(Classifier classifier, DMatrixRMaj inputs, double errorRate, Set<Integer> errorIndex) {
 			this.classifier = classifier;
@@ -192,12 +254,31 @@ public class AdaBoostBasic {
 		public String toString() {
 			StringBuilder builder = new StringBuilder();
 			
-			builder.append(classifier);
-			builder.append(" ==> ");
-			builder.append(ff.format(errorRate));	
-			builder.append(" : ");
-			builder.append(errorIndex.stream().map(p -> p.toString()).collect(Collectors.joining(", ")));
-			builder.append("\n");
+			if (classifier != null) {
+				builder.append(classifier);
+				builder.append(" ==> ");
+				builder.append("e: " + ff.format(errorRate));	
+				builder.append(" : ");
+				builder.append("a: " + ff.format(Classifiers.alpha(errorRate)));
+				builder.append(" : ");
+				builder.append(errorIndex.stream().map(p -> p.toString()).collect(Collectors.joining(", ")));
+				builder.append("\n");
+			}
+			else
+			if (classifiers != null) {
+				classifiers.entrySet().stream().forEach(entry -> {
+					
+					if (builder.length() > 0)
+						builder.append(" + ");
+					
+					builder.append(ff.format(entry.getKey()));
+					builder.append(" * ");
+					builder.append(entry.getValue());
+					builder.append("\n");
+					
+				});
+			}
+				
 			builder.append(inputs);
 			builder.append("\n\n");
 			
@@ -208,9 +289,9 @@ public class AdaBoostBasic {
 	
 	private static class Classifier {
 		
-		private int seed;
+		private double seed;
 		
-		public Classifier(int seed) {
+		public Classifier(double seed) {
 			this.seed = seed;
 		}
 		
@@ -230,9 +311,12 @@ public class AdaBoostBasic {
 			return new Result(this, data, errors, index);
 		}
 		
-		public int classify(double x, double y) {		
-			double val = (double) Math.abs(Double.valueOf(x * 20 + y).hashCode()) % seed / seed;
-			return val >= 0.5 ? 1 : -1;
+		public int classify(double x, double y) {	
+			
+			if (seed < x && seed < y)
+				return 1;
+			else
+				return -1;
 		}
 		
 		@Override
