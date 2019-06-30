@@ -132,18 +132,77 @@ public class AdaBoostBasic {
 						target = result;
 					}
 				}
-			
+				
+				clsifiers.remove(target.getClassifier());
+				
+				data = update4(data, target);
+				
 				says.put(alpha(min), target.getClassifier());	
 				
 				System.out.println("EPOCH: " + (i + 1) + "   " + target);
 				
-				clsifiers.remove(target.getClassifier());
-				
-				if (target.getErrorRate() <= 0 || target.getErrorRate() >= 0.99999)
+				if (target.getErrorRate() <= 0 || target.getErrorRate() >= 0.9999)
 					break;
-				
-				data = update2(data, target);
 			}		
+		}
+		
+		// My improvement#2 based on update2
+		private DMatrixRMaj update4(DMatrixRMaj data, Result result) {
+			
+			double sum = 0.0;
+			
+			for (int row = 0; row < data.numRows; row++) {
+				
+				double w = data.get(row, 3);
+	
+				if (result.getErrorIndex().contains(row)) {				
+					w += w * (double) 1.0 / result.getErrorIndex().size();
+				}
+				
+				data.set(row, 3, w);
+				
+				sum += w;
+			}
+			
+			for (int row = 0; row < data.numRows; row++) {
+				data.set(row, 3, data.get(row, 3) / sum);
+			}
+				
+			return data;	
+		}
+		
+		// My improvement based on update2
+		private DMatrixRMaj update3(DMatrixRMaj data, Result result) {
+			
+			DMatrixRMaj data2 = data.copy();
+			
+			for (int row = 0; row < data2.numRows; row++) {
+				
+				double w = 0.0;
+	
+				if (result.getErrorIndex().contains(row)) {				
+					w = 3.0 / 4.0 * (double) 1.0 / result.getErrorIndex().size();
+				}
+				else {
+					w = 1.0 / 4.0 * (double) 1.0 / (data.numRows - result.getErrorIndex().size());
+				}
+				
+				data2.set(row, 3, w);
+			}
+			
+			DMatrixRMaj data3 = new DMatrixRMaj(data.numRows, data.numCols);
+			
+			for (int row = 0; row < data3.numRows; row++) {
+				
+				int index = random(data2);
+				
+				data3.set(row, 0, data.get(index, 0));
+				data3.set(row, 1, data.get(index, 1));
+				data3.set(row, 2, data.get(index, 2));
+				data3.set(row, 3, 1.0 / data.numRows);		
+			}
+				
+			return data3;	
 		}
 		
 		// MIT professor discovered better method for calculating weight
@@ -263,14 +322,14 @@ public class AdaBoostBasic {
 		public Result(Map<Double, Classifier> classifiers, DMatrixRMaj inputs, double errorRate, Set<Integer> errorIndex) {
 			this.classifiers = classifiers;
 			this.inputs = inputs;
-			this.errorRate = errorRate;
+			this.errorRate = errorRate < 1.0 ? errorRate : 0.999999;
 			this.errorIndex = errorIndex;		
 		}
 		
 		public Result(Classifier classifier, DMatrixRMaj inputs, double errorRate, Set<Integer> errorIndex) {
 			this.classifier = classifier;
 			this.inputs = inputs;
-			this.errorRate = errorRate;
+			this.errorRate = errorRate < 1.0 ? errorRate : 0.999999;
 			this.errorIndex = errorIndex;
 		}
 		
@@ -308,6 +367,9 @@ public class AdaBoostBasic {
 			if (classifiers != null) {
 				classifiers.entrySet().stream().forEach(entry -> {
 					
+					if (builder.length() <= 0)
+						builder.append(" = ");
+					else
 					if (builder.length() > 0)
 						builder.append(" + ");
 					
