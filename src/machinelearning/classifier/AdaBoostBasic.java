@@ -172,6 +172,7 @@ public class AdaBoostBasic {
 		}
 		
 		// My improvement based on update2
+		@SuppressWarnings("unused")
 		private DMatrixRMaj update3(DMatrixRMaj data, Result result) {
 			
 			DMatrixRMaj data2 = data.copy();
@@ -206,6 +207,7 @@ public class AdaBoostBasic {
 		}
 		
 		// MIT professor discovered better method for calculating weight
+		@SuppressWarnings("unused")
 		private DMatrixRMaj update2(DMatrixRMaj data, Result result) {
 			
 			DMatrixRMaj data2 = data.copy();
