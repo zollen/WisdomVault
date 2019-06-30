@@ -39,21 +39,21 @@ public class GradientDecent {
 				
 				DerivativeStructure f = formula(intercept, slope, new double[] {1.0, 3.0, 2.0, 4.0, 3.5}, new double[] {1.0, 1.0, 3.0, 2.0, 3.5});
 					
-				double pI = f.getPartialDerivative(1, 0);
-				double pS = f.getPartialDerivative(0, 1);
+				double gradientI = f.getPartialDerivative(1, 0);
+				double gradientS = f.getPartialDerivative(0, 1);
 				
 				System.out.println("Iteration: " + iter + 
 						" intercept: " + ff.format(intercept) +
 						" slope: " + ff.format(slope) +
 						" f: " + ff.format(f.getValue()) +  
-						" ∂L/∂i: " + ff.format(pI) +
-						" ∂L/∂s: " + ff.format(pS));
+						" ∂L/∂i: " + ff.format(gradientI) +
+						" ∂L/∂s: " + ff.format(gradientS));
 				
 			
-				intercept -= pI * LEARNING_RATE;
-				slope -= pS * LEARNING_RATE;		
+				intercept -= gradientI * LEARNING_RATE;
+				slope -= gradientS * LEARNING_RATE;		
 				
-				if (Math.abs(pI) < THRESHOLD && Math.abs(pS) < THRESHOLD)
+				if (Math.abs(gradientI) < THRESHOLD && Math.abs(gradientS) < THRESHOLD)
 					break;
 			}
 		}
