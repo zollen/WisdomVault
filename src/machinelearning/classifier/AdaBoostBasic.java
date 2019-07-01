@@ -16,6 +16,10 @@ import org.ejml.equation.Equation;
 // AdaBoost or its varations are best for classification problems. Boosting NEVER OVERFITTED!!
 public class AdaBoostBasic {
 	
+	private static final double THRESHOLD = 0.00001;
+	private static final int X = 0;
+	private static final int Y = 1;
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Equation eq = new Equation();
@@ -38,16 +42,11 @@ public class AdaBoostBasic {
 		DMatrixRMaj A = eq.lookupDDRM("A");
 		
 		Classifiers classifiers =  new Classifiers(
-				new Classifier(3.5),
-				new Classifier(4.0),
-				new Classifier(4.5),
-				new Classifier(5.0),
-				new Classifier(5.5),
-				new Classifier(6.0),
-				new Classifier(6.5),
-				new Classifier(7.0),
-				new Classifier(8.5),
-				new Classifier(9.0)	
+				
+				new Classifier(X, 2.5),
+				new Classifier(Y, 2.0),
+				new Classifier(Y, 8.5),
+				new Classifier(X, 8.0)	
 		);
 		
 		
@@ -57,6 +56,7 @@ public class AdaBoostBasic {
 						//		 x,    y,  expected,  actual
 						//  ---------------------------------
 							" -1.0,  -1.0,        1,      0;" +
+							"  3.2,   1.5,        1,      0;" +
 							"  6.6,   7.8,       -1,      0;" +
 							"  9.2,   8.8,       -1,      0 " + 
 							"]");
@@ -131,6 +131,9 @@ public class AdaBoostBasic {
 						min = result.getErrorRate();
 						target = result;
 					}
+					
+					if (result.getErrorRate() <= THRESHOLD || result.getErrorRate() >= 1.0) 
+						break;
 				}
 				
 				clsifiers.remove(target.getClassifier());
@@ -167,7 +170,7 @@ public class AdaBoostBasic {
 			for (int row = 0; row < data.numRows; row++) {
 				data.set(row, 3, data.get(row, 3) / sum);
 			}
-				
+			
 			return data;	
 		}
 		
@@ -302,7 +305,10 @@ public class AdaBoostBasic {
 			return data.numRows - 1;
 		}
 		
-		private static double alpha(double error) {			
+		private static double alpha(double error) {		
+			if (error <= 0)
+				error = THRESHOLD;
+			
 			return 0.5 * Math.log((1.0 - error) / error);
 		}
 		
@@ -390,12 +396,14 @@ public class AdaBoostBasic {
 		}
 	}
 	
-	
+	// Dummy Weak Classifier
 	private static class Classifier {
 		
 		private double seed;
+		private int attribute;
 		
-		public Classifier(double seed) {
+		public Classifier(int attr, double seed) {
+			this.attribute = attr;
 			this.seed = seed;
 		}
 		
@@ -417,15 +425,23 @@ public class AdaBoostBasic {
 		
 		public int classify(double x, double y) {	
 			
-			if (seed < x && seed < y)
-				return 1;
-			else
-				return -1;
+			if (attribute == 0) {
+				if (seed > x)
+					return 1;
+				else
+					return -1;
+			}
+			else {
+				if (seed > y)
+					return 1;
+				else
+					return -1;
+			}
 		}
 		
 		@Override
 		public String toString() {
-			return "classifier(" + seed + ")";
+			return "classifier(" + (attribute == 0 ? "X" : "Y") + ", " + seed + ")";
 		}
 	}
 
