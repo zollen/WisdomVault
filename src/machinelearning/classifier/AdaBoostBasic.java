@@ -41,7 +41,7 @@ public class AdaBoostBasic {
 		
 		DMatrixRMaj A = eq.lookupDDRM("A");
 		
-		Classifiers classifiers =  new Classifiers(
+		AdaBoost adaBoost =  new AdaBoost(
 				
 				new Classifier(X, 2.5),
 				new Classifier(Y, 2.0),
@@ -50,7 +50,7 @@ public class AdaBoostBasic {
 		);
 		
 		
-		classifiers.fit(A, 10);
+		adaBoost.fit(A, 10);
 		
 		eq.process("T = [ " + 
 						//		 x,    y,  expected,  actual
@@ -63,18 +63,18 @@ public class AdaBoostBasic {
 		
 		DMatrixRMaj T = eq.lookupDDRM("T");
 		
-		System.out.println(classifiers.classify(T));
+		System.out.println(adaBoost.classify(T));
 	}
 	
 	
-	private static class Classifiers {
+	private static class AdaBoost {
 		
 		private static Random rand = new Random(83);
 		
 		private List<Classifier> classifiers = new ArrayList<Classifier>();
 		Map<Double, Classifier> says = new LinkedHashMap<Double, Classifier>();
 		
-		public Classifiers(Classifier ...clsifier) {
+		public AdaBoost(Classifier ...clsifier) {
 			
 			for (int i = 0; i < clsifier.length; i++) {
 				classifiers.add(clsifier[i]);
@@ -366,7 +366,7 @@ public class AdaBoostBasic {
 				builder.append(" ==> ");
 				builder.append("e: " + ff.format(errorRate));	
 				builder.append(" : ");
-				builder.append("a: " + ff.format(Classifiers.alpha(errorRate)));
+				builder.append("a: " + ff.format(AdaBoost.alpha(errorRate)));
 				builder.append(" : ");
 				builder.append(errorIndex.stream().map(p -> p.toString()).collect(Collectors.joining(", ")));
 				builder.append("\n");
