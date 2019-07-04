@@ -1,7 +1,9 @@
 package genetic;
 
 
-import java.util.Random;
+import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import io.jenetics.DoubleGene;
 import io.jenetics.MeanAlterer;
@@ -24,7 +26,7 @@ import io.jenetics.util.DoubleRange;
  */
 public class JeneticsDemo6 {
 	
-	private static final Random rand = new Random(83);
+	private static final DecimalFormat ff = new DecimalFormat("0.000");
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -36,7 +38,7 @@ public class JeneticsDemo6 {
 		        .ofVector(DoubleRange.of(0, 1), 3);
 		 */
 		
-		// Optimization problem with constraint
+		// Optimization problem with constraints
 		// a + b + c = 1
 		// c <= 0.8
 		final Codec<double[], DoubleGene> CODEC = Codecs
@@ -64,7 +66,11 @@ public class JeneticsDemo6 {
 				// Terminate the evolution after maximal 100 generations.
 				.limit(50000).collect(EvolutionResult.toBestPhenotype());
 		
-		System.out.println("Best GenoType: " + result);
+		double [] res = CODEC.decode(result.getGenotype());
+		System.out.println("Best Phenotype: " + 
+					Arrays.stream(res).mapToObj(p -> ff.format(p))
+							.collect(Collectors.joining(", ")) + 
+					" ==> " + ff.format(result.getFitness()));
 		System.out.println(statistics);
 
 	}
@@ -74,8 +80,8 @@ public class JeneticsDemo6 {
 		// a + b + c = 1
 		// c <= 0.8
 		
-		x[2] = rand.nextDouble() * 0.8;
-		x[1] = rand.nextDouble() * (1.0 - x[2]);
+		x[2] = x[2] * 0.8;
+		x[1] = x[1] * (1.0 - x[2]);
 		x[0] = 1.0 - x[2] - x[1];
 		
 		return x;
