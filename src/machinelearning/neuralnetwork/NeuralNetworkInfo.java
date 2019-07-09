@@ -77,6 +77,43 @@ public class NeuralNetworkInfo {
 		// org.nd4j.linalg.learning.config.RmsProp
 		// θ(t+1) = θ(t) - η / RMS(g(t)) * g(t)  <-- learning rate required
 		
+		// org.nd4j.linalg.learning.config.Adam
+		// Adam can be looked at as a combination of RMSprop and Stochastic Gradient Descent with 
+		// momentum. It uses the squared gradients to scale the learning rate like RMSprop and 
+		// it takes advantage of momentum by using moving average of the gradient instead of 
+		// gradient itself like SGD with momentum. 
+		// m_t = b1 * m_t-1 + (1 - b1) * g_t
+		// v_t = b2 * v_t-1 + (1 - b2) * (g_t)^2
+		// m and v are moving average.
+		// Expected Value(m_t) = Expected Value(g_t)
+		// Expected Value(v_t) = Expected Value((g_t)^2)
+		
+		// m_0 = 0
+		// m_1 = b1 * m_0 + (1 - b1) * g_1 = (1 - b1) * g_1
+		// m_2 = b1 * m_1 + (1 - b1) * g_2 = b1 * (1 - b1) * g_1 + (1 - b1) * g_2
+		// m_3 = b1 * m_2 + (1 - b1) * g_3 = b1^2 * (1 - b1) * g_1 + b1 * (1 - b1) * g_2 + (1- b1) g_3
+		
+		// m_t = (1 - b1) Σ (b1)^(t-i) * g_i
+		
+		// In the first row, we use the above formula for moving average to expand m:
+		// Expected Value(m_t) = Expected Value( (1 - b1) Σ (b1)^(t-i) * g_i )
+		
+		// Next, we approximate g[i] with g[t]. Now we can take it out of sum, since it does not 
+		// now depend on i. Because the approximation is taking place, the error C emerge in the 
+		// formula:
+		// Expected Value(m_t) = Expected Value(g_t) * (1 - b1) * Σ (b1)^(t-i) + K
+		
+		// In the last line we just use the formula for the sum of a finite geometric series:
+		// Bias correction for the first momentum estimator
+		// Expected Value(m_t) = Expected Value(g_t) * (1 - b1) + K
+		
+		// Now we need to correct the estimator, so that the expected value is the one we want. 
+		// This step is usually referred to as bias correction. The final formulas for our 
+		// estimator will be as follows:
+		// M_t = m_t / (1 - b1)
+		// V_t = v_t / (1 - b1)
+		
+		// w_t = w_t-1 + η * M_t / (sqrt(V_t) + e
 	}
 
 }
