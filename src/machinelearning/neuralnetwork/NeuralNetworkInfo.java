@@ -78,6 +78,7 @@ public class NeuralNetworkInfo {
 		// θ(t+1) = θ(t) - η / RMS(g(t)) * g(t)  <-- learning rate required
 		
 		// org.nd4j.linalg.learning.config.Adam
+		// https://towardsdatascience.com/adam-latest-trends-in-deep-learning-optimization-6be9a291375c
 		// Adam can be looked at as a combination of RMSprop and Stochastic Gradient Descent with 
 		// momentum. It uses the squared gradients to scale the learning rate like RMSprop and 
 		// it takes advantage of momentum by using moving average of the gradient instead of 
@@ -101,7 +102,7 @@ public class NeuralNetworkInfo {
 		// Next, we approximate g[i] with g[t]. Now we can take it out of sum, since it does not 
 		// now depend on i. Because the approximation is taking place, the error C emerge in the 
 		// formula:
-		// Expected Value(m_t) = Expected Value(g_t) * (1 - b1) * Σ (b1)^(t-i) + K
+		// Expected Value(m_t) = Expected Value(g_i) * (1 - b1) * Σ (b1)^(t-i) + K
 		
 		// In the last line we just use the formula for the sum of a finite geometric series:
 		// Bias correction for the first momentum estimator
