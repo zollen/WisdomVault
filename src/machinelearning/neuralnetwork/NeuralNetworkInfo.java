@@ -29,6 +29,8 @@ public class NeuralNetworkInfo {
 		// hyper-parameters
 		// η - learning rate
 		// α - learning decay rate
+		
+		// http://ruder.io/optimizing-gradient-descent
 
 		// org.nd4j.linalg.learning.config.Sgd
 		// Standard Gradient Decent
