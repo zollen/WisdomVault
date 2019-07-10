@@ -1,4 +1,4 @@
-package machinelearning.neuralnetwork.words;
+package machinelearning.neuralnetwork.recurrent;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;

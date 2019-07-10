@@ -1,4 +1,4 @@
-package machinelearning.neuralnetwork.words;
+package machinelearning.neuralnetwork.recurrent;
 
 import java.io.File;
 import java.util.Random;
