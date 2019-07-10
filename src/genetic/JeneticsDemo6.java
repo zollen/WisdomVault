@@ -60,10 +60,10 @@ public class JeneticsDemo6 {
 		// Execute the GA (engine).
 		final Phenotype<DoubleGene, Double> result = engine.stream()
 				// Truncate the evolution stream if no better individual could
-				// be found after 5 consecutive generations.
+				// be found after 200 consecutive generations.
 				.limit(Limits.bySteadyFitness(200))
 				.peek(statistics)
-				// Terminate the evolution after maximal 100 generations.
+				// Terminate the evolution after maximal 50000 generations.
 				.limit(50000).collect(EvolutionResult.toBestPhenotype());
 		
 		double [] res = CODEC.decode(result.getGenotype());
