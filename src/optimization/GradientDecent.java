@@ -34,7 +34,7 @@ public class GradientDecent {
 				// Imagine a very large data of 1,000,000 samples, it would take too much
 				// calculation for each iteration.
 				// Instead of using all samples of x, SGD randomly picks a single sample of
-				// x or a subset of sample of x for each iteration
+				// x or a subset of sample of x (i.e. batch size..etc) for each iteration
 
 				
 				DerivativeStructure f = formula(intercept, slope, new double[] {1.0, 3.0, 2.0, 4.0, 3.5}, new double[] {1.0, 1.0, 3.0, 2.0, 3.5});
