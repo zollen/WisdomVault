@@ -698,7 +698,7 @@ public class MidiMusicExtractor  {
 	public static void main(String[] args) {
 		//restrictToBassAndGuitar();
 		try {
-			File inputDirectoryOfMidiFiles = chooseInputMidiDirectoryFile("d:/music/Midi"); // TODO: change path to your liking!!!!!!
+			File inputDirectoryOfMidiFiles = chooseInputMidiDirectoryFile("out"); // TODO: change path to your liking!!!!!!
 			if (inputDirectoryOfMidiFiles == null) {
 				return;
 			}
