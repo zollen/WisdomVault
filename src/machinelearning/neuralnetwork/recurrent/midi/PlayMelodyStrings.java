@@ -25,8 +25,6 @@ import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Sequence;
 import javax.sound.midi.Sequencer;
 import javax.sound.midi.ShortMessage;
-import javax.sound.midi.Soundbank;
-import javax.sound.midi.Synthesizer;
 import javax.sound.midi.Track;
 
 /*
@@ -44,7 +42,7 @@ import javax.sound.midi.Track;
  */
 public class PlayMelodyStrings {
     private static Random random = new Random();
-    private final static String tempDir = System.getProperty("java.io.tmpdir");
+    private final static String tempDir = "out/midi-learning/data";
     private static Map<String, Integer> instrumentsByName = new HashMap<>();
 
     private static Pattern INSTRUMENT_PATTERN = Pattern.compile(".*Instrument = (\\d+).*");
@@ -336,19 +334,7 @@ public class PlayMelodyStrings {
     public static void playMelody(String melody, double secondsToPlay) throws Exception {
         int startPitch = 55;
         int instrumentNumber = 0; // Acoustic Grand Piano
-//        int separatorIndex = melody.indexOf(Midi2Slices.SEPARATOR);
-//        if (separatorIndex>0) {
-//            String [] parts = melody.substring(0, separatorIndex).split(":",4);
-//            melody = melody.substring(separatorIndex+1);
-//            //return firstPitch + ":" + firstInstrument + ":" + resolution + " " + result.toString();
-//            startPitch = Integer.parseInt(parts[0]);
-//            instrumentNumber = Integer.parseInt(parts[1]);
-//            String forPath="";
-//            if (parts.length>3) {
-//                forPath = " for " + parts[3];
-//            }
-//            System.out.println("Using startPitch = " + startPitch + ", instrument = " + instrumentNumber + forPath);
-//        }
+
         playMelody(melody, startPitch, instrumentNumber, secondsToPlay);
     }
 
@@ -421,7 +407,7 @@ public class PlayMelodyStrings {
 
     // This method will try to play a melody even if the string is malformed.  The neural networks sometimes output invalid substrings, especially at the beginning of learning.
     public static void playMelody(String melody, int startNote, int instrumentNumber, double secondsToPlay) throws MidiUnavailableException, InvalidMidiDataException {
-        loadSoundBank();
+
         List<Note> ns = createNoteSequence(melody, instrumentNumber, startNote);
         Sequencer sequencer = MidiSystem.getSequencer();
         Sequence sequence = makeSequence(ns, instrumentNumber);
@@ -444,7 +430,7 @@ public class PlayMelodyStrings {
     }
 
     public static void playSequence(Sequence sequence, double tempoFactor) throws MidiUnavailableException, InvalidMidiDataException {
-        loadSoundBank();
+
         Sequencer sequencer = MidiSystem.getSequencer();
         sequencer.setSequence(sequence);
         sequencer.setTickPosition(0);
@@ -467,44 +453,14 @@ public class PlayMelodyStrings {
     }
 
     //---------------------------------
-    private static boolean soundBackLoaded = false;
-
-    private static void loadSoundBank() {// Download for higher quality MIDI
-        if (soundBackLoaded) {
-            return;
-        }
-        soundBackLoaded = true;
-        final String filename = "GeneralUser_GS_SoftSynth.sf2";  // FreeFont.sf2   Airfont_340.dls
-        final String soundBankLocation = tempDir + "/" + filename;
-        File file = new File(soundBankLocation);
-        try {
-            if (!file.exists()) {
-                System.out.println("Downloading soundbank (first time only!). This may take a while.");
-                copyURLContentsToFile(new URL("http://truthsite.org/music/" + filename), file);
-                System.out.println("Soundbank downloaded to " + file.getAbsolutePath());
-            }
-            Synthesizer synth = MidiSystem.getSynthesizer();
-            Soundbank deluxeSoundbank;
-            deluxeSoundbank = MidiSystem.getSoundbank(file);
-            synth.loadAllInstruments(deluxeSoundbank);
-            System.out.println("Loaded soundbank from " + soundBankLocation);
-        } catch (Exception exc) {
-            System.err.println("Unable to load soundbank " + soundBankLocation + " due to " + exc.getMessage()
-                + ", using default soundbank.");
-        }
-    }
-
+   
     private static String getPathToExampleMelodiesFile() throws Exception {
-        String filename = "bach-composition-2018-02-10.txt"; // These melodies were composed by MelodyModelingExample.java.
-        //filename = "composed-in-the-style-of-pop.txt";
+        String filename = "masterpiece.txt"; 
         String fileLocation = tempDir + "/" + filename;
         File file = new File(fileLocation);
-        if (!file.exists()) {
-            copyURLContentsToFile(new URL("http://truthsite.org/music/" + filename), file);
-            System.out.println("Melody file downloaded to " + file.getAbsolutePath());
-        } else {
-            System.out.println("Using existing melody file at " + file.getAbsolutePath());
-        }
+      
+        System.out.println("Using existing melody file at " + file.getAbsolutePath());
+
         return fileLocation;
     }
 
@@ -537,9 +493,7 @@ public class PlayMelodyStrings {
 
     //-----------------------------------
     public static void main(String[] args) {
-//        String filename="beatles-melodies-input.txt";
-//        MelodyModelingExample.makeSureFileIsInTmpDir(filename);
-//        args = new String[] {MelodyModelingExample.tmpDir + "/" + filename};
+
         try {
             String pathToMelodiesFile = args.length == 0 ? getPathToExampleMelodiesFile() : args[0];
             playMelodies(pathToMelodiesFile, 30); /// Note: by default it plays 30 seconds of each melody
