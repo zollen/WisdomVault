@@ -26,13 +26,8 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
-import com.sun.media.sound.AudioSynthesizer;
 
 
-
-
-
-@SuppressWarnings("restriction")
 public class Midi2WavRenderer {
     public final static int MIDI_PERCUSSION_CHANNEL = 9;
     private AudioSynthesizer synth;
@@ -75,7 +70,6 @@ public class Midi2WavRenderer {
         for (Track track : sequence.getTracks()) {
             for (int eventNumber = 0; eventNumber < track.size(); eventNumber++) {
                 MidiEvent event = track.get(eventNumber);
-                long tick = event.getTick();
                 MidiMessage message = event.getMessage();
                 if (message instanceof ShortMessage) {
                     ShortMessage shortMessage = (ShortMessage) message;
@@ -224,7 +218,8 @@ public class Midi2WavRenderer {
     }
 
     //...........
-    private static String[] loadMelodies(String inputFilePath, int count) throws IOException {
+    @SuppressWarnings("unused")
+	private static String[] loadMelodies(String inputFilePath, int count) throws IOException {
         String[] strings = new String[count];
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(inputFilePath)));
         for (int i = 0; i < count; i++) {

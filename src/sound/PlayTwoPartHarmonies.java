@@ -161,6 +161,7 @@ public class PlayTwoPartHarmonies {
 		}
 		return (sum+0.0)/count;
 	}
+	@SuppressWarnings("unused")
 	private static void validateOrdered(String line) {
 		String even=evenPart(line);
 		String odd=oddPart(line);
@@ -233,6 +234,7 @@ public class PlayTwoPartHarmonies {
 		}
 		reader.close();
 	}
+	@SuppressWarnings("unused")
 	private static void playRandomHarmonyFile(String directoryPath, int repeatLimit, double tempoFactor) throws Exception {
 		File directory = new File(directoryPath);
 		File [] files = directory.listFiles(new FileFilter(){
