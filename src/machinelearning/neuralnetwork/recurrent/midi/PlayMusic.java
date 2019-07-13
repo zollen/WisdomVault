@@ -320,7 +320,7 @@ public class PlayMusic {
     }
 
     public static void chooseMidiFileAndPlay() throws MidiUnavailableException, InvalidMidiDataException, IOException {
-        JFileChooser chooser = new JFileChooser(new File("D:/Music/MIDI/clean_midi"));
+        JFileChooser chooser = new JFileChooser(new File("out"));
         chooser.setFileFilter(new FileFilter() {
             @Override
             public boolean accept(File file) {

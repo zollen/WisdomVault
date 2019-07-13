@@ -143,7 +143,7 @@ public class DeepHarmony extends Application {
     //----------------------
     public static void main(String[] args) {
         try {
-            String defaultDirectoryPath = System.getProperty("user.home") + "/midi-learning";
+            String defaultDirectoryPath = "out/midi-learning";
             File netFile = chooseNetworkModelFile(defaultDirectoryPath);
             if (netFile==null) {
                 return; // User hit Cancel

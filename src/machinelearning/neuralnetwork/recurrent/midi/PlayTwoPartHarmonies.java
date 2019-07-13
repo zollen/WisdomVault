@@ -20,7 +20,7 @@ public class PlayTwoPartHarmonies {
 	private static int transposeHalfSteps = 0;
 	public static int instrument0=0; // PlayMusic.getInstrument("Flute"); // PlayMusic.getInstrument("Acoustic Bass");
 	public static int instrument1=PlayMusic.getInstrument("Acoustic Guitar (nylon)"); // PlayMusic.getInstrument("Acoustic Guitar (steel)");
-	public static final String ROOT_DIR_PATH = "out" +File.separator  + "midi-learning"; // Change this if you want!!!!!!!!!!!!!!!!!
+	public static final String ROOT_DIR_PATH = "out" + File.separator  + "midi-learning"; // Change this if you want!!!!!!!!!!!!!!!!!
 	static {
 		makeOrCheckDirectory(ROOT_DIR_PATH);
 	}

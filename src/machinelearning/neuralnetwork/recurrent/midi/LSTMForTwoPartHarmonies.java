@@ -171,7 +171,7 @@ public class LSTMForTwoPartHarmonies {
         net.addListeners(new StatsListener(statsStorage));
     }
     private static File chooseInputHarmoniesFile() {
-        JFileChooser chooser = new JFileChooser(System.getProperty("user.home") + File.separator + "midi-learning");
+        JFileChooser chooser = new JFileChooser("out");
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         if (chooser.showDialog(null, "Choose harmonies file") != JFileChooser.APPROVE_OPTION) {
             return null;
