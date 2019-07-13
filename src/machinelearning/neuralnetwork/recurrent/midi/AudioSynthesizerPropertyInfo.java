@@ -1,4 +1,4 @@
-package sound;
+package machinelearning.neuralnetwork.recurrent.midi;
 
 /**
  * Information about property used in  opening <code>AudioSynthesizer</code>.

@@ -1,4 +1,4 @@
-package sound;
+package machinelearning.neuralnetwork.recurrent.midi;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiEvent;

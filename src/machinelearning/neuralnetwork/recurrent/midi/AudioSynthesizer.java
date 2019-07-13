@@ -1,4 +1,4 @@
-package sound;
+package machinelearning.neuralnetwork.recurrent.midi;
 
 import java.util.Map;
 

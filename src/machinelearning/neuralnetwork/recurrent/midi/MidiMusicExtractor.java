@@ -1,4 +1,4 @@
-package sound;
+package machinelearning.neuralnetwork.recurrent.midi;
 
 import java.io.File;
 import java.io.FileOutputStream;
