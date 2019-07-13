@@ -149,7 +149,7 @@ public class DeepHarmony extends Application {
                 return; // User hit Cancel
             }
             net = MultiLayerNetwork.load(netFile, false);
-            characterIterator = GravesLSTMForTwoPartHarmonies.getCharacterIteratorForPlayBack();
+            characterIterator = LSTMForTwoPartHarmonies.getCharacterIteratorForPlayBack();
             //GravesLSTMForTwoPartHarmonies.getHarmoniesIterator(64,2000);
             //loadCharacterIterator("D:/tmp/midi-character-iterator.jobj");
             System.out.println(characterIterator.inputColumns() + " input columns");

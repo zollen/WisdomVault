@@ -47,7 +47,7 @@ import org.nd4j.linalg.lossfunctions.LossFunctions.LossFunction;
  * http://deeplearning4j.org/lstm
  * http://deeplearning4j.org/recurrentnetwork
  */
-public class GravesLSTMForTwoPartHarmonies {
+public class LSTMForTwoPartHarmonies {
      private static String inputOutputDirectoryPath;
 
     public static void main(String[] args) throws Exception {
