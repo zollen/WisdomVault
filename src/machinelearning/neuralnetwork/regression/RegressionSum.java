@@ -25,9 +25,9 @@ import org.nd4j.linalg.lossfunctions.LossFunctions;
  */
 public class RegressionSum {
     //Random number generator seed, for reproducability
-    public static final int seed = 12345;
+    public static final int seed = 83;
     //Number of epochs (full passes of the data)
-    public static final int nEpochs = 200;
+    public static final int nEpochs = 500;
     //Number of data points
     public static final int nSamples = 1000;
     //Batch size: i.e., each epoch has nSamples/batchSize parameter updates
@@ -49,7 +49,7 @@ public class RegressionSum {
         //Create the network
         int numInput = 2;
         int numOutputs = 1;
-        int nHidden = 10;
+        int nHidden = 16;
         MultiLayerNetwork net = new MultiLayerNetwork(new NeuralNetConfiguration.Builder()
                 .seed(seed)
                 .weightInit(WeightInit.XAVIER)
@@ -58,13 +58,19 @@ public class RegressionSum {
                 .layer(0, new DenseLayer.Builder().nIn(numInput).nOut(nHidden)
                         .activation(Activation.TANH)
                         .build())
-                .layer(1, new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
+                .layer(1, new DenseLayer.Builder().nIn(nHidden).nOut(nHidden * 2)
+                        .activation(Activation.TANH)
+                        .build())
+                .layer(2, new DenseLayer.Builder().nIn(nHidden * 2).nOut(nHidden)
+                        .activation(Activation.TANH)
+                        .build())
+                .layer(3, new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
                         .activation(Activation.IDENTITY)
                         .nIn(nHidden).nOut(numOutputs).build())
                 .build()
         );
         net.init();
-        net.setListeners(new ScoreIterationListener(1));
+        net.setListeners(new ScoreIterationListener(1000));
 
 
         //Train the network on the full data set, and evaluate in periodically
@@ -73,9 +79,11 @@ public class RegressionSum {
             net.fit(iterator);
         }
         // Test the addition of 2 numbers (Try different numbers here)
-        final INDArray input = Nd4j.create(new double[] { 0.111111, 0.3333333333333 }, new int[] { 1, 2 });
+        double op1 = 0.25;
+        double op2 = 0.32;
+        final INDArray input = Nd4j.create(new double[] { op1, op2 }, new int[] { 1, 2 });
         INDArray out = net.output(input, false);
-        System.out.println(out);
+        System.out.println(op1 + " : " + op2 + " = " + out);
 
     }
 
