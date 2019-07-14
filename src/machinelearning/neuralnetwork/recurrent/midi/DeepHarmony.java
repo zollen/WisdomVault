@@ -55,10 +55,7 @@ import javafx.stage.Stage;
  * @Author Donald A. Smith
  */
 public class DeepHarmony extends Application {
-    static {
-        PlayMusic.loadSoundBank();
-    }
-
+  
     private static final int NOTE_OFF_VELOCITY_DECAY = 64;
     protected static final int WIDTH = 1200;
     protected static final int HEIGHT = 700;

@@ -56,7 +56,7 @@ public class LSTMForTwoPartHarmonies {
         int exampleLength = 2000;                   //Length of each training example sequence to use. This could certainly be increased
         int tbpttLength = 300;                      //Length for truncated backpropagation through time. i.e., do parameter updates ever 50 characters
         int numEpochs = 16;                         //Total number of training epochs
-        int generateSamplesEveryNMinibatches = 5;  //How frequently to generate samples from the network? 1000 characters / 50 tbptt length: 20 parameter updates per minibatch
+        int generateSamplesEveryNMinibatches = 1;  //How frequently to generate samples from the network? 1000 characters / 50 tbptt length: 20 parameter updates per minibatch
         int nSamplesToGenerate = 4;                    //Number of samples to generate after each training epoch
         int nCharactersToSample = 3600;    //Length of each sample to generate
         double l2 = 0.0015;

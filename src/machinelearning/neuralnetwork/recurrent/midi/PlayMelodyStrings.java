@@ -455,7 +455,7 @@ public class PlayMelodyStrings {
     //---------------------------------
    
     private static String getPathToExampleMelodiesFile() throws Exception {
-        String filename = "masterpiece.txt"; 
+        String filename = "melodies.txt"; 
         String fileLocation = tempDir + "/" + filename;
         File file = new File(fileLocation);
       

@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -19,8 +18,6 @@ import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Sequence;
 import javax.sound.midi.Sequencer;
 import javax.sound.midi.ShortMessage;
-import javax.sound.midi.Soundbank;
-import javax.sound.midi.Synthesizer;
 import javax.sound.midi.Track;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
@@ -246,7 +243,6 @@ public class PlayMusic {
     }
 
     public static void playSequence(Sequence sequence, double tempoFactor, int maxSeconds) throws MidiUnavailableException, InvalidMidiDataException {
-        loadSoundBank();
         Sequencer sequencer = MidiSystem.getSequencer();
         sequencer.setSequence(sequence);
         sequencer.setTickPosition(0);
@@ -289,38 +285,8 @@ public class PlayMusic {
         return sequence;
     }
 
-    //---------------------------------
-    private static boolean soundBackLoaded = false;
-
-    protected static void loadSoundBank() {// Download for higher quality MIDI
-        if (soundBackLoaded) {
-            return;
-        }
-        soundBackLoaded = true;
-        long startTime = System.currentTimeMillis();
-        final String filename = "GeneralUser_GS_SoftSynth.sf2";  // FreeFont.sf2   Airfont_340.dls
-        final String soundBankLocation = PlayTwoPartHarmonies.ROOT_DIR_PATH + File.separator + filename;
-        File file = new File(soundBankLocation);
-        try {
-            if (!file.exists()) {
-                System.out.println("Downloading soundbank (first time only!). This may take a while.");
-                PlayMelodyStrings.copyURLContentsToFile(new URL("http://truthsite.org/music/" + filename), file);
-                System.out.println("Soundbank downloaded to " + file.getAbsolutePath());
-            }
-            Synthesizer synth = MidiSystem.getSynthesizer();
-            Soundbank deluxeSoundbank;
-            deluxeSoundbank = MidiSystem.getSoundbank(file);
-            synth.loadAllInstruments(deluxeSoundbank);
-            float seconds = 0.001f * (System.currentTimeMillis() - startTime);
-            System.out.println("Loaded soundbank from " + file.getAbsolutePath() + " in " + seconds + " seconds");
-        } catch (Exception exc) {
-            System.err.println("Unable to load soundbank " + file.getAbsolutePath() + " due to " + exc.getMessage()
-                + ", using default soundbank.");
-        }
-    }
-
     public static void chooseMidiFileAndPlay() throws MidiUnavailableException, InvalidMidiDataException, IOException {
-        JFileChooser chooser = new JFileChooser(new File("out"));
+        JFileChooser chooser = new JFileChooser(new File("data"));
         chooser.setFileFilter(new FileFilter() {
             @Override
             public boolean accept(File file) {

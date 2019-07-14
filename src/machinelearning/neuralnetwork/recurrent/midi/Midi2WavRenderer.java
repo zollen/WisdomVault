@@ -32,10 +32,6 @@ public class Midi2WavRenderer {
     public final static int MIDI_PERCUSSION_CHANNEL = 9;
     private AudioSynthesizer synth;
 
-    static {
-        PlayMusic.loadSoundBank();
-    }
-
     public Midi2WavRenderer() throws MidiUnavailableException, InvalidMidiDataException, IOException {
         this.synth = findAudioSynthesizer(); // MidiSystem.getSynthesizer();
     }
