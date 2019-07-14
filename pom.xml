@@ -20,7 +20,6 @@
 		<weka-version>3.8.3</weka-version>
 		<smile-version>1.5.2</smile-version>
 		<jenetic-version>5.0.0</jenetic-version>
-		<javafx-version>13-ea+9</javafx-version>
 	</properties>
 
 	<profiles>
@@ -176,18 +175,6 @@
 			<groupId>io.jenetics</groupId>
 			<artifactId>jenetics.ext</artifactId>
 			<version>${jenetic-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-swing</artifactId>
-			<version>${javafx-version}</version>
-			<type>pom</type>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-controls</artifactId>
-			<version>${javafx-version}</version>
-			<type>pom</type>
 		</dependency>
 	</dependencies>
 </project>
