@@ -145,6 +145,7 @@ public class Midi2WavRenderer {
     private AudioSynthesizer findAudioSynthesizer() throws MidiUnavailableException {
         // First check if default synthesizer is AudioSynthesizer.
         Synthesizer synth = MidiSystem.getSynthesizer();
+    
         if (synth instanceof AudioSynthesizer) {
             return (AudioSynthesizer) synth;
         }
@@ -237,7 +238,7 @@ public class Midi2WavRenderer {
             //   C  C#  D  D# E  F  F#   g  G#  A  A#  B  C    SCALE
             //saveMelodyToWav("s", "d:/tmp/piano/C4.wav",48);
             //saveMelodiesToWav("d:/tmp/melodies/matches.txt", 8, "d:/tmp/matches1.wav");
-            createWavFile("data/teddybear.mid", "out/teddybear.wav", 0);
+            createWavFile("data/CarelessWhisper.mid", "out/CarelessWhisper.wav", 0);
         } catch (Exception exc) {
             exc.printStackTrace();
             System.exit(1);
