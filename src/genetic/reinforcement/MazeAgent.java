@@ -3,7 +3,6 @@ package genetic.reinforcement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import io.jenetics.AltererResult;
 import io.jenetics.AnyChromosome;
@@ -77,14 +76,13 @@ public class MazeAgent {
 				
 			List<Phenotype<AnyGene<MazeGame>, Integer>> games = new ArrayList<Phenotype<AnyGene<MazeGame>, Integer>>();
 			
-			AtomicInteger count = new AtomicInteger(0);
 			population.forEach(child -> {
 				
 				Phenotype<AnyGene<MazeGame>, Integer> target = child;
 				MazeGame game = child.getGenotype().getGene().getAllele();
 				
 				if (rand.nextDouble() <= this._probability) {
-					count.incrementAndGet();
+				
 					final MazeGame gg = game.clone();
 					gg.mutate(3);
 					target = Phenotype.of(
