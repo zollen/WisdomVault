@@ -85,11 +85,11 @@ public class MazeAgent {
 				
 				if (rand.nextDouble() <= this._probability) {
 					count.incrementAndGet();
-					game = game.clone();
-					game.mutate(3);
+					final MazeGame gg = game.clone();
+					gg.mutate(3);
 					target = Phenotype.of(
 								Genotype.of(
-									AnyChromosome.of(MazeMutator::get)), generation);
+									AnyChromosome.of(() -> gg)), generation);
 				}
 
 				games.add(target);
@@ -97,12 +97,6 @@ public class MazeAgent {
 			});
 		
 			return AltererResult.of(ISeq.of(games));
-		}
-		
-		private static MazeGame get() {
-			return new MazeGame();
-		}
-		
+		}		
 	}
-
 }
