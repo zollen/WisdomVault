@@ -1,9 +1,14 @@
 package genetic.reinforcement;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import io.jenetics.AltererResult;
+import io.jenetics.AnyChromosome;
 import io.jenetics.AnyGene;
+import io.jenetics.Genotype;
 import io.jenetics.Mutator;
 import io.jenetics.Optimize;
 import io.jenetics.Phenotype;
@@ -19,6 +24,8 @@ import io.jenetics.util.Seq;
 public class MazeAgent {
 	
 	private static final Random rand = new Random(23);
+	
+	private static final int MAX_UNCHANGED_GENERATIONS = 50;
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -36,7 +43,7 @@ public class MazeAgent {
 		final Phenotype<AnyGene<MazeGame>, Integer> result = engine.stream()
 				// Truncate the evolution stream if no better individual could
 				// be found after 50 consecutive generations.
-				.limit(Limits.bySteadyFitness(50))
+				.limit(Limits.bySteadyFitness(MAX_UNCHANGED_GENERATIONS))
 				// Terminate the evolution after maximal 100 generations.
 				.limit(100).collect(EvolutionResult.toBestPhenotype());
 		
@@ -67,23 +74,33 @@ public class MazeAgent {
 		
 		@Override
 		public AltererResult<AnyGene<MazeGame>, Integer> alter(Seq<Phenotype<AnyGene<MazeGame>, Integer>> population, long generation) {
-		
-			ISeq<Phenotype<AnyGene<MazeGame>, Integer>> games = ISeq.of();
+				
+			List<Phenotype<AnyGene<MazeGame>, Integer>> games = new ArrayList<Phenotype<AnyGene<MazeGame>, Integer>>();
 			
+			AtomicInteger count = new AtomicInteger(0);
 			population.forEach(child -> {
 				
+				Phenotype<AnyGene<MazeGame>, Integer> target = child;
 				MazeGame game = child.getGenotype().getGene().getAllele();
 				
 				if (rand.nextDouble() <= this._probability) {
+					count.incrementAndGet();
 					game = game.clone();
 					game.mutate(3);
+					target = Phenotype.of(
+								Genotype.of(
+									AnyChromosome.of(MazeMutator::get)), generation);
 				}
 
-			//	games.append(some type);
+				games.add(target);
 
 			});
 		
-			return AltererResult.of(games);
+			return AltererResult.of(ISeq.of(games));
+		}
+		
+		private static MazeGame get() {
+			return new MazeGame();
 		}
 		
 	}
