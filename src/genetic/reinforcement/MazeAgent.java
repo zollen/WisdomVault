@@ -82,9 +82,11 @@ public class MazeAgent {
 				MazeGame game = child.getGenotype().getGene().getAllele();
 				
 				if (rand.nextDouble() <= this._probability) {
-				
+					
+					int mutations = (int) (45 > generation ? Math.abs(45 - generation) : 1); 
+					
 					final MazeGame gg = game.clone();
-					gg.mutate(3);
+					gg.mutate(mutations);
 					target = Phenotype.of(
 								Genotype.of(
 									AnyChromosome.of(() -> gg)), generation);

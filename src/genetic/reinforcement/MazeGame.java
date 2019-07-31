@@ -12,11 +12,14 @@ import java.util.stream.Collectors;
 public class MazeGame {
 	
 	private static final int WIDTH = 7;
-	private static final int HEIGHT = 3;
-	
+	private static final int HEIGHT = 3;	
 	private static final int SEED = 83;
+	
+	
 	private static final int MAX_TURNS = 100;
-	private static final int END_STATE = 16;
+	private static final int END_STATE = 15;
+	
+	
 	
 	private static final int UP = 0;
 	private static final int DOWN = 1;
@@ -46,7 +49,7 @@ public class MazeGame {
 		this.map[row][col] = 'X';
 		
 		this.map[1][1] = this.map[1][2] = 
-				this.map[1][4] = this.map[1][5] = '*';
+				this.map[1][4] = this.map[1][5] = this.map[2][3] = '*';
 	}
 	
 	public void mutate(int start) {
@@ -74,7 +77,7 @@ public class MazeGame {
 	}
 	
 	public int score() {
-		return this.current() == END_STATE ? 200 - this.moves.size() : 0;
+		return this.current() == END_STATE ? 110 - this.moves.size() : -1 * (END_STATE - this.current());
 	}
 	
 	public void random() {
@@ -184,7 +187,7 @@ public class MazeGame {
 		}
 		
 		this.map[1][1] = this.map[1][2] = 
-				this.map[1][4] = this.map[1][5] = '*';
+				this.map[1][4] = this.map[1][5] = this.map[2][3] = '*';
 		
 		row = col = 0;
 		map[row][col] = 'X';
@@ -288,7 +291,7 @@ public class MazeGame {
 		positions.put("10", 7);
 		
 		Set<Integer> a13 = new HashSet<Integer>();
-		a13.add(UP); a13.add(DOWN);
+		a13.add(UP);
 		allowed.put("13", a13);
 		positions.put("13", 8);
 		
@@ -308,29 +311,24 @@ public class MazeGame {
 		positions.put("21", 11);
 		
 		Set<Integer> a22 = new HashSet<Integer>();
-		a22.add(LEFT); a22.add(RIGHT);
+		a22.add(LEFT); 
 		allowed.put("22", a22);
 		positions.put("22", 12);
 		
-		Set<Integer> a23 = new HashSet<Integer>();
-		a23.add(UP); a23.add(LEFT); a23.add(RIGHT);
-		allowed.put("23", a23);
-		positions.put("23", 13);
-		
 		Set<Integer> a24 = new HashSet<Integer>();
-		a24.add(LEFT); a24.add(RIGHT);
+		a24.add(RIGHT);
 		allowed.put("24", a24);
-		positions.put("24", 14);
+		positions.put("24", 13);
 		
 		Set<Integer> a25 = new HashSet<Integer>();
 		a25.add(LEFT); a25.add(RIGHT);
 		allowed.put("25", a25);
-		positions.put("25", 15);
+		positions.put("25", 14);
 		
 		Set<Integer> a26 = new HashSet<Integer>();
 		a26.add(UP); a26.add(LEFT);
 		allowed.put("26", a26);
-		positions.put("26", 16);		
+		positions.put("26", 15);		
 	}
 	
 	public static class Move {
