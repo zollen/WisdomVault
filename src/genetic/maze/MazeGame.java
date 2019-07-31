@@ -77,7 +77,7 @@ public class MazeGame {
 	}
 	
 	public int score() {
-		return this.current() == END_STATE ? 110 - this.moves.size() : -1 * (END_STATE - this.current());
+		return this.current() == END_STATE ? (MAX_TURNS + 10) - this.moves.size() : -1 * (END_STATE - this.current());
 	}
 	
 	public void random() {
