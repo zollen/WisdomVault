@@ -16,7 +16,7 @@ public class MazeGame {
 	private static final int SEED = 83;
 	
 	
-	private static final int MAX_TURNS = 20;
+	private static final int MAX_TURNS = 10;
 	private static final int END_STATE = 15;
 	
 	

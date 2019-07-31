@@ -24,7 +24,7 @@ public class MazeAgent {
 	
 	private static final Random rand = new Random(23);
 	
-	private static final int MAX_UNCHANGED_GENERATIONS = 50;
+	private static final int MAX_UNCHANGED_GENERATIONS = 5;
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -33,18 +33,18 @@ public class MazeAgent {
 		
 		final Engine<AnyGene<MazeGame>, Integer> engine = Engine
 				.builder(MazeAgent::score, CODEC)
-					.populationSize(8000)
+					.populationSize(100)
 					.optimize(Optimize.MAXIMUM)
 					.offspringSelector(new StochasticUniversalSelector<>())
-					.alterers(new MazeMutator(0.01))
+					.alterers(new MazeMutator(0.1))
 					.build();
 		
 		final Phenotype<AnyGene<MazeGame>, Integer> result = engine.stream()
 				// Truncate the evolution stream if no better individual could
-				// be found after 50 consecutive generations.
+				// be found after 5 consecutive generations.
 				.limit(Limits.bySteadyFitness(MAX_UNCHANGED_GENERATIONS))
-				// Terminate the evolution after maximal 100 generations.
-				.limit(100).collect(EvolutionResult.toBestPhenotype());
+				// Terminate the evolution after maximal 10 generations.
+				.limit(10).collect(EvolutionResult.toBestPhenotype());
 		
 	
 		MazeGame game = result.getGenotype().getGene().getAllele();
