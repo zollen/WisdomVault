@@ -24,7 +24,7 @@ public class MazeAgent {
 	
 	private static final Random rand = new Random(23);
 	
-	private static final int MAX_UNCHANGED_GENERATIONS = 5;
+	private static final int MAX_UNCHANGED_GENERATIONS = 10;
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -83,7 +83,8 @@ public class MazeAgent {
 				
 				if (rand.nextDouble() <= this._probability) {
 					
-					int mutations = (int) (45 > generation ? Math.abs(45 - generation) : 1); 
+					int mutations = (int) (MAX_UNCHANGED_GENERATIONS > generation ? 
+							Math.abs(MAX_UNCHANGED_GENERATIONS - generation) : 1); 
 					
 					final MazeGame gg = game.clone();
 					gg.mutate(mutations);
