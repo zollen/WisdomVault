@@ -44,7 +44,7 @@ public class MazeAgent {
 				// be found after 5 consecutive generations.
 				.limit(Limits.bySteadyFitness(MAX_UNCHANGED_GENERATIONS))
 				// Terminate the evolution after maximal 10 generations.
-				.limit(10).collect(EvolutionResult.toBestPhenotype());
+				.limit(20).collect(EvolutionResult.toBestPhenotype());
 		
 	
 		MazeGame game = result.getGenotype().getGene().getAllele();
