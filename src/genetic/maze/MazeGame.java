@@ -12,12 +12,12 @@ import java.util.stream.Collectors;
 public class MazeGame {
 	
 	private static final int WIDTH = 7;
-	private static final int HEIGHT = 3;	
+	private static final int HEIGHT = 5;	
 	private static final int SEED = 83;
 	
 	
-	private static final int MAX_TURNS = 10;
-	private static final int END_STATE = 15;
+	private static final int MAX_TURNS = 20;
+	private static final int END_STATE = 23;
 	
 	
 	
@@ -48,8 +48,14 @@ public class MazeGame {
 		this.moves = new ArrayList<Move>();
 		this.map[row][col] = 'X';
 		
-		this.map[1][1] = this.map[1][2] = 
-				this.map[1][4] = this.map[1][5] = this.map[2][3] = '*';
+		blocks();
+	}
+	
+	public void blocks() {
+		this.map[1][2] = this.map[1][3] = this.map[1][4] = this.map[1][6] = '*';
+		this.map[2][2] = this.map[2][3] = this.map[2][4] = '*';
+		this.map[3][2] = this.map[3][4] = this.map[3][5] = '*';
+		this.map[4][5] = '*';
 	}
 	
 	public void mutate(int start) {
@@ -186,8 +192,7 @@ public class MazeGame {
 			}
 		}
 		
-		this.map[1][1] = this.map[1][2] = 
-				this.map[1][4] = this.map[1][5] = this.map[2][3] = '*';
+		blocks();
 		
 		row = col = 0;
 		map[row][col] = 'X';
@@ -239,6 +244,10 @@ public class MazeGame {
 		
 		builder.append(moves.stream().map(p -> p.toString()).collect(Collectors.joining(", ")));
 		
+		builder.append("\n");
+		
+		builder.append(moves.size() + " moves");
+		
 		return builder.toString();
 	}
 	
@@ -256,7 +265,7 @@ public class MazeGame {
 		positions.put("00", 0);
 		
 		Set<Integer> a01 = new HashSet<Integer>();
-		a01.add(LEFT); a01.add(RIGHT);
+		a01.add(LEFT); a01.add(RIGHT); a01.add(LEFT);
 		allowed.put("01", a01);
 		positions.put("01", 1);
 		
@@ -266,69 +275,117 @@ public class MazeGame {
 		positions.put("02", 2);
 		
 		Set<Integer> a03 = new HashSet<Integer>();
-		a03.add(DOWN); a03.add(LEFT); a03.add(RIGHT);
+		a03.add(RIGHT); a03.add(LEFT); 
 		allowed.put("03", a03);
 		positions.put("03", 3);
 		
 		Set<Integer> a04 = new HashSet<Integer>();
-		a04.add(LEFT); a04.add(RIGHT);
+		a04.add(RIGHT); a04.add(LEFT);
 		allowed.put("04", a04);
 		positions.put("04", 4);
 		
 		Set<Integer> a05 = new HashSet<Integer>();
-		a05.add(LEFT); a05.add(RIGHT);
+		a05.add(DOWN); a05.add(RIGHT); a05.add(LEFT);
 		allowed.put("05", a05);
 		positions.put("05", 5);
 		
 		Set<Integer> a06 = new HashSet<Integer>();
-		a06.add(DOWN); a06.add(LEFT);
+		a06.add(LEFT);
 		allowed.put("06", a06);
 		positions.put("06", 6);
 		
+		
+		
 		Set<Integer> a10 = new HashSet<Integer>();
-		a10.add(UP); a10.add(DOWN);
+		a10.add(UP); a10.add(DOWN); a10.add(RIGHT);
 		allowed.put("10", a10);
 		positions.put("10", 7);
 		
-		Set<Integer> a13 = new HashSet<Integer>();
-		a13.add(UP);
-		allowed.put("13", a13);
-		positions.put("13", 8);
+		Set<Integer> a11 = new HashSet<Integer>();
+		a11.add(UP); a11.add(DOWN); a11.add(LEFT);
+		allowed.put("11", a11);
+		positions.put("11", 8);
 		
-		Set<Integer> a16 = new HashSet<Integer>();
-		a16.add(UP); a16.add(DOWN);
-		allowed.put("16", a16);
-		positions.put("16", 9);
+		Set<Integer> a15 = new HashSet<Integer>();
+		a15.add(UP); a15.add(DOWN);
+		allowed.put("15", a15);
+		positions.put("15", 9);
+		
+		
 		
 		Set<Integer> a20 = new HashSet<Integer>();
-		a20.add(UP); a20.add(RIGHT);
+		a20.add(UP); a20.add(DOWN); a20.add(RIGHT);
 		allowed.put("20", a20);
 		positions.put("20", 10);
 		
 		Set<Integer> a21 = new HashSet<Integer>();
-		a21.add(LEFT); a21.add(RIGHT);
+		a21.add(UP); a21.add(DOWN); a21.add(LEFT);
 		allowed.put("21", a21);
 		positions.put("21", 11);
 		
-		Set<Integer> a22 = new HashSet<Integer>();
-		a22.add(LEFT); 
-		allowed.put("22", a22);
-		positions.put("22", 12);
-		
-		Set<Integer> a24 = new HashSet<Integer>();
-		a24.add(RIGHT);
-		allowed.put("24", a24);
-		positions.put("24", 13);
-		
 		Set<Integer> a25 = new HashSet<Integer>();
-		a25.add(LEFT); a25.add(RIGHT);
+		a25.add(UP); a25.add(RIGHT); 
 		allowed.put("25", a25);
-		positions.put("25", 14);
+		positions.put("25", 12);
 		
 		Set<Integer> a26 = new HashSet<Integer>();
-		a26.add(UP); a26.add(LEFT);
+		a26.add(DOWN); a26.add(LEFT);
 		allowed.put("26", a26);
-		positions.put("26", 15);		
+		positions.put("26", 13);
+		
+		
+		
+		Set<Integer> a30 = new HashSet<Integer>();
+		a30.add(UP); a30.add(DOWN); a30.add(RIGHT);
+		allowed.put("30", a30);
+		positions.put("30", 14);
+		
+		Set<Integer> a31 = new HashSet<Integer>();
+		a31.add(UP); a31.add(DOWN); a31.add(LEFT);
+		allowed.put("31", a31);
+		positions.put("31", 15);
+		
+		Set<Integer> a33 = new HashSet<Integer>();
+		a33.add(DOWN);
+		allowed.put("33", a33);
+		positions.put("33", 16);	
+		
+		Set<Integer> a36 = new HashSet<Integer>();
+		a36.add(UP); a36.add(DOWN);
+		allowed.put("36", a36);
+		positions.put("36", 17);	
+		
+		
+		
+		Set<Integer> a40 = new HashSet<Integer>();
+		a40.add(UP); a40.add(RIGHT);
+		allowed.put("40", a40);
+		positions.put("40", 18);	
+		
+		Set<Integer> a41 = new HashSet<Integer>();
+		a41.add(UP); a41.add(RIGHT); a41.add(LEFT);
+		allowed.put("41", a41);
+		positions.put("41", 19);	
+		
+		Set<Integer> a42 = new HashSet<Integer>();
+		a42.add(RIGHT); a42.add(LEFT);
+		allowed.put("42", a42);
+		positions.put("42", 20);
+		
+		Set<Integer> a43 = new HashSet<Integer>();
+		a43.add(UP); a43.add(RIGHT); a43.add(LEFT);
+		allowed.put("43", a43);
+		positions.put("43", 21);
+		
+		Set<Integer> a44 = new HashSet<Integer>();
+		a44.add(LEFT);
+		allowed.put("44", a44);
+		positions.put("44", 22);
+		
+		Set<Integer> a46 = new HashSet<Integer>();
+		a46.add(UP);
+		allowed.put("46", a46);
+		positions.put("46", 23);
 	}
 	
 	public static class Move {

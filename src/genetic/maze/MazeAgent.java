@@ -33,7 +33,7 @@ public class MazeAgent {
 		
 		final Engine<AnyGene<MazeGame>, Integer> engine = Engine
 				.builder(MazeAgent::score, CODEC)
-					.populationSize(100)
+					.populationSize(500)
 					.optimize(Optimize.MAXIMUM)
 					.offspringSelector(new StochasticUniversalSelector<>())
 					.alterers(new MazeMutator(0.1))
@@ -49,7 +49,6 @@ public class MazeAgent {
 	
 		MazeGame game = result.getGenotype().getGene().getAllele();
 		System.out.println(game);
-		System.out.println(game.moves().size() + " moves");
 	}
 	
 	public static int score(MazeGame game) {
