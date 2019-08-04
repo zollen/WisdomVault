@@ -28,8 +28,10 @@ public class MazeAgent {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		final MazeLoader loader = new MazeLoader("data/mymaze.txt");
+		
 		final Codec<MazeGame, AnyGene<MazeGame>> CODEC = Codecs
-				.ofScalar(MazeAgent::newInstance);
+				.ofScalar(() -> loader.create().random());
 		
 		final Engine<AnyGene<MazeGame>, Integer> engine = Engine
 				.builder(MazeAgent::score, CODEC)
@@ -55,14 +57,7 @@ public class MazeAgent {
 		return game.score();
 	}
 	
-	public static MazeGame newInstance() {
-		MazeGame game = new MazeGame();
-		
-		game.random();
-		
-		return game;
-	}
-	
+
 	
 	private static class MazeMutator extends Mutator<AnyGene<MazeGame>, Integer> {
 		
