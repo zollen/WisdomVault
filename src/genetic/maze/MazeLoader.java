@@ -24,9 +24,9 @@ public class MazeLoader {
 		// TODO Auto-generated method stub
 		MazeLoader loader = new MazeLoader("data/mymaze.txt");
 		
-		MazeGame game1 = loader.create().random();
+		MazeGame game = loader.create().random();
 		
-		System.out.println (game1);
+		System.out.println (game);
 	}
 	
 	public MazeLoader(String file) {
@@ -126,17 +126,16 @@ public class MazeLoader {
 	
 	public MazeGame create() {
 		
-		char [][] map = new char[height][width];
-		char [][] src = this.map.toArray(new char[0][0]);
-		
-		for (int row = 0; row < height; row++) {
-			for (int col = 0; col < width; col++) {
-				map[row][col] = src[row][col];
-			}
-		}
-		
-		return new MazeGame(this.width, this.height, 0, 0, this.end,
-				map, this.allowed, this.positions);
+		return new MazeGame.Builder()
+				.setWidth(width)
+				.setHeight(height)
+				.setRow(0)
+				.setCol(0)
+				.setEnd(end)
+				.setMap(map.toArray(new char[0][0]))
+				.setAllowed(allowed)
+				.setPositions(positions)
+				.build();
 	}
 	
 }

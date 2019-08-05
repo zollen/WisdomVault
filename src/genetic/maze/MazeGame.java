@@ -23,29 +23,145 @@ public class MazeGame {
 	
 	private Map<String, Set<Integer>> allowed;
 	private Map<String, Integer> positions;
-
 	private char [][] map;
 	private int width;
 	private int height;	
 	private int end;
 	private int row;
 	private int col;
+	
 	private List<Move> moves;
 	
 
-	public MazeGame(int width, int height, int col, int row, 
-			int end, char [][] map, Map<String, Set<Integer>> allowed, Map<String, Integer> positions) {
-
-		this.end = end;
+	private MazeGame() {
+	}
+	
+	public void setWidth(int width) {
 		this.width = width;
+	}
+	
+	public void setHeight(int height) {
 		this.height = height;
-		this.allowed = allowed;
-		this.positions = positions;
-		this.map = map;
+	}
+	
+	public void setRow(int row) {
 		this.row = row;
+	}
+	
+	public void setCol(int col) {
 		this.col = col;
-		this.moves = new ArrayList<Move>();
-		this.map[row][col] = 'X';
+	}
+	
+	public void setEnd(int end) {
+		this.end = end;
+	}
+	
+	public void setMap(char [][] map) {
+		this.map = map;
+	}
+	
+	public void setAllowed(Map<String, Set<Integer>> allowed) {
+		this.allowed = allowed;
+	}
+	
+	public void setPositions(Map<String, Integer> positions) {
+		this.positions = positions;
+	}
+	
+	public void setMove(List<Move> moves) {
+		this.moves = moves;
+	}
+	
+	public static class Builder {
+		
+		private Map<String, Set<Integer>> allowed;
+		private Map<String, Integer> positions;
+
+		private char [][] map;
+		private int width;
+		private int height;	
+		private int end;
+		private int row;
+		private int col;
+		private List<Move> moves;
+		
+		public Builder() {
+			moves = new ArrayList<Move>();
+		}
+		
+		public Builder setWidth(int width) {
+			this.width = width;
+			return this;
+		}
+		
+		public Builder setHeight(int height) {
+			this.height = height;
+			return this;
+		}
+		
+		public Builder setRow(int row) {
+			this.row = row;
+			return this;
+		}
+		
+		public Builder setCol(int col) {
+			this.col = col;
+			return this;
+		}
+		
+		public Builder setEnd(int end) {
+			this.end = end;
+			return this;
+		}
+		
+		public Builder setMap(char [][] map) {
+			this.map = map;
+			return this;
+		}
+		
+		public Builder setAllowed(Map<String, Set<Integer>> allowed) {
+			this.allowed = allowed;
+			return this;
+		}
+		
+		public Builder setPositions(Map<String, Integer> positions) {
+			this.positions = positions;
+			return this;
+		}
+		
+		public Builder setMoves(List<Move> moves) {
+			this.moves = moves;
+			return this;
+		}
+		
+		public MazeGame build() {
+		
+			MazeGame game = new MazeGame();
+			
+			game.setWidth(width);
+			game.setHeight(height);
+			game.setRow(row);
+			game.setCol(col);
+			game.setEnd(end);
+			game.setAllowed(allowed);
+			game.setPositions(positions);
+			game.setMove(new ArrayList<Move>(moves));
+	
+			char [][] mmap = new char[height][width];
+			
+			for (int j = 0; j < height; j++) {
+				for (int i = 0; i < width; i++) {
+					mmap[j][i] = map[j][i];
+				}
+			}
+			
+			mmap[row][col] = 'X';
+			
+			game.setMap(mmap);
+			
+			return game;
+		}
+		
 	}
 	
 	public void mutate(int start) {
@@ -179,21 +295,17 @@ public class MazeGame {
 	@Override
 	public MazeGame clone() {
 		
-		MazeGame game = new MazeGame(this.width, this.height, this.col, this.row, this.end,
-				new char[height][width], this.allowed, this.positions);
-						
-		
-		for (int row = 0; row < height; row++) {
-			for (int col = 0; col < width; col++) {
-				game.map[row][col] = this.map[row][col];
-			}
-		}
-		
-		game.row = this.row;
-		game.col = this.col;
-		game.moves = new ArrayList<Move>(this.moves);
-		
-		return game;
+		return new MazeGame.Builder()
+			.setWidth(width)
+			.setHeight(height)
+			.setRow(row)
+			.setCol(col)
+			.setEnd(end)
+			.setMap(this.map)
+			.setAllowed(allowed)
+			.setPositions(positions)
+			.setMoves(moves)
+			.build();
 	}
 	
 	@Override
