@@ -1,6 +1,7 @@
 package genetic.maze;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -152,28 +153,67 @@ public class MazeGame {
 		
 	}
 	
-	public void mutate(int start) {
+	public void mutate(MazeLoader loader) {
 		
-		map[row][col] = ' ';
+		MazeGame [] game = new MazeGame[100];
 		
-		if (start >= moves.size() - 1) {
-			if (moves.size() - 5 > 0)
-				start = moves.size() - 5;
-			else
-				start = 1;
+		MazeGame target = null;
+		double max = Integer.MIN_VALUE;
+		
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < 100; i++) {
+			
+			game[i] = loader.create().random();
+			
+			if (i > 0)
+				builder.append(", " );
+			builder.append(game[i].score());
+			
+	
+			if (game[i].score() > max) {
+				max = game[i].score();
+				target = game[i];
+			}
 		}
 		
-		int last = moves.size() - 1;
-		for (int j = last; j > last - start; j--) {
-			moves.remove(j);
+		if (target.score() > this.score()) {	
+			this.map = target.map;
+			this.row = target.row;
+			this.col = target.col;
+			this.moves = target.moves();
+		}
+	}
+	
+	public void optimize() {
+		
+		Map<Move, Move> optimized = new LinkedHashMap<Move, Move>();
+		
+		Move start = new Move(NONE, 0, 0);
+			
+		Move prev = start;
+		
+		for (Move move : moves) {
+				
+			Move curr = optimized.get(move);
+						
+			if (curr == null) {
+				optimized.put(prev, move);
+			}
+			else {
+				Move purged = optimized.keySet().toArray(new Move[0])[optimized.size() - 1];
+			
+				while (optimized.size() > 0 && !purged.same(move)) {
+					
+					optimized.remove(purged);
+					if (optimized.size() > 0)
+						purged = optimized.keySet().toArray(new Move[0])[optimized.size() - 1];
+				}	
+			}
+			
+			prev = move;
 		}
 		
-		Move move = moves.get(moves.size() - 1);
-		
-		row = move.getRow();
-		col = move.getCol();
-		
-		random();
+		this.moves = new ArrayList<Move>(optimized.values());
 	}
 	
 	public double score() {
@@ -387,6 +427,16 @@ public class MazeGame {
 				return true;
 			
 			return false;
+		}
+		
+		@Override
+		public boolean equals(Object position) {
+			return same((Move) position);
+		}
+	
+		@Override
+		public int hashCode() {
+			return this.row * 100 + this.col;
 		}
 		
 		public double distance(Move position) {		

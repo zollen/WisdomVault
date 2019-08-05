@@ -19,18 +19,6 @@ public class MazeLoader {
 	private MazeGame.Move end;
 	private boolean done;
 
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		MazeLoader loader = new MazeLoader("data/mymaze.txt");
-		
-		MazeGame game = loader.create().random();
-		
-		System.out.println (game);
-		
-		game.mutate(0);
-		
-		System.out.println(game);
-	}
 	
 	public MazeLoader(String file) {
 		

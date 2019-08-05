@@ -24,8 +24,9 @@ public class MazeAgent {
 	
 	private static final Random rand = new Random(23);
 	
-	private static final int MAX_GENERATIONS = 5000;
-	private static final int MAX_UNCHANGED_GENERATIONS = 300;
+	private static final int MAX_GENERATIONS = 200;
+	private static final int POPULATION_SIZE = 500;
+	private static final int MAX_UNCHANGED_GENERATIONS = 20;
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -36,10 +37,10 @@ public class MazeAgent {
 		
 		final Engine<AnyGene<MazeGame>, Double> engine = Engine
 				.builder(MazeAgent::score, CODEC)
-					.populationSize(10000)
+					.populationSize(POPULATION_SIZE)
 					.optimize(Optimize.MAXIMUM)
 					.offspringSelector(new StochasticUniversalSelector<>())
-					.alterers(new MazeMutator(0.3))
+					.alterers(new MazeMutator(0.3, loader))
 					.build();
 		
 		final Phenotype<AnyGene<MazeGame>, Double> result = engine.stream()
@@ -62,8 +63,12 @@ public class MazeAgent {
 	
 	private static class MazeMutator extends Mutator<AnyGene<MazeGame>, Double> {
 		
-		public MazeMutator(double prob) {
+		private MazeLoader loader;
+		
+		public MazeMutator(double prob, MazeLoader loader) {
 			super(prob);
+			
+			this.loader = loader;
 		}
 		
 		@Override
@@ -80,11 +85,13 @@ public class MazeAgent {
 					
 					double score = game.score();
 					
-					int mutations = score > 0 ? 30 : (int) Math.abs(score) / 100 * 50;
-					
 					final MazeGame gg = game.clone();
 					
-					gg.mutate(mutations);
+					if (score > 0)
+						gg.optimize();
+					else
+						gg.mutate(loader);
+					
 					target = Phenotype.of(
 								Genotype.of(
 									AnyChromosome.of(() -> gg)), generation);
