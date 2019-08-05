@@ -18,17 +18,17 @@ public class MazeGame {
 	public static final int DOWN = 1;
 	public static final int LEFT = 2;
 	public static final int RIGHT = 3;
+	public static final int NONE = 4;
 	
 	private static Random rand = new Random(SEED);
 	
 	private Map<String, Set<Integer>> allowed;
-	private Map<String, Integer> positions;
 	private char [][] map;
 	private int width;
 	private int height;	
-	private int end;
 	private int row;
 	private int col;
+	private Move end;
 	
 	private List<Move> moves;
 	
@@ -52,7 +52,7 @@ public class MazeGame {
 		this.col = col;
 	}
 	
-	public void setEnd(int end) {
+	public void setEnd(Move end) {
 		this.end = end;
 	}
 	
@@ -64,10 +64,6 @@ public class MazeGame {
 		this.allowed = allowed;
 	}
 	
-	public void setPositions(Map<String, Integer> positions) {
-		this.positions = positions;
-	}
-	
 	public void setMove(List<Move> moves) {
 		this.moves = moves;
 	}
@@ -75,14 +71,12 @@ public class MazeGame {
 	public static class Builder {
 		
 		private Map<String, Set<Integer>> allowed;
-		private Map<String, Integer> positions;
-
 		private char [][] map;
 		private int width;
 		private int height;	
-		private int end;
 		private int row;
 		private int col;
+		private Move end;
 		private List<Move> moves;
 		
 		public Builder() {
@@ -109,7 +103,7 @@ public class MazeGame {
 			return this;
 		}
 		
-		public Builder setEnd(int end) {
+		public Builder setEnd(Move end) {
 			this.end = end;
 			return this;
 		}
@@ -121,11 +115,6 @@ public class MazeGame {
 		
 		public Builder setAllowed(Map<String, Set<Integer>> allowed) {
 			this.allowed = allowed;
-			return this;
-		}
-		
-		public Builder setPositions(Map<String, Integer> positions) {
-			this.positions = positions;
 			return this;
 		}
 		
@@ -144,7 +133,6 @@ public class MazeGame {
 			game.setCol(col);
 			game.setEnd(end);
 			game.setAllowed(allowed);
-			game.setPositions(positions);
 			game.setMove(new ArrayList<Move>(moves));
 	
 			char [][] mmap = new char[height][width];
@@ -189,7 +177,9 @@ public class MazeGame {
 	}
 	
 	public double score() {
-		return this.current() == end ? (MAX_TURNS + 10) - this.moves.size() : -1 * (end - this.current());
+		return this.current().same(end) ? 
+				(MAX_TURNS + 10) - this.moves.size() : 
+				-1 *  this.current().distance(end);
 	}
 	
 	public MazeGame random() {
@@ -202,7 +192,7 @@ public class MazeGame {
 			
 			move(next);
 			
-			if (this.current() == end)
+			if (this.current().same(end))
 				break;
 		}
 		
@@ -232,8 +222,12 @@ public class MazeGame {
 		return allowed.get(String.valueOf(row) + String.valueOf(col));
 	}
 	
-	public int current() {
-		return positions.get(String.valueOf(row) + String.valueOf(col));
+	public Move current() {
+		
+		if (moves == null || moves.size() <= 0)
+			return new Move(NONE, 0, 0);
+		
+		return moves.get(moves.size() - 1);
 	}
 	
 	public List<Move> moves() {
@@ -303,7 +297,6 @@ public class MazeGame {
 			.setEnd(end)
 			.setMap(this.map)
 			.setAllowed(allowed)
-			.setPositions(positions)
 			.setMoves(moves)
 			.build();
 	}
@@ -351,7 +344,7 @@ public class MazeGame {
 	public static class Move {
 		
 		public static final String [] ACTIONS = {
-				"\u2191", "\u2193", "\u2190", "\u2192"
+				"\u2191", "\u2193", "\u2190", "\u2192", "N"
 		};
 		
 		private int action;
@@ -386,6 +379,19 @@ public class MazeGame {
 
 		public void setCol(int col) {
 			this.col = col;
+		}
+		
+		public boolean same(Move position) {
+			
+			if (this.row == position.row && this.col == position.col)
+				return true;
+			
+			return false;
+		}
+		
+		public double distance(Move position) {		
+			return Math.sqrt(Math.pow(this.row - position.row, 2) + 
+					Math.pow(this.col - position.col, 2));
 		}
 		
 		@Override

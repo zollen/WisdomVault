@@ -13,11 +13,10 @@ import java.util.Set;
 public class MazeLoader {
 	
 	private Map<String, Set<Integer>> allowed;
-	private Map<String, Integer> positions;
 	private List<char []> map;
 	private int height;
 	private int width;
-	private int end;
+	private MazeGame.Move end;
 	private boolean done;
 
 	public static void main(String[] args) {
@@ -32,7 +31,6 @@ public class MazeLoader {
 	public MazeLoader(String file) {
 		
 		this.allowed = new HashMap<String, Set<Integer>>();
-		this.positions = new HashMap<String, Integer>();
 		this.map = new ArrayList<char []>();
 		this.width = 0;
 		this.height = 0;
@@ -56,8 +54,6 @@ public class MazeLoader {
 	}
 	
 	private void process(char [][] map) {
-		
-		int pos = 0;
 		
 		for (int row = 0; row < height; row++) {
 			for (int col = 0; col < width; col++) {
@@ -84,14 +80,10 @@ public class MazeLoader {
 					}
 					
 					allowed.put(key, moves);
-					positions.put(key, pos);
-					
-					pos++;
+					end = new MazeGame.Move(MazeGame.NONE, row, col);
 				}
 			}
 		}
-		
-		end = pos - 1;
 	}
 	
 	private void process(String line) {
@@ -134,7 +126,6 @@ public class MazeLoader {
 				.setEnd(end)
 				.setMap(map.toArray(new char[0][0]))
 				.setAllowed(allowed)
-				.setPositions(positions)
 				.build();
 	}
 	
