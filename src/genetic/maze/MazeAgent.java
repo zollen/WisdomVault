@@ -24,9 +24,9 @@ public class MazeAgent {
 	
 	private static final Random rand = new Random(23);
 	
-	private static final int MAX_GENERATIONS = 200;
-	private static final int POPULATION_SIZE = 500;
-	private static final int MAX_UNCHANGED_GENERATIONS = 20;
+	private static final int MAX_GENERATIONS = 20;
+	private static final int POPULATION_SIZE = 200;
+	private static final int MAX_UNCHANGED_GENERATIONS = 2;
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -40,7 +40,7 @@ public class MazeAgent {
 					.populationSize(POPULATION_SIZE)
 					.optimize(Optimize.MAXIMUM)
 					.offspringSelector(new StochasticUniversalSelector<>())
-					.alterers(new MazeMutator(0.3, loader))
+					.alterers(new MazeMutator(0.1, loader))
 					.build();
 		
 		final Phenotype<AnyGene<MazeGame>, Double> result = engine.stream()
