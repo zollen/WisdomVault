@@ -24,7 +24,8 @@ public class MazeAgent {
 	
 	private static final Random rand = new Random(23);
 	
-	private static final int MAX_UNCHANGED_GENERATIONS = 10;
+	private static final int MAX_GENERATIONS = 5000;
+	private static final int MAX_UNCHANGED_GENERATIONS = 300;
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -35,10 +36,10 @@ public class MazeAgent {
 		
 		final Engine<AnyGene<MazeGame>, Double> engine = Engine
 				.builder(MazeAgent::score, CODEC)
-					.populationSize(500)
+					.populationSize(10000)
 					.optimize(Optimize.MAXIMUM)
 					.offspringSelector(new StochasticUniversalSelector<>())
-					.alterers(new MazeMutator(0.1))
+					.alterers(new MazeMutator(0.3))
 					.build();
 		
 		final Phenotype<AnyGene<MazeGame>, Double> result = engine.stream()
@@ -46,7 +47,7 @@ public class MazeAgent {
 				// be found after 5 consecutive generations.
 				.limit(Limits.bySteadyFitness(MAX_UNCHANGED_GENERATIONS))
 				// Terminate the evolution after maximal 10 generations.
-				.limit(20).collect(EvolutionResult.toBestPhenotype());
+				.limit(MAX_GENERATIONS).collect(EvolutionResult.toBestPhenotype());
 		
 	
 		MazeGame game = result.getGenotype().getGene().getAllele();
@@ -77,10 +78,12 @@ public class MazeAgent {
 				
 				if (rand.nextDouble() <= this._probability) {
 					
-					int mutations = (int) (MAX_UNCHANGED_GENERATIONS > generation ? 
-							Math.abs(MAX_UNCHANGED_GENERATIONS - generation) : 1); 
+					double score = game.score();
+					
+					int mutations = score > 0 ? 30 : (int) Math.abs(score) / 100 * 50;
 					
 					final MazeGame gg = game.clone();
+					
 					gg.mutate(mutations);
 					target = Phenotype.of(
 								Genotype.of(

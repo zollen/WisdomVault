@@ -11,7 +11,7 @@ public class MazeGame {
 
 	private static final int SEED = 83;
 	
-	private static final int MAX_TURNS = 20;
+	private static final int MAX_TURNS = 100;
 	
 	
 	public static final int UP = 0;
@@ -179,7 +179,7 @@ public class MazeGame {
 	public double score() {
 		return this.current().same(end) ? 
 				(MAX_TURNS + 10) - this.moves.size() : 
-				-1 *  this.current().distance(end);
+				-100 *  this.current().distance(end);
 	}
 	
 	public MazeGame random() {

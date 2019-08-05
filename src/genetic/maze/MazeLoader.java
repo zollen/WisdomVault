@@ -26,6 +26,10 @@ public class MazeLoader {
 		MazeGame game = loader.create().random();
 		
 		System.out.println (game);
+		
+		game.mutate(0);
+		
+		System.out.println(game);
 	}
 	
 	public MazeLoader(String file) {
