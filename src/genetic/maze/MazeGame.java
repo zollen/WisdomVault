@@ -72,7 +72,7 @@ public class MazeGame {
 		random();
 	}
 	
-	public int score() {
+	public double score() {
 		return this.current() == end ? (MAX_TURNS + 10) - this.moves.size() : -1 * (end - this.current());
 	}
 	

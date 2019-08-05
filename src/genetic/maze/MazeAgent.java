@@ -33,7 +33,7 @@ public class MazeAgent {
 		final Codec<MazeGame, AnyGene<MazeGame>> CODEC = Codecs
 				.ofScalar(() -> loader.create().random());
 		
-		final Engine<AnyGene<MazeGame>, Integer> engine = Engine
+		final Engine<AnyGene<MazeGame>, Double> engine = Engine
 				.builder(MazeAgent::score, CODEC)
 					.populationSize(500)
 					.optimize(Optimize.MAXIMUM)
@@ -41,7 +41,7 @@ public class MazeAgent {
 					.alterers(new MazeMutator(0.1))
 					.build();
 		
-		final Phenotype<AnyGene<MazeGame>, Integer> result = engine.stream()
+		final Phenotype<AnyGene<MazeGame>, Double> result = engine.stream()
 				// Truncate the evolution stream if no better individual could
 				// be found after 5 consecutive generations.
 				.limit(Limits.bySteadyFitness(MAX_UNCHANGED_GENERATIONS))
@@ -53,26 +53,26 @@ public class MazeAgent {
 		System.out.println(game);
 	}
 	
-	public static int score(MazeGame game) {
+	public static double score(MazeGame game) {
 		return game.score();
 	}
 	
 
 	
-	private static class MazeMutator extends Mutator<AnyGene<MazeGame>, Integer> {
+	private static class MazeMutator extends Mutator<AnyGene<MazeGame>, Double> {
 		
 		public MazeMutator(double prob) {
 			super(prob);
 		}
 		
 		@Override
-		public AltererResult<AnyGene<MazeGame>, Integer> alter(Seq<Phenotype<AnyGene<MazeGame>, Integer>> population, long generation) {
+		public AltererResult<AnyGene<MazeGame>, Double> alter(Seq<Phenotype<AnyGene<MazeGame>, Double>> population, long generation) {
 				
-			List<Phenotype<AnyGene<MazeGame>, Integer>> games = new ArrayList<Phenotype<AnyGene<MazeGame>, Integer>>();
+			List<Phenotype<AnyGene<MazeGame>, Double>> games = new ArrayList<Phenotype<AnyGene<MazeGame>, Double>>();
 			
 			population.forEach(child -> {
 				
-				Phenotype<AnyGene<MazeGame>, Integer> target = child;
+				Phenotype<AnyGene<MazeGame>, Double> target = child;
 				MazeGame game = child.getGenotype().getGene().getAllele();
 				
 				if (rand.nextDouble() <= this._probability) {
