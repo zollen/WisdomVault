@@ -24,9 +24,9 @@ public class MazeAgent {
 	
 	private static final Random rand = new Random(23);
 	
-	private static final int MAX_GENERATIONS = 20;
+	private static final int MAX_GENERATIONS = 5;
 	private static final int POPULATION_SIZE = 200;
-	private static final int MAX_UNCHANGED_GENERATIONS = 2;
+	private static final int MAX_UNCHANGED_GENERATIONS = 1;
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
