@@ -72,10 +72,11 @@ public class MazeLoader {
 					}
 					
 					allowed.put(key, moves);
-					end = new MazeGame.Move(MazeGame.NONE, row, col);
 				}
 			}
 		}
+		
+		end = new MazeGame.Move(MazeGame.NONE, height - 1, width - 1);
 	}
 	
 	private void process(String line) {
