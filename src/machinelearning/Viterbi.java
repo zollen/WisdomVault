@@ -1,20 +1,14 @@
 package machinelearning;
 
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.equation.Equation;
+
 public class Viterbi {
 	
 	private static String[] states = { "#", "NN", "VB" };
 	private static String[] observations = { "I", "write", "a letter" };
 	private static double[] start_probability = { 0.3, 0.4, 0.3 };
-	private static double[][] transition_probability = { 
-						{ 0.2, 0.2, 0.6 }, 
-						{ 0.4, 0.1, 0.5 }, 
-						{ 0.1, 0.8, 0.1 } 
-				};
-	private static double[][] emission_probability = { 
-						{ 0.01, 0.02, 0.02 }, 
-						{ 0.8, 0.01, 0.5 }, 
-						{ 0.19, 0.97, 0.48 } 
-				};
+	
 
 	private static class TNode {
 		public int[] v_path;
@@ -45,12 +39,12 @@ public class Viterbi {
 
 	// forwardViterbi(observations, states, start_probability,
 	// transition_probability, emission_probability)
-	public int[] forwardViterbi(String[] y, String[] X, double[] sp, double[][] tp, double[][] ep) {
+	public int[] forwardViterbi(String[] y, String[] X, double[] sp, DMatrixRMaj tp, DMatrixRMaj ep) {
 		TNode[] T = new TNode[X.length];
 		for (int state = 0; state < X.length; state++) {
 			int[] intArray = new int[1];
 			intArray[0] = state;
-			T[state] = new TNode(intArray, sp[state] * ep[state][0]);
+			T[state] = new TNode(intArray, sp[state] * ep.get(state, 0));
 		}
 
 		for (int output = 1; output < y.length; output++) {
@@ -61,7 +55,7 @@ public class Viterbi {
 				for (int state = 0; state < X.length; state++) {
 					int[] v_path = copyIntArray(T[state].v_path);
 					double v_prob = T[state].v_prob;
-					double p = ep[next_state][output] * tp[state][next_state];
+					double p = ep.get(next_state, output) * tp.get(state, next_state);
 					v_prob *= p;
 					if (v_prob > valmax) {
 						if (v_path.length == y.length) {
@@ -110,27 +104,29 @@ public class Viterbi {
 		for (int i = 0; i < states.length; i++) {
 			System.out.print(states[i] + ": " + start_probability[i] + ", ");
 		}
-		System.out.println("\n\nTransition probability:");
-		for (int i = 0; i < states.length; i++) {
-			System.out.print(" " + states[i] + ": {");
-			for (int j = 0; j < states.length; j++) {
-				System.out.print("  " + states[j] + ": " + transition_probability[i][j] + ", ");
-			}
-			System.out.println("}");
-		}
-		System.out.println("\n\nEmission probability:");
-		for (int i = 0; i < states.length; i++) {
-			System.out.print(" " + states[i] + ": {");
-			for (int j = 0; j < observations.length; j++) {
-				System.out.print("  " + observations[j] + ": " + emission_probability[i][j] + ", ");
-			}
-			System.out.println("}");
-		}
 		
-		System.out.println("\n");
+		
+		Equation eq = new Equation();	
+
+		eq.process("T = [" +
+					/*      #,   NN,   VB      */
+	/* # */				" 0.2, 0.2, 0.6;" +
+	/* NN */			" 0.4, 0.1, 0.5;" +
+	/* VB */			" 0.1, 0.8, 0.1 " +
+						"]");
+		
+		eq.process("E = [" +
+					/*      I,    write,   a letter      */
+	/* # */				" 0.01,	   0.02,     0.02;" +
+	/* NN */			"  0.8,    0.01,      0.5;" +
+	/* VB */			" 0.19,    0.97,     0.48 " +
+						"]");
+				
+		DMatrixRMaj T = eq.lookupDDRM("T");
+		DMatrixRMaj E = eq.lookupDDRM("E");
 		
 		Viterbi v = new Viterbi();
-		v.forwardViterbi(observations, states, start_probability, transition_probability, emission_probability);
+		v.forwardViterbi(observations, states, start_probability, T, E);
 
 	}
 }
