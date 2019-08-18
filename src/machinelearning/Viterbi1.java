@@ -5,7 +5,7 @@ import java.text.DecimalFormat;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
 
-public class Viterbi {
+public class Viterbi1 {
 	
 	private static final DecimalFormat ff = new DecimalFormat("0.0000");
 	
@@ -43,7 +43,7 @@ public class Viterbi {
 
 	// forwardViterbi(observations, states, start_probability,
 	// transition_probability, emission_probability)
-	public int[] forwardViterbi(String[] y, String[] X, double[] sp, DMatrixRMaj tp, DMatrixRMaj ep) {
+	public int[] compute(String[] y, String[] X, double[] sp, DMatrixRMaj tp, DMatrixRMaj ep) {
 		TNode[] T = new TNode[X.length];
 		for (int state = 0; state < X.length; state++) {
 			int[] intArray = new int[1];
@@ -154,8 +154,8 @@ public class Viterbi {
 		DMatrixRMaj T = eq.lookupDDRM("T");
 		DMatrixRMaj E = eq.lookupDDRM("E");
 		
-		Viterbi v = new Viterbi();
-		v.forwardViterbi(observations, states, start_probability, T, E);
+		Viterbi1 v = new Viterbi1();
+		v.compute(observations, states, start_probability, T, E);
 
 	}
 }
