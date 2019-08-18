@@ -105,6 +105,8 @@ public class Viterbi {
 			System.out.print(states[i] + ": " + start_probability[i] + ", ");
 		}
 		
+		System.out.println();
+		
 		
 		Equation eq = new Equation();	
 
