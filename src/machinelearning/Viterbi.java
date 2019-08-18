@@ -1,9 +1,13 @@
 package machinelearning;
 
+import java.text.DecimalFormat;
+
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
 
 public class Viterbi {
+	
+	private static final DecimalFormat ff = new DecimalFormat("0.0000");
 	
 	private static String[] states = { "#", "NN", "VB" };
 	private static String[] observations = { "I", "write", "a letter" };
@@ -67,6 +71,7 @@ public class Viterbi {
 
 					}
 				}
+				System.err.println(debug(argmax, valmax));
 				U[next_state] = new TNode(argmax, valmax);
 			}
 			T = U;
@@ -82,25 +87,47 @@ public class Viterbi {
 				valmax = v_prob;
 			}
 		}
+		System.err.println(debug(argmax, valmax));
 		System.out.print("Viterbi path: [");
 		for (int i = 0; i < argmax.length; i++) {
-			System.out.print(states[argmax[i]] + ", ");
+			
+			if (i > 0)
+				System.out.print(", ");
+			
+			System.out.print(states[argmax[i]]);
 		}
-		System.out.println("].\n Probability of the whole system: " + valmax);
+		System.out.println("].\n Probability of the whole system: " + ff.format(valmax));
 		return argmax;
+	}
+	
+	private String debug(int [] tokens, double prob) {
+		
+		StringBuilder builder = new StringBuilder();
+		
+		for (int i = 0; i < tokens.length; i++) {
+			
+			if (builder.length() > 0)
+				builder.append(", ");
+			
+			builder.append(states[tokens[i]] + " {" + observations[i] + "}");
+		}
+		
+		builder.append(" : " + ff.format(prob));
+		
+		return builder.toString();
 	}
 
 	public static void main(String[] args) throws Exception {
 		
-		System.out.print("\nStates: ");
+		System.out.print("States: ");
 		for (int i = 0; i < states.length; i++) {
 			System.out.print(states[i] + ", ");
 		}
-		System.out.print("\n\nObservations: ");
+		System.out.print("\nObservations: ");
 		for (int i = 0; i < observations.length; i++) {
 			System.out.print(observations[i] + ", ");
 		}
-		System.out.print("\n\nStart probability: ");
+		System.out.print("\nStart probability: ");
 		for (int i = 0; i < states.length; i++) {
 			System.out.print(states[i] + ": " + start_probability[i] + ", ");
 		}
