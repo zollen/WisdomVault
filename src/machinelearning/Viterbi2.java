@@ -1,7 +1,6 @@
 package machinelearning;
 
 import java.text.DecimalFormat;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -41,12 +40,6 @@ public class Viterbi2 {
 		DMatrixRMaj E = eq.lookupDDRM("E");
 
 		{
-			System.out.println("========== [Viterbi] ==========");
-			
-			Map<Integer, Double> starts = new HashMap<Integer, Double>();
-			starts.put(0, 0.99d);
-			starts.put(1, 0.01d);
-
 			Viterbi2 virtebi = new Viterbi2();
 			virtebi.compute(SEQUENCE, STATES, STARTS, T, E);
 
