@@ -49,6 +49,7 @@ public class Viterbi1 {
 			int[] intArray = new int[1];
 			intArray[0] = state;
 			T[state] = new TNode(intArray, sp[state] * ep.get(state, 0));
+			System.err.println(debug(intArray, sp[state] * ep.get(state, 0)));
 		}
 
 		for (int output = 1; output < y.length; output++) {
@@ -59,7 +60,7 @@ public class Viterbi1 {
 				for (int state = 0; state < X.length; state++) {
 					int[] v_path = copyIntArray(T[state].v_path);
 					double v_prob = T[state].v_prob;
-					double p = ep.get(next_state, output) * tp.get(state, next_state);
+					double p = ep.get(next_state, output) * tp.get(next_state, state);
 					v_prob *= p;
 					if (v_prob > valmax) {
 						if (v_path.length == y.length) {
@@ -87,7 +88,7 @@ public class Viterbi1 {
 				valmax = v_prob;
 			}
 		}
-		System.err.println(debug(argmax, valmax));
+	
 		System.out.print("Viterbi path: [");
 		for (int i = 0; i < argmax.length; i++) {
 			
