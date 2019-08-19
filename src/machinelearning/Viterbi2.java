@@ -15,6 +15,7 @@ public class Viterbi2 {
 
 	private static final String[] SEQUENCE = { "I", "write", "a letter" };
 	private static final String[] STATES = { "#", "NN", "VB" };
+	private static final int [] CONVERTER = { 0, 1, 2 };
 	private static final double[] STARTS = { 0.3, 0.4, 0.3 };
 
 	public static void main(String[] args) {
@@ -41,7 +42,7 @@ public class Viterbi2 {
 
 		{
 			Viterbi2 virtebi = new Viterbi2();
-			virtebi.compute(SEQUENCE, STATES, STARTS, T, E);
+			virtebi.compute(SEQUENCE, CONVERTER, STATES, STARTS, T, E, ff);
 
 			System.out.println();
 		}
@@ -68,7 +69,7 @@ public class Viterbi2 {
 		}
 	}
 
-	public void compute(String[] sequence, String[] states, double[] starts, DMatrixRMaj T, DMatrixRMaj E) {
+	public void compute(String[] sequence, int [] converter, String[] states, double[] starts, DMatrixRMaj T, DMatrixRMaj E, DecimalFormat ff) {
 
 		Map<String, Double> probs = new LinkedHashMap<String, Double>();
 		final Map<String, Double> ss = probs;
@@ -76,19 +77,19 @@ public class Viterbi2 {
 		Set<Integer> froms = new LinkedHashSet<Integer>();
 
 		for (int i = 0; i < starts.length; i++) {
-			ss.put("0" + ":" + states[i] + "{" + sequence[0] + "}", starts[i] * E.get(0, i));
+			ss.put("0" + ":" + states[i] + "{" + sequence[0] + "}", starts[i] * E.get(converter[0], i));
 			froms.add(i);
 		}
 
 		Set<Integer> nexts = new LinkedHashSet<Integer>();
 
-		for (int step = 1; step < sequence.length; step++) {
+		for (int step = 1; step < converter.length; step++) {
 
 			for (int from : froms) {
 
 				for (int to = 0; to < T.numRows; to++) {
 
-					if (T.get(to, from) > 0 && E.get(step, to) > 0) {
+					if (T.get(to, from) > 0 && E.get(converter[step], to) > 0) {
 
 						double left = 0.0d;
 						double right = 0.0d;
@@ -101,7 +102,7 @@ public class Viterbi2 {
 						}
 
 						if (left > 0) {
-							left = left * T.get(to, from) * E.get(step, to);
+							left = left * T.get(to, from) * E.get(converter[step], to);
 
 							if (left > right)
 								ss.put(step + ":" + states[to] + "{" + sequence[step] + "}", left);

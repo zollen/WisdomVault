@@ -13,6 +13,7 @@ public class Viterbi1 {
 	
 	private static String[] states = { "#", "NN", "VB" };
 	private static String[] observations = { "I", "write", "a letter" };
+	private static int [] converter = { 0, 1, 2 };
 	private static double[] start_probability = { 0.3, 0.4, 0.3 };
 	
 
@@ -26,18 +27,18 @@ public class Viterbi1 {
 		}
 	}
 
-	public List<Integer> compute(String[] observables, String[] states, double[] sp, DMatrixRMaj tp, DMatrixRMaj ep) {
+	public List<Integer> compute(String[] observables, int [] converter, String[] states, double[] sp, DMatrixRMaj tp, DMatrixRMaj ep, DecimalFormat ff) {
 		
 		TNode[] T = new TNode[states.length];
 		for (int state = 0; state < states.length; state++) {
 			List<Integer> intArray = new ArrayList<Integer>();
 			intArray.add(state);
-			T[state] = new TNode(intArray, sp[state] * ep.get(state, 0));
-			System.err.println(debug(intArray, sp[state] * ep.get(state, 0)));
+			T[state] = new TNode(intArray, sp[state] * ep.get(state, converter[0]));
+			System.err.println(debug(observables, states, intArray, sp[state] * ep.get(state, 0), ff));
 		}
 
 		
-		for (int output = 1; output < observables.length; output++) {
+		for (int output = 1; output < converter.length; output++) {
 			
 			TNode[] U = new TNode[states.length];
 			for (int current_state = 0; current_state < states.length; current_state++) {
@@ -48,11 +49,11 @@ public class Viterbi1 {
 					
 					List<Integer> v_path = new ArrayList<Integer>(T[next_state].v_path);
 					double v_prob = T[next_state].v_prob;
-					double p = ep.get(current_state, output) * tp.get(current_state, next_state);
+					double p = ep.get(current_state, converter[output]) * tp.get(current_state, next_state);
 					v_prob *= p;
 					if (v_prob > valmax) {
 						
-						if (v_path.size() == observables.length) {
+						if (v_path.size() == converter.length) {
 							argmax = v_path;
 						} else {
 							argmax = v_path;
@@ -63,14 +64,15 @@ public class Viterbi1 {
 					}
 				}
 				
-				System.err.println(debug(argmax, valmax));
+				System.err.println(debug(observables, states, argmax, valmax, ff));
 				U[current_state] = new TNode(argmax, valmax);
 			}
 			
 			T = U;
 		}
+		
 		// apply sum/max to the final states:
-		List<Integer> argmax = new ArrayList<Integer>();
+		List<Integer> argmax = null;
 		double valmax = 0;
 		for (int state = 0; state < states.length; state++) {
 			
@@ -85,7 +87,7 @@ public class Viterbi1 {
 		return argmax;
 	}
 	
-	private String debug(List<Integer> tokens, double prob) {
+	private String debug(String[] observables, String[] states, List<Integer> tokens, double prob, DecimalFormat ff) {
 		
 		StringBuilder builder = new StringBuilder();
 		
@@ -94,7 +96,7 @@ public class Viterbi1 {
 			if (builder.length() > 0)
 				builder.append(", ");
 			
-			builder.append(states[tokens.get(i)] + " {" + observations[i] + "}");
+			builder.append(states[tokens.get(i)] + " {" + observables[i] + "}");
 		}
 		
 		builder.append(" : " + ff.format(prob));
@@ -140,7 +142,7 @@ public class Viterbi1 {
 		DMatrixRMaj E = eq.lookupDDRM("E");
 		
 		Viterbi1 v = new Viterbi1();
-		List<Integer> paths = v.compute(observations, states, start_probability, T, E);
+		List<Integer> paths = v.compute(observations, converter, states, start_probability, T, E, ff);
 		
 		System.out.print("Viterbi path: [");
 		for (int i = 0; i < paths.size(); i++) {
