@@ -27,6 +27,7 @@ public class Viterbi1 {
 	}
 
 	public List<Integer> compute(String[] observables, String[] states, double[] sp, DMatrixRMaj tp, DMatrixRMaj ep) {
+		
 		TNode[] T = new TNode[states.length];
 		for (int state = 0; state < states.length; state++) {
 			List<Integer> intArray = new ArrayList<Integer>();
@@ -35,12 +36,16 @@ public class Viterbi1 {
 			System.err.println(debug(intArray, sp[state] * ep.get(state, 0)));
 		}
 
+		
 		for (int output = 1; output < observables.length; output++) {
 			TNode[] U = new TNode[states.length];
 			for (int current_state = 0; current_state < states.length; current_state++) {
-				List<Integer> argmax = new ArrayList<Integer>();
+				
+				List<Integer> argmax = null;
 				double valmax = 0;
+				
 				for (int next_state = 0; next_state < states.length; next_state++) {
+					
 					List<Integer> v_path = new ArrayList<Integer>(T[next_state].v_path);
 					double v_prob = T[next_state].v_prob;
 					double p = ep.get(current_state, output) * tp.get(current_state, next_state);
@@ -56,15 +61,18 @@ public class Viterbi1 {
 
 					}
 				}
+				
 				System.err.println(debug(argmax, valmax));
 				U[current_state] = new TNode(argmax, valmax);
 			}
+			
 			T = U;
 		}
 		// apply sum/max to the final states:
 		List<Integer> argmax = new ArrayList<Integer>();
 		double valmax = 0;
 		for (int state = 0; state < states.length; state++) {
+			
 			List<Integer> v_path = new ArrayList<Integer>(T[state].v_path);
 			double v_prob = T[state].v_prob;
 			if (v_prob > valmax) {
