@@ -41,23 +41,24 @@ public class Viterbi1 {
 		for (int output = 1; output < converter.length; output++) {
 			
 			TNode[] U = new TNode[states.length];
-			for (int current_state = 0; current_state < states.length; current_state++) {
+			for (int next_state = 0; next_state < states.length; next_state++) {
 				
 				List<Integer> argmax = null;
 				double valmax = 0;			
-				for (int next_state = 0; next_state < states.length; next_state++) {
+				for (int current_state = 0; current_state < states.length; current_state++) {
 					
-					List<Integer> v_path = new ArrayList<Integer>(T[next_state].v_path);
-					double v_prob = T[next_state].v_prob;
-					double p = ep.get(current_state, converter[output]) * tp.get(current_state, next_state);
+					List<Integer> v_path = new ArrayList<Integer>(T[current_state].v_path);
+					double v_prob = T[current_state].v_prob;
+					double p = ep.get(next_state, converter[output]) * tp.get(current_state, next_state);
 					v_prob *= p;
+					
 					if (v_prob > valmax) {
 						
 						if (v_path.size() == converter.length) {
 							argmax = v_path;
 						} else {
 							argmax = v_path;
-							argmax.add(current_state);
+							argmax.add(next_state);
 						}
 						
 						valmax = v_prob;
@@ -65,7 +66,7 @@ public class Viterbi1 {
 				}
 				
 				System.err.println(debug(observables, states, argmax, valmax, ff));
-				U[current_state] = new TNode(argmax, valmax);
+				U[next_state] = new TNode(argmax, valmax);
 			}
 			
 			T = U;
