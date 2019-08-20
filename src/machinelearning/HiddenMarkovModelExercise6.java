@@ -4,8 +4,8 @@ import java.text.DecimalFormat;
 import java.util.List;
 
 import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.equation.Equation;
+import org.nd4j.linalg.primitives.Pair;
 
 public class HiddenMarkovModelExercise6 {
 	
@@ -33,9 +33,12 @@ public class HiddenMarkovModelExercise6 {
 	/* U2 */			" 0.1, 0.4, 0.5;" +
 	/* U3 */			" 0.6, 0.1, 0.3 " +
 						"]");
+		
+		eq.process("S = [ 1./3; 1./3; 1./3 ]");
 				
 		DMatrixRMaj T = eq.lookupDDRM("T");
 		DMatrixRMaj E = eq.lookupDDRM("E");
+		DMatrixRMaj S = eq.lookupDDRM("S");
 		
 		{
 			Viterbi1 v = new Viterbi1();
@@ -54,12 +57,22 @@ public class HiddenMarkovModelExercise6 {
 		}
 		
 		{
-			CommonOps_DDRM.transpose(E);
-			
 			Viterbi2 virtebi = new Viterbi2();
-			virtebi.compute(observations, converter, states, start_probability, T, E, ff);
+			List<Pair<Integer, Double>> list = virtebi.compute(observations, converter, states, S, T, E, ff);
 
-			System.out.println();
+			StringBuilder builder = new StringBuilder();
+			for (int i = 0; i < observations.length; i++) {
+				
+				Pair<Integer, Double> pair = list.get(i);
+				
+				if (i > 0)
+					builder.append(", ");
+				
+				builder.append(observations[i] + "{" + states[pair.getFirst()] + "}: " + ff.format(pair.getSecond()));
+				
+			}
+			
+			System.out.println(builder.toString());
 		}
 		
 		

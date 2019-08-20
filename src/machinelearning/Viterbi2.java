@@ -1,13 +1,13 @@
 package machinelearning;
 
 import java.text.DecimalFormat;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.equation.Equation;
+import org.nd4j.linalg.primitives.Pair;
 
 public class Viterbi2 {
 
@@ -16,7 +16,6 @@ public class Viterbi2 {
 	private static final String[] SEQUENCE = { "I", "write", "a letter" };
 	private static final String[] STATES = { "#", "NN", "VB" };
 	private static final int [] CONVERTER = { 0, 1, 2 };
-	private static final double[] STARTS = { 0.3, 0.4, 0.3 };
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -29,32 +28,46 @@ public class Viterbi2 {
 					"]");
 
 		eq.process("E = [" +
-						  /* #,    NN,    VB */
-		/* I */ 		" 0.01,	  0.8,   0.19;" +
-		/* write */ 	" 0.02,  0.01,   0.97;" +
-		/* a letter */ 	" 0.02,   0.5,   0.48 " + 
+				/*       I,   write,   a letter      */
+		/* # */		" 0.01,	   0.02,     0.02;" +
+		/* NN */	"  0.8,    0.01,      0.5;" +
+		/* VB */	" 0.19,    0.97,     0.48 " +
 					"]");
 		
 		eq.process("S = [ 0.3; 0.4; 0.3 ]");
 
 		DMatrixRMaj T = eq.lookupDDRM("T");
 		DMatrixRMaj E = eq.lookupDDRM("E");
+		DMatrixRMaj S = eq.lookupDDRM("S");
 
 		{
 			Viterbi2 virtebi = new Viterbi2();
-			virtebi.compute(SEQUENCE, CONVERTER, STATES, STARTS, T, E, ff);
+			List<Pair<Integer, Double>> list = virtebi.compute(SEQUENCE, CONVERTER, STATES, S, T, E, ff);
 
-			System.out.println();
+			StringBuilder builder = new StringBuilder();
+			for (int i = 0; i < SEQUENCE.length; i++) {
+				
+				Pair<Integer, Double> pair = list.get(i);
+				
+				if (i > 0)
+					builder.append(", ");
+				
+				builder.append(SEQUENCE[i] + "{" + STATES[pair.getFirst()] + "}: " + ff.format(pair.getSecond()));
+				
+			}
+			
+			System.out.println(builder.toString());
 		}
 
 		{
-			eq.process("Ei = diag(E(0,0:))");
-			eq.process("Ew = diag(E(1,0:))");
-			eq.process("Ea = diag(E(2,0:))");
+			eq.process("Ei = diag(E(0:,0))");
+			eq.process("Ew = diag(E(0:,1))");
+			eq.process("Ea = diag(E(0:,2))");
 
 			eq.process("V1 = Ei * S");
-			eq.process("V2 = Ew * T * max(V1) * [ 0; 1; 0 ]");
-			eq.process("V3 = Ea * T * max(V2) * [ 0; 0; 1 ]");
+			eq.process("V1 = V1'");
+			eq.process("V2 = [0, 1, 0] * T * Ew * max(V1) ");
+			eq.process("V3 = [0, 0, 1] * T * Ea * max(V2) ");
 
 			System.out.print("V1: ");
 			DMatrixRMaj V1 = eq.lookupDDRM("V1");
@@ -69,55 +82,72 @@ public class Viterbi2 {
 		}
 	}
 
-	public void compute(String[] sequence, int [] converter, String[] states, double[] starts, DMatrixRMaj T, DMatrixRMaj E, DecimalFormat ff) {
-
-		Map<String, Double> probs = new LinkedHashMap<String, Double>();
-		final Map<String, Double> ss = probs;
-
-		Set<Integer> froms = new LinkedHashSet<Integer>();
-
-		for (int i = 0; i < starts.length; i++) {
-			ss.put("0" + ":" + states[i] + "{" + sequence[0] + "}", starts[i] * E.get(converter[0], i));
-			froms.add(i);
-		}
-
-		Set<Integer> nexts = new LinkedHashSet<Integer>();
-
-		for (int step = 1; step < converter.length; step++) {
-
-			for (int from : froms) {
-
-				for (int to = 0; to < T.numRows; to++) {
-
-					if (T.get(to, from) > 0 && E.get(converter[step], to) > 0) {
-
-						double left = 0.0d;
-						double right = 0.0d;
-						if (ss.get((step - 1) + ":" + states[from] + "{" + sequence[step - 1] + "}") != null) {
-							left = ss.get((step - 1) + ":" + states[from] + "{" + sequence[step - 1] + "}");
-						}
-
-						if (ss.get(step + ":" + states[to] + "{" + sequence[step] + "}") != null) {
-							right = ss.get(step + ":" + states[to] + "{" + sequence[step] + "}");
-						}
-
-						if (left > 0) {
-							left = left * T.get(to, from) * E.get(converter[step], to);
-
-							if (left > right)
-								ss.put(step + ":" + states[to] + "{" + sequence[step] + "}", left);
-						}
-
-						nexts.add(to);
+	public List<Pair<Integer, Double>> compute(String[] sequence, int [] converter, String[] states, DMatrixRMaj starts, DMatrixRMaj T, DMatrixRMaj E, DecimalFormat ff) {
+		
+		double lastVal = 0;
+		int lastRow = 0;
+		List<Pair<Integer, Double>> list = new ArrayList<Pair<Integer, Double>>();
+		
+		for (int index = 0; index < sequence.length; index++) {
+			
+			DMatrixRMaj ee = diag(E, converter[index]);
+			
+			if (index == 0) {
+				
+				DMatrixRMaj res = new DMatrixRMaj(E.numRows, 1);
+						
+				CommonOps_DDRM.mult(ee, starts, res);
+				
+				double maxVal = Double.MIN_VALUE;
+				int maxRow = -1;
+				for (int row = 0; row < E.numRows; row++) {
+					
+					if (res.get(row, 0) > maxVal) {
+						maxVal = res.get(row, 0);
+						maxRow = row;
+					}				
+				}
+				
+				lastVal = maxVal;
+				lastRow = maxRow;
+				
+				list.add(new Pair<>(lastRow, lastVal));
+				
+			}
+			else {
+				
+				DMatrixRMaj res = new DMatrixRMaj(T.numRows, ee.numCols);
+				CommonOps_DDRM.mult(lastVal, T, ee, res);
+				
+				double maxVal = Double.MIN_VALUE;
+				int maxCol = -1;
+				for (int col = 0; col < res.numCols; col++) {
+					
+					if (res.get(lastRow, col) > maxVal) {
+						maxVal = res.get(lastRow, col);
+						maxCol = col; 
 					}
 				}
-			}
-
-			froms = new LinkedHashSet<Integer>(nexts);
-			nexts.clear();
+				
+				lastVal = maxVal;
+				lastRow = maxCol;
+				
+				list.add(new Pair<>(lastRow, lastVal));
+			}			
+		}	
+		
+		return list;
+	}
+	
+	private DMatrixRMaj diag(DMatrixRMaj A, int col) {
+		
+		double [] args = new double[A.numCols];
+		
+		for (int i = 0; i < A.numRows; i++) {
+			args[i] = A.get(i, col);
 		}
 
-		ss.entrySet().stream().forEach(p -> System.out.println(p.getKey() + " ==> " + ff.format(p.getValue())));
+		return CommonOps_DDRM.diagR(A.numRows, A.numCols, args);
 	}
 
 }
