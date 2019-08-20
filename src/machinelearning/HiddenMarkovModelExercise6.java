@@ -41,6 +41,7 @@ public class HiddenMarkovModelExercise6 {
 		DMatrixRMaj S = eq.lookupDDRM("S");
 		
 		{
+			System.out.println("Using Wiki Proposed Viterbi");
 			Viterbi1 v = new Viterbi1();
 			List<Pair<Integer, Double>> paths = v.compute(observations, converter, states, 
 									start_probability, T, E, ff);
@@ -61,6 +62,7 @@ public class HiddenMarkovModelExercise6 {
 		}
 		
 		{
+			System.out.println("Using Bayes Rules calculation");
 			Viterbi2 virtebi = new Viterbi2();
 			List<Pair<Integer, Double>> list = virtebi.compute(observations, converter, states, S, T, E, ff);
 
