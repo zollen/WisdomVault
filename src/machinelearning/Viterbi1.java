@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
+import org.nd4j.linalg.primitives.Pair;
 
 public class Viterbi1 {
 	
@@ -18,23 +19,23 @@ public class Viterbi1 {
 	
 
 	private static class TNode {
-		public List<Integer> v_path;
+		public List<Pair<Integer, Double>> v_path;
 		public double v_prob;
 
-		public TNode(List<Integer> v_path, double v_prob) {
-			this.v_path = new ArrayList<Integer>(v_path);
+		public TNode(List<Pair<Integer, Double>> v_path, double v_prob) {
+			this.v_path = new ArrayList<Pair<Integer, Double>>(v_path);
 			this.v_prob = v_prob;
 		}
 	}
 
-	public List<Integer> compute(String[] observables, int [] converter, String[] states, double[] sp, DMatrixRMaj tp, DMatrixRMaj ep, DecimalFormat ff) {
+	public List<Pair<Integer, Double>> compute(String[] observables, int [] converter, String[] states, double[] sp, DMatrixRMaj tp, DMatrixRMaj ep, DecimalFormat ff) {
 		
 		TNode[] T = new TNode[states.length];
 		for (int state = 0; state < states.length; state++) {
-			List<Integer> intArray = new ArrayList<Integer>();
-			intArray.add(state);
-			T[state] = new TNode(intArray, sp[state] * ep.get(state, converter[0]));
-			System.err.println(debug(observables, states, intArray, sp[state] * ep.get(state, 0), ff));
+			List<Pair<Integer, Double>> intArray = new ArrayList<Pair<Integer, Double>>();
+			double v_prob = sp[state] * ep.get(state, converter[0]);
+			intArray.add(new Pair<>(state, v_prob));
+			T[state] = new TNode(intArray, v_prob);
 		}
 
 		
@@ -43,11 +44,11 @@ public class Viterbi1 {
 			TNode[] U = new TNode[states.length];
 			for (int next_state = 0; next_state < states.length; next_state++) {
 				
-				List<Integer> argmax = null;
+				List<Pair<Integer, Double>> argmax = null;
 				double valmax = 0;			
 				for (int current_state = 0; current_state < states.length; current_state++) {
 					
-					List<Integer> v_path = new ArrayList<Integer>(T[current_state].v_path);
+					List<Pair<Integer, Double>> v_path = new ArrayList<Pair<Integer, Double>>(T[current_state].v_path);
 					double v_prob = T[current_state].v_prob;
 					double p = ep.get(next_state, converter[output]) * tp.get(current_state, next_state);
 					v_prob *= p;
@@ -58,14 +59,13 @@ public class Viterbi1 {
 							argmax = v_path;
 						} else {
 							argmax = v_path;
-							argmax.add(next_state);
+							argmax.add(new Pair<>(next_state, v_prob));
 						}
 						
 						valmax = v_prob;
 					}
 				}
-				
-				System.err.println(debug(observables, states, argmax, valmax, ff));
+
 				U[next_state] = new TNode(argmax, valmax);
 			}
 			
@@ -73,11 +73,11 @@ public class Viterbi1 {
 		}
 		
 		// apply sum/max to the final states:
-		List<Integer> argmax = null;
+		List<Pair<Integer, Double>> argmax = null;
 		double valmax = 0;
 		for (int state = 0; state < states.length; state++) {
 			
-			List<Integer> v_path = new ArrayList<Integer>(T[state].v_path);
+			List<Pair<Integer, Double>> v_path = new ArrayList<Pair<Integer, Double>>(T[state].v_path);
 			double v_prob = T[state].v_prob;
 			if (v_prob > valmax) {
 				argmax = v_path;
@@ -86,23 +86,6 @@ public class Viterbi1 {
 		}
 	
 		return argmax;
-	}
-	
-	private String debug(String[] observables, String[] states, List<Integer> tokens, double prob, DecimalFormat ff) {
-		
-		StringBuilder builder = new StringBuilder();
-		
-		for (int i = 0; i < tokens.size(); i++) {
-			
-			if (builder.length() > 0)
-				builder.append(", ");
-			
-			builder.append(states[tokens.get(i)] + " {" + observables[i] + "}");
-		}
-		
-		builder.append(" : " + ff.format(prob));
-		
-		return builder.toString();
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -143,7 +126,7 @@ public class Viterbi1 {
 		DMatrixRMaj E = eq.lookupDDRM("E");
 		
 		Viterbi1 v = new Viterbi1();
-		List<Integer> paths = v.compute(observations, converter, states, start_probability, T, E, ff);
+		List<Pair<Integer, Double>> paths = v.compute(observations, converter, states, start_probability, T, E, ff);
 		
 		System.out.print("Viterbi path: [");
 		for (int i = 0; i < paths.size(); i++) {
@@ -151,7 +134,9 @@ public class Viterbi1 {
 			if (i > 0)
 				System.out.print(", ");
 			
-			System.out.print(states[paths.get(i)]);
+			Pair<Integer, Double> pair = paths.get(i);
+			
+			System.out.print(states[pair.getFirst()] + " : " + ff.format(pair.getSecond()));
 		}
 		System.out.println("]");
 

@@ -42,18 +42,22 @@ public class HiddenMarkovModelExercise6 {
 		
 		{
 			Viterbi1 v = new Viterbi1();
-			List<Integer> paths = v.compute(observations, converter, states, 
+			List<Pair<Integer, Double>> paths = v.compute(observations, converter, states, 
 									start_probability, T, E, ff);
 		
-			System.out.print("Viterbi path: [");
-			for (int i = 0; i < paths.size(); i++) {
-			
+			StringBuilder builder = new StringBuilder();
+			for (int i = 0; i < observations.length; i++) {
+				
+				Pair<Integer, Double> pair = paths.get(i);
+				
 				if (i > 0)
-					System.out.print(", ");
-			
-				System.out.print(states[paths.get(i)]);
+					builder.append(", ");
+				
+				builder.append(observations[i] + "{" + states[pair.getFirst()] + "}: " + ff.format(pair.getSecond()));
+				
 			}
-			System.out.println("]");
+			
+			System.out.println(builder.toString());
 		}
 		
 		{
