@@ -7,7 +7,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
 import org.nd4j.linalg.primitives.Pair;
 
-public class HiddenMarkovModel6 {
+public class HiddenMarkovModel2 {
 	
 	private static final DecimalFormat ff = new DecimalFormat("0.00000000");
 	
