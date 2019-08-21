@@ -7,7 +7,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
 import org.nd4j.linalg.primitives.Pair;
 
-public class HiddenMarkovModelExercise6 {
+public class HiddenMarkovModel6 {
 	
 	private static final DecimalFormat ff = new DecimalFormat("0.00000000");
 	
@@ -45,7 +45,7 @@ public class HiddenMarkovModelExercise6 {
 			double start = System.currentTimeMillis();
 			
 			Viterbi1 v = new Viterbi1();
-			List<Pair<Integer, Double>> paths = v.compute(converter, S, T, E);
+			List<Pair<Integer, Double>> paths = v.fit(converter, S, T, E);
 		
 			StringBuilder builder = new StringBuilder();
 			for (int i = 0; i < observations.length; i++) {
@@ -71,7 +71,7 @@ public class HiddenMarkovModelExercise6 {
 			double start = System.currentTimeMillis();
 			
 			Viterbi2 virtebi = new Viterbi2();
-			List<Pair<Integer, Double>> list = virtebi.compute(converter, S, T, E);
+			List<Pair<Integer, Double>> list = virtebi.fit(converter, S, T, E);
 
 			StringBuilder builder = new StringBuilder();
 			for (int i = 0; i < observations.length; i++) {

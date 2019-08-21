@@ -28,7 +28,7 @@ public class Viterbi1 {
 		}
 	}
 
-	public List<Pair<Integer, Double>> compute(int [] converter, DMatrixRMaj sp, DMatrixRMaj tp, DMatrixRMaj ep) {
+	public List<Pair<Integer, Double>> fit(int [] converter, DMatrixRMaj sp, DMatrixRMaj tp, DMatrixRMaj ep) {
 		
 		TNode[] T = new TNode[tp.numRows];
 		for (int state = 0; state < tp.numRows; state++) {
@@ -129,7 +129,7 @@ public class Viterbi1 {
 		DMatrixRMaj S = eq.lookupDDRM("S");
 		
 		Viterbi1 v = new Viterbi1();
-		List<Pair<Integer, Double>> paths = v.compute(converter, S, T, E);
+		List<Pair<Integer, Double>> paths = v.fit(converter, S, T, E);
 		
 		System.out.print("Viterbi path: [");
 		for (int i = 0; i < paths.size(); i++) {
