@@ -41,7 +41,7 @@ public class Viterbi2 {
 
 		{
 			Viterbi2 virtebi = new Viterbi2();
-			List<Pair<Integer, Double>> list = virtebi.compute(SEQUENCE, CONVERTER, S, T, E);
+			List<Pair<Integer, Double>> list = virtebi.compute(CONVERTER, S, T, E);
 
 			StringBuilder builder = new StringBuilder();
 			for (int i = 0; i < SEQUENCE.length; i++) {
@@ -81,7 +81,7 @@ public class Viterbi2 {
 		}
 	}
 
-	public List<Pair<Integer, Double>> compute(String[] sequence, int [] converter, DMatrixRMaj S, DMatrixRMaj T, DMatrixRMaj E) {
+	public List<Pair<Integer, Double>> compute(int [] converter, DMatrixRMaj S, DMatrixRMaj T, DMatrixRMaj E) {
 		
 		List<Pair<Integer, Double>> list = new ArrayList<Pair<Integer, Double>>();
 		

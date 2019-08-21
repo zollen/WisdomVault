@@ -42,7 +42,7 @@ public class HiddenMarkovModelExercise6 {
 		{
 			System.out.println("Using Wiki Proposed Viterbi");
 			Viterbi1 v = new Viterbi1();
-			List<Pair<Integer, Double>> paths = v.compute(observations, converter, S, T, E);
+			List<Pair<Integer, Double>> paths = v.compute(converter, S, T, E);
 		
 			StringBuilder builder = new StringBuilder();
 			for (int i = 0; i < observations.length; i++) {
@@ -62,7 +62,7 @@ public class HiddenMarkovModelExercise6 {
 		{
 			System.out.println("Using Bayes Rules calculation");
 			Viterbi2 virtebi = new Viterbi2();
-			List<Pair<Integer, Double>> list = virtebi.compute(observations, converter, S, T, E);
+			List<Pair<Integer, Double>> list = virtebi.compute(converter, S, T, E);
 
 			StringBuilder builder = new StringBuilder();
 			for (int i = 0; i < observations.length; i++) {
