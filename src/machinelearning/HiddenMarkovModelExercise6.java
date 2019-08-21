@@ -41,6 +41,9 @@ public class HiddenMarkovModelExercise6 {
 		
 		{
 			System.out.println("Using Wiki Proposed Viterbi");
+			
+			double start = System.currentTimeMillis();
+			
 			Viterbi1 v = new Viterbi1();
 			List<Pair<Integer, Double>> paths = v.compute(converter, S, T, E);
 		
@@ -56,11 +59,17 @@ public class HiddenMarkovModelExercise6 {
 				
 			}
 			
+			double end = System.currentTimeMillis();
+			
 			System.out.println(builder.toString());
+			System.out.println("Total Elapse Time: " + (end - start) + " ms");
 		}
 		
 		{
 			System.out.println("Using Bayes Rules calculation");
+			
+			double start = System.currentTimeMillis();
+			
 			Viterbi2 virtebi = new Viterbi2();
 			List<Pair<Integer, Double>> list = virtebi.compute(converter, S, T, E);
 
@@ -76,7 +85,10 @@ public class HiddenMarkovModelExercise6 {
 				
 			}
 			
-			System.out.println(builder.toString());
+			double end = System.currentTimeMillis();
+			
+			System.out.println(builder.toString());		
+			System.out.println("Total Elapse Time: " + (end - start) + " ms");
 		}
 		
 		
