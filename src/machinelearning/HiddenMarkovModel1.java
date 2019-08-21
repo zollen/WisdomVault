@@ -68,14 +68,10 @@ public class HiddenMarkovModel1 {
 			System.out.println("===================Forward===================");
 			
 			eq.process("F1 = Ea * S");
-			eq.process("F2 = T * Ec * F1");
-			eq.process("F3 = T * Et * F2");
-			eq.process("F4 = T * Eg * F3");
-			
-		// 	eq.process("F2 = Ec * T * F1");
-		//  eq.process("F3 = Et * T * F2");
-		//  eq.process("F4 = Eg * T * F3");
-			
+			eq.process("F2 = Ec * T * F1");
+			eq.process("F3 = Et * T * F2");
+			eq.process("F4 = Eg * T * F3");
+					
 			System.out.print("F1: ");
 			DMatrixRMaj F1 = eq.lookupDDRM("F1");
 			F1.print("%2.3f");
@@ -120,7 +116,7 @@ public class HiddenMarkovModel1 {
 			DMatrixRMaj V4 = eq.lookupDDRM("V4");
 			V4.print("%2.6f");
 		}
-/*		
+		
 		{
 			System.out.println("===================Backward===================");
 			
@@ -142,14 +138,14 @@ public class HiddenMarkovModel1 {
 			DMatrixRMaj B1 = eq.lookupDDRM("B1");
 			B1.print("%2.6f");
 		}
-*/		
+		
 		System.out.println();
 		System.out.println("Posterior Probability Of Position #2");
 		System.out.println("PP(0) = F(C0) * B(C0) = 0.00875 * 0.03 = " + ff.format(0.00875 * 0.03));
 		System.out.println("PP(1) = F(C1) * B(C1) = 0.03375 * 0.055 = " + ff.format(0.03375 * 0.055));
-		System.out.println("PP(#2) = PP(0) + PP(1) = " + ff.format(new Double(0.002118)));
+		System.out.println("PP(#2) = PP(0) + PP(1) = " + ff.format(0.002118));
 		System.out.println("Posterior Probability Of Position #3");
-		System.out.println("PP(#3) = F(T0) * B(T0) + F(T1) * B(T1) = " + ff.format(new Double(0.002118)));
+		System.out.println("PP(#3) = F(T0) * B(T0) + F(T1) * B(T1) = " + ff.format(0.002118));
 		System.out.println("Verifying the Probability with Forward(A,C,T,G)");
 		System.out.println("PP(ACTG) = F(G0) + F(G1) = " + ff.format(0.002118));
 	}
