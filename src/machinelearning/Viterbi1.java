@@ -28,12 +28,12 @@ public class Viterbi1 {
 		}
 	}
 
-	public List<Pair<Integer, Double>> compute(String[] observables, int [] converter, String[] states, double[] sp, DMatrixRMaj tp, DMatrixRMaj ep, DecimalFormat ff) {
+	public List<Pair<Integer, Double>> compute(String[] observables, int [] converter, DMatrixRMaj sp, DMatrixRMaj tp, DMatrixRMaj ep) {
 		
-		TNode[] T = new TNode[states.length];
-		for (int state = 0; state < states.length; state++) {
+		TNode[] T = new TNode[tp.numRows];
+		for (int state = 0; state < tp.numRows; state++) {
 			List<Pair<Integer, Double>> intArray = new ArrayList<Pair<Integer, Double>>();
-			double v_prob = sp[state] * ep.get(state, converter[0]);
+			double v_prob = sp.get(state, 0) * ep.get(state, converter[0]);
 			intArray.add(new Pair<>(state, v_prob));
 			T[state] = new TNode(intArray, v_prob);
 		}
@@ -41,12 +41,12 @@ public class Viterbi1 {
 		
 		for (int output = 1; output < converter.length; output++) {
 			
-			TNode[] U = new TNode[states.length];
-			for (int next_state = 0; next_state < states.length; next_state++) {
+			TNode[] U = new TNode[tp.numRows];
+			for (int next_state = 0; next_state < tp.numRows; next_state++) {
 				
 				List<Pair<Integer, Double>> argmax = null;
 				double valmax = 0;			
-				for (int current_state = 0; current_state < states.length; current_state++) {
+				for (int current_state = 0; current_state < tp.numRows; current_state++) {
 					
 					List<Pair<Integer, Double>> v_path = new ArrayList<Pair<Integer, Double>>(T[current_state].v_path);
 					double v_prob = T[current_state].v_prob;
@@ -75,7 +75,7 @@ public class Viterbi1 {
 		// apply sum/max to the final states:
 		List<Pair<Integer, Double>> argmax = null;
 		double valmax = 0;
-		for (int state = 0; state < states.length; state++) {
+		for (int state = 0; state < tp.numRows; state++) {
 			
 			List<Pair<Integer, Double>> v_path = new ArrayList<Pair<Integer, Double>>(T[state].v_path);
 			double v_prob = T[state].v_prob;
@@ -121,12 +121,15 @@ public class Viterbi1 {
 	/* NN */			"  0.8,    0.01,      0.5;" +
 	/* VB */			" 0.19,    0.97,     0.48 " +
 						"]");
+		
+		eq.process("S = [ 0.3; 0.4; 0.3 ]");
 				
 		DMatrixRMaj T = eq.lookupDDRM("T");
 		DMatrixRMaj E = eq.lookupDDRM("E");
+		DMatrixRMaj S = eq.lookupDDRM("S");
 		
 		Viterbi1 v = new Viterbi1();
-		List<Pair<Integer, Double>> paths = v.compute(observations, converter, states, start_probability, T, E, ff);
+		List<Pair<Integer, Double>> paths = v.compute(observations, converter, S, T, E);
 		
 		System.out.print("Viterbi path: [");
 		for (int i = 0; i < paths.size(); i++) {

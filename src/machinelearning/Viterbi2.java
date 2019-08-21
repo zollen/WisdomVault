@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.equation.Equation;
 import org.nd4j.linalg.primitives.Pair;
 
@@ -42,7 +41,7 @@ public class Viterbi2 {
 
 		{
 			Viterbi2 virtebi = new Viterbi2();
-			List<Pair<Integer, Double>> list = virtebi.compute(SEQUENCE, CONVERTER, STATES, S, T, E, ff);
+			List<Pair<Integer, Double>> list = virtebi.compute(SEQUENCE, CONVERTER, S, T, E);
 
 			StringBuilder builder = new StringBuilder();
 			for (int i = 0; i < SEQUENCE.length; i++) {
@@ -82,72 +81,63 @@ public class Viterbi2 {
 		}
 	}
 
-	public List<Pair<Integer, Double>> compute(String[] sequence, int [] converter, String[] states, DMatrixRMaj starts, DMatrixRMaj T, DMatrixRMaj E, DecimalFormat ff) {
+	public List<Pair<Integer, Double>> compute(String[] sequence, int [] converter, DMatrixRMaj S, DMatrixRMaj T, DMatrixRMaj E) {
 		
-		double lastVal = 0;
-		int lastRow = 0;
 		List<Pair<Integer, Double>> list = new ArrayList<Pair<Integer, Double>>();
 		
-		for (int index = 0; index < sequence.length; index++) {
-			
-			DMatrixRMaj ee = diag(E, converter[index]);
-			
-			if (index == 0) {
-				
-				DMatrixRMaj res = new DMatrixRMaj(E.numRows, 1);
-						
-				CommonOps_DDRM.mult(ee, starts, res);
-				
-				double maxVal = Double.MIN_VALUE;
-				int maxRow = -1;
-				for (int row = 0; row < E.numRows; row++) {
-					
-					if (res.get(row, 0) > maxVal) {
-						maxVal = res.get(row, 0);
-						maxRow = row;
-					}				
-				}
-				
-				lastVal = maxVal;
-				lastRow = maxRow;
-				
-				list.add(new Pair<>(lastRow, lastVal));
-				
-			}
-			else {
-				
-				DMatrixRMaj res = new DMatrixRMaj(T.numRows, ee.numCols);
-				CommonOps_DDRM.mult(lastVal, T, ee, res);
-				
-				double maxVal = Double.MIN_VALUE;
-				int maxCol = -1;
-				for (int col = 0; col < res.numCols; col++) {
-					
-					if (res.get(lastRow, col) > maxVal) {
-						maxVal = res.get(lastRow, col);
-						maxCol = col; 
-					}
-				}
-				
-				lastVal = maxVal;
-				lastRow = maxCol;
-				
-				list.add(new Pair<>(lastRow, lastVal));
-			}			
-		}	
+		list.add(max(S, 0, E, converter[0]));
 		
-		return list;
+		return _compute(converter, T, E, list);
 	}
 	
-	private DMatrixRMaj diag(DMatrixRMaj A, int col) {
+	private List<Pair<Integer, Double>> _compute(int [] converter, DMatrixRMaj T, DMatrixRMaj E, List<Pair<Integer, Double>> list) {
 		
-		double [] args = new double[A.numCols];
+		Pair<Integer, Double> last = list.get(list.size() - 1);
 		
-		for (int i = 0; i < A.numRows; i++) {
-			args[i] = A.get(i, col);
+		if (list.size() == converter.length) {
+			return list;
 		}
-
-		return CommonOps_DDRM.diagR(A.numRows, A.numCols, args);
+		
+		List<List<Pair<Integer, Double>>> repo = new ArrayList<List<Pair<Integer, Double>>>();
+		
+		for (int col = 0; col < T.numCols; col++ ) {
+			
+			double prob = last.getSecond() *  T.get(last.getFirst(), col) * E.get(last.getFirst(), converter[list.size()]);
+		
+			List<Pair<Integer, Double>> tmp = new ArrayList<Pair<Integer, Double>>(list);
+			tmp.add(new Pair<Integer, Double>(col, prob));
+			
+			repo.add(_compute(converter, T, E, tmp));
+		}
+		
+		
+		
+		List<Pair<Integer, Double>> desirable = null;
+		double maxProb = Double.MIN_VALUE;
+		for (List<Pair<Integer, Double>> target : repo) {
+			
+			if (target.get(target.size() - 1).getSecond() > maxProb) {
+				desirable = target;
+				maxProb = target.get(target.size() - 1).getSecond();
+			}
+		}		
+			
+		return desirable;
+	}
+	
+	private Pair<Integer, Double> max(DMatrixRMaj T, int col1, DMatrixRMaj E, int col2) {
+		
+		double maxProb = Double.MIN_VALUE;
+		int maxRow = -1;
+		for (int row = 0; row < T.numRows; row++) {
+			double val = T.get(row, col1) * E.get(row, col2);
+			if (val > maxProb) {
+				maxProb = val;
+				maxRow = row;
+			}
+		}
+		
+		return new Pair<Integer, Double>(maxRow, maxProb);
 	}
 
 }

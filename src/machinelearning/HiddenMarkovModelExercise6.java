@@ -14,8 +14,7 @@ public class HiddenMarkovModelExercise6 {
 	private static String[] states = { "U1", "U2", "U3" };
 	private static String[] observations = { "R", "R", "G", "G", "B", "R", "G", "R" };
 	private static int [] converter = { 0, 0, 1, 1, 2, 0, 1, 0 };
-	private static double[] start_probability = { 1.0/3.0, 1.0/3.0, 1.0/3.0 };
-
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Equation eq = new Equation();	
@@ -43,8 +42,7 @@ public class HiddenMarkovModelExercise6 {
 		{
 			System.out.println("Using Wiki Proposed Viterbi");
 			Viterbi1 v = new Viterbi1();
-			List<Pair<Integer, Double>> paths = v.compute(observations, converter, states, 
-									start_probability, T, E, ff);
+			List<Pair<Integer, Double>> paths = v.compute(observations, converter, S, T, E);
 		
 			StringBuilder builder = new StringBuilder();
 			for (int i = 0; i < observations.length; i++) {
@@ -64,7 +62,7 @@ public class HiddenMarkovModelExercise6 {
 		{
 			System.out.println("Using Bayes Rules calculation");
 			Viterbi2 virtebi = new Viterbi2();
-			List<Pair<Integer, Double>> list = virtebi.compute(observations, converter, states, S, T, E, ff);
+			List<Pair<Integer, Double>> list = virtebi.compute(observations, converter, S, T, E);
 
 			StringBuilder builder = new StringBuilder();
 			for (int i = 0; i < observations.length; i++) {
