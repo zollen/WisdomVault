@@ -96,25 +96,6 @@ public class HiddenMarkovModel1 {
 								
 			Viterbi2 v2 = new Viterbi2();
 			System.out.println("Bayes Calculation Viterbi : " + display(v2.fit(CONVERT, S, T, E)));
-			
-			
-			eq.process("V1 = Ea * S");
-			eq.process("V2 = [1, 0] * T * Ec * max(V1)");
-			eq.process("V3 = [0, 1] * T * Et * max(V2)");
-			eq.process("V4 = [0, 1] * T * Eg * max(V3)");
-			
-			System.out.print("V1: ");
-			DMatrixRMaj V1 = eq.lookupDDRM("V1");
-			V1.print("%2.3f");
-			System.out.print("V2: ");
-			DMatrixRMaj V2 = eq.lookupDDRM("V2");
-			V2.print("%2.6f");
-			System.out.print("V3: ");
-			DMatrixRMaj V3 = eq.lookupDDRM("V3");
-			V3.print("%2.6f");
-			System.out.print("V4: ");
-			DMatrixRMaj V4 = eq.lookupDDRM("V4");
-			V4.print("%2.6f");
 		}
 		
 		{
