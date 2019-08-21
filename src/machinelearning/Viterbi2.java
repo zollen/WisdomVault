@@ -101,8 +101,8 @@ public class Viterbi2 {
 		List<List<Pair<Integer, Double>>> repo = new ArrayList<List<Pair<Integer, Double>>>();
 		
 		for (int col = 0; col < T.numCols; col++ ) {
-			
-			double prob = last.getSecond() *  T.get(last.getFirst(), col) * E.get(last.getFirst(), converter[list.size()]);
+		
+			double prob = last.getSecond() *  T.get(last.getFirst(), col) * E.get(col, converter[list.size()]);
 		
 			List<Pair<Integer, Double>> tmp = new ArrayList<Pair<Integer, Double>>(list);
 			tmp.add(new Pair<Integer, Double>(col, prob));
@@ -115,7 +115,7 @@ public class Viterbi2 {
 		List<Pair<Integer, Double>> desirable = null;
 		double maxProb = Double.MIN_VALUE;
 		for (List<Pair<Integer, Double>> target : repo) {
-			
+
 			if (target.get(target.size() - 1).getSecond() > maxProb) {
 				desirable = target;
 				maxProb = target.get(target.size() - 1).getSecond();
