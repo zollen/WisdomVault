@@ -1,17 +1,19 @@
 package machinelearning;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.equation.Equation;
+import org.nd4j.linalg.primitives.Pair;
 
 public class Forward {
 	
-	@SuppressWarnings("unused")
 	private static final DecimalFormat ff = new DecimalFormat("0.0000");
 	
 	/**
@@ -99,15 +101,16 @@ public class Forward {
 		int [] converter = { 0, 1, 2, 2 };
 		String [] states = { "R", "W", "B" };
 		
-		Map<Integer, DMatrixRMaj> map = fit(converter, S, T, E);
+		List<Pair<Integer, DMatrixRMaj>> list = fit(converter, S, T, E);
 		
-		map.entrySet().stream().forEach(p -> { 
-					System.out.print("[" + states[converter[p.getKey()]] + "] : ");
-					p.getValue().print("%2.4f");
-				});
+		System.out.println(list.stream().map(p -> 
+					"{" + states[converter[p.getKey()]] + "} : " + "[" +
+					ff.format(p.getValue().get(0, 0)) + ", " +
+					ff.format(p.getValue().get(1, 0)) + "]"
+				).collect(Collectors.joining(", ")));
 	}
 	
-	public static Map<Integer, DMatrixRMaj> fit(int [] converter, DMatrixRMaj S, DMatrixRMaj T, DMatrixRMaj E) {
+	public static List<Pair<Integer, DMatrixRMaj>> fit(int [] converter, DMatrixRMaj S, DMatrixRMaj T, DMatrixRMaj E) {
 		
 		Map<Integer, DMatrixRMaj> map = new HashMap<Integer, DMatrixRMaj>();
 		
@@ -117,7 +120,7 @@ public class Forward {
 		
 		
 		
-		Map<Integer, DMatrixRMaj> forward = new LinkedHashMap<Integer, DMatrixRMaj>();
+		List<Pair<Integer, DMatrixRMaj>> forward = new ArrayList<Pair<Integer, DMatrixRMaj>>();
 		DMatrixRMaj res = new DMatrixRMaj(T.numRows, 1);
 		for (int index = 0; index < converter.length; index++) {
 			
@@ -131,7 +134,7 @@ public class Forward {
 				res = tmp;
 			}	
 			
-			forward.put(index, res);
+			forward.add(new Pair<>(index, res));
 		}
 		
 		return forward;
