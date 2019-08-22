@@ -52,9 +52,9 @@ public class Forward {
 		
 		eq.process("S = [ 0.8; 0.2 ]");
 		
-		eq.process("Er = [ 0.3; 0.4 ]");
-		eq.process("Ew = [ 0.4; 0.3 ]");
-		eq.process("Eb = [ 0.3; 0.3 ]");
+//		eq.process("Er = E(0:,0)");
+//		eq.process("Ew = E(0:,1)");
+//		eq.process("Eb = E(0:,2)");
 		
 		DMatrixRMaj T = eq.lookupDDRM("T");
 		DMatrixRMaj E = eq.lookupDDRM("E");
