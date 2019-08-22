@@ -60,46 +60,67 @@ public class Forward {
 		DMatrixRMaj E = eq.lookupDDRM("E");
 		DMatrixRMaj S = eq.lookupDDRM("S");
 		
+		DecimalFormat ff = new DecimalFormat("0.0000");
+		
 		// 'R'
 //		eq.process("F1 = Er .* S");
+//		eq.process("F10 = F1(0,0)");
+//		eq.process("F11 = F1(1,0)");
 //		eq.lookupDDRM("F1").print("%2.4f");
-//		System.out.println("F1(0): " + ff.format(eq.lookupDDRM("F1").get(0, 0)));
-//		System.out.println("F1(1): " + ff.format(eq.lookupDDRM("F1").get(1, 0)));
+//		System.out.println("F1(0): " + ff.format(eq.lookupDouble("F10")));
+//		System.out.println("F1(1): " + ff.format(eq.lookupDouble("F11")));
 		
-		// 'W'                                         (Long form)
-//		eq.process("F20 = 0.4 * (0.6 * 0.24 + 0.3 * 0.08)");
+		// 'RW'                                         
+		// Long form
+		// F2(0) = E[0,W] * (T[0,0] * F1(0) + T[1,0] * F1(1))
+		// F2(0) = 0.4 * (0.6 * 0.24 + 0.3 * 0.08)
+//		eq.process("F20 = E(0,1) * (T(0,0) * F10 + T(1,0) * F11)");
 //		System.out.println("F2(0): " + ff.format(eq.lookupDouble("F20")));
-//		eq.process("F21 = 0.3 * (0.4 * 0.24 + 0.7 * 0.08)");
+		// F2(1) = E[1,W] * (T[0,1] * F1(0) + T[1,1] * F1(1))
+		// F2(1) = 0.3 * (0.4 * 0.24 + 0.7 * 0.08)
+//		eq.process("F21 = E(1,1) * (T(0,1) * F10 + T(1,1) * F11)");
 //		System.out.println("F2(1): " + ff.format(eq.lookupDouble("F21")));
 		
-		// Transposing T switch from -> to, to -> from  (Matrix form)
+		// Matrix form
+		// Transposing T switch from -> to, to -> from  
 //		eq.process("F2 = Ew .* (T' * F1)"); 
 //		eq.lookupDDRM("F2").print("%2.4f");
 		
-		// 'B'                                          (Long form)
-//		eq.process("F30 = 0.3 * (0.6 * 0.0672 + 0.3 * 0.0456)");
+		// 'RWB'                                          
+		// Long form
+		// F3(0) = E[0,B] * (T[0,0] * F2(0) + T[1,0] * F2(1))
+		// F3(0) = 0.3 * (0.6 * 0.0672 + 0.3 * 0.0456)
+//		eq.process("F30 = E(0,2) * (T(0,0) * F20 + T(1,0) * F21)");
 //		System.out.println("F3(0): " + ff.format(eq.lookupDouble("F30")));
-//		eq.process("F31 = 0.3 * (0.4 * 0.0672 + 0.7 * 0.0456)");
+		// F3(1) = E[1,B] * (T[0,1] * F2(0) + T[1,1] * F2(1))
+		// F3(1) = 0.3 * (0.4 * 0.0672 + 0.7 * 0.0456)
+//		eq.process("F31 = E(1,2) * (T(0,1) * F20 + T(1,1) * F21)");
 //		System.out.println("F3(1): " + ff.format(eq.lookupDouble("F31")));
 		
+		// Matrix form
 		// Transposing T switch from -> to, to -> from   (Matrix form)
 //		eq.process("F3 = Eb .* (T' * F2)"); 
 //		eq.lookupDDRM("F3").print("%2.4f");
 		
-		// 'B'                                            (Long form)
-//		eq.process("F40 = 0.3 * (0.6 * 0.0162 + 0.3 * 0.0176)");
+		// 'RWBB'                                            
+		// Long form
+		// F4(0) = E[0,B] * (T[0,0] * F3(0) + T[1,0] * F3(1))
+		// F4(0) = 0.3 * (0.6 * 0.0162 + 0.3 * 0.0176)
+//		eq.process("F40 = E(0,2) * (T(0,0) * F30 + T(1,0) * F31)");
 //		System.out.println("F4(0): " + ff.format(eq.lookupDouble("F40")));
-//		eq.process("F41 = 0.3 * (0.4 * 0.0162 + 0.7 * 0.0176)");
+		// F4(1) = E[1,B] * (T[0,1] * F3(0) + T[1,1] * F3(1))
+		// F4(1) = 0.3 * (0.4 * 0.0162 + 0.7 * 0.0176)
+//		eq.process("F41 = E(1,2) * (T(0,1) * F30 + T(1,1) * F31)");
 //		System.out.println("F4(1): " + ff.format(eq.lookupDouble("F41")));
 		
-		// Transposing T switch from -> to, to -> from    (Matrix form)
+		// Matrix form
+		// Transposing T switch from -> to, to -> from    
 //		eq.process("F4 = Eb .* (T' * F3)"); 
 //		eq.lookupDDRM("F4").print("%2.4f");
 		
 		int [] converter = { 0, 1, 2, 2 };
 		String [] sequence = { "R", "W", "B" };
 		
-		DecimalFormat ff = new DecimalFormat("0.0000");
 		Forward forward = new Forward();
 		List<Pair<Integer, DMatrixRMaj>> list = forward.fit(converter, S, T, E);
 		
