@@ -1,6 +1,7 @@
 package machinelearning;
 import java.text.DecimalFormat;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
@@ -14,7 +15,7 @@ public class HiddenMarkovModel1 {
 	
 	private static final String[] SEQUENCE = { "A", "C", "T", "G" };
 	
-	private static final int [] CONVERT = { 0, 1, 2, 3 };
+	private static final int [] CONVERTER = { 0, 1, 2, 3 };
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -67,24 +68,8 @@ public class HiddenMarkovModel1 {
 		{
 			System.out.println("===================Forward===================");
 			
-			eq.process("F1 = Ea * S");
-			eq.process("F2 = Ec * T * F1");
-			eq.process("F3 = Et * T * F2");
-			eq.process("F4 = Eg * T * F3");
-					
-			System.out.print("F1: ");
-			DMatrixRMaj F1 = eq.lookupDDRM("F1");
-			F1.print("%2.3f");
-			System.out.print("F2: ");
-			DMatrixRMaj F2 = eq.lookupDDRM("F2");
-			F2.print("%2.5f");
-			System.out.print("F3: ");
-			DMatrixRMaj F3 = eq.lookupDDRM("F3");
-			F3.print("%2.6f");
-			System.out.print("F4: ");
-			DMatrixRMaj F4 = eq.lookupDDRM("F4");
-			F4.print("%2.6f");
-			
+			Forward forward = new Forward();
+			System.out.println(display1(forward.fit(CONVERTER, S, T, E)));			
 		}
 		
 		{
@@ -92,10 +77,10 @@ public class HiddenMarkovModel1 {
 
 
 			Viterbi v1 = new Viterbi(Viterbi.WIKI_PROPOSED_ALGO);
-			System.out.println("Wiki Proposed Viterbi Algo: " + display(v1.fit(CONVERT, S, T, E)));
+			System.out.println("Wiki Proposed Viterbi Algo: " + display2(v1.fit(CONVERTER, S, T, E)));
 								
 			Viterbi v2 = new Viterbi(Viterbi.BAYES_RULES_ALGO);
-			System.out.println("Bayes Calculation Viterbi : " + display(v2.fit(CONVERT, S, T, E)));
+			System.out.println("Bayes Calculation Viterbi : " + display2(v2.fit(CONVERTER, S, T, E)));
 		}
 		
 		{
@@ -131,7 +116,7 @@ public class HiddenMarkovModel1 {
 		System.out.println("PP(ACTG) = F(G0) + F(G1) = " + ff.format(0.002118));
 	}
 	
-	private static String display(List<Pair<Integer, Double>> list) {
+	private static String display2(List<Pair<Integer, Double>> list) {
 		
 		StringBuilder builder = new StringBuilder();
 		for (int i = 0; i < SEQUENCE.length; i++) {
@@ -146,5 +131,14 @@ public class HiddenMarkovModel1 {
 		}
 		
 		return builder.toString();
+	}
+	
+	private static String display1(List<Pair<Integer, DMatrixRMaj>> list) {
+		
+		return list.stream().map(p -> 
+			"{" + SEQUENCE[CONVERTER[p.getKey()]] + "} : " + "[" +
+			ff.format(p.getValue().get(0, 0)) + ", " +
+			ff.format(p.getValue().get(1, 0)) + "]"
+				).collect(Collectors.joining(", "));
 	}
 }

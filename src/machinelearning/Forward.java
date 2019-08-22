@@ -97,19 +97,20 @@ public class Forward {
 //		eq.lookupDDRM("F4").print("%2.4f");
 		
 		int [] converter = { 0, 1, 2, 2 };
-		String [] states = { "R", "W", "B" };
+		String [] sequence = { "R", "W", "B" };
 		
 		DecimalFormat ff = new DecimalFormat("0.0000");
-		List<Pair<Integer, DMatrixRMaj>> list = fit(converter, S, T, E);
+		Forward forward = new Forward();
+		List<Pair<Integer, DMatrixRMaj>> list = forward.fit(converter, S, T, E);
 		
 		System.out.println(list.stream().map(p -> 
-					"{" + states[converter[p.getKey()]] + "} : " + "[" +
+					"{" + sequence[converter[p.getKey()]] + "} : " + "[" +
 					ff.format(p.getValue().get(0, 0)) + ", " +
 					ff.format(p.getValue().get(1, 0)) + "]"
 				).collect(Collectors.joining(", ")));
 	}
 	
-	public static List<Pair<Integer, DMatrixRMaj>> fit(int [] converter, DMatrixRMaj S, DMatrixRMaj T, DMatrixRMaj E) {
+	public List<Pair<Integer, DMatrixRMaj>> fit(int [] converter, DMatrixRMaj S, DMatrixRMaj T, DMatrixRMaj E) {
 		
 		Map<Integer, DMatrixRMaj> map = new HashMap<Integer, DMatrixRMaj>();
 		
