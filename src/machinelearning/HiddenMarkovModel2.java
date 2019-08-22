@@ -44,7 +44,7 @@ public class HiddenMarkovModel2 {
 			
 			double start = System.currentTimeMillis();
 			
-			Viterbi1 v = new Viterbi1();
+			Viterbi v = new Viterbi(Viterbi.WIKI_PROPOSED_ALGO);
 			List<Pair<Integer, Double>> paths = v.fit(converter, S, T, E);
 		
 			StringBuilder builder = new StringBuilder();
@@ -70,7 +70,7 @@ public class HiddenMarkovModel2 {
 			
 			double start = System.currentTimeMillis();
 			
-			Viterbi2 virtebi = new Viterbi2();
+			Viterbi virtebi = new Viterbi(Viterbi.BAYES_RULES_ALGO);
 			List<Pair<Integer, Double>> list = virtebi.fit(converter, S, T, E);
 
 			StringBuilder builder = new StringBuilder();

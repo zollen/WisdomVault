@@ -13,9 +13,7 @@ import org.ejml.equation.Equation;
 import org.nd4j.linalg.primitives.Pair;
 
 public class Forward {
-	
-	private static final DecimalFormat ff = new DecimalFormat("0.0000");
-	
+
 	/**
 	 * http://www.cs.rochester.edu/u/james/CSC248/Lec11.pdf
 	 * 
@@ -101,6 +99,7 @@ public class Forward {
 		int [] converter = { 0, 1, 2, 2 };
 		String [] states = { "R", "W", "B" };
 		
+		DecimalFormat ff = new DecimalFormat("0.0000");
 		List<Pair<Integer, DMatrixRMaj>> list = fit(converter, S, T, E);
 		
 		System.out.println(list.stream().map(p -> 

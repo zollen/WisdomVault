@@ -8,14 +8,26 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
 import org.nd4j.linalg.primitives.Pair;
 
-public class Viterbi1 {
+public class Viterbi {
 	
-	private static final DecimalFormat ff = new DecimalFormat("0.0000");
+	public static final int WIKI_PROPOSED_ALGO = 1;
+	public static final int BAYES_RULES_ALGO = 2;
 	
-	private static String[] states = { "#", "NN", "VB" };
-	private static String[] observations = { "I", "write", "a letter" };
-	private static int [] converter = { 0, 1, 2 };
-	private static double[] start_probability = { 0.3, 0.4, 0.3 };
+	private int algo;
+	
+	public Viterbi(int algo) {
+		this.algo = algo;
+	}
+	
+	public List<Pair<Integer, Double>> fit(int [] converter, DMatrixRMaj sp, DMatrixRMaj tp, DMatrixRMaj ep) {
+		
+		if (this.algo == WIKI_PROPOSED_ALGO) {
+			return wiki(converter, sp, tp, ep);
+		}
+		else {
+			return bayes(converter, sp, tp, ep);
+		}
+	}
 	
 
 	private static class TNode {
@@ -28,7 +40,7 @@ public class Viterbi1 {
 		}
 	}
 
-	public List<Pair<Integer, Double>> fit(int [] converter, DMatrixRMaj sp, DMatrixRMaj tp, DMatrixRMaj ep) {
+	public List<Pair<Integer, Double>> wiki(int [] converter, DMatrixRMaj sp, DMatrixRMaj tp, DMatrixRMaj ep) {
 		
 		TNode[] T = new TNode[tp.numRows];
 		for (int state = 0; state < tp.numRows; state++) {
@@ -87,8 +99,71 @@ public class Viterbi1 {
 	
 		return argmax;
 	}
+	
+	public List<Pair<Integer, Double>> bayes(int [] converter, DMatrixRMaj S, DMatrixRMaj T, DMatrixRMaj E) {
+		
+		List<Pair<Integer, Double>> list = new ArrayList<Pair<Integer, Double>>();
+		
+		list.add(max(S, 0, E, converter[0]));
+		
+		return _compute(converter, T, E, list);
+	}
+	
+	private List<Pair<Integer, Double>> _compute(int [] converter, DMatrixRMaj T, DMatrixRMaj E, List<Pair<Integer, Double>> list) {
+		
+		Pair<Integer, Double> last = list.get(list.size() - 1);
+		
+		if (list.size() == converter.length) {
+			return list;
+		}
+		
+		
+		
+		double maxProb = Double.MIN_VALUE;
+		List<Pair<Integer, Double>> desirable = null;
+		
+		for (int col = 0; col < T.numCols; col++ ) {
+		
+			double prob = last.getSecond() *  T.get(last.getFirst(), col) * E.get(col, converter[list.size()]);
+		
+			List<Pair<Integer, Double>> tmp = new ArrayList<Pair<Integer, Double>>(list);
+			tmp.add(new Pair<Integer, Double>(col, prob));
+			
+			tmp = _compute(converter, T, E, tmp);
+			double pp = tmp.get(tmp.size() - 1).getSecond();
+			if (pp > maxProb) {
+				maxProb = pp; 
+				desirable = tmp;
+			}
+		}
+		
+		return desirable;
+	}
+	
+	private Pair<Integer, Double> max(DMatrixRMaj T, int col1, DMatrixRMaj E, int col2) {
+		
+		double maxProb = Double.MIN_VALUE;
+		int maxRow = -1;
+		for (int row = 0; row < T.numRows; row++) {
+			double val = T.get(row, col1) * E.get(row, col2);
+			if (val > maxProb) {
+				maxProb = val;
+				maxRow = row;
+			}
+		}
+		
+		return new Pair<Integer, Double>(maxRow, maxProb);
+	}
+
 
 	public static void main(String[] args) throws Exception {
+		
+		DecimalFormat ff = new DecimalFormat("0.0000");
+		
+		String[] states = { "#", "NN", "VB" };
+		String[] observations = { "I", "write", "a letter" };
+		int [] converter = { 0, 1, 2 };
+		double[] start_probability = { 0.3, 0.4, 0.3 };
 		
 		System.out.print("States: ");
 		for (int i = 0; i < states.length; i++) {
@@ -128,20 +203,39 @@ public class Viterbi1 {
 		DMatrixRMaj E = eq.lookupDDRM("E");
 		DMatrixRMaj S = eq.lookupDDRM("S");
 		
-		Viterbi1 v = new Viterbi1();
-		List<Pair<Integer, Double>> paths = v.fit(converter, S, T, E);
-		
-		System.out.print("Viterbi path: [");
-		for (int i = 0; i < paths.size(); i++) {
-			
-			if (i > 0)
-				System.out.print(", ");
-			
-			Pair<Integer, Double> pair = paths.get(i);
-			
-			System.out.print(states[pair.getFirst()] + " : " + ff.format(pair.getSecond()));
+		{
+			Viterbi v1 = new Viterbi(Viterbi.WIKI_PROPOSED_ALGO);
+			List<Pair<Integer, Double>> paths = v1.fit(converter, S, T, E);
+
+			System.out.print("Wiki Proposed ALGO: [");
+			for (int i = 0; i < paths.size(); i++) {
+
+				if (i > 0)
+					System.out.print(", ");
+
+				Pair<Integer, Double> pair = paths.get(i);
+
+				System.out.print(states[pair.getFirst()] + " : " + ff.format(pair.getSecond()));
+			}
+			System.out.println("]");
 		}
-		System.out.println("]");
+
+		{
+			Viterbi v2 = new Viterbi(Viterbi.BAYES_RULES_ALGO);
+			List<Pair<Integer, Double>> paths = v2.fit(converter, S, T, E);
+
+			System.out.print("Bayes Rules ALGO: [");
+			for (int i = 0; i < paths.size(); i++) {
+
+				if (i > 0)
+					System.out.print(", ");
+
+				Pair<Integer, Double> pair = paths.get(i);
+
+				System.out.print(states[pair.getFirst()] + " : " + ff.format(pair.getSecond()));
+			}
+			System.out.println("]");
+		}
 
 	}
 }
