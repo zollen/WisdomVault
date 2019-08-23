@@ -51,9 +51,9 @@ public class Backward {
 		
 		eq.process("S = [ 0.8; 0.2 ]");
 		
-		eq.process("Er = E(0:,0)");
-		eq.process("Ew = E(0:,1)");
-		eq.process("Eb = E(0:,2)");
+//		eq.process("Er = E(0:,0)");
+//		eq.process("Ew = E(0:,1)");
+//		eq.process("Eb = E(0:,2)");
 		
 		DMatrixRMaj T = eq.lookupDDRM("T");
 		DMatrixRMaj E = eq.lookupDDRM("E");
@@ -118,9 +118,9 @@ public class Backward {
 		List<Pair<Integer, DMatrixRMaj>> list = backward.fit(converter, S, T, E);
 		
 		System.out.println(list.stream().map(p -> 
-					"{" + output[converter[p.getKey()]] + "} : " + "[" +
-					ff.format(p.getValue().get(0, 0)) + ", " +
-					ff.format(p.getValue().get(1, 0)) + "]"
+					"{" + output[converter[p.getFirst()]] + "} : " + "[" +
+					ff.format(p.getSecond().get(0, 0)) + ", " +
+					ff.format(p.getSecond().get(1, 0)) + "]"
 				).collect(Collectors.joining(", ")));
 		
 	}
@@ -148,7 +148,7 @@ public class Backward {
 				res = tmp;
 			}	
 			
-			backward.add(new Pair<>(index, res));
+			backward.add(0, new Pair<>(index, res));
 		}
 		
 		return backward;

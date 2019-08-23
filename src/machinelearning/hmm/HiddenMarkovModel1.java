@@ -121,9 +121,9 @@ public class HiddenMarkovModel1 {
 	private static String display1(List<Pair<Integer, DMatrixRMaj>> list) {
 		
 		return list.stream().map(p -> 
-			"{" + SEQUENCE[CONVERTER[p.getKey()]] + "}: " + "[" +
-			ff.format(p.getValue().get(0, 0)) + ", " +
-			ff.format(p.getValue().get(1, 0)) + "]"
+			"{" + SEQUENCE[CONVERTER[p.getFirst()]] + "}: " + "[" +
+			ff.format(p.getSecond().get(0, 0)) + ", " +
+			ff.format(p.getSecond().get(1, 0)) + "]"
 				).collect(Collectors.joining(", "));
 	}
 }

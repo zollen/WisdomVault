@@ -21,13 +21,13 @@ public class HiddenMarkovModel2 {
 		Equation eq = new Equation();
 
 		eq.process("T = [" +
-		/* U1, U2, U3 */
+				 /* U1, U2, U3 */
 		/* U1 */ " 0.1, 0.4, 0.5;" +
 		/* U2 */ " 0.6, 0.2, 0.2;" +
 		/* U3 */ " 0.3, 0.4, 0.3 " + "]");
 
 		eq.process("E = [" +
-		/* R, G, B */
+				  /* R, G, B */
 		/* U1 */ " 0.3, 0.5, 0.2;" +
 		/* U2 */ " 0.1, 0.4, 0.5;" +
 		/* U3 */ " 0.6, 0.1, 0.3 " + "]");
@@ -120,11 +120,11 @@ public class HiddenMarkovModel2 {
 	private static String display2(List<Pair<Integer, DMatrixRMaj>> list) {
 
 		return list
-				.stream().map(p -> "{" + observations[converter[p.getKey()]] + "}: " + 
+				.stream().map(p -> "{" + observations[converter[p.getFirst()]] + "}: " + 
 						"[" +
-							ff.format(p.getValue().get(0, 0)) + ", " + 
-							ff.format(p.getValue().get(1, 0)) + ", " +
-							ff.format(p.getValue().get(2, 0)) + 
+							ff.format(p.getSecond().get(0, 0)) + ", " + 
+							ff.format(p.getSecond().get(1, 0)) + ", " +
+							ff.format(p.getSecond().get(2, 0)) + 
 						"]")
 				.collect(Collectors.joining(", "));
 	}
