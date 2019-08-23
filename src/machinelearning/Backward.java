@@ -143,8 +143,8 @@ public class Backward {
 			}
 			else {
 				DMatrixRMaj tmp = new DMatrixRMaj(T.numRows, 1);
-				CommonOps_DDRM.mult(T, map.get(converter[index + 1]), tmp);
-				CommonOps_DDRM.elementMult(tmp, res);
+				CommonOps_DDRM.elementMult(map.get(converter[index + 1]), res, tmp);
+				CommonOps_DDRM.mult(T, tmp.copy(), tmp);
 				res = tmp;
 			}	
 			
