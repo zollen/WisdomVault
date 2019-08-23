@@ -78,7 +78,7 @@ public class Backward {
 //		System.out.println("B3(1): " + ff.format(eq.lookupDouble("B31")));
 		
 		// Matrix form
-//		eq.process("B3 = T * Eb .* B4");
+//		eq.process("B3 = T * (Eb .* B4)");
 //		eq.lookupDDRM("B3").print("%2.4f");
 		
 		// 'WBB'
@@ -93,7 +93,7 @@ public class Backward {
 //		System.out.println("B2(1): " + ff.format(eq.lookupDouble("B21")));
 		
 		// Matrix form
-//		eq.process("B2 = T * Eb .* B3");
+//		eq.process("B2 = T * (Eb .* B3)");
 //		eq.lookupDDRM("B2").print("%2.4f");
 		
 		// 'RWBB'
@@ -108,7 +108,7 @@ public class Backward {
 //		System.out.println("B1(1): " + ff.format(eq.lookupDouble("B11")));
 		
 		// Matrix form
-//		eq.process("B1 = T * Ew .* B2");
+//		eq.process("B1 = T * (Ew .* B2)");
 //		eq.lookupDDRM("B1").print("%2.4f");
 		
 		int [] converter = { 0, 1, 2, 2 };
