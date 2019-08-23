@@ -119,13 +119,13 @@ public class Forward {
 //		eq.lookupDDRM("F4").print("%2.4f");
 		
 		int [] converter = { 0, 1, 2, 2 };
-		String [] sequence = { "R", "W", "B" };
+		String [] output = { "R", "W", "B" };
 		
 		Forward forward = new Forward();
 		List<Pair<Integer, DMatrixRMaj>> list = forward.fit(converter, S, T, E);
 		
 		System.out.println(list.stream().map(p -> 
-					"{" + sequence[converter[p.getKey()]] + "} : " + "[" +
+					"{" + output[converter[p.getKey()]] + "} : " + "[" +
 					ff.format(p.getValue().get(0, 0)) + ", " +
 					ff.format(p.getValue().get(1, 0)) + "]"
 				).collect(Collectors.joining(", ")));

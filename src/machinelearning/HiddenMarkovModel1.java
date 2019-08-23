@@ -86,23 +86,8 @@ public class HiddenMarkovModel1 {
 		{
 			System.out.println("===================Backward===================");
 			
-			eq.process("B4 = [1; 1]");
-			eq.process("B3 = T' * Eg * B4");
-			eq.process("B2 = T' * Et * B3");
-			eq.process("B1 = T' * Ec * B2");
-			
-			System.out.print("B4: ");
-			DMatrixRMaj B4 = eq.lookupDDRM("B4");
-			B4.print("%2.0f");
-			System.out.print("B3: ");
-			DMatrixRMaj B3 = eq.lookupDDRM("B3");
-			B3.print("%2.2f");
-			System.out.print("B2: ");
-			DMatrixRMaj B2 = eq.lookupDDRM("B2");
-			B2.print("%2.3f");
-			System.out.print("B1: ");
-			DMatrixRMaj B1 = eq.lookupDDRM("B1");
-			B1.print("%2.6f");
+			Backward backward = new Backward();
+			System.out.println(display1(backward.fit(CONVERTER, S, T, E)));
 		}
 		
 		System.out.println();
