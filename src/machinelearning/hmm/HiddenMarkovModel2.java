@@ -14,7 +14,8 @@ public class HiddenMarkovModel2 {
 
 	private static String [] states = { "U1", "U2", "U3" };
 	private static String[] characters = { "R", "G", "B" };
-	private static String[] observations = { "R", "R", "G", "G", "B", "R", "G", "R" };
+	
+	// 					sequence: "R", "R", "G", "G", "B", "R", "G", "R" 
 	private static int[] converter = { 0, 0, 1, 1, 2, 0, 1, 0 };
 
 	public static void main(String[] args) {
@@ -46,47 +47,19 @@ public class HiddenMarkovModel2 {
 		System.out.println("Forward    : " + display(fb.forward()));
 		System.out.println("Backward   : " + display(fb.backward()));
 		System.out.println("Prob(state): " + display(fb.forwardBackward()));
-		System.out.println("PP(R,G,B)  : " + display(characters, converter, fb.posteriorProb()));
+		System.out.println("PP(R,G,B)  : " + display(characters, fb.posteriorProb()));
 	}
 
 	private static String display(String [] output, List<Pair<Integer, Double>> list) {
 
-		StringBuilder builder = new StringBuilder();
-		for (int i = 0; i < observations.length; i++) {
-
-			Pair<Integer, Double> pair = list.get(i);
-
-			if (i > 0)
-				builder.append(", ");
-
-			builder.append("{" + output[pair.getFirst()] + "}: " + ff.format(pair.getSecond()));
-
-		}
-
-		return builder.toString();
-	}
-	
-	private static String display(String [] output, int [] converter, List<Pair<Integer, Double>> list) {
-
-		StringBuilder builder = new StringBuilder();
-		for (int i = 0; i < observations.length; i++) {
-
-			Pair<Integer, Double> pair = list.get(i);
-
-			if (i > 0)
-				builder.append(", ");
-
-			builder.append("{" + output[converter[pair.getFirst()]] + "}: " + ff.format(pair.getSecond()));
-
-		}
-
-		return builder.toString();
+		return list.stream().map(p -> "{" + output[p.getFirst()] + "}: " + 
+					ff.format(p.getSecond())).collect(Collectors.joining(", "));
 	}
 
 	private static String display(List<Pair<Integer, DMatrixRMaj>> list) {
 
 		return list
-				.stream().map(p -> "{" + observations[converter[p.getFirst()]] + "}: " + 
+				.stream().map(p -> "{" + characters[p.getFirst()] + "}: " + 
 						"[" +
 							ff.format(p.getSecond().get(0, 0)) + ", " + 
 							ff.format(p.getSecond().get(1, 0)) + ", " +

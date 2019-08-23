@@ -39,16 +39,16 @@ public class ForwardBackward {
 		this.posteriorProb = new ArrayList<Pair<Integer, Double>>();
 		this.fbpass = new ArrayList<Pair<Integer, DMatrixRMaj>>();
 		
-		for (int i = 0; i < this.fpass.size() && i < this.bpass.size(); i++) {
+		for (int index = 0; index < this.fpass.size() && index < this.bpass.size(); index++) {
 			
-			Pair<Integer, DMatrixRMaj> fpair = this.fpass.get(i);
-			Pair<Integer, DMatrixRMaj> bpair = this.bpass.get(i);
+			Pair<Integer, DMatrixRMaj> fpair = this.fpass.get(index);
+			Pair<Integer, DMatrixRMaj> bpair = this.bpass.get(index);
 			
 			DMatrixRMaj tmp = new DMatrixRMaj(T.numRows, 1);	
 			CommonOps_DDRM.elementMult(fpair.getSecond(), bpair.getSecond(), tmp);
 			
-			this.fbpass.add(new Pair<>(fpair.getFirst(), tmp));	
-			this.posteriorProb.add(new Pair<>(fpair.getFirst(), CommonOps_DDRM.elementSum(tmp)));
+			this.fbpass.add(new Pair<>(converter[index], tmp));	
+			this.posteriorProb.add(new Pair<>(converter[index], CommonOps_DDRM.elementSum(tmp)));
 		}
 	}
 	

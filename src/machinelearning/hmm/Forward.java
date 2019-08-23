@@ -125,7 +125,7 @@ public class Forward {
 		List<Pair<Integer, DMatrixRMaj>> list = forward.fit(converter, S, T, E);
 		
 		System.out.println(list.stream().map(p -> 
-					"{" + output[converter[p.getKey()]] + "} : " + "[" +
+					"{" + output[p.getKey()] + "} : " + "[" +
 					ff.format(p.getValue().get(0, 0)) + ", " +
 					ff.format(p.getValue().get(1, 0)) + "]"
 				).collect(Collectors.joining(", ")));
@@ -155,7 +155,7 @@ public class Forward {
 				res = tmp;
 			}	
 			
-			forward.add(new Pair<>(index, res));
+			forward.add(new Pair<>(converter[index], res));
 		}
 		
 		return forward;

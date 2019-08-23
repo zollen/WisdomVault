@@ -118,7 +118,7 @@ public class Backward {
 		List<Pair<Integer, DMatrixRMaj>> list = backward.fit(converter, S, T, E);
 		
 		System.out.println(list.stream().map(p -> 
-					"{" + output[converter[p.getFirst()]] + "} : " + "[" +
+					"{" + output[p.getFirst()] + "} : " + "[" +
 					ff.format(p.getSecond().get(0, 0)) + ", " +
 					ff.format(p.getSecond().get(1, 0)) + "]"
 				).collect(Collectors.joining(", ")));
@@ -148,7 +148,7 @@ public class Backward {
 				res = tmp;
 			}	
 			
-			backward.add(0, new Pair<>(index, res));
+			backward.add(0, new Pair<>(converter[index], res));
 		}
 		
 		return backward;
