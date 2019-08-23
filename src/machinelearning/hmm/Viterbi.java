@@ -19,13 +19,13 @@ public class Viterbi {
 		this.algo = algo;
 	}
 	
-	public List<Pair<Integer, Double>> fit(int [] converter, DMatrixRMaj sp, DMatrixRMaj tp, DMatrixRMaj ep) {
+	public List<Pair<Integer, Double>> fit(int [] converter, DMatrixRMaj S, DMatrixRMaj T, DMatrixRMaj E) {
 		
 		if (this.algo == WIKI_PROPOSED_ALGO) {
-			return wiki(converter, sp, tp, ep);
+			return wiki(converter, S, T, E);
 		}
 		else {
-			return bayes(converter, sp, tp, ep);
+			return bayes(converter, S, T, E);
 		}
 	}
 	
