@@ -204,37 +204,51 @@ public class Viterbi {
 		DMatrixRMaj S = eq.lookupDDRM("S");
 		
 		{
+			System.out.print("Wiki Proposed ALGO: [");
+			
+			double start = System.nanoTime();
+			
 			Viterbi v1 = new Viterbi(Viterbi.WIKI_PROPOSED_ALGO);
 			List<Pair<Integer, Double>> paths = v1.fit(converter, S, T, E);
-
-			System.out.print("Wiki Proposed ALGO: [");
+			
+			double end = System.nanoTime();
+	
+			StringBuilder builder = new StringBuilder();
 			for (int i = 0; i < paths.size(); i++) {
 
 				if (i > 0)
-					System.out.print(", ");
+					builder.append(", ");
 
 				Pair<Integer, Double> pair = paths.get(i);
 
-				System.out.print(states[pair.getFirst()] + " : " + ff.format(pair.getSecond()));
+				builder.append(states[pair.getFirst()] + " : " + ff.format(pair.getSecond()));
 			}
-			System.out.println("]");
+			
+			System.out.println(builder.toString() + "]    Performance: " + ((end - start) / 1000000.0) + " ms");
 		}
 
 		{
+			System.out.print("Bayes Rules ALGO: [");
+			
+			double start = System.nanoTime();
+			
 			Viterbi v2 = new Viterbi(Viterbi.BAYES_RULES_ALGO);
 			List<Pair<Integer, Double>> paths = v2.fit(converter, S, T, E);
+			
+			double end = System.nanoTime();
 
-			System.out.print("Bayes Rules ALGO: [");
+			StringBuilder builder = new StringBuilder();
 			for (int i = 0; i < paths.size(); i++) {
 
 				if (i > 0)
-					System.out.print(", ");
+					builder.append(", ");
 
 				Pair<Integer, Double> pair = paths.get(i);
 
-				System.out.print(states[pair.getFirst()] + " : " + ff.format(pair.getSecond()));
+				builder.append(states[pair.getFirst()] + " : " + ff.format(pair.getSecond()));
 			}
-			System.out.println("]");
+			
+			System.out.println(builder.toString() + "]    Performance: " + ((end - start) / 1000000.0) + " ms");
 		}
 
 	}
