@@ -44,9 +44,11 @@ public class HiddenMarkovModel2 {
 			ForwardBackward fb = new ForwardBackward.Builder().build();
 			fb.fit(converter, S, T, E);
 		
+			List<Pair<Integer, Double>> vl = fb.viterbi();
 			List<Pair<Integer, DMatrixRMaj>> ffl = fb.forward();
 			List<Pair<Integer, DMatrixRMaj>> bbl = fb.backward();
-			System.out.println("Forward    : " + display(ffl) + " || Posterior: " + ff.format(fb.forward(ffl)));
+			System.out.println("Viterbi    : " + display(states, vl) + "   || Prob(RRGGBRGR): " + ff.format(fb.viterbi(vl)));
+			System.out.println("Forward    : " + display(ffl) + "   || Posterior: " + ff.format(fb.forward(ffl)));
 			System.out.println("Backward   : " + display(bbl));
 			System.out.println("FB         : " + display(fb.forwardBackward()));
 			System.out.println("Posterior  : " + display(characters, fb.posterior()));
@@ -57,9 +59,11 @@ public class HiddenMarkovModel2 {
 									.setUnderFlowStrategy(true).build();
 			fb.fit(converter, S, T, E);
 		
+			List<Pair<Integer, Double>> vl = fb.viterbi();
 			List<Pair<Integer, DMatrixRMaj>> ffl = fb.forward();
 			List<Pair<Integer, DMatrixRMaj>> bbl = fb.backward();
-			System.out.println("Forward    : " + display(ffl) + " || Posterior: " + ff.format(fb.forward(ffl)));
+			System.out.println("Viterbi    : " + display(states, vl) + "   || Weight(RRGGBRGR): " + ff.format(fb.viterbi(vl)));
+			System.out.println("Forward    : " + display(ffl) + "   || Posterior: " + ff.format(fb.forward(ffl)));
 			System.out.println("Backward   : " + display(bbl));
 			System.out.println("FB         : " + display(fb.forwardBackward()));
 			System.out.println("Posterior  : " + display(characters, fb.posterior()));

@@ -80,6 +80,11 @@ public class Viterbi implements HMMAlgothrim<Double> {
 			
 			double v_prob = sp.get(state, 0) * ep.get(state, converter[0]);
 			
+			if (this.strategy == UnderFlowStrategy.ENABLED) {
+				v_prob = Math.log(v_prob);
+			}
+
+			
 			intArray.add(new Pair<>(state, v_prob));
 			T[state] = new TNode(intArray, v_prob);
 		}
@@ -91,14 +96,23 @@ public class Viterbi implements HMMAlgothrim<Double> {
 			for (int next_state = 0; next_state < tp.numRows; next_state++) {
 				
 				List<Pair<Integer, Double>> argmax = null;
-				double valmax = 0;			
+				double valmax = Double.NEGATIVE_INFINITY;
+				
 				for (int current_state = 0; current_state < tp.numRows; current_state++) {
 					
 					List<Pair<Integer, Double>> v_path = new ArrayList<Pair<Integer, Double>>(T[current_state].v_path);
+					
 					double v_prob = T[current_state].v_prob;
 					
 					double p = ep.get(next_state, converter[output]) * tp.get(current_state, next_state);
-					v_prob *= p;
+
+					if (this.strategy == UnderFlowStrategy.NONE) {
+						v_prob *= p;
+					}
+					else {
+						v_prob += Math.log(p);
+					}
+				
 					
 					if (v_prob > valmax) {
 						
@@ -121,7 +135,8 @@ public class Viterbi implements HMMAlgothrim<Double> {
 		
 		// apply sum/max to the final states:
 		List<Pair<Integer, Double>> argmax = null;
-		double valmax = 0;
+		double valmax = Double.NEGATIVE_INFINITY;
+		
 		for (int state = 0; state < tp.numRows; state++) {
 			
 			List<Pair<Integer, Double>> v_path = new ArrayList<Pair<Integer, Double>>(T[state].v_path);
@@ -171,8 +186,8 @@ public class Viterbi implements HMMAlgothrim<Double> {
 			}
 			else {
 				
-				prob = last.getSecond() + Math.log(T.get(last.getFirst(), col)) + 
-												Math.log(E.get(col, converter[list.size()]));
+				prob = last.getSecond() + Math.log(T.get(last.getFirst(), col) * 
+												E.get(col, converter[list.size()]));
 			}
 			
 			List<Pair<Integer, Double>> tmp = new ArrayList<Pair<Integer, Double>>(list);
@@ -279,7 +294,7 @@ public class Viterbi implements HMMAlgothrim<Double> {
 		}
 
 		{
-			System.out.print("Bayes Rules ALGO: [");
+			System.out.print("Bayes Rules ALGO  : [");
 			
 			double start = System.nanoTime();
 			
