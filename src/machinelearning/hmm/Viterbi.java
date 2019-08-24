@@ -10,27 +10,27 @@ import org.nd4j.linalg.primitives.Pair;
 
 public class Viterbi extends HMMAlgothrim {
 	
-	private VirterbiAlgorithm valgo = VirterbiAlgorithm.BAYES_RULES_ALGO;
-	private UnderFlowStrategy ualgo = UnderFlowStrategy.NONE;
+	private VirterbiAlgorithm algorithm = VirterbiAlgorithm.BAYES_RULES_ALGO;
+	private UnderFlowStrategy strategy = UnderFlowStrategy.NONE;
 	
 	public Viterbi() {}
 	
-	public Viterbi(VirterbiAlgorithm algo) {
-		this.valgo = algo;
+	public Viterbi(VirterbiAlgorithm algorithm) {
+		this.algorithm = algorithm;
 	}
 	
-	public Viterbi(UnderFlowStrategy algo) {
-		this.ualgo = algo;
+	public Viterbi(UnderFlowStrategy strategy) {
+		this.strategy = strategy;
 	}
 	
-	public Viterbi(VirterbiAlgorithm valgo, UnderFlowStrategy ualgo) {
-		this.valgo = valgo;
-		this.ualgo = ualgo;
+	public Viterbi(VirterbiAlgorithm algorithm, UnderFlowStrategy strategy) {
+		this.algorithm = algorithm;
+		this.strategy = strategy;
 	}
 	
 	public List<Pair<Integer, Double>> fit(int [] converter, DMatrixRMaj S, DMatrixRMaj T, DMatrixRMaj E) {
 		
-		if (this.valgo.equals(VirterbiAlgorithm.WIKI_PROPOSED_ALGO)) {
+		if (this.strategy.equals(VirterbiAlgorithm.WIKI_PROPOSED_ALGO)) {
 			return wiki(converter, S, T, E);
 		}
 		else {
