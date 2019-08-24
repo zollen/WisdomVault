@@ -7,7 +7,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.nd4j.linalg.primitives.Pair;
 
-public class ForwardBackward {
+public class ForwardBackward extends HMMAlgothrim {
 	
 	private Forward forward;
 	private Backward backward;
@@ -18,10 +18,10 @@ public class ForwardBackward {
 	private List<Pair<Integer, DMatrixRMaj>> fbpass;
 	private List<Pair<Integer, Double>> posteriorProb;
 	
-	private ForwardBackward(boolean logs, boolean scaled, Viterbi.Algorithm algo) {
-		this.forward = new Forward(logs, scaled);
-		this.backward = new Backward(logs, scaled);
-		this.viterbi = new Viterbi(algo);
+	private ForwardBackward(UnderFlowAlgorithm ualgo, VirterbiAlgorithm valgo) {
+		this.forward = new Forward(ualgo);
+		this.backward = new Backward(ualgo);
+		this.viterbi = new Viterbi(valgo);
 
 		this.fpass = null;
 		this.bpass = null;
@@ -32,32 +32,25 @@ public class ForwardBackward {
 	
 	public static class Builder {
 		
-		private boolean log = false;
-		private boolean scaled = false;
-		private Viterbi.Algorithm algo = Viterbi.Algorithm.BAYES_RULES_ALGO;
+		private UnderFlowAlgorithm ualgo = UnderFlowAlgorithm.NONE;
+		private VirterbiAlgorithm valgo = VirterbiAlgorithm.BAYES_RULES_ALGO;
 		
 		public Builder() {}
 		
-		public Builder setNegativeLog(boolean flag) {
+		public Builder setUnderFlowAlgorithm(UnderFlowAlgorithm flag) {
 
-			this.log = flag;			
+			this.ualgo = flag;			
 			return this; 
 		}
 		
-		public Builder setScaledValues(boolean flag) {
-		
-			this.scaled = flag;
-			return this;
-		}
-		
-		public Builder setViterbiAlgo(Viterbi.Algorithm type) {
+		public Builder setViterbiAlgorithm(VirterbiAlgorithm flag) {
 			
-			this.algo = type;
+			this.valgo = flag;
 			return this;
 		}
 		
 		public ForwardBackward build() {
-			return new ForwardBackward(log, scaled, algo);
+			return new ForwardBackward(ualgo, valgo);
 		}
 	}
 	

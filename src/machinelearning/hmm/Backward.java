@@ -12,7 +12,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.equation.Equation;
 import org.nd4j.linalg.primitives.Pair;
 
-public class Backward {
+public class Backward extends HMMAlgothrim {
 	
 	/**
 	 * http://www.cs.rochester.edu/u/james/CSC248/Lec11.pdf
@@ -140,14 +140,12 @@ public class Backward {
 		
 	}
 	
-	private boolean negativeLog = false;
-	private boolean scaledValues = false;
+	private UnderFlowAlgorithm algo = UnderFlowAlgorithm.NONE;
 	
 	public Backward() {}
 	
-	public Backward(boolean negativeLog, boolean scaledValues) {
-		this.negativeLog = negativeLog;
-		this.scaledValues = scaledValues;
+	public Backward(UnderFlowAlgorithm algo) {
+		this.algo = algo;
 	}
 	
 	public List<Pair<Integer, DMatrixRMaj>> fit(int [] converter, DMatrixRMaj S, DMatrixRMaj T, DMatrixRMaj E) {

@@ -8,24 +8,29 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
 import org.nd4j.linalg.primitives.Pair;
 
-public class Viterbi {
+public class Viterbi extends HMMAlgothrim {
 	
-	public enum Algorithm {
-		BAYES_RULES_ALGO,
-		WIKI_PROPOSED_ALGO
-	}
-	
-	private Algorithm algo = Algorithm.BAYES_RULES_ALGO;
+	private VirterbiAlgorithm valgo = VirterbiAlgorithm.BAYES_RULES_ALGO;
+	private UnderFlowAlgorithm ualgo = UnderFlowAlgorithm.NONE;
 	
 	public Viterbi() {}
 	
-	public Viterbi(Algorithm algo) {
-		this.algo = algo;
+	public Viterbi(VirterbiAlgorithm algo) {
+		this.valgo = algo;
+	}
+	
+	public Viterbi(UnderFlowAlgorithm algo) {
+		this.ualgo = algo;
+	}
+	
+	public Viterbi(VirterbiAlgorithm valgo, UnderFlowAlgorithm ualgo) {
+		this.valgo = valgo;
+		this.ualgo = ualgo;
 	}
 	
 	public List<Pair<Integer, Double>> fit(int [] converter, DMatrixRMaj S, DMatrixRMaj T, DMatrixRMaj E) {
 		
-		if (this.algo.equals(Algorithm.WIKI_PROPOSED_ALGO)) {
+		if (this.valgo.equals(VirterbiAlgorithm.WIKI_PROPOSED_ALGO)) {
 			return wiki(converter, S, T, E);
 		}
 		else {
@@ -212,7 +217,7 @@ public class Viterbi {
 			
 			double start = System.nanoTime();
 			
-			Viterbi v1 = new Viterbi(Algorithm.WIKI_PROPOSED_ALGO);
+			Viterbi v1 = new Viterbi(VirterbiAlgorithm.WIKI_PROPOSED_ALGO);
 			List<Pair<Integer, Double>> paths = v1.fit(converter, S, T, E);
 			
 			double end = System.nanoTime();
@@ -236,7 +241,7 @@ public class Viterbi {
 			
 			double start = System.nanoTime();
 			
-			Viterbi v2 = new Viterbi(Algorithm.BAYES_RULES_ALGO);
+			Viterbi v2 = new Viterbi(VirterbiAlgorithm.BAYES_RULES_ALGO);
 			List<Pair<Integer, Double>> paths = v2.fit(converter, S, T, E);
 			
 			double end = System.nanoTime();

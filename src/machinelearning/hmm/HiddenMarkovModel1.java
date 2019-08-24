@@ -76,10 +76,10 @@ public class HiddenMarkovModel1 {
 			System.out.println("==================Viterbi====================");
 
 
-			Viterbi v1 = new Viterbi(Viterbi.Algorithm.WIKI_PROPOSED_ALGO);
+			Viterbi v1 = new Viterbi(HMMAlgothrim.VirterbiAlgorithm.WIKI_PROPOSED_ALGO);
 			System.out.println("Wiki Proposed Viterbi Algo: " + display2(v1.fit(CONVERTER, S, T, E)));
 								
-			Viterbi v2 = new Viterbi(Viterbi.Algorithm.BAYES_RULES_ALGO);
+			Viterbi v2 = new Viterbi(HMMAlgothrim.VirterbiAlgorithm.BAYES_RULES_ALGO);
 			System.out.println("Bayes Calculation Viterbi : " + display2(v2.fit(CONVERTER, S, T, E)));
 		}
 		
