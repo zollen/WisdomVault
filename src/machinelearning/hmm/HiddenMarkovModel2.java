@@ -47,7 +47,7 @@ public class HiddenMarkovModel2 {
 			List<Pair<Integer, Double>> vl = fb.viterbi();
 			List<Pair<Integer, DMatrixRMaj>> ffl = fb.forward();
 			List<Pair<Integer, DMatrixRMaj>> bbl = fb.backward();
-			System.out.println("Viterbi    : " + display(states, vl) + "   || Prob(RRGGBRGR): " + ff.format(fb.viterbi(vl)));
+			System.out.println("Viterbi    : " + display(states, vl) + "   || Prob(U3,U3,U2,U1,U3,U3,U1,U3|R,R,G,G,B,R,G,R): " + ff.format(fb.viterbi(vl)));
 			System.out.println("Forward    : " + display(ffl) + "   || Posterior: " + ff.format(fb.forward(ffl)));
 			System.out.println("Backward   : " + display(bbl));
 			System.out.println("FB         : " + display(fb.forwardBackward()));
@@ -62,7 +62,7 @@ public class HiddenMarkovModel2 {
 			List<Pair<Integer, Double>> vl = fb.viterbi();
 			List<Pair<Integer, DMatrixRMaj>> ffl = fb.forward();
 			List<Pair<Integer, DMatrixRMaj>> bbl = fb.backward();
-			System.out.println("Viterbi    : " + display(states, vl) + "   || Weight(RRGGBRGR): " + ff.format(fb.viterbi(vl)));
+			System.out.println("Viterbi    : " + display(states, vl) + "   || Weight(U3,U3,U2,U1,U3,U3,U1,U3|R,R,G,G,B,R,G,R): " + ff.format(fb.viterbi(vl)));
 			System.out.println("Forward    : " + display(ffl) + "   || Posterior: " + ff.format(fb.forward(ffl)));
 			System.out.println("Backward   : " + display(bbl));
 			System.out.println("FB         : " + display(fb.forwardBackward()));
