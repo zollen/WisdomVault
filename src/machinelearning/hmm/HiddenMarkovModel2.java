@@ -40,7 +40,7 @@ public class HiddenMarkovModel2 {
 		DMatrixRMaj E = eq.lookupDDRM("E");
 		DMatrixRMaj S = eq.lookupDDRM("S");
 
-		ForwardBackward fb = new ForwardBackward();
+		ForwardBackward fb = new ForwardBackward.Builder().build();
 		fb.fit(converter, S, T, E);
 		
 		System.out.println("Viterbi    : " + display(states, fb.viterbi()));

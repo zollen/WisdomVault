@@ -18,16 +18,47 @@ public class ForwardBackward {
 	private List<Pair<Integer, DMatrixRMaj>> fbpass;
 	private List<Pair<Integer, Double>> posteriorProb;
 	
-	public ForwardBackward() {
-		this.forward = new Forward();
-		this.backward = new Backward();
-		this.viterbi = new Viterbi(Viterbi.BAYES_RULES_ALGO);
+	private ForwardBackward(boolean logs, boolean scaled, Viterbi.Algorithm algo) {
+		this.forward = new Forward(logs, scaled);
+		this.backward = new Backward(logs, scaled);
+		this.viterbi = new Viterbi(algo);
 
 		this.fpass = null;
 		this.bpass = null;
 		this.fbpass = null;
 		this.statesProb = null;
 		this.posteriorProb = null;
+	}
+	
+	public static class Builder {
+		
+		private boolean log = false;
+		private boolean scaled = false;
+		private Viterbi.Algorithm algo = Viterbi.Algorithm.BAYES_RULES_ALGO;
+		
+		public Builder() {}
+		
+		public Builder setNegativeLog(boolean flag) {
+
+			this.log = flag;			
+			return this; 
+		}
+		
+		public Builder setScaledValues(boolean flag) {
+		
+			this.scaled = flag;
+			return this;
+		}
+		
+		public Builder setViterbiAlgo(Viterbi.Algorithm type) {
+			
+			this.algo = type;
+			return this;
+		}
+		
+		public ForwardBackward build() {
+			return new ForwardBackward(log, scaled, algo);
+		}
 	}
 	
 	public void fit(int [] converter, DMatrixRMaj S, DMatrixRMaj T, DMatrixRMaj E) {

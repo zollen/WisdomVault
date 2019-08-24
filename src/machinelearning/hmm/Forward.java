@@ -131,6 +131,16 @@ public class Forward {
 				).collect(Collectors.joining(", ")));
 	}
 	
+	private boolean negativeLog = false;
+	private boolean scaledValues = false;
+	
+	public Forward() {}
+	
+	public Forward(boolean negativeLog, boolean scaledValues) {
+		this.negativeLog = negativeLog;
+		this.scaledValues = scaledValues;
+	}
+	
 	public List<Pair<Integer, DMatrixRMaj>> fit(int [] converter, DMatrixRMaj S, DMatrixRMaj T, DMatrixRMaj E) {
 		
 		Map<Integer, DMatrixRMaj> map = new HashMap<Integer, DMatrixRMaj>();

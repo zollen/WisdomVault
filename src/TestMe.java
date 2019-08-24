@@ -36,7 +36,7 @@ public class TestMe {
 		int [] converter = { 0, 1, 0 };
 		String [] output = { "0", "1" };
 		
-		ForwardBackward fb = new ForwardBackward();
+		ForwardBackward fb = new ForwardBackward.Builder().build();
 		fb.fit(converter, S, T, E);
 		
 		System.out.println("Forward    : " + display(output, converter, fb.forward()));
