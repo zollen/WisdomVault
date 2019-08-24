@@ -63,10 +63,10 @@ public class Backward {
 		
 		// SEQUENCE: R W B B
 		
-		// 'B'
+		// 'B'  time = 4
 //		eq.process("B4 = [ 1; 1]");
 		
-		// 'BB'
+		// 'BB'  time = 3
 		// Long form
 		// B3(0) = T[0,0] * E[0,B] * 1 + T[0,1] * E[1,B] * 1
 		// B3(0) = 0.6 * 0.3 * 1 + 0.4 * 0.3 * 1
@@ -81,7 +81,7 @@ public class Backward {
 //		eq.process("B3 = T * (Eb .* B4)");
 //		eq.lookupDDRM("B3").print("%2.4f");
 		
-		// 'WBB'
+		// 'WBB'  time = 2
 		// Long form
 		// B2(0) = T[0,0] * E[0,B] * B3(0) + T[0,1] * E[1,B] * B3(1)
 		// B2(0) = 0.6 * 0.3 * 0.3 + 0.4 * 0.3 * 0.3
@@ -96,7 +96,7 @@ public class Backward {
 //		eq.process("B2 = T * (Eb .* B3)");
 //		eq.lookupDDRM("B2").print("%2.4f");
 		
-		// 'RWBB'
+		// 'RWBB' time = 1
 		// Long form
 		// B1(0) = T[0,0] * E[0,W] * B2(0) + T[0,1] * E[1,W] * B2(1)
 		// B1(0) = 0.6 * 0.4 * 0.09 + 0.4 * 0.3 * 0.09
@@ -110,6 +110,21 @@ public class Backward {
 		// Matrix form
 //		eq.process("B1 = T * (Ew .* B2)");
 //		eq.lookupDDRM("B1").print("%2.4f");
+		
+		// 'RWBB'  time = 0
+		// Long form
+		// B0(0) = S[0,0] * E[0,R] * B1(0)
+		// B0(0) = 0.8 * 0.3 * 0.0324
+//		eq.process("B00 = S(0,0) * E(0,0) * B10");
+//		System.out.println("B0(0): " + ff.format(eq.lookupDouble("B00")));
+		// B0(1) = S[1,0] * E[1,R] * B1(1)
+		// B0(1) = 0.2 * 0.4 * 0.0297
+//		eq.process("B01 = S(1,0) * E(1,0) * B11");
+//		System.out.println("B0(1): " + ff.format(eq.lookupDouble("B01")));
+		
+		// Matrix form
+//		eq.process("B0 = S .* Er .* B1");
+//		eq.lookupDDRM("B0").print(%2.4f");
 		
 		int [] converter = { 0, 1, 2, 2 };
 		String [] output = { "R", "W", "B"};
