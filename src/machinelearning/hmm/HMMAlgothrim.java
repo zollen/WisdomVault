@@ -2,7 +2,7 @@ package machinelearning.hmm;
 
 public class HMMAlgothrim {
 	
-	public enum UnderFlowAlgorithm {
+	public enum UnderFlowStrategy {
 		NONE, NEGATIVE_LOG, SCALED_VALUES
 	}
 	

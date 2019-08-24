@@ -18,10 +18,10 @@ public class ForwardBackward extends HMMAlgothrim {
 	private List<Pair<Integer, DMatrixRMaj>> fbpass;
 	private List<Pair<Integer, Double>> posteriorProb;
 	
-	private ForwardBackward(UnderFlowAlgorithm ualgo, VirterbiAlgorithm valgo) {
-		this.forward = new Forward(ualgo);
-		this.backward = new Backward(ualgo);
-		this.viterbi = new Viterbi(valgo);
+	private ForwardBackward(UnderFlowStrategy strategy, VirterbiAlgorithm algorithm) {
+		this.forward = new Forward(strategy);
+		this.backward = new Backward(strategy);
+		this.viterbi = new Viterbi(algorithm, strategy);
 
 		this.fpass = null;
 		this.bpass = null;
@@ -32,12 +32,12 @@ public class ForwardBackward extends HMMAlgothrim {
 	
 	public static class Builder {
 		
-		private UnderFlowAlgorithm ualgo = UnderFlowAlgorithm.NONE;
+		private UnderFlowStrategy ualgo = UnderFlowStrategy.NONE;
 		private VirterbiAlgorithm valgo = VirterbiAlgorithm.BAYES_RULES_ALGO;
 		
 		public Builder() {}
 		
-		public Builder setUnderFlowAlgorithm(UnderFlowAlgorithm flag) {
+		public Builder setUnderFlowAlgorithm(UnderFlowStrategy flag) {
 
 			this.ualgo = flag;			
 			return this; 

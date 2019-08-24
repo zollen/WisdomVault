@@ -131,12 +131,12 @@ public class Forward extends HMMAlgothrim {
 				).collect(Collectors.joining(", ")));
 	}
 	
-	private UnderFlowAlgorithm algo = UnderFlowAlgorithm.NONE;
+	private UnderFlowStrategy strategy = UnderFlowStrategy.NONE;
 	
 	public Forward() {}
 	
-	public Forward(UnderFlowAlgorithm algo) {
-		this.algo = algo;
+	public Forward(UnderFlowStrategy strategy) {
+		this.strategy = strategy;
 	}
 	
 	public List<Pair<Integer, DMatrixRMaj>> fit(int [] converter, DMatrixRMaj S, DMatrixRMaj T, DMatrixRMaj E) {

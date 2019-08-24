@@ -11,7 +11,7 @@ import org.nd4j.linalg.primitives.Pair;
 public class Viterbi extends HMMAlgothrim {
 	
 	private VirterbiAlgorithm valgo = VirterbiAlgorithm.BAYES_RULES_ALGO;
-	private UnderFlowAlgorithm ualgo = UnderFlowAlgorithm.NONE;
+	private UnderFlowStrategy ualgo = UnderFlowStrategy.NONE;
 	
 	public Viterbi() {}
 	
@@ -19,11 +19,11 @@ public class Viterbi extends HMMAlgothrim {
 		this.valgo = algo;
 	}
 	
-	public Viterbi(UnderFlowAlgorithm algo) {
+	public Viterbi(UnderFlowStrategy algo) {
 		this.ualgo = algo;
 	}
 	
-	public Viterbi(VirterbiAlgorithm valgo, UnderFlowAlgorithm ualgo) {
+	public Viterbi(VirterbiAlgorithm valgo, UnderFlowStrategy ualgo) {
 		this.valgo = valgo;
 		this.ualgo = ualgo;
 	}

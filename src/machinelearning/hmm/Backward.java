@@ -140,12 +140,12 @@ public class Backward extends HMMAlgothrim {
 		
 	}
 	
-	private UnderFlowAlgorithm algo = UnderFlowAlgorithm.NONE;
+	private UnderFlowStrategy strategy = UnderFlowStrategy.NONE;
 	
 	public Backward() {}
 	
-	public Backward(UnderFlowAlgorithm algo) {
-		this.algo = algo;
+	public Backward(UnderFlowStrategy strategy) {
+		this.strategy = strategy;
 	}
 	
 	public List<Pair<Integer, DMatrixRMaj>> fit(int [] converter, DMatrixRMaj S, DMatrixRMaj T, DMatrixRMaj E) {
