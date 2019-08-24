@@ -12,7 +12,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.equation.Equation;
 import org.nd4j.linalg.primitives.Pair;
 
-public class Forward extends HMMAlgothrim {
+public class Forward implements HMMAlgothrim<DMatrixRMaj> {
 
 	/**
 	 * http://www.cs.rochester.edu/u/james/CSC248/Lec11.pdf
@@ -139,6 +139,7 @@ public class Forward extends HMMAlgothrim {
 		this.strategy = strategy;
 	}
 	
+	@Override
 	public List<Pair<Integer, DMatrixRMaj>> fit(int [] converter, DMatrixRMaj S, DMatrixRMaj T, DMatrixRMaj E) {
 		
 		Map<Integer, DMatrixRMaj> map = new HashMap<Integer, DMatrixRMaj>();
@@ -147,19 +148,29 @@ public class Forward extends HMMAlgothrim {
 			map.put(index, CommonOps_DDRM.extractColumn(E, index, null));
 		}
 		
-		
-		
+				
 		List<Pair<Integer, DMatrixRMaj>> forward = new ArrayList<Pair<Integer, DMatrixRMaj>>();
 		DMatrixRMaj res = new DMatrixRMaj(T.numRows, 1);
 		for (int index = 0; index < converter.length; index++) {
 			
 			if (index == 0) {
-				CommonOps_DDRM.elementMult(map.get(converter[index]), S, res);		
+				
+				CommonOps_DDRM.elementMult(map.get(converter[index]), S, res);	
+				
+				if (strategy.equals(UnderFlowStrategy.ENABLED)) {
+					CommonOps_DDRM.scale(1.0 / CommonOps_DDRM.elementSum(res), res);
+				}
 			}
 			else {
 				DMatrixRMaj tmp = new DMatrixRMaj(T.numRows, res.numCols);
+				
 				CommonOps_DDRM.multTransA(T, res, tmp);
 				CommonOps_DDRM.elementMult(tmp, map.get(converter[index]));
+				
+				if (strategy.equals(UnderFlowStrategy.ENABLED)) {
+					CommonOps_DDRM.scale(1.0 / CommonOps_DDRM.elementSum(tmp), tmp);
+				}
+				
 				res = tmp;
 			}	
 			
@@ -167,5 +178,12 @@ public class Forward extends HMMAlgothrim {
 		}
 		
 		return forward;
+	}
+	
+	@Override
+	public double posterior(List<Pair<Integer, DMatrixRMaj>> list) {
+		
+		DMatrixRMaj last = list.get(list.size() - 1).getSecond();
+		return CommonOps_DDRM.elementSum(last);
 	}
 }

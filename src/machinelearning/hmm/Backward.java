@@ -12,7 +12,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.equation.Equation;
 import org.nd4j.linalg.primitives.Pair;
 
-public class Backward extends HMMAlgothrim {
+public class Backward implements HMMAlgothrim<DMatrixRMaj> {
 	
 	/**
 	 * http://www.cs.rochester.edu/u/james/CSC248/Lec11.pdf
@@ -148,6 +148,7 @@ public class Backward extends HMMAlgothrim {
 		this.strategy = strategy;
 	}
 	
+	@Override
 	public List<Pair<Integer, DMatrixRMaj>> fit(int [] converter, DMatrixRMaj S, DMatrixRMaj T, DMatrixRMaj E) {
 		
 		Map<Integer, DMatrixRMaj> map = new HashMap<Integer, DMatrixRMaj>();
@@ -163,11 +164,22 @@ public class Backward extends HMMAlgothrim {
 			
 			if (index == converter.length - 1) {
 				CommonOps_DDRM.fill(res, 1.0);
+				
+				if (strategy.equals(UnderFlowStrategy.ENABLED)) {
+					CommonOps_DDRM.scale(1.0 / CommonOps_DDRM.elementSum(res), res);
+				}
 			}
 			else {
 				DMatrixRMaj tmp = new DMatrixRMaj(T.numRows, 1);
+				
 				CommonOps_DDRM.elementMult(map.get(converter[index + 1]), res, tmp);
 				CommonOps_DDRM.mult(T, tmp.copy(), tmp);
+					
+				if (strategy.equals(UnderFlowStrategy.ENABLED)) {
+						double sums = CommonOps_DDRM.elementSum(tmp);
+						CommonOps_DDRM.scale(1.0 / sums, tmp);
+				}
+			
 				res = tmp;
 			}	
 			
@@ -176,6 +188,12 @@ public class Backward extends HMMAlgothrim {
 		
 		return backward;
 		
+	}
+	
+	@Override
+	public double posterior(List<Pair<Integer, DMatrixRMaj>> list) {
+		
+		throw new RuntimeException("Not supported!");
 	}
 
 }

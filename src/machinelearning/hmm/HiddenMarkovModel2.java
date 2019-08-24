@@ -40,14 +40,30 @@ public class HiddenMarkovModel2 {
 		DMatrixRMaj E = eq.lookupDDRM("E");
 		DMatrixRMaj S = eq.lookupDDRM("S");
 
-		ForwardBackward fb = new ForwardBackward.Builder().build();
-		fb.fit(converter, S, T, E);
+		{
+			ForwardBackward fb = new ForwardBackward.Builder().build();
+			fb.fit(converter, S, T, E);
 		
-		System.out.println("Viterbi    : " + display(states, fb.viterbi()));
-		System.out.println("Forward    : " + display(fb.forward()));
-		System.out.println("Backward   : " + display(fb.backward()));
-		System.out.println("Prob(state): " + display(fb.forwardBackward()));
-		System.out.println("PP(R,G,B)  : " + display(characters, fb.posteriorProb()));
+			List<Pair<Integer, DMatrixRMaj>> ffl = fb.forward();
+			List<Pair<Integer, DMatrixRMaj>> bbl = fb.backward();
+			System.out.println("Forward    : " + display(ffl) + " || Posterior: " + ff.format(fb.forward(ffl)));
+			System.out.println("Backward   : " + display(bbl));
+			System.out.println("FB         : " + display(fb.forwardBackward()));
+			System.out.println("Posterior  : " + display(characters, fb.posteriorProb()));
+		}
+		System.out.println();
+		{
+			ForwardBackward fb = new ForwardBackward.Builder()
+									.setUnderFlowStrategy(true).build();
+			fb.fit(converter, S, T, E);
+		
+			List<Pair<Integer, DMatrixRMaj>> ffl = fb.forward();
+			List<Pair<Integer, DMatrixRMaj>> bbl = fb.backward();
+			System.out.println("Forward    : " + display(ffl) + " || Posterior: " + ff.format(fb.forward(ffl)));
+			System.out.println("Backward   : " + display(bbl));
+			System.out.println("FB         : " + display(fb.forwardBackward()));
+			System.out.println("Posterior  : " + display(characters, fb.posteriorProb()));
+		}
 	}
 
 	private static String display(String [] output, List<Pair<Integer, Double>> list) {

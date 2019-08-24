@@ -17,26 +17,27 @@ public class TestMe {
 		Equation eq = new Equation();
 		eq.process("T = [ " +
 					   /* A,    B */
-			/* A */ "  0.99, 0.01;" +
-			/* B */ "  0.01, 0.99 " +
+			/* A */ "   0.7, 0.3;" +
+			/* B */ "   0.3, 0.7 " +
 						"]");
 
 		eq.process("E = [" +
 				 /*  0,   1 */
-		/* A */  " 0.8, 0.2;" +
-		/* B */  " 0.1, 0.9 " +
+		/* A */  " 0.9, 0.1;" +
+		/* B */  " 0.2, 0.8 " +
 					"]");
 		
-		eq.process("S = [ 0.99; 0.01 ]");
+		eq.process("S = [ 0.5; 0.5 ]");
 		
 		DMatrixRMaj T = eq.lookupDDRM("T");
 		DMatrixRMaj E = eq.lookupDDRM("E");
 		DMatrixRMaj S = eq.lookupDDRM("S");
 		
-		int [] converter = { 0, 1, 0 };
+		int [] converter = { 0, 0, 1, 0, 0 };
 		String [] output = { "0", "1" };
 		
-		ForwardBackward fb = new ForwardBackward.Builder().build();
+		ForwardBackward fb = new ForwardBackward.Builder()
+				.setUnderFlowStrategy(true).build();
 		fb.fit(converter, S, T, E);
 		
 		System.out.println("Forward    : " + display(output, converter, fb.forward()));

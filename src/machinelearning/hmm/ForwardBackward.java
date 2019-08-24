@@ -7,7 +7,10 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.nd4j.linalg.primitives.Pair;
 
-public class ForwardBackward extends HMMAlgothrim {
+import machinelearning.hmm.HMMAlgothrim.UnderFlowStrategy;
+import machinelearning.hmm.HMMAlgothrim.VirterbiAlgorithm;
+
+public class ForwardBackward  {
 	
 	private Forward forward;
 	private Backward backward;
@@ -17,6 +20,7 @@ public class ForwardBackward extends HMMAlgothrim {
 	private List<Pair<Integer, DMatrixRMaj>> bpass;
 	private List<Pair<Integer, DMatrixRMaj>> fbpass;
 	private List<Pair<Integer, Double>> posteriorProb;
+	private UnderFlowStrategy strategy;
 	
 	private ForwardBackward(UnderFlowStrategy strategy, VirterbiAlgorithm algorithm) {
 		this.forward = new Forward(strategy);
@@ -28,6 +32,7 @@ public class ForwardBackward extends HMMAlgothrim {
 		this.fbpass = null;
 		this.statesProb = null;
 		this.posteriorProb = null;
+		this.strategy = strategy;
 	}
 	
 	public static class Builder {
@@ -37,9 +42,11 @@ public class ForwardBackward extends HMMAlgothrim {
 		
 		public Builder() {}
 		
-		public Builder setUnderFlowAlgorithm(UnderFlowStrategy flag) {
-
-			this.ualgo = flag;			
+		public Builder setUnderFlowStrategy(boolean flag) {
+			
+			if (flag)
+				this.ualgo = UnderFlowStrategy.ENABLED;
+			
 			return this; 
 		}
 		
@@ -68,8 +75,13 @@ public class ForwardBackward extends HMMAlgothrim {
 			Pair<Integer, DMatrixRMaj> fpair = this.fpass.get(index);
 			Pair<Integer, DMatrixRMaj> bpair = this.bpass.get(index);
 			
-			DMatrixRMaj tmp = new DMatrixRMaj(T.numRows, 1);	
+			DMatrixRMaj tmp = new DMatrixRMaj(T.numRows, 1);
+
 			CommonOps_DDRM.elementMult(fpair.getSecond(), bpair.getSecond(), tmp);
+			
+			if (this.strategy == UnderFlowStrategy.ENABLED) {
+				CommonOps_DDRM.scale(1.0 / CommonOps_DDRM.elementSum(tmp), tmp);
+			}
 			
 			this.fbpass.add(new Pair<>(converter[index], tmp));	
 			this.posteriorProb.add(new Pair<>(converter[index], CommonOps_DDRM.elementSum(tmp)));
@@ -82,6 +94,10 @@ public class ForwardBackward extends HMMAlgothrim {
 	
 	public List<Pair<Integer, DMatrixRMaj>> forward() {
 		return fpass;
+	}
+	
+	public double forward(List<Pair<Integer, DMatrixRMaj>> list) {
+		return forward.posterior(list);
 	}
 	
 	public List<Pair<Integer, DMatrixRMaj>> backward() {

@@ -8,7 +8,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
 import org.nd4j.linalg.primitives.Pair;
 
-public class Viterbi extends HMMAlgothrim {
+public class Viterbi implements HMMAlgothrim<Double> {
 	
 	private VirterbiAlgorithm algorithm = VirterbiAlgorithm.BAYES_RULES_ALGO;
 	private UnderFlowStrategy strategy = UnderFlowStrategy.NONE;
@@ -16,26 +16,49 @@ public class Viterbi extends HMMAlgothrim {
 	public Viterbi() {}
 	
 	public Viterbi(VirterbiAlgorithm algorithm) {
-		this.algorithm = algorithm;
+		this.setAlgorithm(algorithm);
 	}
 	
 	public Viterbi(UnderFlowStrategy strategy) {
-		this.strategy = strategy;
+		this.setStrategy(strategy);
 	}
 	
 	public Viterbi(VirterbiAlgorithm algorithm, UnderFlowStrategy strategy) {
+		this.setAlgorithm(algorithm);
+		this.setStrategy(strategy);
+	}
+	
+	public VirterbiAlgorithm getAlgorithm() {
+		return algorithm;
+	}
+
+	public void setAlgorithm(VirterbiAlgorithm algorithm) {
 		this.algorithm = algorithm;
+	}
+	
+	public UnderFlowStrategy getStrategy() {
+		return strategy;
+	}
+
+	public void setStrategy(UnderFlowStrategy strategy) {
 		this.strategy = strategy;
 	}
 	
+	@Override
 	public List<Pair<Integer, Double>> fit(int [] converter, DMatrixRMaj S, DMatrixRMaj T, DMatrixRMaj E) {
 		
-		if (this.strategy.equals(VirterbiAlgorithm.WIKI_PROPOSED_ALGO)) {
+		if (this.algorithm == VirterbiAlgorithm.WIKI_PROPOSED_ALGO) {
 			return wiki(converter, S, T, E);
 		}
 		else {
 			return bayes(converter, S, T, E);
 		}
+	}
+	
+	@Override
+	public double posterior(List<Pair<Integer, Double>> list) {
+		
+		throw new RuntimeException("Not supported!");
 	}
 	
 
