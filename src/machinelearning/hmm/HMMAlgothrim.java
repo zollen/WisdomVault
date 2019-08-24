@@ -17,6 +17,4 @@ public interface HMMAlgothrim<T> {
 	
 	public List<Pair<Integer, T>> fit(int [] converter, DMatrixRMaj S, DMatrixRMaj T, DMatrixRMaj E);
 	
-	public double posterior(List<Pair<Integer, T>> list);
-
 }

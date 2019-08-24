@@ -15,11 +15,11 @@ public class ForwardBackward  {
 	private Forward forward;
 	private Backward backward;
 	private Viterbi viterbi; 
-	private List<Pair<Integer, Double>> statesProb;
+	private List<Pair<Integer, Double>> states;
 	private List<Pair<Integer, DMatrixRMaj>> fpass;
 	private List<Pair<Integer, DMatrixRMaj>> bpass;
 	private List<Pair<Integer, DMatrixRMaj>> fbpass;
-	private List<Pair<Integer, Double>> posteriorProb;
+	private List<Pair<Integer, Double>> posterior;
 	private UnderFlowStrategy strategy;
 	
 	private ForwardBackward(UnderFlowStrategy strategy, VirterbiAlgorithm algorithm) {
@@ -30,8 +30,8 @@ public class ForwardBackward  {
 		this.fpass = null;
 		this.bpass = null;
 		this.fbpass = null;
-		this.statesProb = null;
-		this.posteriorProb = null;
+		this.states = null;
+		this.posterior = null;
 		this.strategy = strategy;
 	}
 	
@@ -50,9 +50,15 @@ public class ForwardBackward  {
 			return this; 
 		}
 		
-		public Builder setViterbiAlgorithm(VirterbiAlgorithm flag) {
+		public Builder setWikiViterbiAlgorithm() {
 			
-			this.valgo = flag;
+			this.valgo = VirterbiAlgorithm.WIKI_PROPOSED_ALGO;
+			return this;
+		}
+		
+		public Builder setBayesViterbiAlgorithm() {
+			
+			this.valgo = VirterbiAlgorithm.BAYES_RULES_ALGO;
 			return this;
 		}
 		
@@ -65,9 +71,9 @@ public class ForwardBackward  {
 		
 		this.fpass = forward.fit(converter, S, T, E);
 		this.bpass = backward.fit(converter, S, T, E);
-		this.statesProb = viterbi.fit(converter, S, T, E);
+		this.states = viterbi.fit(converter, S, T, E);
 		
-		this.posteriorProb = new ArrayList<Pair<Integer, Double>>();
+		this.posterior = new ArrayList<Pair<Integer, Double>>();
 		this.fbpass = new ArrayList<Pair<Integer, DMatrixRMaj>>();
 		
 		for (int index = 0; index < this.fpass.size() && index < this.bpass.size(); index++) {
@@ -84,12 +90,12 @@ public class ForwardBackward  {
 			}
 			
 			this.fbpass.add(new Pair<>(converter[index], tmp));	
-			this.posteriorProb.add(new Pair<>(converter[index], CommonOps_DDRM.elementSum(tmp)));
+			this.posterior.add(new Pair<>(converter[index], CommonOps_DDRM.elementSum(tmp)));
 		}
 	}
 	
 	public List<Pair<Integer, Double>> viterbi() {
-		return statesProb;
+		return states;
 	}
 	
 	public List<Pair<Integer, DMatrixRMaj>> forward() {
@@ -97,7 +103,7 @@ public class ForwardBackward  {
 	}
 	
 	public double forward(List<Pair<Integer, DMatrixRMaj>> list) {
-		return forward.posterior(list);
+		return forward.probability(list);
 	}
 	
 	public List<Pair<Integer, DMatrixRMaj>> backward() {
@@ -108,7 +114,7 @@ public class ForwardBackward  {
 		return fbpass;
 	}
 	
-	public List<Pair<Integer, Double>> posteriorProb() {
-		return posteriorProb;
+	public List<Pair<Integer, Double>> posterior() {
+		return posterior;
 	}
 }

@@ -49,7 +49,7 @@ public class HiddenMarkovModel2 {
 			System.out.println("Forward    : " + display(ffl) + " || Posterior: " + ff.format(fb.forward(ffl)));
 			System.out.println("Backward   : " + display(bbl));
 			System.out.println("FB         : " + display(fb.forwardBackward()));
-			System.out.println("Posterior  : " + display(characters, fb.posteriorProb()));
+			System.out.println("Posterior  : " + display(characters, fb.posterior()));
 		}
 		System.out.println();
 		{
@@ -62,7 +62,7 @@ public class HiddenMarkovModel2 {
 			System.out.println("Forward    : " + display(ffl) + " || Posterior: " + ff.format(fb.forward(ffl)));
 			System.out.println("Backward   : " + display(bbl));
 			System.out.println("FB         : " + display(fb.forwardBackward()));
-			System.out.println("Posterior  : " + display(characters, fb.posteriorProb()));
+			System.out.println("Posterior  : " + display(characters, fb.posterior()));
 		}
 	}
 

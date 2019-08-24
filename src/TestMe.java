@@ -1,12 +1,13 @@
 import java.text.DecimalFormat;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
 import org.nd4j.linalg.primitives.Pair;
 
-import machinelearning.hmm.ForwardBackward;
+import machinelearning.hmm.HMMAlgothrim.UnderFlowStrategy;
+import machinelearning.hmm.HMMAlgothrim.VirterbiAlgorithm;
+import machinelearning.hmm.Viterbi;
 
 public class TestMe {
 	
@@ -36,26 +37,42 @@ public class TestMe {
 		int [] converter = { 0, 0, 1, 0, 0 };
 		String [] output = { "0", "1" };
 		
-		ForwardBackward fb = new ForwardBackward.Builder()
-				.setUnderFlowStrategy(true).build();
-		fb.fit(converter, S, T, E);
-		
-		System.out.println("Forward    : " + display(output, converter, fb.forward()));
-		System.out.println("Backward   : " + display(output, converter, fb.backward()));
-		System.out.println("Prob(state): " + display(output, converter, fb.forwardBackward()));
+		{
+			Viterbi v = new Viterbi(VirterbiAlgorithm.BAYES_RULES_ALGO, UnderFlowStrategy.NONE);
+			System.out.println(display(v.fit(converter, S, T, E)));
+			System.out.println("PROB: " + ff.format(v.probability(v.fit(converter, S, T, E))));
+		}
+		System.out.println();
+
+		{
+			Viterbi v = new Viterbi(VirterbiAlgorithm.WIKI_PROPOSED_ALGO, UnderFlowStrategy.ENABLED);
+			System.out.println(display(v.fit(converter, S, T, E)));
+			System.out.println("PROB: " + ff.format(v.probability(v.fit(converter, S, T, E))));
+		}
+		System.out.println();
+		{
+			Viterbi v = new Viterbi(VirterbiAlgorithm.BAYES_RULES_ALGO, UnderFlowStrategy.ENABLED);
+			System.out.println(display(v.fit(converter, S, T, E)));
+			System.out.println("PROB: " + ff.format(v.probability(v.fit(converter, S, T, E))));
+		}
 		
 	}
 	
-	private static String display(String [] characters, int [] converter, 
-						List<Pair<Integer, DMatrixRMaj>> list) {
+	private static String display(List<Pair<Integer, Double>> paths) {
+		
+		final String [] states = { "A", "B" };
+		
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < paths.size(); i++) {
 
-		return list
-				.stream().map(p -> "{" + characters[converter[p.getFirst()]] + "}: " +
-						"[" +
-							ff.format(p.getSecond().get(0, 0)) + ", " + 
-							ff.format(p.getSecond().get(1, 0)) + 
-						"]"
-						)
-				.collect(Collectors.joining(", "));
+			if (i > 0)
+				builder.append(", ");
+
+			Pair<Integer, Double> pair = paths.get(i);
+
+			builder.append(states[pair.getFirst()] + " : " + ff.format(pair.getSecond()));
+		}
+		
+		return builder.toString();
 	}
 }

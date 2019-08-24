@@ -180,8 +180,7 @@ public class Forward implements HMMAlgothrim<DMatrixRMaj> {
 		return forward;
 	}
 	
-	@Override
-	public double posterior(List<Pair<Integer, DMatrixRMaj>> list) {
+	public double probability(List<Pair<Integer, DMatrixRMaj>> list) {
 		
 		DMatrixRMaj last = list.get(list.size() - 1).getSecond();
 		return CommonOps_DDRM.elementSum(last);

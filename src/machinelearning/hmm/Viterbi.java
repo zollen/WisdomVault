@@ -55,11 +55,11 @@ public class Viterbi implements HMMAlgothrim<Double> {
 		}
 	}
 	
-	@Override
-	public double posterior(List<Pair<Integer, Double>> list) {
+	public double probability(List<Pair<Integer, Double>> list) {
 		
-		throw new RuntimeException("Not supported!");
+		return list.get(list.size() - 1).getSecond();
 	}
+	
 	
 
 	private static class TNode {
@@ -77,7 +77,9 @@ public class Viterbi implements HMMAlgothrim<Double> {
 		TNode[] T = new TNode[tp.numRows];
 		for (int state = 0; state < tp.numRows; state++) {
 			List<Pair<Integer, Double>> intArray = new ArrayList<Pair<Integer, Double>>();
+			
 			double v_prob = sp.get(state, 0) * ep.get(state, converter[0]);
+			
 			intArray.add(new Pair<>(state, v_prob));
 			T[state] = new TNode(intArray, v_prob);
 		}
@@ -94,6 +96,7 @@ public class Viterbi implements HMMAlgothrim<Double> {
 					
 					List<Pair<Integer, Double>> v_path = new ArrayList<Pair<Integer, Double>>(T[current_state].v_path);
 					double v_prob = T[current_state].v_prob;
+					
 					double p = ep.get(next_state, converter[output]) * tp.get(current_state, next_state);
 					v_prob *= p;
 					
@@ -138,10 +141,15 @@ public class Viterbi implements HMMAlgothrim<Double> {
 		
 		list.add(max(S, 0, E, converter[0]));
 		
-		return _compute(converter, T, E, list);
+		if (this.strategy == UnderFlowStrategy.ENABLED) {
+	
+			list.get(0).setSecond(Math.log(list.get(0).getSecond()));
+		} 
+		
+		return compute(converter, T, E, list);
 	}
 	
-	private List<Pair<Integer, Double>> _compute(int [] converter, DMatrixRMaj T, DMatrixRMaj E, List<Pair<Integer, Double>> list) {
+	private List<Pair<Integer, Double>> compute(int [] converter, DMatrixRMaj T, DMatrixRMaj E, List<Pair<Integer, Double>> list) {
 		
 		Pair<Integer, Double> last = list.get(list.size() - 1);
 		
@@ -151,19 +159,30 @@ public class Viterbi implements HMMAlgothrim<Double> {
 		
 		
 		
-		double maxProb = Double.MIN_VALUE;
+		double maxProb = Double.NEGATIVE_INFINITY;
 		List<Pair<Integer, Double>> desirable = null;
 		
 		for (int col = 0; col < T.numCols; col++ ) {
-		
-			double prob = last.getSecond() *  T.get(last.getFirst(), col) * E.get(col, converter[list.size()]);
-		
+			
+			double prob = 0.0;
+			
+			if (this.strategy == UnderFlowStrategy.NONE) {
+				prob = last.getSecond() * T.get(last.getFirst(), col) * E.get(col, converter[list.size()]);
+			}
+			else {
+				
+				prob = last.getSecond() + Math.log(T.get(last.getFirst(), col)) + 
+												Math.log(E.get(col, converter[list.size()]));
+			}
+			
 			List<Pair<Integer, Double>> tmp = new ArrayList<Pair<Integer, Double>>(list);
 			tmp.add(new Pair<Integer, Double>(col, prob));
 			
-			tmp = _compute(converter, T, E, tmp);
+			tmp = compute(converter, T, E, tmp);
 			double pp = tmp.get(tmp.size() - 1).getSecond();
+			
 			if (pp > maxProb) {
+				
 				maxProb = pp; 
 				desirable = tmp;
 			}

@@ -164,10 +164,6 @@ public class Backward implements HMMAlgothrim<DMatrixRMaj> {
 			
 			if (index == converter.length - 1) {
 				CommonOps_DDRM.fill(res, 1.0);
-				
-				if (strategy.equals(UnderFlowStrategy.ENABLED)) {
-					CommonOps_DDRM.scale(1.0 / CommonOps_DDRM.elementSum(res), res);
-				}
 			}
 			else {
 				DMatrixRMaj tmp = new DMatrixRMaj(T.numRows, 1);
@@ -189,11 +185,4 @@ public class Backward implements HMMAlgothrim<DMatrixRMaj> {
 		return backward;
 		
 	}
-	
-	@Override
-	public double posterior(List<Pair<Integer, DMatrixRMaj>> list) {
-		
-		throw new RuntimeException("Not supported!");
-	}
-
 }
