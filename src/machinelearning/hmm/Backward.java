@@ -111,7 +111,7 @@ public class Backward extends HMMAlgothrim {
 //		eq.process("B1 = T * (Ew .* B2)");
 //		eq.lookupDDRM("B1").print("%2.4f");
 		
-		// 'RWBB'  time = 0
+		// 'RWBB'  time = 0  (optional)
 		// Long form
 		// B0(0) = S[0,0] * E[0,R] * B1(0)
 		// B0(0) = 0.8 * 0.3 * 0.0324
@@ -122,7 +122,7 @@ public class Backward extends HMMAlgothrim {
 //		eq.process("B01 = S(1,0) * E(1,0) * B11");
 //		System.out.println("B0(1): " + ff.format(eq.lookupDouble("B01")));
 		
-		// Matrix form
+		// Matrix form       (optional)
 //		eq.process("B0 = S .* Er .* B1");
 //		eq.lookupDDRM("B0").print(%2.4f");
 		
