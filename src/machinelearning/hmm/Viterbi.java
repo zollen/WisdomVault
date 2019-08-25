@@ -223,6 +223,21 @@ public class Viterbi implements HMMAlgothrim<Double> {
 
 
 	public static void main(String[] args) throws Exception {
+		/**
+		 * Bayes Rule Viterbi Intuition
+		 * ============================
+		 *  X1 -> X2 -> X3
+		 *   |     |     |
+		 *  \|/   \|/   \|/
+		 *  E1     E2    E3
+		 *  
+		 *  Step: 
+		 *  1. V1 = max( Σi=0..2  S[i,0] * E[i,'E1'] ); 
+		 *  2. V2 = recursive( Σj=0..2  T[i(V1),j] * E[j,'E2'] * prob(V1) )
+		 *  3. V3 = recursive( Σk=0..2  T[j(V2),k] * E[k,'E3'] * prob(V2) )
+		 *  4. Out of many lists, Choose one list with the highest last state probability.    
+		 *  
+		 */
 		
 		DecimalFormat ff = new DecimalFormat("0.0000");
 		
