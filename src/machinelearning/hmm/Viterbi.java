@@ -13,6 +13,101 @@ public class Viterbi implements HMMAlgothrim<Double> {
 	private VirterbiAlgorithm algorithm = VirterbiAlgorithm.BAYES_RULES_ALGO;
 	private UnderFlowStrategy strategy = UnderFlowStrategy.NONE;
 	
+	public static void main(String[] args) throws Exception {
+		/**
+		 * Bayes Rule Viterbi Intuition
+		 * ============================
+		 *  X1 -> X2 -> X3
+		 *   |     |     |
+		 *  \|/   \|/   \|/
+		 *  E1     E2    E3
+		 *  
+		 *  Step: 
+		 *  1. V1 = max( Σi=0..2  S[i,0] * E[i,'E1'] ); 
+		 *  2. V2 = recursive( Σj=0..2  T[i(V1),j] * E[j,'E2'] * prob(V1) )
+		 *  3. V3 = recursive( Σk=0..2  T[j(V2),k] * E[k,'E3'] * prob(V2) )
+		 *  4. Out of many lists, Choose one list with the highest last state probability.    
+		 *  
+		 */
+		
+		DecimalFormat ff = new DecimalFormat("0.0000");
+		
+		String[] states = { "#", "NN", "VB" };
+		String[] observations = { "I", "write", "a letter" };
+		int [] converter = { 0, 1, 2 };
+		double[] start_probability = { 0.3, 0.4, 0.3 };
+		
+		System.out.print("States: ");
+		for (int i = 0; i < states.length; i++) {
+			System.out.print(states[i] + ", ");
+		}
+		System.out.print("\nObservations: ");
+		for (int i = 0; i < observations.length; i++) {
+			System.out.print(observations[i] + ", ");
+		}
+		System.out.print("\nStart probability: ");
+		for (int i = 0; i < states.length; i++) {
+			System.out.print(states[i] + ": " + start_probability[i] + ", ");
+		}
+		
+		System.out.println();
+		
+		
+		Equation eq = new Equation();	
+
+		eq.process("T = [" +
+					/*      #,   NN,   VB      */
+	/* # */				" 0.2, 0.2, 0.6;" +
+	/* NN */			" 0.4, 0.1, 0.5;" +
+	/* VB */			" 0.1, 0.8, 0.1 " +
+						"]");
+		
+		eq.process("E = [" +
+					/*      I,    write,   a letter      */
+	/* # */				" 0.01,	   0.02,     0.02;" +
+	/* NN */			"  0.8,    0.01,      0.5;" +
+	/* VB */			" 0.19,    0.97,     0.48 " +
+						"]");
+		
+		eq.process("S = [ 0.3; 0.4; 0.3 ]");
+				
+		DMatrixRMaj T = eq.lookupDDRM("T");
+		DMatrixRMaj E = eq.lookupDDRM("E");
+		DMatrixRMaj S = eq.lookupDDRM("S");
+		
+		Printer p = new Printer(ff);
+		
+		{
+			System.out.print("Wiki Proposed ALGO: [");
+			
+			double start = System.nanoTime();
+			
+			Viterbi v = new Viterbi(VirterbiAlgorithm.WIKI_PROPOSED_ALGO);
+			String output  = p.display(states, v.fit(converter, S, T, E));
+			
+			double end = System.nanoTime();
+
+			System.out.println(output + "    Performance: " + ((end - start) / 1000000.0) + " ms");
+		}
+
+		{
+			System.out.print("Bayes Rules ALGO  : [");
+			
+			double start = System.nanoTime();
+			
+			Viterbi v = new Viterbi(VirterbiAlgorithm.BAYES_RULES_ALGO);
+			String output  = p.display(states, v.fit(converter, S, T, E));
+			
+			double end = System.nanoTime();
+
+			
+			System.out.println(output + "    Performance: " + ((end - start) / 1000000.0) + " ms");
+		}
+
+	}
+	
+	
+	
 	public Viterbi() {}
 	
 	public Viterbi(VirterbiAlgorithm algorithm) {
@@ -219,99 +314,5 @@ public class Viterbi implements HMMAlgothrim<Double> {
 		}
 		
 		return new Pair<Integer, Double>(maxRow, maxProb);
-	}
-
-
-	public static void main(String[] args) throws Exception {
-		/**
-		 * Bayes Rule Viterbi Intuition
-		 * ============================
-		 *  X1 -> X2 -> X3
-		 *   |     |     |
-		 *  \|/   \|/   \|/
-		 *  E1     E2    E3
-		 *  
-		 *  Step: 
-		 *  1. V1 = max( Σi=0..2  S[i,0] * E[i,'E1'] ); 
-		 *  2. V2 = recursive( Σj=0..2  T[i(V1),j] * E[j,'E2'] * prob(V1) )
-		 *  3. V3 = recursive( Σk=0..2  T[j(V2),k] * E[k,'E3'] * prob(V2) )
-		 *  4. Out of many lists, Choose one list with the highest last state probability.    
-		 *  
-		 */
-		
-		DecimalFormat ff = new DecimalFormat("0.0000");
-		
-		String[] states = { "#", "NN", "VB" };
-		String[] observations = { "I", "write", "a letter" };
-		int [] converter = { 0, 1, 2 };
-		double[] start_probability = { 0.3, 0.4, 0.3 };
-		
-		System.out.print("States: ");
-		for (int i = 0; i < states.length; i++) {
-			System.out.print(states[i] + ", ");
-		}
-		System.out.print("\nObservations: ");
-		for (int i = 0; i < observations.length; i++) {
-			System.out.print(observations[i] + ", ");
-		}
-		System.out.print("\nStart probability: ");
-		for (int i = 0; i < states.length; i++) {
-			System.out.print(states[i] + ": " + start_probability[i] + ", ");
-		}
-		
-		System.out.println();
-		
-		
-		Equation eq = new Equation();	
-
-		eq.process("T = [" +
-					/*      #,   NN,   VB      */
-	/* # */				" 0.2, 0.2, 0.6;" +
-	/* NN */			" 0.4, 0.1, 0.5;" +
-	/* VB */			" 0.1, 0.8, 0.1 " +
-						"]");
-		
-		eq.process("E = [" +
-					/*      I,    write,   a letter      */
-	/* # */				" 0.01,	   0.02,     0.02;" +
-	/* NN */			"  0.8,    0.01,      0.5;" +
-	/* VB */			" 0.19,    0.97,     0.48 " +
-						"]");
-		
-		eq.process("S = [ 0.3; 0.4; 0.3 ]");
-				
-		DMatrixRMaj T = eq.lookupDDRM("T");
-		DMatrixRMaj E = eq.lookupDDRM("E");
-		DMatrixRMaj S = eq.lookupDDRM("S");
-		
-		Printer p = new Printer(ff);
-		
-		{
-			System.out.print("Wiki Proposed ALGO: [");
-			
-			double start = System.nanoTime();
-			
-			Viterbi v = new Viterbi(VirterbiAlgorithm.WIKI_PROPOSED_ALGO);
-			String output  = p.display(states, v.fit(converter, S, T, E));
-			
-			double end = System.nanoTime();
-
-			System.out.println(output + "    Performance: " + ((end - start) / 1000000.0) + " ms");
-		}
-
-		{
-			System.out.print("Bayes Rules ALGO  : [");
-			
-			double start = System.nanoTime();
-			
-			Viterbi v = new Viterbi(VirterbiAlgorithm.BAYES_RULES_ALGO);
-			String output  = p.display(states, v.fit(converter, S, T, E));
-			
-			double end = System.nanoTime();
-
-			
-			System.out.println(output + "    Performance: " + ((end - start) / 1000000.0) + " ms");
-		}
-
 	}
 }
