@@ -3,7 +3,6 @@ package machinelearning.hmm;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
@@ -225,7 +224,7 @@ public class Viterbi implements HMMAlgothrim<Double> {
 
 	public static void main(String[] args) throws Exception {
 		
-		
+		DecimalFormat ff = new DecimalFormat("0.0000");
 		
 		String[] states = { "#", "NN", "VB" };
 		String[] observations = { "I", "write", "a letter" };
@@ -270,13 +269,15 @@ public class Viterbi implements HMMAlgothrim<Double> {
 		DMatrixRMaj E = eq.lookupDDRM("E");
 		DMatrixRMaj S = eq.lookupDDRM("S");
 		
+		Printer p = new Printer(ff);
+		
 		{
 			System.out.print("Wiki Proposed ALGO: [");
 			
 			double start = System.nanoTime();
 			
 			Viterbi v = new Viterbi(VirterbiAlgorithm.WIKI_PROPOSED_ALGO);
-			String output  = display(states, v.fit(converter, S, T, E));
+			String output  = p.display(states, v.fit(converter, S, T, E));
 			
 			double end = System.nanoTime();
 
@@ -289,7 +290,7 @@ public class Viterbi implements HMMAlgothrim<Double> {
 			double start = System.nanoTime();
 			
 			Viterbi v = new Viterbi(VirterbiAlgorithm.BAYES_RULES_ALGO);
-			String output  = display(states, v.fit(converter, S, T, E));
+			String output  = p.display(states, v.fit(converter, S, T, E));
 			
 			double end = System.nanoTime();
 
@@ -297,31 +298,5 @@ public class Viterbi implements HMMAlgothrim<Double> {
 			System.out.println(output + "    Performance: " + ((end - start) / 1000000.0) + " ms");
 		}
 
-	}
-	
-	private static <T> String display(String [] output, List<Pair<Integer, T>> list) {
-		
-		DecimalFormat ff = new DecimalFormat("0.0000");
-		
-		return list.stream().map(p -> { 
-				StringBuilder builder = new StringBuilder();
-				builder.append("{");
-				builder.append(output[p.getFirst()]);
-				builder.append("}: ");
-				
-				if (p.getSecond() instanceof Double) {
-					builder.append(ff.format(p.getSecond()));
-				}
-				else {
-					DMatrixRMaj mat = (DMatrixRMaj) p.getSecond();
-					builder.append("[" + ff.format(mat.get(0, 0)) + ", ");
-					builder.append(ff.format(mat.get(1, 0)) + ", ");
-					builder.append(ff.format(mat.get(2, 0)) + "]");
-				}
-				
-				return builder.toString();
-				
-		}).collect(Collectors.joining(", "));
-		
 	}
 }
