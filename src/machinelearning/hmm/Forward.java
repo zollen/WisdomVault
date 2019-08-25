@@ -174,7 +174,7 @@ public class Forward implements HMMAlgothrim<DMatrixRMaj> {
 		return forward;
 	}
 	
-	public double probability(List<Pair<Integer, DMatrixRMaj>> list) {
+	public static double probability(List<Pair<Integer, DMatrixRMaj>> list) {
 		
 		DMatrixRMaj last = list.get(list.size() - 1).getSecond();
 		return CommonOps_DDRM.elementSum(last);

@@ -98,16 +98,8 @@ public class ForwardBackward  {
 		return states;
 	}
 	
-	public double viterbi(List<Pair<Integer, Double>> list) {
-			return viterbi.probability(list);
-	}
-	
 	public List<Pair<Integer, DMatrixRMaj>> forward() {
 		return fpass;
-	}
-	
-	public double forward(List<Pair<Integer, DMatrixRMaj>> list) {
-		return forward.probability(list);
 	}
 	
 	public List<Pair<Integer, DMatrixRMaj>> backward() {

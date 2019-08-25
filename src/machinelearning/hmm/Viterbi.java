@@ -55,7 +55,7 @@ public class Viterbi implements HMMAlgothrim<Double> {
 		}
 	}
 	
-	public double probability(List<Pair<Integer, Double>> list) {
+	public static double probability(List<Pair<Integer, Double>> list) {
 		
 		return list.get(list.size() - 1).getSecond();
 	}

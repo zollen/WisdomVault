@@ -43,8 +43,8 @@ public class HiddenMarkovModel2 {
 			ForwardBackward fb = new ForwardBackward.Builder().build();
 			fb.fit(converter, S, T, E);
 		
-			System.out.println("Viterbi    : " + p.display(states, fb.viterbi()) + "   || Prob(U3,U3,U2,U1,U3,U3,U1,U3|R,R,G,G,B,R,G,R): " + ff.format(fb.viterbi(fb.viterbi())));
-			System.out.println("Forward    : " + p.display(characters, fb.forward()) + "   || Posterior: " + ff.format(fb.forward(fb.forward())));
+			System.out.println("Viterbi    : " + p.display(states, fb.viterbi()) + "   || Prob(U3,U3,U2,U1,U3,U3,U1,U3|R,R,G,G,B,R,G,R): " + ff.format(Viterbi.probability(fb.viterbi())));
+			System.out.println("Forward    : " + p.display(characters, fb.forward()) + "   || Posterior: " + ff.format(Forward.probability(fb.forward())));
 			System.out.println("Backward   : " + p.display(characters, fb.backward()));
 			System.out.println("FB         : " + p.display(characters, fb.forwardBackward()));
 			System.out.println("Posterior  : " + p.display(characters, fb.posterior()));
@@ -55,8 +55,8 @@ public class HiddenMarkovModel2 {
 									.setUnderFlowStrategy(true).build();
 			fb.fit(converter, S, T, E);
 		
-			System.out.println("Viterbi    : " + p.display(states, fb.viterbi()) + "   || Weight(U3,U3,U2,U1,U3,U3,U1,U3|R,R,G,G,B,R,G,R): " + ff.format(fb.viterbi(fb.viterbi())));
-			System.out.println("Forward    : " + p.display(characters, fb.forward()) + "   || Posterior: " + ff.format(fb.forward(fb.forward())));
+			System.out.println("Viterbi    : " + p.display(states, fb.viterbi()) + "   || Weight(U3,U3,U2,U1,U3,U3,U1,U3|R,R,G,G,B,R,G,R): " + ff.format(Viterbi.probability(fb.viterbi())));
+			System.out.println("Forward    : " + p.display(characters, fb.forward()) + "   || Posterior: " + ff.format(Forward.probability(fb.forward())));
 			System.out.println("Backward   : " + p.display(characters, fb.backward()));
 			System.out.println("FB         : " + p.display(characters, fb.forwardBackward()));
 			System.out.println("Posterior  : " + p.display(characters, fb.posterior()));
