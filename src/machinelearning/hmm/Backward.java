@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
@@ -128,17 +127,13 @@ public class Backward implements HMMAlgothrim<DMatrixRMaj> {
 		
 		int [] converter = { 0, 1, 2, 2 };
 		String [] output = { "R", "W", "B"};
+		Printer p = new Printer(ff);
 		
 		Backward backward = new Backward();
-		List<Pair<Integer, DMatrixRMaj>> list = backward.fit(converter, S, T, E);
-		
-		System.out.println(list.stream().map(p -> 
-					"{" + output[p.getFirst()] + "} : " + "[" +
-					ff.format(p.getSecond().get(0, 0)) + ", " +
-					ff.format(p.getSecond().get(1, 0)) + "]"
-				).collect(Collectors.joining(", ")));
-		
+		System.out.println(p.display(output, backward.fit(converter, S, T, E)));
 	}
+	
+
 	
 	private UnderFlowStrategy strategy = UnderFlowStrategy.NONE;
 	

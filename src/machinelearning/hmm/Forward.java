@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
@@ -120,15 +119,10 @@ public class Forward implements HMMAlgothrim<DMatrixRMaj> {
 		
 		int [] converter = { 0, 1, 2, 2 };
 		String [] output = { "R", "W", "B" };
+		Printer p = new Printer(ff);
 		
 		Forward forward = new Forward();
-		List<Pair<Integer, DMatrixRMaj>> list = forward.fit(converter, S, T, E);
-		
-		System.out.println(list.stream().map(p -> 
-					"{" + output[p.getKey()] + "} : " + "[" +
-					ff.format(p.getValue().get(0, 0)) + ", " +
-					ff.format(p.getValue().get(1, 0)) + "]"
-				).collect(Collectors.joining(", ")));
+		System.out.println(p.display(output, forward.fit(converter, S, T, E)));
 	}
 	
 	private UnderFlowStrategy strategy = UnderFlowStrategy.NONE;

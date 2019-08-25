@@ -1,11 +1,8 @@
 package machinelearning.hmm;
 import java.text.DecimalFormat;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
-import org.nd4j.linalg.primitives.Pair;
 
 public class HiddenMarkovModel1 {
 
@@ -64,12 +61,14 @@ public class HiddenMarkovModel1 {
 		DMatrixRMaj E = eq.lookupDDRM("E");
 		DMatrixRMaj S = eq.lookupDDRM("S");
 		
+		Printer p = new Printer(ff);
+		
 
 		{
 			System.out.println("===================Forward===================");
 			
 			Forward forward = new Forward();
-			System.out.println(display1(forward.fit(CONVERTER, S, T, E)));			
+			System.out.println(p.display(SEQUENCE, forward.fit(CONVERTER, S, T, E)));			
 		}
 		
 		{
@@ -77,17 +76,17 @@ public class HiddenMarkovModel1 {
 
 
 			Viterbi v1 = new Viterbi(HMMAlgothrim.VirterbiAlgorithm.WIKI_PROPOSED_ALGO);
-			System.out.println("Wiki Proposed Viterbi Algo: " + display2(v1.fit(CONVERTER, S, T, E)));
+			System.out.println("Wiki Proposed Viterbi Algo: " + p.display(STATES, v1.fit(CONVERTER, S, T, E)));
 								
 			Viterbi v2 = new Viterbi(HMMAlgothrim.VirterbiAlgorithm.BAYES_RULES_ALGO);
-			System.out.println("Bayes Calculation Viterbi : " + display2(v2.fit(CONVERTER, S, T, E)));
+			System.out.println("Bayes Calculation Viterbi : " + p.display(STATES, v2.fit(CONVERTER, S, T, E)));
 		}
 		
 		{
 			System.out.println("===================Backward===================");
 			
 			Backward backward = new Backward();
-			System.out.println(display1(backward.fit(CONVERTER, S, T, E)));
+			System.out.println(p.display(SEQUENCE, backward.fit(CONVERTER, S, T, E)));
 		}
 		
 		System.out.println();
@@ -99,31 +98,5 @@ public class HiddenMarkovModel1 {
 		System.out.println("PP(#3) = F(T0) * B(T0) + F(T1) * B(T1) = " + ff.format(0.002118));
 		System.out.println("Verifying the Probability with Forward(A,C,T,G)");
 		System.out.println("PP(ACTG) = F(G0) + F(G1) = " + ff.format(0.002118));
-	}
-	
-	private static String display2(List<Pair<Integer, Double>> list) {
-		
-		StringBuilder builder = new StringBuilder();
-		for (int i = 0; i < SEQUENCE.length; i++) {
-			
-			Pair<Integer, Double> pair = list.get(i);
-			
-			if (i > 0)
-				builder.append(", ");
-			
-			builder.append(SEQUENCE[i] + "{" + STATES[pair.getFirst()] + "}: " + ff.format(pair.getSecond()));
-			
-		}
-		
-		return builder.toString();
-	}
-	
-	private static String display1(List<Pair<Integer, DMatrixRMaj>> list) {
-		
-		return list.stream().map(p -> 
-			"{" + SEQUENCE[CONVERTER[p.getFirst()]] + "}: " + "[" +
-			ff.format(p.getSecond().get(0, 0)) + ", " +
-			ff.format(p.getSecond().get(1, 0)) + "]"
-				).collect(Collectors.joining(", "));
 	}
 }

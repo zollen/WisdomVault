@@ -1,12 +1,9 @@
 package machinelearning.hmm;
 
 import java.text.DecimalFormat;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
-import org.nd4j.linalg.primitives.Pair;
 
 public class HiddenMarkovModel2 {
 
@@ -39,16 +36,18 @@ public class HiddenMarkovModel2 {
 		DMatrixRMaj T = eq.lookupDDRM("T");
 		DMatrixRMaj E = eq.lookupDDRM("E");
 		DMatrixRMaj S = eq.lookupDDRM("S");
+		
+		Printer p = new Printer(ff);
 
 		{
 			ForwardBackward fb = new ForwardBackward.Builder().build();
 			fb.fit(converter, S, T, E);
 		
-			System.out.println("Viterbi    : " + display(states, fb.viterbi()) + "   || Prob(U3,U3,U2,U1,U3,U3,U1,U3|R,R,G,G,B,R,G,R): " + ff.format(fb.viterbi(fb.viterbi())));
-			System.out.println("Forward    : " + display(characters, fb.forward()) + "   || Posterior: " + ff.format(fb.forward(fb.forward())));
-			System.out.println("Backward   : " + display(characters, fb.backward()));
-			System.out.println("FB         : " + display(characters, fb.forwardBackward()));
-			System.out.println("Posterior  : " + display(characters, fb.posterior()));
+			System.out.println("Viterbi    : " + p.display(states, fb.viterbi()) + "   || Prob(U3,U3,U2,U1,U3,U3,U1,U3|R,R,G,G,B,R,G,R): " + ff.format(fb.viterbi(fb.viterbi())));
+			System.out.println("Forward    : " + p.display(characters, fb.forward()) + "   || Posterior: " + ff.format(fb.forward(fb.forward())));
+			System.out.println("Backward   : " + p.display(characters, fb.backward()));
+			System.out.println("FB         : " + p.display(characters, fb.forwardBackward()));
+			System.out.println("Posterior  : " + p.display(characters, fb.posterior()));
 		}
 		System.out.println();
 		{
@@ -56,36 +55,12 @@ public class HiddenMarkovModel2 {
 									.setUnderFlowStrategy(true).build();
 			fb.fit(converter, S, T, E);
 		
-			System.out.println("Viterbi    : " + display(states, fb.viterbi()) + "   || Weight(U3,U3,U2,U1,U3,U3,U1,U3|R,R,G,G,B,R,G,R): " + ff.format(fb.viterbi(fb.viterbi())));
-			System.out.println("Forward    : " + display(characters, fb.forward()) + "   || Posterior: " + ff.format(fb.forward(fb.forward())));
-			System.out.println("Backward   : " + display(characters, fb.backward()));
-			System.out.println("FB         : " + display(characters, fb.forwardBackward()));
-			System.out.println("Posterior  : " + display(characters, fb.posterior()));
+			System.out.println("Viterbi    : " + p.display(states, fb.viterbi()) + "   || Weight(U3,U3,U2,U1,U3,U3,U1,U3|R,R,G,G,B,R,G,R): " + ff.format(fb.viterbi(fb.viterbi())));
+			System.out.println("Forward    : " + p.display(characters, fb.forward()) + "   || Posterior: " + ff.format(fb.forward(fb.forward())));
+			System.out.println("Backward   : " + p.display(characters, fb.backward()));
+			System.out.println("FB         : " + p.display(characters, fb.forwardBackward()));
+			System.out.println("Posterior  : " + p.display(characters, fb.posterior()));
 		}
 	}
 	
-	private static <T> String display(String [] output, List<Pair<Integer, T>> list) {
-		
-		return list.stream().map(p -> { 
-				StringBuilder builder = new StringBuilder();
-				builder.append("{");
-				builder.append(output[p.getFirst()]);
-				builder.append("}: ");
-				
-				if (p.getSecond() instanceof Double) {
-					builder.append(ff.format(p.getSecond()));
-				}
-				else {
-					DMatrixRMaj mat = (DMatrixRMaj) p.getSecond();
-					builder.append("[" + ff.format(mat.get(0, 0)) + ", ");
-					builder.append(ff.format(mat.get(1, 0)) + ", ");
-					builder.append(ff.format(mat.get(2, 0)) + "]");
-				}
-				
-				return builder.toString();
-				
-		}).collect(Collectors.joining(", "));
-		
-	}
-
 }
