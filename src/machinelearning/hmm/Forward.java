@@ -121,11 +121,15 @@ public class Forward implements HMMAlgothrim<DMatrixRMaj> {
 		String [] output = { "R", "W", "B" };
 		Printer p = new Printer(ff);
 		
-		Forward forward = new Forward();
-		System.out.println(p.display(output, forward.fit(converter, S, T, E)));
+		Forward forward = new Forward(UnderFlowStrategy.ENABLED);
+		
+		List<Pair<Integer, DMatrixRMaj>> list = forward.fit(converter, S, T, E);
+		System.out.println(p.display(output, list));
+		System.out.println("P: " + forward.probability(list));
 	}
 	
 	private UnderFlowStrategy strategy = UnderFlowStrategy.NONE;
+	private double coeff = 1.0;
 	
 	public Forward() {}
 	
@@ -152,6 +156,7 @@ public class Forward implements HMMAlgothrim<DMatrixRMaj> {
 				CommonOps_DDRM.elementMult(map.get(converter[index]), S, res);	
 				
 				if (strategy.equals(UnderFlowStrategy.ENABLED)) {
+					this.coeff *= CommonOps_DDRM.elementSum(res);
 					CommonOps_DDRM.scale(1.0 / CommonOps_DDRM.elementSum(res), res);
 				}
 			}
@@ -162,6 +167,7 @@ public class Forward implements HMMAlgothrim<DMatrixRMaj> {
 				CommonOps_DDRM.elementMult(tmp, map.get(converter[index]));
 				
 				if (strategy.equals(UnderFlowStrategy.ENABLED)) {
+					this.coeff *= CommonOps_DDRM.elementSum(tmp);
 					CommonOps_DDRM.scale(1.0 / CommonOps_DDRM.elementSum(tmp), tmp);
 				}
 				
@@ -174,9 +180,10 @@ public class Forward implements HMMAlgothrim<DMatrixRMaj> {
 		return forward;
 	}
 	
-	public static double probability(List<Pair<Integer, DMatrixRMaj>> list) {
+	public double probability(List<Pair<Integer, DMatrixRMaj>> list) {
 		
 		DMatrixRMaj last = list.get(list.size() - 1).getSecond();
-		return CommonOps_DDRM.elementSum(last);
+	
+		return CommonOps_DDRM.elementSum(last) * this.coeff;
 	}
 }

@@ -12,27 +12,12 @@ import machinelearning.hmm.HMMAlgothrim.VirterbiAlgorithm;
 
 public class ForwardBackward  {
 	
-	private Forward forward;
-	private Backward backward;
-	private Viterbi viterbi; 
-	private List<Pair<Integer, Double>> states;
-	private List<Pair<Integer, DMatrixRMaj>> fpass;
-	private List<Pair<Integer, DMatrixRMaj>> bpass;
-	private List<Pair<Integer, DMatrixRMaj>> fbpass;
-	private List<Pair<Integer, Double>> posterior;
+	private VirterbiAlgorithm algorithm;
 	private UnderFlowStrategy strategy;
 	
 	private ForwardBackward(UnderFlowStrategy strategy, VirterbiAlgorithm algorithm) {
-		this.forward = new Forward(strategy);
-		this.backward = new Backward(strategy);
-		this.viterbi = new Viterbi(algorithm, strategy);
-
-		this.fpass = null;
-		this.bpass = null;
-		this.fbpass = null;
-		this.states = null;
-		this.posterior = null;
 		this.strategy = strategy;
+		this.algorithm = algorithm;
 	}
 	
 	public static class Builder {
@@ -67,19 +52,84 @@ public class ForwardBackward  {
 		}
 	}
 	
-	public void fit(int [] converter, DMatrixRMaj S, DMatrixRMaj T, DMatrixRMaj E) {
+	public static class HMMResult {
 		
-		this.fpass = forward.fit(converter, S, T, E);
-		this.bpass = backward.fit(converter, S, T, E);
-		this.states = viterbi.fit(converter, S, T, E);
+		private List<Pair<Integer, Double>> vpass;
+		private List<Pair<Integer, DMatrixRMaj>> fpass;
+		private List<Pair<Integer, DMatrixRMaj>> bpass;
+		private List<Pair<Integer, DMatrixRMaj>> fbpass;
+		private List<Pair<Integer, Double>> ppass;
+		private Forward forward;
+		private Backward backward;
+		private Viterbi viterbi;
 		
-		this.posterior = new ArrayList<Pair<Integer, Double>>();
-		this.fbpass = new ArrayList<Pair<Integer, DMatrixRMaj>>();
+		public HMMResult(Forward forward, Backward backward, Viterbi viterbi,
+				List<Pair<Integer, Double>> vpass,
+				List<Pair<Integer, DMatrixRMaj>> fpass, 
+				List<Pair<Integer, DMatrixRMaj>> bpass,
+				List<Pair<Integer, DMatrixRMaj>> fbpass,
+				List<Pair<Integer, Double>> ppass) {
+			this.forward = forward;
+			this.backward = backward;
+			this.viterbi = viterbi;
+			this.vpass = vpass;
+			this.fpass = fpass;
+			this.bpass = bpass;
+			this.fbpass = fbpass;
+			this.ppass = ppass;
+		}
 		
-		for (int index = 0; index < this.fpass.size() && index < this.bpass.size(); index++) {
+		public Forward forward() {
+			return forward;
+		}
+		
+		public Backward backward() {
+			return backward;
+		}
+		
+		public Viterbi viterbi() {
+			return viterbi;
+		}
+		
+		public List<Pair<Integer, Double>> vlist() {
+			return vpass;
+		}
+		
+		public List<Pair<Integer, DMatrixRMaj>> flist() {
+			return fpass;
+		}
+		
+		public List<Pair<Integer, DMatrixRMaj>> blist() {
+			return bpass;
+		}
+		
+		public List<Pair<Integer, DMatrixRMaj>> fblist() {
+			return fbpass;
+		}
+		
+		public List<Pair<Integer, Double>> plist() {
+			return ppass;
+		}
+	}
+	
+	public HMMResult fit(int [] converter, DMatrixRMaj S, DMatrixRMaj T, DMatrixRMaj E) {
+		
+		Forward forward = new Forward(strategy);
+		Backward backward = new Backward(strategy);
+		Viterbi viterbi = new Viterbi(algorithm, strategy);
+
+		
+		List<Pair<Integer, DMatrixRMaj>> fpass = forward.fit(converter, S, T, E);
+		List<Pair<Integer, DMatrixRMaj>> bpass = backward.fit(converter, S, T, E);
+		List<Pair<Integer, Double>> states = viterbi.fit(converter, S, T, E);
+		
+		List<Pair<Integer, Double>> ppass = new ArrayList<Pair<Integer, Double>>();
+		List<Pair<Integer, DMatrixRMaj>> fbpass = new ArrayList<Pair<Integer, DMatrixRMaj>>();
+		
+		for (int index = 0; index < fpass.size() && index < bpass.size(); index++) {
 			
-			Pair<Integer, DMatrixRMaj> fpair = this.fpass.get(index);
-			Pair<Integer, DMatrixRMaj> bpair = this.bpass.get(index);
+			Pair<Integer, DMatrixRMaj> fpair = fpass.get(index);
+			Pair<Integer, DMatrixRMaj> bpair = bpass.get(index);
 			
 			DMatrixRMaj tmp = new DMatrixRMaj(T.numRows, 1);
 
@@ -89,28 +139,10 @@ public class ForwardBackward  {
 				CommonOps_DDRM.scale(1.0 / CommonOps_DDRM.elementSum(tmp), tmp);
 			}
 			
-			this.fbpass.add(new Pair<>(converter[index], tmp));	
-			this.posterior.add(new Pair<>(converter[index], CommonOps_DDRM.elementSum(tmp)));
+			fbpass.add(new Pair<>(converter[index], tmp));	
+			ppass.add(new Pair<>(converter[index], CommonOps_DDRM.elementSum(tmp)));
 		}
-	}
-	
-	public List<Pair<Integer, Double>> viterbi() {
-		return states;
-	}
-	
-	public List<Pair<Integer, DMatrixRMaj>> forward() {
-		return fpass;
-	}
-	
-	public List<Pair<Integer, DMatrixRMaj>> backward() {
-		return bpass;
-	}
-	
-	public List<Pair<Integer, DMatrixRMaj>> forwardBackward() {
-		return fbpass;
-	}
-	
-	public List<Pair<Integer, Double>> posterior() {
-		return posterior;
+		
+		return new HMMResult(forward, backward, viterbi, states, fpass, bpass, fbpass, ppass);
 	}
 }

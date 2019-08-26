@@ -5,6 +5,8 @@ import java.text.DecimalFormat;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
 
+import machinelearning.hmm.ForwardBackward.HMMResult;
+
 public class HiddenMarkovModel2 {
 
 	private static final DecimalFormat ff = new DecimalFormat("0.00000000");
@@ -41,25 +43,25 @@ public class HiddenMarkovModel2 {
 
 		{
 			ForwardBackward fb = new ForwardBackward.Builder().build();
-			fb.fit(converter, S, T, E);
+			HMMResult h = fb.fit(converter, S, T, E);
 		
-			System.out.println("Viterbi    : " + p.display(states, fb.viterbi()) + "   || Prob(U3,U3,U2,U1,U3,U3,U1,U3|R,R,G,G,B,R,G,R): " + ff.format(Viterbi.probability(fb.viterbi())));
-			System.out.println("Forward    : " + p.display(characters, fb.forward()) + "   || Posterior: " + ff.format(Forward.probability(fb.forward())));
-			System.out.println("Backward   : " + p.display(characters, fb.backward()));
-			System.out.println("FB         : " + p.display(characters, fb.forwardBackward()));
-			System.out.println("Posterior  : " + p.display(characters, fb.posterior()));
+			System.out.println("Viterbi    : " + p.display(states, h.vlist()) + "   || Prob(U3,U3,U2,U1,U3,U3,U1,U3|R,R,G,G,B,R,G,R): " + ff.format(h.viterbi().probability(h.vlist())));
+			System.out.println("Forward    : " + p.display(characters, h.flist()) + "   || Posterior: " + ff.format(h.forward().probability(h.flist())));
+			System.out.println("Backward   : " + p.display(characters, h.blist()));
+			System.out.println("FB         : " + p.display(characters, h.fblist()));
+			System.out.println("Posterior  : " + p.display(characters, h.plist()));
 		}
 		System.out.println();
 		{
 			ForwardBackward fb = new ForwardBackward.Builder()
 									.setUnderFlowStrategy(true).build();
-			fb.fit(converter, S, T, E);
+			HMMResult h = fb.fit(converter, S, T, E);
 		
-			System.out.println("Viterbi    : " + p.display(states, fb.viterbi()) + "   || Weight(U3,U3,U2,U1,U3,U3,U1,U3|R,R,G,G,B,R,G,R): " + ff.format(Viterbi.probability(fb.viterbi())));
-			System.out.println("Forward    : " + p.display(characters, fb.forward()) + "   || Posterior: " + ff.format(Forward.probability(fb.forward())));
-			System.out.println("Backward   : " + p.display(characters, fb.backward()));
-			System.out.println("FB         : " + p.display(characters, fb.forwardBackward()));
-			System.out.println("Posterior  : " + p.display(characters, fb.posterior()));
+			System.out.println("Viterbi    : " + p.display(states, h.vlist()) + "   || Prob(U3,U3,U2,U1,U3,U3,U1,U3|R,R,G,G,B,R,G,R): " + ff.format(h.viterbi().probability(h.vlist())));
+			System.out.println("Forward    : " + p.display(characters, h.flist()) + "   || Posterior: " + ff.format(h.forward().probability(h.flist())));
+			System.out.println("Backward   : " + p.display(characters, h.blist()));
+			System.out.println("FB         : " + p.display(characters, h.fblist()));
+			System.out.println("Posterior  : " + p.display(characters, h.plist()));
 		}
 	}
 	

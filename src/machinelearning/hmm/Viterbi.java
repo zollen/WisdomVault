@@ -151,9 +151,15 @@ public class Viterbi implements HMMAlgothrim<Double> {
 		}
 	}
 	
-	public static double probability(List<Pair<Integer, Double>> list) {
+	public double probability(List<Pair<Integer, Double>> list) {
 		
-		return list.get(list.size() - 1).getSecond();
+		double prob = list.get(list.size() - 1).getSecond();
+		
+		if (this.strategy == UnderFlowStrategy.ENABLED) {
+			prob = Math.exp(prob);
+		}
+		
+		return prob;
 	}
 	
 	
