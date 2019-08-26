@@ -120,12 +120,20 @@ public class Forward implements HMMAlgothrim<DMatrixRMaj> {
 		int [] converter = { 0, 1, 2, 2 };
 		String [] output = { "R", "W", "B" };
 		Printer p = new Printer(ff);
-		
-		Forward forward = new Forward(UnderFlowStrategy.ENABLED);
-		
-		List<Pair<Integer, DMatrixRMaj>> list = forward.fit(converter, S, T, E);
-		System.out.println(p.display(output, list));
-		System.out.println("P: " + forward.probability(list));
+		{
+			Forward forward = new Forward();
+
+			List<Pair<Integer, DMatrixRMaj>> list = forward.fit(converter, S, T, E);
+			System.out.println(p.display(output, list));
+			System.out.println("P: " + forward.probability(list));
+		}
+		{
+			Forward forward = new Forward(UnderFlowStrategy.ENABLED);
+			
+			List<Pair<Integer, DMatrixRMaj>> list = forward.fit(converter, S, T, E);
+			System.out.println(p.display(output, list));
+			System.out.println("P: " + forward.probability(list));
+		}
 	}
 	
 	private UnderFlowStrategy strategy = UnderFlowStrategy.NONE;
