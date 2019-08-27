@@ -43,58 +43,7 @@ public class Robot {
 	
 	static {
 			
-		map[1][0] = map[1][2] = '*';
-		
-		Set<Integer> m00 = new HashSet<Integer>();
-		m00.add(RIGHT); 
-		environment.put("00", m00);
-		positions.put("00", 0);
-		
-		Set<Integer> m01 = new HashSet<Integer>();
-		m01.add(RIGHT); m01.add(LEFT); m01.add(DOWN);
-		environment.put("01", m01);
-		positions.put("01", 1);
-		
-		Set<Integer> m02 = new HashSet<Integer>();
-		m02.add(RIGHT); m02.add(LEFT); 
-		environment.put("02", m02);
-		positions.put("02", 2);
-		
-		Set<Integer> m03 = new HashSet<Integer>();
-		m03.add(LEFT); m03.add(DOWN);
-		environment.put("03", m03);
-		positions.put("03", 3);
-		
-		Set<Integer> m11 = new HashSet<Integer>();
-		m11.add(TOP); m11.add(DOWN);
-		environment.put("11", m11);
-		positions.put("11", 4);
-		
-		Set<Integer> m13 = new HashSet<Integer>();
-		m13.add(TOP); m13.add(DOWN);
-		environment.put("13", m13);
-		positions.put("13", 5);
-		
-		Set<Integer> m20 = new HashSet<Integer>();
-		m20.add(RIGHT);
-		environment.put("20", m20);
-		positions.put("20", 6);
-		
-		Set<Integer> m21 = new HashSet<Integer>();
-		m21.add(LEFT); m21.add(RIGHT); m21.add(TOP);
-		environment.put("21", m21);
-		positions.put("21", 7);
-		
-		Set<Integer> m22 = new HashSet<Integer>();
-		m22.add(LEFT); m22.add(RIGHT); 
-		environment.put("22", m22);
-		positions.put("22", 8);
-		
-		Set<Integer> m23 = new HashSet<Integer>();
-		m23.add(LEFT); m23.add(TOP); 
-		environment.put("23", m23);
-		positions.put("23", 9);
-		
+		setup();
 	}
 	
 	public static void main(String ...args) {
@@ -391,6 +340,59 @@ public class Robot {
 		
 	}
 	
-	
+	private static void setup() {
+		
+		map[1][0] = map[1][2] = '*';
+		
+		Set<Integer> m00 = new HashSet<Integer>();
+		m00.add(RIGHT); 
+		environment.put("00", m00);
+		positions.put("00", 0);
+		
+		Set<Integer> m01 = new HashSet<Integer>();
+		m01.add(RIGHT); m01.add(LEFT); m01.add(DOWN);
+		environment.put("01", m01);
+		positions.put("01", 1);
+		
+		Set<Integer> m02 = new HashSet<Integer>();
+		m02.add(RIGHT); m02.add(LEFT); 
+		environment.put("02", m02);
+		positions.put("02", 2);
+		
+		Set<Integer> m03 = new HashSet<Integer>();
+		m03.add(LEFT); m03.add(DOWN);
+		environment.put("03", m03);
+		positions.put("03", 3);
+		
+		Set<Integer> m11 = new HashSet<Integer>();
+		m11.add(TOP); m11.add(DOWN);
+		environment.put("11", m11);
+		positions.put("11", 4);
+		
+		Set<Integer> m13 = new HashSet<Integer>();
+		m13.add(TOP); m13.add(DOWN);
+		environment.put("13", m13);
+		positions.put("13", 5);
+		
+		Set<Integer> m20 = new HashSet<Integer>();
+		m20.add(RIGHT);
+		environment.put("20", m20);
+		positions.put("20", 6);
+		
+		Set<Integer> m21 = new HashSet<Integer>();
+		m21.add(LEFT); m21.add(RIGHT); m21.add(TOP);
+		environment.put("21", m21);
+		positions.put("21", 7);
+		
+		Set<Integer> m22 = new HashSet<Integer>();
+		m22.add(LEFT); m22.add(RIGHT); 
+		environment.put("22", m22);
+		positions.put("22", 8);
+		
+		Set<Integer> m23 = new HashSet<Integer>();
+		m23.add(LEFT); m23.add(TOP); 
+		environment.put("23", m23);
+		positions.put("23", 9);
+	}
 
 }
