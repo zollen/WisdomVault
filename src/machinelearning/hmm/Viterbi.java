@@ -79,7 +79,7 @@ public class Viterbi implements HMMAlgothrim<Double> {
 		Printer p = new Printer(ff);
 		
 		{
-			System.out.print("Wiki Proposed ALGO: [");
+			System.out.print("Wiki Proposed ALGO: ");
 			
 			double start = System.nanoTime();
 			
@@ -92,7 +92,7 @@ public class Viterbi implements HMMAlgothrim<Double> {
 		}
 
 		{
-			System.out.print("Bayes Rules ALGO  : [");
+			System.out.print("Bayes Rules ALGO  : ");
 			
 			double start = System.nanoTime();
 			
@@ -183,7 +183,7 @@ public class Viterbi implements HMMAlgothrim<Double> {
 			double v_prob = sp.get(state, 0) * ep.get(state, converter[0]);
 			
 			if (this.strategy == UnderFlowStrategy.ENABLED) {
-				v_prob = Math.log(v_prob);
+				v_prob = Math.log(v_prob == 0 ? Double.MIN_VALUE : v_prob);
 			}
 
 			
@@ -212,7 +212,7 @@ public class Viterbi implements HMMAlgothrim<Double> {
 						v_prob *= p;
 					}
 					else {
-						v_prob += Math.log(p);
+						v_prob += Math.log(p == 0 ? Double.MIN_VALUE : p);
 					}
 				
 					
@@ -253,29 +253,48 @@ public class Viterbi implements HMMAlgothrim<Double> {
 	}
 	
 	public List<Pair<Integer, Double>> bayes(int [] converter, DMatrixRMaj S, DMatrixRMaj T, DMatrixRMaj E) {
+
+		List<Pair<Integer, Double>> desirable = null; 
+		double maxProb = Double.NEGATIVE_INFINITY;
 		
-		List<Pair<Integer, Double>> list = new ArrayList<Pair<Integer, Double>>();
+		for (int row = 0; row < S.numRows; row++) {
+			
+			List<Pair<Integer, Double>> list = new ArrayList<Pair<Integer, Double>>();
+			
+			double prob = S.get(row, 0) * E.get(row, converter[0]);
+			if (prob > 0) {
+				
+				if (this.strategy == UnderFlowStrategy.ENABLED) {
+					prob = Math.log(prob);
+				}
+				
+				list.add(new Pair<>(row, prob));
+				
+				list = compute(converter, T, E, list);
+				
+				double pp = list.get(list.size() - 1).getSecond();
+				
+				if (pp > maxProb) {
+					
+					maxProb = pp; 
+					desirable = list;
+				}
+				
+			}	
+		}
 		
-		list.add(max(S, 0, E, converter[0]));
-		
-		if (this.strategy == UnderFlowStrategy.ENABLED) {
-	
-			list.get(0).setSecond(Math.log(list.get(0).getSecond()));
-		} 
-		
-		return compute(converter, T, E, list);
+		return desirable;
 	}
 	
 	private List<Pair<Integer, Double>> compute(int [] converter, DMatrixRMaj T, DMatrixRMaj E, List<Pair<Integer, Double>> list) {
 		
 		Pair<Integer, Double> last = list.get(list.size() - 1);
-		
+	
 		if (list.size() == converter.length) {
 			return list;
 		}
 		
-		
-		
+			
 		double maxProb = Double.NEGATIVE_INFINITY;
 		List<Pair<Integer, Double>> desirable = null;
 		
@@ -288,8 +307,8 @@ public class Viterbi implements HMMAlgothrim<Double> {
 			}
 			else {
 				
-				prob = last.getSecond() + Math.log(T.get(last.getFirst(), col) * 
-												E.get(col, converter[list.size()]));
+				double tmp = T.get(last.getFirst(), col) * E.get(col, converter[list.size()]);			
+				prob = last.getSecond() + Math.log(tmp == 0 ? Double.MIN_VALUE : tmp); 
 			}
 			
 			List<Pair<Integer, Double>> tmp = new ArrayList<Pair<Integer, Double>>(list);
@@ -308,18 +327,4 @@ public class Viterbi implements HMMAlgothrim<Double> {
 		return desirable;
 	}
 	
-	private Pair<Integer, Double> max(DMatrixRMaj T, int col1, DMatrixRMaj E, int col2) {
-		
-		double maxProb = Double.MIN_VALUE;
-		int maxRow = -1;
-		for (int row = 0; row < T.numRows; row++) {
-			double val = T.get(row, col1) * E.get(row, col2);
-			if (val > maxProb) {
-				maxProb = val;
-				maxRow = row;
-			}
-		}
-		
-		return new Pair<Integer, Double>(maxRow, maxProb);
-	}
 }

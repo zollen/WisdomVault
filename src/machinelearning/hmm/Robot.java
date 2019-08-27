@@ -1,10 +1,21 @@
 package machinelearning.hmm;
 
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.nd4j.linalg.primitives.Pair;
+
+import machinelearning.hmm.ForwardBackward.HMMResult;
+import machinelearning.hmm.Robot.Sensor.Reading;
 
 public class Robot {
 	
@@ -13,14 +24,14 @@ public class Robot {
 	public static final int LEFT = 2;
 	public static final int RIGHT = 3;
 	
-	public static final Random rand = new Random(83);
-	public static final int ROUND = 100;
+	private static final DecimalFormat ff = new DecimalFormat("0.0000");
+	public static final int ROUND = 1000;
 	public static final int HEIGHT = 3;
 	public static final int WIDTH = 4;
 	public static final char [][] map = new char[HEIGHT][WIDTH];
-	public static final Map<String, Set<Integer>> allowed = new HashMap<String, Set<Integer>>();
-	public static int x = 0;
-	public static int y = 0;
+	public static final Map<String, Set<Integer>> environment = new HashMap<String, Set<Integer>>();
+	public static final Map<String, Integer> positions = new HashMap<String, Integer>();
+
 	
 	/**
 	 * ******
@@ -36,87 +47,158 @@ public class Robot {
 		
 		Set<Integer> m00 = new HashSet<Integer>();
 		m00.add(RIGHT); 
-		allowed.put("00", m00);
+		environment.put("00", m00);
+		positions.put("00", 0);
 		
 		Set<Integer> m01 = new HashSet<Integer>();
 		m01.add(RIGHT); m01.add(LEFT); m01.add(DOWN);
-		allowed.put("01", m01);
+		environment.put("01", m01);
+		positions.put("01", 1);
 		
 		Set<Integer> m02 = new HashSet<Integer>();
 		m02.add(RIGHT); m02.add(LEFT); 
-		allowed.put("02", m02);
+		environment.put("02", m02);
+		positions.put("02", 2);
 		
 		Set<Integer> m03 = new HashSet<Integer>();
 		m03.add(LEFT); m03.add(DOWN);
-		allowed.put("03", m03);
+		environment.put("03", m03);
+		positions.put("03", 3);
 		
 		Set<Integer> m11 = new HashSet<Integer>();
 		m11.add(TOP); m11.add(DOWN);
-		allowed.put("11", m11);
+		environment.put("11", m11);
+		positions.put("11", 4);
 		
 		Set<Integer> m13 = new HashSet<Integer>();
 		m13.add(TOP); m13.add(DOWN);
-		allowed.put("13", m13);
+		environment.put("13", m13);
+		positions.put("13", 5);
 		
 		Set<Integer> m20 = new HashSet<Integer>();
 		m20.add(RIGHT);
-		allowed.put("20", m20);
+		environment.put("20", m20);
+		positions.put("20", 6);
 		
 		Set<Integer> m21 = new HashSet<Integer>();
 		m21.add(LEFT); m21.add(RIGHT); m21.add(TOP);
-		allowed.put("21", m21);
+		environment.put("21", m21);
+		positions.put("21", 7);
 		
 		Set<Integer> m22 = new HashSet<Integer>();
 		m22.add(LEFT); m22.add(RIGHT); 
-		allowed.put("22", m22);
+		environment.put("22", m22);
+		positions.put("22", 8);
 		
 		Set<Integer> m23 = new HashSet<Integer>();
 		m23.add(LEFT); m23.add(TOP); 
-		allowed.put("23", m23);
-		
+		environment.put("23", m23);
+		positions.put("23", 9);
 		
 	}
 	
 	public static void main(String ...args) {
 		
-		Robot robot = new Robot();
+		Random rand = new Random(83);
 		
-		for (int i = 0; i < ROUND; i++) {
+		DMatrixRMaj S = new DMatrixRMaj(HEIGHT * WIDTH - 2, 1);
+		DMatrixRMaj T = new DMatrixRMaj(HEIGHT * WIDTH - 2, HEIGHT * WIDTH - 2);
+		DMatrixRMaj E = new DMatrixRMaj(HEIGHT * WIDTH - 2, Sensor.Reading.emissions.size());
+				
+		CommonOps_DDRM.fill(S, 0.0);
+		CommonOps_DDRM.fill(T, 0.0);
+		CommonOps_DDRM.fill(E, 0.0);
+		
+		S.set(positions.get("00"), 0, 0.5);
+		S.set(positions.get("20"), 0, 0.5);
 			
-			Set<Integer> possiblities = allowed.get(String.valueOf(y) + String.valueOf(x));
+		{
+			// stochastic training robot
+			Robot robot = new Robot(rand);
+
+			for (int i = 0; i < ROUND; i++) {
+				
+				Robot.Sensor.Reading reading = robot.sense(environment);
+				
+				int from = positions.get(String.valueOf(robot.row) + String.valueOf(robot.col));
+				
+				E.set(from, Sensor.Reading.emissions.get(reading.get()),
+						E.get(from, Sensor.Reading.emissions.get(reading.get())) + 1);
+
+				robot.random(environment);
+
+				int to = positions.get(String.valueOf(robot.row) + String.valueOf(robot.col));
+
+				T.set(from, to, T.get(from, to) + 1);
+			}
+
+			CommonOps_DDRM.divideCols(T, CommonOps_DDRM.transpose(CommonOps_DDRM.sumCols(T, null), null).data);
+			CommonOps_DDRM.divideCols(E, CommonOps_DDRM.transpose(CommonOps_DDRM.sumCols(E, null), null).data);
 			
-			System.out.println(robot.sense(possiblities));
+		}
+		
+
+		for (int epoch = 0; epoch < 10; epoch++)
+		{
+			// testing robots
+			Robot robot = new Robot(rand);
+			
+			for (int i = 0; i < 6; i++) {
+				
+				robot.record(robot.sense(environment));
+						
+				robot.random(environment);
+			}
+			
+			ForwardBackward fb = new ForwardBackward.Builder().build();
+			
+			HMMResult h = fb.fit(robot.get(), S, T, E);
+			
+			Printer p = new Printer(ff);
+			String [] states = { "0:0", "0:1", "0:2", "0:3", "1:1", "1:3", "2:0", "2:1", "2:2", "2:3" };
+			String [] emissions = { "R", "RLW", "RL", "LD", "TD", "RLT", "LT" };
+			
+			System.out.println("Robot #" + (epoch + 1));
+			System.out.println("==========");
 			System.out.println(robot);
+			System.out.println("Viterbi    : " + p.display(states, h.vlist()) + "   => P: " + ff.format(h.viterbi().probability(h.vlist())));
+			System.out.println("Forward    : " + p.display(emissions, h.flist()) + "   => P: " + ff.format(h.forward().probability(h.flist())));
+			System.out.println("Backward   : " + p.display(emissions, h.blist()));
+			System.out.println("FB         : " + p.display(emissions, h.fblist()));
+			System.out.println("Posterior  : " + p.display(emissions, h.plist()));
+			System.out.println();
 			
-			robot.move(next(possiblities));
-		}
-	}
-	
-	public static Integer next(Set<Integer> moves) {
-		
-		int chosen = rand.nextInt(moves.size());
-		
-		int next = 0;
-		int index = 0;
-		for (Integer move : moves) {
-			
-			if (index == chosen)
-				next = move;
-			
-			index++;
 		}
 		
-		return next;
 	}
 	
+
+	
+	
+	
+	private Random rand;
+	private int row;
+	private int col;
 	private Sensor sensor;
+	private List<Pair<String, Sensor.Reading>> readings = new ArrayList<Pair<String, Sensor.Reading>>();
 	
-	public Robot() {
+	public Robot(Random rand) {
+		this.rand = rand;
 		this.sensor = new Sensor();
+		if (rand.nextDouble() <= 0.5) {
+			row = 0;
+			col = 0;
+		}
+		else {
+			row = 2;
+			col = 0;
+		}
+			
 	}
 	
-	public Sensor.Reading sense(Set<Integer> surrounding) {
-		return sensor.sense(surrounding);
+	public Sensor.Reading sense(Map<String, Set<Integer>> surrounding) {
+		Set<Integer> info = environment.get(String.valueOf(row) + String.valueOf(col));
+		return sensor.sense(info);
 	}
 	
 	public void move(int action) {
@@ -137,31 +219,60 @@ public class Robot {
 		}
 	}
 	
-	public void top() {
+	public void random(Map<String, Set<Integer>> surrounding) {
 		
-		if (y - 1 >= 0 && allowed.get(String.valueOf(y) + String.valueOf(x)).contains(TOP)) {		
-			y -= 1;
+		Set<Integer> info = surrounding.get(String.valueOf(row) + String.valueOf(col));
+		
+		int chosen = rand.nextInt(info.size());
+		
+		int next = 0;
+		int index = 0;
+		for (Integer move : info) {
+			
+			if (index == chosen)
+				next = move;
+			
+			index++;
 		}
+		
+		move(next);		
+	}
+	
+	public void record(Reading reading) {
+		readings.add(new Pair<>(String.valueOf(row) + ":" + String.valueOf(col), reading));
+	}
+	
+	public int [] get() {
+		
+		int [] results = new int[readings.size()];
+		
+		for (int i = 0; i < readings.size(); i++) {
+			
+			Pair<String, Reading> reading = readings.get(i);
+			
+			results[i] = Sensor.Reading.emissions.get(reading.getSecond().get());
+		}
+		
+		return results;
+	}
+	
+	public void top() {
+				
+		row -= 1;
 	}
 	
 	public void down() {
 		
-		if (y + 1 < HEIGHT && allowed.get(String.valueOf(y) + String.valueOf(x)).contains(DOWN)) {		
-			y += 1;
-		}
+		row += 1;
 	}
 	
 	public void left() {
-		if (x - 1 >= 0 && allowed.get(String.valueOf(y) + String.valueOf(x)).contains(LEFT)) {
-			x -= 1;
-		}	
+		col -= 1;
 	}
 	
 	public void right() {
 		
-		if (x + 1 < WIDTH && allowed.get(String.valueOf(y) + String.valueOf(x)).contains(RIGHT)) {			
-			x += 1;
-		}
+		col += 1;
 	}
 	
 	@Override
@@ -178,7 +289,7 @@ public class Robot {
 			
 			builder.append("|");
 			for (int j = 0; j < WIDTH; j++) {
-				if (i == y && j == x) {
+				if (i == row && j == col) {
 					builder.append("X");
 				}
 				else {
@@ -190,6 +301,11 @@ public class Robot {
 		
 		for (int i = 0; i < WIDTH + 2; i++)
 			builder.append("-");
+		
+		builder.append("\n");
+		
+		builder.append(readings.stream().map(p -> "{" + p.getFirst() + "}:" + p.getSecond())
+								.collect(Collectors.joining(", ")));
 		
 		builder.append("\n");
 		
@@ -217,16 +333,26 @@ public class Robot {
 			public static final int RIGHT_LEFT_TOP = 61;
 			public static final int LEFT_TOP = 11;
 			
+			
 			private static final Map<Integer, String> desc = new HashMap<Integer, String>();
+			private static final Map<Integer, Integer> emissions = new HashMap<Integer, Integer>();
 			
 			static {
-				desc.put(RIGHT_ONLY, "{RIGHT}");
-				desc.put(RIGHT_LEFT_DOWN, "{RIGHT, LEFT, DOWN}");
-				desc.put(RIGHT_LEFT, "{RIGHT, LEFT}");
-				desc.put(LEFT_DOWN, "{LEFT, DOWN}");
-				desc.put(TOP_DOWN, "{TOP DOWN}");
-				desc.put(RIGHT_LEFT_TOP, "{RIGHT, LEFT, TOP}");
-				desc.put(LEFT_TOP, "{LEFT, TOP}");				
+				desc.put(RIGHT_ONLY, "[RIGHT]");
+				desc.put(RIGHT_LEFT_DOWN, "[RIGHT,LEFT,DOWN]");
+				desc.put(RIGHT_LEFT, "[RIGHT,LEFT]");
+				desc.put(LEFT_DOWN, "[LEFT,DOWN]");
+				desc.put(TOP_DOWN, "[TOP,DOWN]");
+				desc.put(RIGHT_LEFT_TOP, "[RIGHT,LEFT,TOP]");
+				desc.put(LEFT_TOP, "[LEFT,TOP]");		
+				
+				emissions.put(RIGHT_ONLY, 0);
+				emissions.put(RIGHT_LEFT_DOWN, 1);
+				emissions.put(RIGHT_LEFT, 2);
+				emissions.put(LEFT_DOWN, 3);
+				emissions.put(TOP_DOWN, 4);
+				emissions.put(RIGHT_LEFT_TOP, 5);
+				emissions.put(LEFT_TOP, 6);
 			}
 			
 			
