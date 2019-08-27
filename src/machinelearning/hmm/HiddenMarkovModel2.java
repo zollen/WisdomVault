@@ -45,8 +45,8 @@ public class HiddenMarkovModel2 {
 			ForwardBackward fb = new ForwardBackward.Builder().build();
 			HMMResult h = fb.fit(converter, S, T, E);
 		
-			System.out.println("Viterbi    : " + p.display(states, h.vlist()) + "   || Prob(U3,U3,U2,U1,U3,U3,U1,U3|R,R,G,G,B,R,G,R): " + ff.format(h.viterbi().probability(h.vlist())));
-			System.out.println("Forward    : " + p.display(characters, h.flist()) + "   || Posterior: " + ff.format(h.forward().probability(h.flist())));
+			System.out.println("Viterbi    : " + p.display(states, h.vlist()) + "   => P(U3,R,R,G,G,B,R,G,R): " + ff.format(h.viterbi().probability(h.vlist())));
+			System.out.println("Forward    : " + p.display(characters, h.flist()) + "   => P(U3,U3,U2,U1,U3,U3,U1,U3|R,R,G,G,B,R,G,R): " + ff.format(h.forward().probability(h.flist())));
 			System.out.println("Backward   : " + p.display(characters, h.blist()));
 			System.out.println("FB         : " + p.display(characters, h.fblist()));
 			System.out.println("Posterior  : " + p.display(characters, h.plist()));
@@ -57,8 +57,8 @@ public class HiddenMarkovModel2 {
 									.setUnderFlowStrategy(true).build();
 			HMMResult h = fb.fit(converter, S, T, E);
 		
-			System.out.println("Viterbi    : " + p.display(states, h.vlist()) + "   || Prob(U3,U3,U2,U1,U3,U3,U1,U3|R,R,G,G,B,R,G,R): " + ff.format(h.viterbi().probability(h.vlist())));
-			System.out.println("Forward    : " + p.display(characters, h.flist()) + "   || Posterior: " + ff.format(h.forward().probability(h.flist())));
+			System.out.println("Viterbi    : " + p.display(states, h.vlist()) + "   => P(U3,R,R,G,G,B,R,G,R): " + ff.format(h.viterbi().probability(h.vlist())));
+			System.out.println("Forward    : " + p.display(characters, h.flist()) + "   => P(U3,U3,U2,U1,U3,U3,U1,U3|R,R,G,G,B,R,G,R): " + ff.format(h.forward().probability(h.flist())));
 			System.out.println("Backward   : " + p.display(characters, h.blist()));
 			System.out.println("FB         : " + p.display(characters, h.fblist()));
 			System.out.println("Posterior  : " + p.display(characters, h.plist()));
