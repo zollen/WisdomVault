@@ -132,8 +132,8 @@ public class Robot {
 				T.set(from, to, T.get(from, to) + 1);
 			}
 
-			CommonOps_DDRM.divideCols(T, CommonOps_DDRM.transpose(CommonOps_DDRM.sumCols(T, null), null).data);
-			CommonOps_DDRM.divideCols(E, CommonOps_DDRM.transpose(CommonOps_DDRM.sumCols(E, null), null).data);
+			CommonOps_DDRM.divideRows(CommonOps_DDRM.transpose(CommonOps_DDRM.sumRows(T, null), null).data, T);
+			CommonOps_DDRM.divideRows(CommonOps_DDRM.transpose(CommonOps_DDRM.sumRows(E, null), null).data, E);
 			
 		}
 		
