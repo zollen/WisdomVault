@@ -4,16 +4,19 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class MazeLoader {
 	
-	private Map<String, Set<Integer>> allowed;
+	private Map<String, Set<Integer>> environment;
+	private Map<String, Integer> twoDToOneD;
+	private Map<Integer, String> oneDToTwoD;
 	private List<char []> map;
+	private int spaces;
 	private int height;
 	private int width;
 	private MazeGame.Move end;
@@ -22,10 +25,13 @@ public class MazeLoader {
 	
 	public MazeLoader(String file) {
 		
-		this.allowed = new HashMap<String, Set<Integer>>();
+		this.environment = new LinkedHashMap<String, Set<Integer>>();
+		this.twoDToOneD = new LinkedHashMap<String, Integer>();
+		this.oneDToTwoD = new LinkedHashMap<Integer, String>();
 		this.map = new ArrayList<char []>();
 		this.width = 0;
 		this.height = 0;
+		this.spaces = 0;
 		this.done = false;
 		
 		BufferedReader reader;
@@ -47,12 +53,15 @@ public class MazeLoader {
 	
 	private void process(char [][] map) {
 		
+		int current = 0;
+		
 		for (int row = 0; row < height; row++) {
 			for (int col = 0; col < width; col++) {
 				
 				if (map[row][col] == ' ') {
 					
-					String key = String.valueOf(row) + String.valueOf(col);
+					String key = String.valueOf(row) + "," + String.valueOf(col);
+					
 					Set<Integer> moves = new HashSet<Integer>();
 					
 					if (row - 1 >= 0 && map[row - 1][col] == ' ') {
@@ -71,7 +80,14 @@ public class MazeLoader {
 						moves.add(MazeGame.RIGHT);
 					}
 					
-					allowed.put(key, moves);
+					spaces++;
+					
+					twoDToOneD.put(String.valueOf(row) + "," + String.valueOf(col), current);
+					oneDToTwoD.put(current, String.valueOf(row) + ":" + String.valueOf(col));
+					
+					current++;
+					
+					environment.put(key, moves);
 				}
 			}
 		}
@@ -109,16 +125,17 @@ public class MazeLoader {
 		}
 	}
 	
+	public Maze build() {
+		return new Maze(map.toArray(new char[0][0]), spaces, environment, twoDToOneD, oneDToTwoD);
+	}
+	
 	public MazeGame create() {
 		
 		return new MazeGame.Builder()
-				.setWidth(width)
-				.setHeight(height)
 				.setRow(0)
 				.setCol(0)
 				.setEnd(end)
-				.setMap(map.toArray(new char[0][0]))
-				.setAllowed(allowed)
+				.setMaze(new Maze(map.toArray(new char[0][0]), spaces, environment, twoDToOneD, oneDToTwoD))
 				.build();
 	}
 	

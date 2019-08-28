@@ -23,10 +23,8 @@ public class MazeGame {
 	
 	private static Random rand = new Random(SEED);
 	
-	private Map<String, Set<Integer>> allowed;
-	private char [][] map;
-	private int width;
-	private int height;	
+	private Maze maze;
+
 	private int row;
 	private int col;
 	private Move end;
@@ -35,14 +33,6 @@ public class MazeGame {
 	
 
 	private MazeGame() {
-	}
-	
-	public void setWidth(int width) {
-		this.width = width;
-	}
-	
-	public void setHeight(int height) {
-		this.height = height;
 	}
 	
 	public void setRow(int row) {
@@ -57,12 +47,8 @@ public class MazeGame {
 		this.end = end;
 	}
 	
-	public void setMap(char [][] map) {
-		this.map = map;
-	}
-	
-	public void setAllowed(Map<String, Set<Integer>> allowed) {
-		this.allowed = allowed;
+	public void setMaze(Maze maze) {
+		this.maze = maze;
 	}
 	
 	public void setMove(List<Move> moves) {
@@ -70,28 +56,17 @@ public class MazeGame {
 	}
 	
 	public static class Builder {
-		
-		private Map<String, Set<Integer>> allowed;
-		private char [][] map;
-		private int width;
-		private int height;	
+	
+		private Maze maze;
 		private int row;
 		private int col;
 		private Move end;
 		private List<Move> moves;
+	
+		
 		
 		public Builder() {
 			moves = new ArrayList<Move>();
-		}
-		
-		public Builder setWidth(int width) {
-			this.width = width;
-			return this;
-		}
-		
-		public Builder setHeight(int height) {
-			this.height = height;
-			return this;
 		}
 		
 		public Builder setRow(int row) {
@@ -109,18 +84,13 @@ public class MazeGame {
 			return this;
 		}
 		
-		public Builder setMap(char [][] map) {
-			this.map = map;
-			return this;
-		}
-		
-		public Builder setAllowed(Map<String, Set<Integer>> allowed) {
-			this.allowed = allowed;
-			return this;
-		}
-		
 		public Builder setMoves(List<Move> moves) {
 			this.moves = moves;
+			return this;
+		}
+		
+		public Builder setMaze(Maze maze) {
+			this.maze = maze;
 			return this;
 		}
 		
@@ -128,25 +98,11 @@ public class MazeGame {
 		
 			MazeGame game = new MazeGame();
 			
-			game.setWidth(width);
-			game.setHeight(height);
+			game.setMaze(maze.clone());
 			game.setRow(row);
 			game.setCol(col);
 			game.setEnd(end);
-			game.setAllowed(allowed);
 			game.setMove(new ArrayList<Move>(moves));
-	
-			char [][] mmap = new char[height][width];
-			
-			for (int j = 0; j < height; j++) {
-				for (int i = 0; i < width; i++) {
-					mmap[j][i] = map[j][i];
-				}
-			}
-			
-			mmap[row][col] = 'X';
-			
-			game.setMap(mmap);
 			
 			return game;
 		}
@@ -177,7 +133,7 @@ public class MazeGame {
 		}
 		
 		if (target.score() > this.score()) {	
-			this.map = target.map;
+			this.maze = target.maze;
 			this.row = target.row;
 			this.col = target.col;
 			this.moves = target.moves();
@@ -259,7 +215,7 @@ public class MazeGame {
 	}
 	
 	public Set<Integer> allowed() {
-		return allowed.get(String.valueOf(row) + String.valueOf(col));
+		return maze.getFreedom(row, col);
 	}
 	
 	public Move current() {
@@ -278,11 +234,11 @@ public class MazeGame {
 		
 		allowed(UP);
 		
-		map[row][col] = ' ';
+		maze.getMap()[row][col] = ' ';
 		
 		row--;
 		
-		map[row][col] = 'X';
+		maze.getMap()[row][col] = 'X';
 		
 		moves.add(new Move(UP, row, col));
 	}
@@ -291,11 +247,11 @@ public class MazeGame {
 		
 		allowed(DOWN);
 		
-		map[row][col] = ' ';
+		maze.getMap()[row][col] = ' ';
 		
 		row++;
 		
-		map[row][col] = 'X';
+		maze.getMap()[row][col] = 'X';
 		
 		moves.add(new Move(DOWN, row, col));
 	}
@@ -304,11 +260,11 @@ public class MazeGame {
 		
 		allowed(LEFT);
 		
-		map[row][col] = ' ';
+		maze.getMap()[row][col] = ' ';
 		
 		col--;
 		
-		map[row][col] = 'X';
+		maze.getMap()[row][col] = 'X';
 		
 		moves.add(new Move(LEFT, row, col));
 	}
@@ -317,11 +273,11 @@ public class MazeGame {
 		
 		allowed(RIGHT);
 		
-		map[row][col] = ' ';
+		maze.getMap()[row][col] = ' ';
 		
 		col++;
 		
-		map[row][col] = 'X';
+		maze.getMap()[row][col] = 'X';
 		
 		moves.add(new Move(RIGHT, row, col));
 	}
@@ -330,13 +286,10 @@ public class MazeGame {
 	public MazeGame clone() {
 		
 		return new MazeGame.Builder()
-			.setWidth(width)
-			.setHeight(height)
 			.setRow(row)
 			.setCol(col)
 			.setEnd(end)
-			.setMap(this.map)
-			.setAllowed(allowed)
+			.setMaze(this.maze.clone())
 			.setMoves(moves)
 			.build();
 	}
@@ -346,21 +299,21 @@ public class MazeGame {
 		
 		StringBuilder builder = new StringBuilder();
 		
-		for (int i = 0; i < width + 2; i++)
+		for (int i = 0; i < maze.getWidth() + 2; i++)
 			builder.append("-");
 		
 		builder.append("\n");
 		
-		for (int i = 0; i < height; i++) {
+		for (int i = 0; i < maze.getHeight(); i++) {
 			
 			builder.append("|");
-			for (int j = 0; j < width; j++) {
-				builder.append(map[i][j]);
+			for (int j = 0; j < maze.getWidth(); j++) {
+				builder.append(maze.getMap()[i][j]);
 			}
 			builder.append("|\n");
 		}
 		
-		for (int i = 0; i < width + 2; i++)
+		for (int i = 0; i < maze.getWidth() + 2; i++)
 			builder.append("-");
 		
 		builder.append("\n");
@@ -376,7 +329,7 @@ public class MazeGame {
 	
 	private void allowed(int action) {
 		
-		if (!allowed.get(String.valueOf(row) + String.valueOf(col)).contains(action))
+		if (!maze.getFreedom(row, col).contains(action))
 			throw new RuntimeException(Move.ACTIONS[action] + " not allowed for (" + row + ", " + col + ")");
 	}
 	
