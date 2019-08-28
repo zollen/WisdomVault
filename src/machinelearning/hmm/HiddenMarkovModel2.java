@@ -5,7 +5,7 @@ import java.text.DecimalFormat;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
 
-import machinelearning.hmm.ForwardBackward.HMMResult;
+import machinelearning.hmm.HMMComposite.HMMResult;
 
 public class HiddenMarkovModel2 {
 
@@ -42,7 +42,7 @@ public class HiddenMarkovModel2 {
 		Printer p = new Printer(ff);
 
 		{
-			ForwardBackward fb = new ForwardBackward.Builder().build();
+			HMMComposite fb = new HMMComposite.Builder().build();
 			HMMResult h = fb.fit(converter, S, T, E);
 		
 			System.out.println("Viterbi    : " + p.display(states, h.vlist()) + "   => P(U3,U3,U2,U1,U3,U3,U1,U3|R,R,G,G,B,R,G,R): " + ff.format(h.viterbi().probability(h.vlist())));
@@ -53,7 +53,7 @@ public class HiddenMarkovModel2 {
 		}
 		System.out.println();
 		{
-			ForwardBackward fb = new ForwardBackward.Builder()
+			HMMComposite fb = new HMMComposite.Builder()
 									.setUnderFlowStrategy(true).build();
 			HMMResult h = fb.fit(converter, S, T, E);
 		

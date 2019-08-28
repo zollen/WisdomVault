@@ -14,7 +14,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.nd4j.linalg.primitives.Pair;
 
-import machinelearning.hmm.ForwardBackward.HMMResult;
+import machinelearning.hmm.HMMComposite.HMMResult;
 import machinelearning.hmm.Robot.Sensor.Reading;
 
 public class Robot {
@@ -99,7 +99,7 @@ public class Robot {
 				robot.random(environment);
 			}
 			
-			ForwardBackward fb = new ForwardBackward.Builder().build();
+			HMMComposite fb = new HMMComposite.Builder().build();
 			
 			HMMResult h = fb.fit(robot.get(), S, T, E);
 			

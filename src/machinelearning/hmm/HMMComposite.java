@@ -10,12 +10,12 @@ import org.nd4j.linalg.primitives.Pair;
 import machinelearning.hmm.HMMAlgothrim.UnderFlowStrategy;
 import machinelearning.hmm.HMMAlgothrim.VirterbiAlgorithm;
 
-public class ForwardBackward  {
+public class HMMComposite  {
 	
 	private VirterbiAlgorithm algorithm;
 	private UnderFlowStrategy strategy;
 	
-	private ForwardBackward(UnderFlowStrategy strategy, VirterbiAlgorithm algorithm) {
+	private HMMComposite(UnderFlowStrategy strategy, VirterbiAlgorithm algorithm) {
 		this.strategy = strategy;
 		this.algorithm = algorithm;
 	}
@@ -47,8 +47,8 @@ public class ForwardBackward  {
 			return this;
 		}
 		
-		public ForwardBackward build() {
-			return new ForwardBackward(ualgo, valgo);
+		public HMMComposite build() {
+			return new HMMComposite(ualgo, valgo);
 		}
 	}
 	
