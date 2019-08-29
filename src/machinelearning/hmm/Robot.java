@@ -24,8 +24,10 @@ public class Robot {
 	public static final int LEFT = MazeGame.LEFT;
 	public static final int RIGHT = MazeGame.RIGHT;
 	
-	private static final DecimalFormat ff = new DecimalFormat("0.0000");
-	public static final int ROUND = 1000;
+	private static final DecimalFormat ff = new DecimalFormat("0.000000");
+	public static final int ROUND = 6000;
+	public static final int TOTAL_ROBOTS = 10;
+	public static final int TOTAL_MOVES = 15;
 
 	
 	/**
@@ -40,11 +42,12 @@ public class Robot {
 		
 		Random rand = new Random(83);
 		
-		MazeLoader loader = new MazeLoader("data/toymaze.txt");
+		MazeLoader loader = new MazeLoader("data/mymaze.txt");
 		
 		Maze maze = loader.build();
-		System.out.println(maze);
-		System.out.println("---------------------------------------------------");
+		System.err.println("-------------------------------- Maze Summary -----------------------------------");
+		System.err.println(maze);
+		System.err.println("---------------------------------------------------------------------------------");
 		
 		DMatrixRMaj S = new DMatrixRMaj(maze.getSpaces(), 1);
 		DMatrixRMaj T = new DMatrixRMaj(maze.getSpaces(), maze.getSpaces());
@@ -55,7 +58,7 @@ public class Robot {
 		CommonOps_DDRM.fill(E, Double.MIN_VALUE);
 		
 		S.set(maze.getPosition(0, 0), 0, 0.5);
-		S.set(maze.getPosition(2, 0), 0, 0.5);
+		S.set(maze.getPosition(6, 0), 0, 0.5);
 			
 		{
 			// stochastic training robot
@@ -83,27 +86,27 @@ public class Robot {
 		}
 		
 
-		for (int epoch = 0; epoch < 10; epoch++)
+		for (int rb = 0; rb < TOTAL_ROBOTS; rb++)
 		{
 			// testing robots
 			Robot robot = new Robot(rand);
 			
-			for (int i = 0; i < 6; i++) {
+			for (int i = 0; i < TOTAL_MOVES; i++) {
 				
 				robot.record(robot.sense(maze));
 						
 				robot.random(maze);
 			}
 			
-			HMMComposite fb = new HMMComposite.Builder().build();
+			HMMComposite fb = new HMMComposite.Builder().setWikiViterbiAlgorithm().build();
 			
 			HMMResult h = fb.fit(robot.get(), S, T, E);
 			
 			Printer p = new Printer(ff);
-			String [] states = { "0:0", "0:1", "0:2", "0:3", "1:1", "1:3", "2:0", "2:1", "2:2", "2:3" };
+			String [] states = maze.getLocations().values().toArray(new String[0]);
 			String [] emissions = Maze.EMISSIONS.values().toArray(new String[0]);
 			
-			System.out.println("Robot #" + (epoch + 1));
+			System.out.println("Robot #" + (rb + 1));
 			System.out.println("==========");
 			System.out.println(robot.summary(maze));
 			System.out.println("Viterbi    : " + p.display(states, h.vlist()) + "   => P: " + ff.format(h.viterbi().probability(h.vlist())));
@@ -135,7 +138,7 @@ public class Robot {
 			col = 0;
 		}
 		else {
-			row = 2;
+			row = 6;
 			col = 0;
 		}
 			
