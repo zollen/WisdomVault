@@ -1,10 +1,24 @@
 package genetic.maze;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Maze {
+	
+	public static final int TOP_E = 1;
+	public static final int DOWN_E = 3;
+	public static final int LEFT_E = 5;
+	public static final int RIGHT_E = 10;
+	
+	public static final Map<Integer, Integer> STATES = new LinkedHashMap<Integer, Integer>();
+	public static final Map<Integer, String> EMISSIONS = new LinkedHashMap<Integer, String>();
+	
+	static {
+		setup();
+	}
+	
 	
 	private Map<String, Set<Integer>> enviornment = null;
 	private Map<String, Integer> twoDToOneD = null;
@@ -126,6 +140,48 @@ public class Maze {
 		builder.append("\n");
 		
 		return builder.toString();
+	}
+	
+	
+	private static void setup() {
+		
+		EMISSIONS.put(TOP_E, MazeGame.Move.ACTIONS[MazeGame.UP]);
+		EMISSIONS.put(DOWN_E, MazeGame.Move.ACTIONS[MazeGame.DOWN]);
+		EMISSIONS.put(RIGHT_E, MazeGame.Move.ACTIONS[MazeGame.RIGHT]);
+		EMISSIONS.put(LEFT_E, MazeGame.Move.ACTIONS[MazeGame.LEFT]);
+		
+		EMISSIONS.put(TOP_E + DOWN_E, MazeGame.Move.ACTIONS[MazeGame.UP] + MazeGame.Move.ACTIONS[MazeGame.DOWN]);
+		EMISSIONS.put(TOP_E + LEFT_E, MazeGame.Move.ACTIONS[MazeGame.UP] + MazeGame.Move.ACTIONS[MazeGame.LEFT]);
+		EMISSIONS.put(TOP_E + RIGHT_E, MazeGame.Move.ACTIONS[MazeGame.UP] + MazeGame.Move.ACTIONS[MazeGame.RIGHT]);
+		EMISSIONS.put(DOWN_E + LEFT_E, MazeGame.Move.ACTIONS[MazeGame.DOWN] + MazeGame.Move.ACTIONS[MazeGame.LEFT]);
+		EMISSIONS.put(DOWN_E + RIGHT_E, MazeGame.Move.ACTIONS[MazeGame.DOWN] + MazeGame.Move.ACTIONS[MazeGame.RIGHT]);
+		EMISSIONS.put(LEFT_E + RIGHT_E, MazeGame.Move.ACTIONS[MazeGame.LEFT] + MazeGame.Move.ACTIONS[MazeGame.RIGHT]);
+		
+		EMISSIONS.put(LEFT_E + TOP_E + RIGHT_E, MazeGame.Move.ACTIONS[MazeGame.LEFT] + MazeGame.Move.ACTIONS[MazeGame.UP] + MazeGame.Move.ACTIONS[MazeGame.RIGHT]);
+		EMISSIONS.put(LEFT_E + DOWN_E + RIGHT_E, MazeGame.Move.ACTIONS[MazeGame.LEFT] + MazeGame.Move.ACTIONS[MazeGame.DOWN] + MazeGame.Move.ACTIONS[MazeGame.RIGHT]);
+		EMISSIONS.put(TOP_E + DOWN_E + RIGHT_E, MazeGame.Move.ACTIONS[MazeGame.UP] + MazeGame.Move.ACTIONS[MazeGame.DOWN] + MazeGame.Move.ACTIONS[MazeGame.RIGHT]);
+		EMISSIONS.put(TOP_E + DOWN_E + LEFT_E, MazeGame.Move.ACTIONS[MazeGame.LEFT] + MazeGame.Move.ACTIONS[MazeGame.UP] + MazeGame.Move.ACTIONS[MazeGame.DOWN]);
+		
+		EMISSIONS.put(RIGHT_E + TOP_E + DOWN_E + LEFT_E, MazeGame.Move.ACTIONS[MazeGame.LEFT] + MazeGame.Move.ACTIONS[MazeGame.UP] + MazeGame.Move.ACTIONS[MazeGame.DOWN] + MazeGame.Move.ACTIONS[MazeGame.RIGHT]);
+		
+		STATES.put(TOP_E, 0);
+		STATES.put(DOWN_E, 1);
+		STATES.put(RIGHT_E, 2);
+		STATES.put(LEFT_E, 3);
+		
+		STATES.put(TOP_E + DOWN_E, 4);
+		STATES.put(TOP_E + LEFT_E, 5);
+		STATES.put(TOP_E + RIGHT_E, 6);
+		STATES.put(DOWN_E + LEFT_E, 7);
+		STATES.put(DOWN_E + RIGHT_E, 8);
+		STATES.put(LEFT_E + RIGHT_E, 9);
+		
+		STATES.put(LEFT_E + TOP_E + RIGHT_E, 10);
+		STATES.put(LEFT_E + DOWN_E + RIGHT_E, 11);
+		STATES.put(TOP_E + DOWN_E + RIGHT_E, 12);
+		STATES.put(TOP_E + DOWN_E + LEFT_E, 13);
+		
+		STATES.put(RIGHT_E + TOP_E + DOWN_E + LEFT_E, 14);
 	}
 
 }

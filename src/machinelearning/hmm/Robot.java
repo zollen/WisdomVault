@@ -2,9 +2,7 @@ package machinelearning.hmm;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -15,7 +13,6 @@ import org.nd4j.linalg.primitives.Pair;
 
 import genetic.maze.Maze;
 import genetic.maze.MazeGame;
-import genetic.maze.MazeGame.Move;
 import genetic.maze.MazeLoader;
 import machinelearning.hmm.HMMComposite.HMMResult;
 import machinelearning.hmm.Robot.Sensor.Reading;
@@ -51,7 +48,7 @@ public class Robot {
 		
 		DMatrixRMaj S = new DMatrixRMaj(maze.getSpaces(), 1);
 		DMatrixRMaj T = new DMatrixRMaj(maze.getSpaces(), maze.getSpaces());
-		DMatrixRMaj E = new DMatrixRMaj(maze.getSpaces(), Sensor.Reading.emissions.size());
+		DMatrixRMaj E = new DMatrixRMaj(maze.getSpaces(), Maze.EMISSIONS.size());
 				
 		CommonOps_DDRM.fill(S, Double.MIN_VALUE);
 		CommonOps_DDRM.fill(T, Double.MIN_VALUE);
@@ -70,8 +67,8 @@ public class Robot {
 				
 				int from = maze.getPosition(robot.row, robot.col);
 				
-				E.set(from, Sensor.Reading.emissions.get(reading.get()),
-						E.get(from, Sensor.Reading.emissions.get(reading.get())) + 1);
+				E.set(from, Maze.STATES.get(reading.get()),
+						E.get(from, Maze.STATES.get(reading.get())) + 1);
 
 				robot.random(maze);
 
@@ -104,7 +101,7 @@ public class Robot {
 			
 			Printer p = new Printer(ff);
 			String [] states = { "0:0", "0:1", "0:2", "0:3", "1:1", "1:3", "2:0", "2:1", "2:2", "2:3" };
-			String [] emissions = Reading.desc.values().toArray(new String[0]);
+			String [] emissions = Maze.EMISSIONS.values().toArray(new String[0]);
 			
 			System.out.println("Robot #" + (epoch + 1));
 			System.out.println("==========");
@@ -197,7 +194,7 @@ public class Robot {
 			
 			Pair<String, Reading> reading = readings.get(i);
 			
-			results[i] = Sensor.Reading.emissions.get(reading.getSecond().get());
+			results[i] = Maze.STATES.get(reading.getSecond().get());
 		}
 		
 		return results;
@@ -266,59 +263,27 @@ public class Robot {
 		
 		public Reading sense(Set<Integer> surrounding) {
 			return new Reading(surrounding);
-		}
-		
+		}		
 		
 		public static class Reading {
 			
-			public static final int RIGHT_ONLY = 50;
-			public static final int RIGHT_LEFT_DOWN = 63;
-			public static final int RIGHT_LEFT = 60;
-			public static final int LEFT_DOWN = 13;
-			public static final int TOP_DOWN = 4;
-			public static final int RIGHT_LEFT_TOP = 61;
-			public static final int LEFT_TOP = 11;
-			
-			
-			public static final Map<Integer, String> desc = new LinkedHashMap<Integer, String>();
-			public static final Map<Integer, Integer> emissions = new LinkedHashMap<Integer, Integer>();
-			
-			static {
-				desc.put(RIGHT_ONLY, Move.ACTIONS[RIGHT]);
-				desc.put(RIGHT_LEFT_DOWN, Move.ACTIONS[LEFT] + Move.ACTIONS[DOWN] + Move.ACTIONS[RIGHT]);
-				desc.put(RIGHT_LEFT, Move.ACTIONS[LEFT] + Move.ACTIONS[RIGHT]);
-				desc.put(LEFT_DOWN, Move.ACTIONS[LEFT] + Move.ACTIONS[DOWN]);
-				desc.put(TOP_DOWN, Move.ACTIONS[TOP] + Move.ACTIONS[DOWN]);
-				desc.put(RIGHT_LEFT_TOP, Move.ACTIONS[LEFT] + Move.ACTIONS[TOP] + Move.ACTIONS[RIGHT]);
-				desc.put(LEFT_TOP, Move.ACTIONS[TOP] + Move.ACTIONS[LEFT]);		
-				
-				emissions.put(RIGHT_ONLY, 0);
-				emissions.put(RIGHT_LEFT_DOWN, 1);
-				emissions.put(RIGHT_LEFT, 2);
-				emissions.put(LEFT_DOWN, 3);
-				emissions.put(TOP_DOWN, 4);
-				emissions.put(RIGHT_LEFT_TOP, 5);
-				emissions.put(LEFT_TOP, 6);
-			}
-			
-			
-			int emissionState;
+			private int emissionState;
 			
 			public Reading(Set<Integer> surrounding) {
-				
+						
 				int score = 0;
 				
 				if (surrounding.contains(TOP))
-					score += 1;
+					score += Maze.TOP_E;
 				
 				if (surrounding.contains(DOWN))
-					score += 3;
+					score += Maze.DOWN_E;
 				
 				if (surrounding.contains(LEFT))
-					score += 10;
+					score += Maze.LEFT_E;
 				
 				if (surrounding.contains(RIGHT))
-					score += 50;
+					score += Maze.RIGHT_E;
 				
 				this.emissionState = score;
 				
@@ -330,7 +295,7 @@ public class Robot {
 				
 			@Override
 			public String toString() {
-				return desc.get(emissionState);
+				return Maze.EMISSIONS.get(emissionState);
 			}
 
 		}
