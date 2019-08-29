@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -14,15 +15,17 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.nd4j.linalg.primitives.Pair;
 
+import genetic.maze.MazeGame;
+import genetic.maze.MazeGame.Move;
 import machinelearning.hmm.HMMComposite.HMMResult;
 import machinelearning.hmm.Robot.Sensor.Reading;
 
 public class Robot {
 	
-	public static final int TOP = 0;
-	public static final int DOWN = 1;
-	public static final int LEFT = 2;
-	public static final int RIGHT = 3;
+	public static final int TOP = MazeGame.UP;
+	public static final int DOWN = MazeGame.DOWN;
+	public static final int LEFT = MazeGame.LEFT;
+	public static final int RIGHT = MazeGame.RIGHT;
 	
 	private static final DecimalFormat ff = new DecimalFormat("0.0000");
 	public static final int ROUND = 1000;
@@ -54,9 +57,9 @@ public class Robot {
 		DMatrixRMaj T = new DMatrixRMaj(HEIGHT * WIDTH - 2, HEIGHT * WIDTH - 2);
 		DMatrixRMaj E = new DMatrixRMaj(HEIGHT * WIDTH - 2, Sensor.Reading.emissions.size());
 				
-		CommonOps_DDRM.fill(S, 0.0);
-		CommonOps_DDRM.fill(T, 0.0);
-		CommonOps_DDRM.fill(E, 0.0);
+		CommonOps_DDRM.fill(S, Double.MIN_VALUE);
+		CommonOps_DDRM.fill(T, Double.MIN_VALUE);
+		CommonOps_DDRM.fill(E, Double.MIN_VALUE);
 		
 		S.set(positions.get("00"), 0, 0.5);
 		S.set(positions.get("20"), 0, 0.5);
@@ -105,7 +108,7 @@ public class Robot {
 			
 			Printer p = new Printer(ff);
 			String [] states = { "0:0", "0:1", "0:2", "0:3", "1:1", "1:3", "2:0", "2:1", "2:2", "2:3" };
-			String [] emissions = { "R", "RLW", "RL", "LD", "TD", "RLT", "LT" };
+			String [] emissions = Reading.desc.values().toArray(new String[0]);
 			
 			System.out.println("Robot #" + (epoch + 1));
 			System.out.println("==========");
@@ -283,17 +286,17 @@ public class Robot {
 			public static final int LEFT_TOP = 11;
 			
 			
-			private static final Map<Integer, String> desc = new HashMap<Integer, String>();
-			private static final Map<Integer, Integer> emissions = new HashMap<Integer, Integer>();
+			public static final Map<Integer, String> desc = new LinkedHashMap<Integer, String>();
+			public static final Map<Integer, Integer> emissions = new LinkedHashMap<Integer, Integer>();
 			
 			static {
-				desc.put(RIGHT_ONLY, "[RIGHT]");
-				desc.put(RIGHT_LEFT_DOWN, "[RIGHT,LEFT,DOWN]");
-				desc.put(RIGHT_LEFT, "[RIGHT,LEFT]");
-				desc.put(LEFT_DOWN, "[LEFT,DOWN]");
-				desc.put(TOP_DOWN, "[TOP,DOWN]");
-				desc.put(RIGHT_LEFT_TOP, "[RIGHT,LEFT,TOP]");
-				desc.put(LEFT_TOP, "[LEFT,TOP]");		
+				desc.put(RIGHT_ONLY, Move.ACTIONS[RIGHT]);
+				desc.put(RIGHT_LEFT_DOWN, Move.ACTIONS[LEFT] + Move.ACTIONS[DOWN] + Move.ACTIONS[RIGHT]);
+				desc.put(RIGHT_LEFT, Move.ACTIONS[LEFT] + Move.ACTIONS[RIGHT]);
+				desc.put(LEFT_DOWN, Move.ACTIONS[LEFT] + Move.ACTIONS[DOWN]);
+				desc.put(TOP_DOWN, Move.ACTIONS[TOP] + Move.ACTIONS[DOWN]);
+				desc.put(RIGHT_LEFT_TOP, Move.ACTIONS[LEFT] + Move.ACTIONS[TOP] + Move.ACTIONS[RIGHT]);
+				desc.put(LEFT_TOP, Move.ACTIONS[TOP] + Move.ACTIONS[LEFT]);		
 				
 				emissions.put(RIGHT_ONLY, 0);
 				emissions.put(RIGHT_LEFT_DOWN, 1);
