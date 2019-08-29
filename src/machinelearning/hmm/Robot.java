@@ -55,7 +55,7 @@ public class Robot {
 		CommonOps_DDRM.fill(E, Double.MIN_VALUE);
 		
 		S.set(maze.getPosition(0, 0), 0, 0.5);
-		S.set(maze.getPosition(0, 0), 0, 0.5);
+		S.set(maze.getPosition(2, 0), 0, 0.5);
 			
 		{
 			// stochastic training robot
