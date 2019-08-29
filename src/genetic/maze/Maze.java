@@ -2,6 +2,7 @@ package genetic.maze;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Maze {
 	
@@ -71,6 +72,60 @@ public class Maze {
 		}
 		
 		return new Maze(mmap, spaces, enviornment, twoDToOneD, oneDToTwoD);
+	}
+	
+	@Override
+	public String toString() {
+		
+		StringBuilder builder = new StringBuilder();
+		
+		for (int i = 0; i < getWidth() + 2; i++)
+			builder.append("-");
+		
+		builder.append("\n");
+		
+		for (int i = 0; i < getHeight(); i++) {
+			
+			builder.append("|");
+			for (int j = 0; j <getWidth(); j++) {
+				builder.append(getMap()[i][j]);
+			}
+			builder.append("|\n");
+		}
+		
+		
+		for (int i = 0; i < getWidth() + 2; i++)
+			builder.append("-");
+		
+		builder.append("\n");
+		
+		builder.append("Total Free Cells: [" + spaces + "]\n");
+		
+		builder.append(enviornment.entrySet().stream().map(p -> 
+				"{" + 
+					p.getKey() + ":" + 
+					p.getValue().stream().map(k -> MazeGame.Move.ACTIONS[k])
+						.collect(Collectors.joining("|")) +
+				"}").collect(Collectors.joining(", ")));
+		
+		builder.append("\n");
+		
+		builder.append("2D => 1D: ");
+		builder.append(twoDToOneD.entrySet().stream().map(
+				p -> "{" + p.getKey() + "=>" + p.getValue() + "}")
+						.collect(Collectors.joining(", ")));
+		
+		builder.append("\n");
+		
+		builder.append("1D => 2D: ");
+		
+		builder.append(oneDToTwoD.entrySet().stream().map(
+				p -> "{" + p.getKey() + "=>" + p.getValue() + "}")
+						.collect(Collectors.joining(", ")));
+		
+		builder.append("\n");
+		
+		return builder.toString();
 	}
 
 }
