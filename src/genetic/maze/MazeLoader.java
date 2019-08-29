@@ -60,7 +60,7 @@ public class MazeLoader {
 				
 				if (map[row][col] == ' ') {
 					
-					String key = String.valueOf(row) + "," + String.valueOf(col);
+					String key = String.valueOf(row) + ":" + String.valueOf(col);
 					
 					Set<Integer> moves = new HashSet<Integer>();
 					
@@ -82,7 +82,7 @@ public class MazeLoader {
 					
 					spaces++;
 					
-					twoDToOneD.put(String.valueOf(row) + "," + String.valueOf(col), current);
+					twoDToOneD.put(String.valueOf(row) + ":" + String.valueOf(col), current);
 					oneDToTwoD.put(current, String.valueOf(row) + ":" + String.valueOf(col));
 					
 					current++;

@@ -2,8 +2,6 @@ package machinelearning.hmm;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,8 +13,10 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.nd4j.linalg.primitives.Pair;
 
+import genetic.maze.Maze;
 import genetic.maze.MazeGame;
 import genetic.maze.MazeGame.Move;
+import genetic.maze.MazeLoader;
 import machinelearning.hmm.HMMComposite.HMMResult;
 import machinelearning.hmm.Robot.Sensor.Reading;
 
@@ -29,11 +29,6 @@ public class Robot {
 	
 	private static final DecimalFormat ff = new DecimalFormat("0.0000");
 	public static final int ROUND = 1000;
-	public static final int HEIGHT = 3;
-	public static final int WIDTH = 4;
-	public static final char [][] map = new char[HEIGHT][WIDTH];
-	public static final Map<String, Set<Integer>> environment = new HashMap<String, Set<Integer>>();
-	public static final Map<String, Integer> positions = new HashMap<String, Integer>();
 
 	
 	/**
@@ -44,25 +39,26 @@ public class Robot {
 	 * ******
 	 */
 	
-	static {
-			
-		setup();
-	}
-	
 	public static void main(String ...args) {
 		
 		Random rand = new Random(83);
 		
-		DMatrixRMaj S = new DMatrixRMaj(HEIGHT * WIDTH - 2, 1);
-		DMatrixRMaj T = new DMatrixRMaj(HEIGHT * WIDTH - 2, HEIGHT * WIDTH - 2);
-		DMatrixRMaj E = new DMatrixRMaj(HEIGHT * WIDTH - 2, Sensor.Reading.emissions.size());
+		MazeLoader loader = new MazeLoader("data/toymaze.txt");
+		
+		Maze maze = loader.build();
+		System.out.println(maze);
+		System.out.println("---------------------------------------------------");
+		
+		DMatrixRMaj S = new DMatrixRMaj(maze.getSpaces(), 1);
+		DMatrixRMaj T = new DMatrixRMaj(maze.getSpaces(), maze.getSpaces());
+		DMatrixRMaj E = new DMatrixRMaj(maze.getSpaces(), Sensor.Reading.emissions.size());
 				
 		CommonOps_DDRM.fill(S, Double.MIN_VALUE);
 		CommonOps_DDRM.fill(T, Double.MIN_VALUE);
 		CommonOps_DDRM.fill(E, Double.MIN_VALUE);
 		
-		S.set(positions.get("00"), 0, 0.5);
-		S.set(positions.get("20"), 0, 0.5);
+		S.set(maze.getPosition(0, 0), 0, 0.5);
+		S.set(maze.getPosition(0, 0), 0, 0.5);
 			
 		{
 			// stochastic training robot
@@ -70,16 +66,16 @@ public class Robot {
 
 			for (int i = 0; i < ROUND; i++) {
 				
-				Robot.Sensor.Reading reading = robot.sense(environment);
+				Robot.Sensor.Reading reading = robot.sense(maze);
 				
-				int from = positions.get(String.valueOf(robot.row) + String.valueOf(robot.col));
+				int from = maze.getPosition(robot.row, robot.col);
 				
 				E.set(from, Sensor.Reading.emissions.get(reading.get()),
 						E.get(from, Sensor.Reading.emissions.get(reading.get())) + 1);
 
-				robot.random(environment);
+				robot.random(maze);
 
-				int to = positions.get(String.valueOf(robot.row) + String.valueOf(robot.col));
+				int to = maze.getPosition(robot.row, robot.col);
 
 				T.set(from, to, T.get(from, to) + 1);
 			}
@@ -97,9 +93,9 @@ public class Robot {
 			
 			for (int i = 0; i < 6; i++) {
 				
-				robot.record(robot.sense(environment));
+				robot.record(robot.sense(maze));
 						
-				robot.random(environment);
+				robot.random(maze);
 			}
 			
 			HMMComposite fb = new HMMComposite.Builder().build();
@@ -112,7 +108,7 @@ public class Robot {
 			
 			System.out.println("Robot #" + (epoch + 1));
 			System.out.println("==========");
-			System.out.println(robot);
+			System.out.println(robot.summary(maze));
 			System.out.println("Viterbi    : " + p.display(states, h.vlist()) + "   => P: " + ff.format(h.viterbi().probability(h.vlist())));
 			System.out.println("Forward    : " + p.display(emissions, h.flist()) + "   => P: " + ff.format(h.forward().probability(h.flist())));
 			System.out.println("Backward   : " + p.display(emissions, h.blist()));
@@ -148,9 +144,8 @@ public class Robot {
 			
 	}
 	
-	public Sensor.Reading sense(Map<String, Set<Integer>> surrounding) {
-		Set<Integer> info = environment.get(String.valueOf(row) + String.valueOf(col));
-		return sensor.sense(info);
+	public Sensor.Reading sense(Maze maze) {
+		return sensor.sense(maze.getFreedom(row, col));
 	}
 	
 	public void move(int action) {
@@ -171,9 +166,9 @@ public class Robot {
 		}
 	}
 	
-	public void random(Map<String, Set<Integer>> surrounding) {
+	public void random(Maze maze) {
 		
-		Set<Integer> info = surrounding.get(String.valueOf(row) + String.valueOf(col));
+		Set<Integer> info = maze.getFreedom(row, col);
 		
 		int chosen = rand.nextInt(info.size());
 		
@@ -227,31 +222,30 @@ public class Robot {
 		col += 1;
 	}
 	
-	@Override
-	public String toString() {
+	public String summary(Maze maze) {
 		
 		StringBuilder builder = new StringBuilder();
 		
-		for (int i = 0; i < WIDTH + 2; i++)
+		for (int i = 0; i < maze.getWidth() + 2; i++)
 			builder.append("-");
 		
 		builder.append("\n");
 		
-		for (int i = 0; i < HEIGHT; i++) {
+		for (int i = 0; i < maze.getHeight(); i++) {
 			
 			builder.append("|");
-			for (int j = 0; j < WIDTH; j++) {
+			for (int j = 0; j < maze.getWidth(); j++) {
 				if (i == row && j == col) {
 					builder.append("X");
 				}
 				else {
-					builder.append(map[i][j]);
+					builder.append(maze.getMap()[i][j]);
 				}
 			}
 			builder.append("|\n");
 		}
 		
-		for (int i = 0; i < WIDTH + 2; i++)
+		for (int i = 0; i < maze.getWidth() + 2; i++)
 			builder.append("-");
 		
 		builder.append("\n");
@@ -342,60 +336,4 @@ public class Robot {
 		}
 		
 	}
-	
-	private static void setup() {
-		
-		map[1][0] = map[1][2] = '*';
-		
-		Set<Integer> m00 = new HashSet<Integer>();
-		m00.add(RIGHT); 
-		environment.put("00", m00);
-		positions.put("00", 0);
-		
-		Set<Integer> m01 = new HashSet<Integer>();
-		m01.add(RIGHT); m01.add(LEFT); m01.add(DOWN);
-		environment.put("01", m01);
-		positions.put("01", 1);
-		
-		Set<Integer> m02 = new HashSet<Integer>();
-		m02.add(RIGHT); m02.add(LEFT); 
-		environment.put("02", m02);
-		positions.put("02", 2);
-		
-		Set<Integer> m03 = new HashSet<Integer>();
-		m03.add(LEFT); m03.add(DOWN);
-		environment.put("03", m03);
-		positions.put("03", 3);
-		
-		Set<Integer> m11 = new HashSet<Integer>();
-		m11.add(TOP); m11.add(DOWN);
-		environment.put("11", m11);
-		positions.put("11", 4);
-		
-		Set<Integer> m13 = new HashSet<Integer>();
-		m13.add(TOP); m13.add(DOWN);
-		environment.put("13", m13);
-		positions.put("13", 5);
-		
-		Set<Integer> m20 = new HashSet<Integer>();
-		m20.add(RIGHT);
-		environment.put("20", m20);
-		positions.put("20", 6);
-		
-		Set<Integer> m21 = new HashSet<Integer>();
-		m21.add(LEFT); m21.add(RIGHT); m21.add(TOP);
-		environment.put("21", m21);
-		positions.put("21", 7);
-		
-		Set<Integer> m22 = new HashSet<Integer>();
-		m22.add(LEFT); m22.add(RIGHT); 
-		environment.put("22", m22);
-		positions.put("22", 8);
-		
-		Set<Integer> m23 = new HashSet<Integer>();
-		m23.add(LEFT); m23.add(TOP); 
-		environment.put("23", m23);
-		positions.put("23", 9);
-	}
-
 }

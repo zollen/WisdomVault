@@ -34,7 +34,7 @@ public class Maze {
 	}
 	
 	public int getPosition(int row, int col) {
-		return twoDToOneD.get(String.valueOf(row) + "," + String.valueOf(col));
+		return twoDToOneD.get(String.valueOf(row) + ":" + String.valueOf(col));
 	}
 	
 	public String getLocation(int location) {
@@ -42,7 +42,7 @@ public class Maze {
 	}
 	
 	public Set<Integer> getFreedom(int row, int col) {
-		return enviornment.get(String.valueOf(row) + "," + String.valueOf(col));	
+		return enviornment.get(String.valueOf(row) + ":" + String.valueOf(col));	
 	}
 	
 	public int getHeight() {
