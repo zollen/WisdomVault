@@ -153,7 +153,7 @@ public class Maze {
 		EMISSIONS.put(TOP_E + DOWN_E, MazeGame.Move.ACTIONS[MazeGame.UP] + MazeGame.Move.ACTIONS[MazeGame.DOWN]);
 		EMISSIONS.put(TOP_E + LEFT_E, MazeGame.Move.ACTIONS[MazeGame.UP] + MazeGame.Move.ACTIONS[MazeGame.LEFT]);
 		EMISSIONS.put(TOP_E + RIGHT_E, MazeGame.Move.ACTIONS[MazeGame.UP] + MazeGame.Move.ACTIONS[MazeGame.RIGHT]);
-		EMISSIONS.put(DOWN_E + LEFT_E, MazeGame.Move.ACTIONS[MazeGame.DOWN] + MazeGame.Move.ACTIONS[MazeGame.LEFT]);
+		EMISSIONS.put(DOWN_E + LEFT_E, MazeGame.Move.ACTIONS[MazeGame.LEFT] + MazeGame.Move.ACTIONS[MazeGame.DOWN]);
 		EMISSIONS.put(DOWN_E + RIGHT_E, MazeGame.Move.ACTIONS[MazeGame.DOWN] + MazeGame.Move.ACTIONS[MazeGame.RIGHT]);
 		EMISSIONS.put(LEFT_E + RIGHT_E, MazeGame.Move.ACTIONS[MazeGame.LEFT] + MazeGame.Move.ACTIONS[MazeGame.RIGHT]);
 		
