@@ -30,14 +30,6 @@ public class Robot {
 	public static final int TOTAL_MOVES = 15;
 
 	
-	/**
-	 * ******
-	 * *S   *
-	 * ** *E*
-	 * *S   *
-	 * ******
-	 */
-	
 	public static void main(String ...args) {
 		
 		Random rand = new Random(83);
