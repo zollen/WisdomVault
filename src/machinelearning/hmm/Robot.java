@@ -32,7 +32,7 @@ public class Robot {
 	
 	public static void main(String ...args) {
 		
-		Random rand = new Random(83);
+		Random rand = new Random(23);
 		
 		MazeLoader loader = new MazeLoader("data/mymaze.txt");
 		
