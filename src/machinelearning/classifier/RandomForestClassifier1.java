@@ -27,6 +27,23 @@ public class RandomForestClassifier1 {
 	
 	private static final String VALUE_PLAY_YES = "Yes";
 	private static final String VALUE_PLAY_NO = "No";
+	
+	/*
+	 * Learning trees are very popular base models for ensemble methods. Strong learners 
+	 * composed of multiple trees can be called “forests”. Trees that compose a forest can 
+	 * be chosen to be either shallow (few depths) or deep (lot of depths, if not fully grown). 
+	 * Shallow trees have less variance but higher bias and then will be better choice for 
+	 * sequential methods that we will described thereafter. Deep trees, on the other side, 
+	 * have low bias but high variance and, so, are relevant choices for bagging method that 
+	 * is mainly focused at reducing variance.
+	 * 
+	 * The random forest approach is a bagging method where deep trees, fitted on bootstrap 
+	 * samples, are combined to produce an output with lower variance. However, random 
+	 * forests also use another trick to make the multiple fitted trees a bit less 
+	 * correlated with each others: when growing each tree, instead of only sampling over 
+	 * the observations in the dataset to generate a bootstrap sample, we also sample over 
+	 * features and keep only a random subset of them to build the tree.
+	 */
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
