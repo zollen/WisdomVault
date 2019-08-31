@@ -1,5 +1,7 @@
 package machinelearning.classifier;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -12,6 +14,7 @@ import java.util.stream.Collectors;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
+import org.ejml.ops.MatrixIO;
 
 // AdaBoost or its varations are best for classification problems. Boosting NEVER OVERFITTED!!
 public class AdaBoostBasic {
@@ -406,8 +409,11 @@ public class AdaBoostBasic {
 					
 				});
 			}
-				
-			builder.append(inputs);
+			
+			ByteArrayOutputStream bao = new ByteArrayOutputStream();
+			MatrixIO.print(new PrintStream(bao), inputs, "%1$7.3f");
+			builder.append(new String(bao.toByteArray()));
+	//		builder.append(inputs);
 			builder.append("\n\n");
 			
 			return builder.toString();
