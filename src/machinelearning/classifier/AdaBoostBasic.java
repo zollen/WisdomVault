@@ -16,6 +16,24 @@ import org.ejml.equation.Equation;
 // AdaBoost or its varations are best for classification problems. Boosting NEVER OVERFITTED!!
 public class AdaBoostBasic {
 	
+	/**
+	 * 
+	 * bagging - that often considers homogeneous weak learners, learns them independently 
+	 * from each other in parallel and combines them following some kind of deterministic 
+	 * averaging process
+	 * boosting - that often considers homogeneous weak learners, learns them sequentially 
+	 * in a very adaptative way (a base model depends on the previous ones) and combines 
+	 * them following a deterministic strategy
+	 * stacking - that often considers heterogeneous weak learners, learns them in parallel 
+	 * and combines them by training a meta-model to output a prediction based on the 
+	 * different weak models predictions
+	 * 
+	 * Very roughly, we can say that bagging will mainly focus at getting an ensemble model 
+	 * with less variance than its components whereas boosting and stacking will mainly try 
+	 * to produce strong models less biased than their components (even if variance 
+	 * can also be reduced)
+	 */
+	
 	private static final double THRESHOLD = 0.00001;
 	private static final int X = 0;
 	private static final int Y = 1;
