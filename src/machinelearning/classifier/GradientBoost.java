@@ -56,7 +56,7 @@ public class GradientBoost {
 			CommonOps_DDRM.subtract(W, R.copy(), R);
 			
 			RandomTree tree = new RandomTree();	
-			tree.setMaxDepth(1);   // we have a small toy data, this tree depth should be 3 to 6 
+			tree.setMaxDepth(1);   // we have a small toy data, this tree depth would be 3 to 6 
 					
 			Instances data = convertData(A, R);
 			
@@ -67,7 +67,7 @@ public class GradientBoost {
 			if (MatrixFeatures.isEquals(R, done, 0.000001))
 				break;
 			
-			R.print("%2.4f");
+			
 		}
 		
 		
