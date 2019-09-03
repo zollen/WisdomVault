@@ -16,7 +16,8 @@ import weka.core.Instances;
 
 public class GradientBoost {
 	
-	private static final int TOTAL_TREES = 100;
+	private static final double THRESHOLD = 0.01;
+	private static final int TOTAL_TREES = 1000;
 	private static final double LEARNING_RATE = 0.1;
 	
 	public static void main(String[] args) throws Exception {
@@ -39,44 +40,60 @@ public class GradientBoost {
 		DMatrixRMaj W = CommonOps_DDRM.extractColumn(A, 3, null);
 		double avg = CommonOps_DDRM.sumCols(W, null).get(0, 0) / W.numRows;
 		
+		DMatrixRMaj TARGET = new DMatrixRMaj(W.numRows, 1);
+		CommonOps_DDRM.fill(TARGET, 0.0);
+		
 		// First residual;
 		DMatrixRMaj R = new DMatrixRMaj(W.numRows, 1);
-		CommonOps_DDRM.fill(R, avg);
+		DMatrixRMaj AVG = new DMatrixRMaj(W.numRows, 1);
+		CommonOps_DDRM.fill(AVG, avg);
+		CommonOps_DDRM.subtract(W, AVG, R);
+		
+		DMatrixRMaj r = new DMatrixRMaj(R.numRows, 1);
+		CommonOps_DDRM.fill(r, 0.0);
+		
+		
 		
 		List<RandomTree> trees = new ArrayList<RandomTree>();
 		
 		
-		DMatrixRMaj done = new DMatrixRMaj(W.numRows, 1);
-		CommonOps_DDRM.fill(done, 0.0);
-		
 		// Let's start building trees
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < TOTAL_TREES; i++) {
 					
-			// next residual
-			CommonOps_DDRM.subtract(W, R.copy(), R);
-			
 			RandomTree tree = new RandomTree();	
 			tree.setMaxDepth(1);   // we have a small toy data, this tree depth would be 3 to 6 
 					
-			Instances data = convertData(A, R);
+			Instances data = toInstances(A, R);
 			
 			tree.buildClassifier(data);
 			
+			DMatrixRMaj C = toMatrix(tree, data);
+			
 			trees.add(tree);
 			
-			if (MatrixFeatures.isEquals(R, done, 0.000001))
-				break;
+			CommonOps_DDRM.add(r.copy(), LEARNING_RATE, C, r);
+			DMatrixRMaj tmp = new DMatrixRMaj(W.numRows, 1);
+			CommonOps_DDRM.add(AVG, r, tmp);
+			CommonOps_DDRM.subtract(W, tmp, R);
 			
-			
+			if (MatrixFeatures.isEquals(R, TARGET, THRESHOLD))
+				break;			
 		}
 		
-		
-		
-		
-		
+		System.out.println("Total Trees: " + trees.size());
+			
 	}
 	
-	private static Instances convertData(DMatrixRMaj A, DMatrixRMaj R) {
+	private static DMatrixRMaj toMatrix(RandomTree tree, Instances data) throws Exception {
+		
+		double [][] res = tree.distributionsForInstances(data);
+		
+		DMatrixRMaj mat = new DMatrixRMaj(res);
+		
+		return mat;
+	}
+	
+	private static Instances toInstances(DMatrixRMaj A, DMatrixRMaj R) {
 		
 		ArrayList<Attribute> attrs = setup();
 		
@@ -86,18 +103,22 @@ public class GradientBoost {
 			
 			Instance data = new DenseInstance(4);	
 			
-			for (int col = 0; col < A.numCols - 1; col++) {
+			for (int col = 0; col < A.numCols; col++) {
 				
-				if (col == 1)
+				switch(col) {
+				case 0:
+					data.setValue(attrs.get(col), A.get(row, col));
+				break;
+				case 1:
 					data.setValue(attrs.get(col), attrs.get(col).value((int) A.get(row, col)));
-				else
-				if (col == 2)
+				break;
+				case 2:
 					data.setValue(attrs.get(col), attrs.get(col).value((int) A.get(row, col)));
-				else
-				data.setValue(attrs.get(col), A.get(row, col));
+				break;
+				default:
+					data.setValue(attrs.get(col), R.get(row, 0));
+				}
 			}
-			
-			data.setValue(attrs.get(A.numCols - 1), R.get(row, 0));
 			
 			training.add(data);
 			
