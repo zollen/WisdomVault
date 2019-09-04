@@ -15,7 +15,7 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class GradientBoost {
+public class GradientBoost2 {
 	
 	/**
 	 * This is a GradientBoosting Regression example!
