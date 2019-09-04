@@ -22,8 +22,8 @@ public class GradientBoost {
 	 */
 	
 	private static final DecimalFormat ff = new DecimalFormat("0.00");
-	private static final double THRESHOLD = 0.01;
-	private static final int TOTAL_TREES = 1000;
+	private static final double THRESHOLD = 0.001;
+	private static final int TOTAL_TREES = 50000;
 	private static final double LEARNING_RATE = 0.1;
 	
 	public static void main(String[] args) throws Exception {
