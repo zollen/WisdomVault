@@ -1,5 +1,6 @@
 package machinelearning.classifier;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +17,11 @@ import weka.core.Instances;
 
 public class GradientBoost {
 	
+	/**
+	 * This is a GradientBoosting Regression example!
+	 */
+	
+	private static final DecimalFormat ff = new DecimalFormat("0.00");
 	private static final double THRESHOLD = 0.01;
 	private static final int TOTAL_TREES = 1000;
 	private static final double LEARNING_RATE = 0.1;
@@ -38,6 +44,9 @@ public class GradientBoost {
 		// Let's get the average weight as our first prediction
 		// The first prediction suggest all predicted weigths are 71.166667
 		DMatrixRMaj W = CommonOps_DDRM.extractColumn(A, 3, null);
+		
+		/*** The averaging step is actually the derivative calcuation  ***/
+		/*** MSE: Σ 1/2 (Prediction - Actual)^2  ***/
 		double avg = CommonOps_DDRM.sumCols(W, null).get(0, 0) / W.numRows;
 		
 		DMatrixRMaj TARGET = new DMatrixRMaj(W.numRows, 1);
@@ -56,7 +65,6 @@ public class GradientBoost {
 		
 		List<RandomTree> trees = new ArrayList<RandomTree>();
 		
-		
 		// Let's start building trees
 		for (int i = 0; i < TOTAL_TREES; i++) {
 					
@@ -67,9 +75,12 @@ public class GradientBoost {
 			
 			tree.buildClassifier(data);
 			
+			/*** The averaging step is actually the derivative calcuation  ***/
+			/*** MSE: Σ 1/2 (Prediction - Actual)^2  ***/
 			DMatrixRMaj C = toMatrix(tree, data);
 			
 			trees.add(tree);
+
 			
 			CommonOps_DDRM.add(r.copy(), LEARNING_RATE, C, r);
 			DMatrixRMaj tmp = new DMatrixRMaj(W.numRows, 1);
@@ -80,8 +91,44 @@ public class GradientBoost {
 				break;			
 		}
 		
+		System.out.println("GraidentBoosting Regression Example");
 		System.out.println("Total Trees: " + trees.size());
+		
+		for (int row = 0; row < A.numRows; row++) {
 			
+			Instances tests = data(A.get(row, 0), (int) A.get(row, 1), (int) A.get(row, 2), A.get(row, 3));
+			for (Instance test : tests)
+				System.out.println(test + "   ==>    " + ff.format(classify(trees, avg, test)));
+		}		
+	}
+	
+	private static Instances data(double height, int color, int gender, double weight) {
+		
+		ArrayList<Attribute> attrs = setup();
+
+		Instances testing = new Instances("TESTING", attrs, 1);
+		Instance data = new DenseInstance(attrs.size());	
+		
+		data.setValue(attrs.get(0), height);
+		data.setValue(attrs.get(1), attrs.get(1).value(color));
+		data.setValue(attrs.get(2), attrs.get(2).value(gender));
+		data.setValue(attrs.get(3), weight);
+		
+		testing.add(data);
+		
+		testing.setClassIndex(testing.numAttributes() - 1);
+	
+		return testing;		
+	}
+	
+	private static double classify(List<RandomTree> trees, double avg, Instance data) throws Exception {
+		
+		double sum = avg;
+		for (RandomTree tree : trees) {
+			sum += tree.classifyInstance(data) * LEARNING_RATE;
+		}
+				
+		return sum;
 	}
 	
 	private static DMatrixRMaj toMatrix(RandomTree tree, Instances data) throws Exception {
@@ -97,11 +144,11 @@ public class GradientBoost {
 		
 		ArrayList<Attribute> attrs = setup();
 		
-		Instances training = new Instances("TRAINING", attrs, 6);
+		Instances training = new Instances("TRAINING", attrs, A.numRows);
 		
 		for (int row = 0; row < A.numRows; row++) {
 			
-			Instance data = new DenseInstance(4);	
+			Instance data = new DenseInstance(attrs.size());	
 			
 			for (int col = 0; col < A.numCols; col++) {
 				
