@@ -22,8 +22,8 @@ public class GradientBoost {
 	 */
 	
 	private static final DecimalFormat ff = new DecimalFormat("0.00");
-	private static final double THRESHOLD = 0.001;
-	private static final int TOTAL_TREES = 50000;
+	private static final double THRESHOLD = 0.00001;
+	private static final int TOTAL_TREES = 1000;
 	private static final double LEARNING_RATE = 0.1;
 	
 	public static void main(String[] args) throws Exception {
@@ -49,8 +49,8 @@ public class GradientBoost {
 		/*** MSE: Σ 1/2 (Prediction - Actual)^2  ***/
 		double avg = CommonOps_DDRM.sumCols(W, null).get(0, 0) / W.numRows;
 		
-		DMatrixRMaj TARGET = new DMatrixRMaj(W.numRows, 1);
-		CommonOps_DDRM.fill(TARGET, 0.0);
+		DMatrixRMaj PREV = new DMatrixRMaj(W.numRows, 1);
+		CommonOps_DDRM.fill(PREV, 0.0);
 		
 		// First residual;
 		DMatrixRMaj R = new DMatrixRMaj(W.numRows, 1);
@@ -87,8 +87,10 @@ public class GradientBoost {
 			CommonOps_DDRM.add(AVG, r, tmp);
 			CommonOps_DDRM.subtract(W, tmp, R);
 			
-			if (MatrixFeatures.isEquals(R, TARGET, THRESHOLD))
-				break;			
+			if (MatrixFeatures.isEquals(R, PREV, THRESHOLD))
+				break;	
+			
+			PREV = R.copy();
 		}
 		
 		System.out.println("GraidentBoosting Regression Example");
