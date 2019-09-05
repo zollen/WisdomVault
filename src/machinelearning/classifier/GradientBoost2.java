@@ -83,6 +83,8 @@ public class GradientBoost2 {
 			// Σ ( residual / Σ (Previous Probabilty * (1 - Previous Probability)) ) 
 			DMatrixRMaj C = toMatrix(tree, data);
 			
+			C.print("%2.4f");
+			
 			trees.add(tree);
 
 			
@@ -154,23 +156,6 @@ public class GradientBoost2 {
 	private static DMatrixRMaj toMatrix(RandomTree tree, Instances data) throws Exception {
 		
 		double [][] res = tree.distributionsForInstances(data);
-		
-		StringBuilder builder = new StringBuilder();
-		
-		for (int row = 0; row < res.length; row++) {
-		
-			for (int col = 0; col < res[0].length; col++) {
-				
-				if (col > 0)
-					builder.append(", ");
-				
-				builder.append(res[row][col]);
-			}
-			
-			builder.append("\n");
-		}
-		
-		System.out.println(builder.toString());
 		
 		DMatrixRMaj mat = new DMatrixRMaj(res);
 		
