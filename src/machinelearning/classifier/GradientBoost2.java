@@ -70,7 +70,7 @@ public class GradientBoost2 {
 		List<RandomTree> trees = new ArrayList<RandomTree>();
 		
 		// Let's start building trees
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < 1; i++) {
 					
 			RandomTree tree = new RandomTree();	
 			tree.setMaxDepth(1);   // we have a small toy data, this tree depth would be 3 to 6 
@@ -155,6 +155,23 @@ public class GradientBoost2 {
 		
 		double [][] res = tree.distributionsForInstances(data);
 		
+		StringBuilder builder = new StringBuilder();
+		
+		for (int row = 0; row < res.length; row++) {
+		
+			for (int col = 0; col < res[0].length; col++) {
+				
+				if (col > 0)
+					builder.append(", ");
+				
+				builder.append(res[row][col]);
+			}
+			
+			builder.append("\n");
+		}
+		
+		System.out.println(builder.toString());
+		
 		DMatrixRMaj mat = new DMatrixRMaj(res);
 		
 		return mat;
@@ -183,7 +200,7 @@ public class GradientBoost2 {
 					data.setValue(attrs.get(col), attrs.get(col).value((int) A.get(row, col)));
 				break;
 				default:
-					data.setValue(attrs.get(col), attrs.get(col).value((int) A.get(row, col)));
+					data.setValue(attrs.get(col), R.get(row, 0));
 				}
 			}
 			
@@ -212,7 +229,7 @@ public class GradientBoost2 {
 		Attribute attr1 = new Attribute("Like Popcorn", likesVals);
 		Attribute attr2 = new Attribute("Age");
 		Attribute attr3 = new Attribute("Color", colorVals);
-		Attribute attr4 = new Attribute("Like Movies", likesVals);
+		Attribute attr4 = new Attribute("Like Movies");
 		attrs.add(attr1);
 		attrs.add(attr2);
 		attrs.add(attr3);
