@@ -83,10 +83,7 @@ public class GradientBoost2 {
 			// Σ ( residual / Σ (Previous Probabilty * (1 - Previous Probability)) ) 
 			DMatrixRMaj C = toMatrix(tree, data);
 			
-			C.print("%2.4f");
-			
 			trees.add(tree);
-
 			
 			CommonOps_DDRM.add(r.copy(), LEARNING_RATE, C, r);
 			DMatrixRMaj tmp = new DMatrixRMaj(W.numRows, 1);
@@ -99,15 +96,16 @@ public class GradientBoost2 {
 			PREV = R.copy();
 		}
 		
-		System.out.println("GraidentBoosting Regression Example");
+		System.out.println("GraidentBoosting Classification Example");
 		System.out.println("Total Trees: " + trees.size());
-		
+/*		
 		for (int row = 0; row < A.numRows; row++) {
 			
 			Instances tests = data(A.get(row, 0), (int) A.get(row, 1), (int) A.get(row, 2), A.get(row, 3));
 			for (Instance test : tests)
 				System.out.println(test + "   ==>    " + ff.format(classify(trees, avg, test)));
 		}		
+*/
 	}
 	
 	private static double toDecision(double prob) {
