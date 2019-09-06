@@ -2,7 +2,10 @@ package machinelearning.classifier;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
@@ -18,7 +21,7 @@ import weka.core.Instances;
 public class GradientBoost2 {
 	
 	/**
-	 * This is a GradientBoosting Regression example!
+	 * This is a GradientBoosting Classification example!
 	 */
 	
 	private static final DecimalFormat ff = new DecimalFormat("0.00");
@@ -59,7 +62,10 @@ public class GradientBoost2 {
 		DMatrixRMaj R = new DMatrixRMaj(W.numRows, 1);
 		DMatrixRMaj AVG = new DMatrixRMaj(W.numRows, 1);
 		CommonOps_DDRM.fill(AVG, avg);
-		CommonOps_DDRM.subtract(W, AVG, R);
+		
+		DMatrixRMaj PROB = AVG.copy();
+		
+		CommonOps_DDRM.subtract(W, PROB, R);
 		
 		
 		DMatrixRMaj r = new DMatrixRMaj(R.numRows, 1);
@@ -69,8 +75,11 @@ public class GradientBoost2 {
 		
 		List<RandomTree> trees = new ArrayList<RandomTree>();
 		
+		DMatrixRMaj ACC = new DMatrixRMaj(R.numRows, 1);
+		CommonOps_DDRM.fill(ACC, 0.0);
+		
 		// Let's start building trees
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 10; i++) {
 					
 			RandomTree tree = new RandomTree();	
 			tree.setMaxDepth(1);   // we have a small toy data, this tree depth would be 3 to 6 
@@ -78,17 +87,20 @@ public class GradientBoost2 {
 			Instances data = toInstances(A, R);
 			
 			tree.buildClassifier(data);
-			
-			/*** The averaging step is actually the derivative calcuation  ***/
-			// Σ ( residual / Σ (Previous Probabilty * (1 - Previous Probability)) ) 
+		
 			DMatrixRMaj C = toMatrix(tree, data);
 			
 			trees.add(tree);
 			
-			CommonOps_DDRM.add(r.copy(), LEARNING_RATE, C, r);
-			DMatrixRMaj tmp = new DMatrixRMaj(W.numRows, 1);
-			CommonOps_DDRM.add(AVG, r, tmp);
-			CommonOps_DDRM.subtract(W, tmp, R);
+
+			CommonOps_DDRM.add(ACC.copy(), LEARNING_RATE, toOutput(tree, data, C, PROB), ACC);
+			
+			DMatrixRMaj logOdd = new DMatrixRMaj(ACC.numRows, 1);
+			CommonOps_DDRM.add(AVG, ACC, logOdd);
+			
+			PROB = toProbability(logOdd);
+			
+			CommonOps_DDRM.subtract(W, PROB, R);
 			
 			if (MatrixFeatures.isEquals(R, PREV, THRESHOLD))
 				break;	
@@ -98,41 +110,103 @@ public class GradientBoost2 {
 		
 		System.out.println("GraidentBoosting Classification Example");
 		System.out.println("Total Trees: " + trees.size());
-/*		
+		
 		for (int row = 0; row < A.numRows; row++) {
 			
-			Instances tests = data(A.get(row, 0), (int) A.get(row, 1), (int) A.get(row, 2), A.get(row, 3));
+			Instances tests = data((int) A.get(row, 0), (int) A.get(row, 1), (int) A.get(row, 2), (int) A.get(row, 3));
 			for (Instance test : tests)
 				System.out.println(test + "   ==>    " + ff.format(classify(trees, avg, test)));
 		}		
-*/
+
 	}
 	
-	private static double toDecision(double prob) {
-		
-		if (prob >= DECISION)
-			return 1.0;
-		else
-			return 0.0;
-	}
-	
+
 	private static double toProbability(double val) {
 		
 		return Math.pow(Math.E, Math.log(val)) / 
 				(1.0 + Math.pow(Math.E, Math.log(val)));
 	}
 	
-	private static Instances data(double height, int color, int gender, double weight) {
+	public static DMatrixRMaj toProbability(DMatrixRMaj O) {
+		
+		DMatrixRMaj r = new DMatrixRMaj(O.numRows, O.numCols);
+		
+		for (int row = 0; row < r.numRows; row++) {				
+			r.set(row, 0, toProbability(O.get(row, 0)));
+		}
+		
+		return r;
+	}
+	
+	private static DMatrixRMaj toOutput(RandomTree tree, 
+						Instances data, DMatrixRMaj C, DMatrixRMaj R) throws Exception {
+		
+		DMatrixRMaj r = new DMatrixRMaj(R.numRows, 1);
+		List<Set<Double>> nominator = new ArrayList<Set<Double>>();
+		List<Set<Double>> denominator = new ArrayList<Set<Double>>();
+		
+		for (int target = 0; target < data.size(); target++) {
+			
+			double [] targetMembers = tree.getMembershipValues(data.get(target));
+			
+			Set<Double> set1 = new HashSet<Double>();
+			set1.add(C.get(target, 0));
+			nominator.add(set1);
+			
+			Set<Double> set2 = new HashSet<Double>();
+			set2.add(R.get(target, 0));
+			denominator.add(set2);
+			
+			for (int row = 0; row < data.size(); row++) {
+				
+				if (target != row) {
+			
+					double [] rowMembers = tree.getMembershipValues(data.get(row));
+					
+					if (Arrays.equals(targetMembers, rowMembers)) {
+						
+						set1.add(C.get(row, 0));
+						set2.add(R.get(row, 0));
+						
+					}
+				}
+			}
+		}
+		
+		/*** This following step is actually the derivative calcuation  ***/
+        // Σ ( residual / Σ (Previous Probabilty * (1 - Previous Probability)) ) 
+		for (int row = 0; row < r.numRows; row++) {
+			
+			Set<Double> nomins = nominator.get(row);
+			Set<Double> denomins = denominator.get(row);
+			
+			double sumN = 0.0;
+			for (Double val : nomins) {
+				sumN += val.doubleValue();
+			}
+			
+			double sumD = 0.0;
+			for (Double val : denomins) {
+				sumD += val.doubleValue() * (1.0 - val.doubleValue());
+			}
+			
+			r.set(row, 0, sumN / sumD);
+		}
+		
+		return r;
+	}
+	
+	private static Instances data(int popcorn, int age, int color, int movies) {
 		
 		ArrayList<Attribute> attrs = setup();
 
 		Instances testing = new Instances("TESTING", attrs, 1);
 		Instance data = new DenseInstance(attrs.size());	
 		
-		data.setValue(attrs.get(0), height);
-		data.setValue(attrs.get(1), attrs.get(1).value(color));
-		data.setValue(attrs.get(2), attrs.get(2).value(gender));
-		data.setValue(attrs.get(3), weight);
+		data.setValue(attrs.get(0), attrs.get(0).value(popcorn));
+		data.setValue(attrs.get(1), age);
+		data.setValue(attrs.get(2), attrs.get(2).value(color));
+		data.setValue(attrs.get(3), movies);
 		
 		testing.add(data);
 		
