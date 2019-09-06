@@ -100,7 +100,7 @@ public class GradientBoost1 {
 			
 			Instances tests = data(A.get(row, 0), (int) A.get(row, 1), (int) A.get(row, 2), A.get(row, 3));
 			for (Instance test : tests)
-				System.out.println(test + "   ==>    " + ff.format(classify(trees, avg, test)));
+				System.out.println(test + "   ==>    " + ff.format(regress(trees, avg, test)));
 		}		
 	}
 	
@@ -123,7 +123,7 @@ public class GradientBoost1 {
 		return testing;		
 	}
 	
-	private static double classify(List<RandomTree> trees, double avg, Instance data) throws Exception {
+	private static double regress(List<RandomTree> trees, double avg, Instance data) throws Exception {
 		
 		double sum = avg;
 		for (RandomTree tree : trees) {
