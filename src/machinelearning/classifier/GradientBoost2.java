@@ -51,7 +51,7 @@ public class GradientBoost2 {
 		// Like Moves column
 		DMatrixRMaj W = CommonOps_DDRM.extractColumn(A, 3, null);
 	
-		/*** The averaging step is actually the derivative calcuation  ***/
+		/*** We use log odd for our probabilty calculation  ***/
 		/** There are 4 people who like movies, but 2 people do not.  **/
 		/** Instead of averging it like the regression example, 
 		/** we use toProbabilty to 'average' **/
