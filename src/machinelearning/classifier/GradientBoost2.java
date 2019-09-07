@@ -96,8 +96,6 @@ public class GradientBoost2 {
 			DMatrixRMaj logOdd = new DMatrixRMaj(ACC.numRows, 1);
 			CommonOps_DDRM.add(AVG, ACC, logOdd);
 			
-			normalize(logOdd);
-			
 			PROB = toProbability(logOdd);
 						
 			CommonOps_DDRM.subtract(W, PROB, R);
@@ -118,6 +116,9 @@ public class GradientBoost2 {
 	
 
 	private static double toProbability(double val) {
+		
+		if (val <= 0)
+			val = Double.MIN_VALUE;
 		
 		return Math.pow(Math.E, Math.log(val)) / 
 				(1.0 + Math.pow(Math.E, Math.log(val)));
@@ -146,7 +147,7 @@ public class GradientBoost2 {
 			
 			System.out.println(data.get(row, 0) + ", " + data.get(row, 1) + ", " +
 						data.get(row, 2) + ", " + data.get(row, 3) + " ===> " + 
-					ff.format(toProbability((sum <= 0 ? Double.MIN_VALUE : sum))));
+					ff.format(toProbability(sum)));
 		}
 	}
 	
@@ -160,14 +161,6 @@ public class GradientBoost2 {
 		}
 		
 		return mat;
-	}
-	
-	private static void normalize(DMatrixRMaj C) {
-		
-		for (int row = 0; row < C.numRows; row++) {
-			
-			C.set(row, 0, C.get(row, 0) <= 0 ? Double.MIN_VALUE : C.get(row, 0));
-		}
 	}
 	
 
