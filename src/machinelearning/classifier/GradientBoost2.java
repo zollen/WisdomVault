@@ -83,11 +83,11 @@ public class GradientBoost2 {
 		// Let's start building trees
 		for (int i = 0; i < TOTAL_TREES; i++) {
 					
-			WeakTree tree = new WeakTree(rand, PROB);	
+			WeakTree tree = new WeakTree(rand);	
 					
 			DMatrixRMaj data = toMatrix(A, R);
 			
-			tree.fit(data);
+			tree.fit(data, PROB);
 			
 			trees.add(tree);
 						
@@ -172,23 +172,23 @@ public class GradientBoost2 {
 		private Map<Double, Set<Pair<Integer, Double>>> map = new HashMap<Double, Set<Pair<Integer, Double>>>();
 		private Random rand;
 		private int chosen;
-		private DMatrixRMaj prob;
-		
+		private int size;
+	
 		@SuppressWarnings("unused")
-		public WeakTree(int chosen, DMatrixRMaj prob) {
+		public WeakTree(int chosen) {
 			this.chosen = chosen;
-			this.prob = prob;
 		}
 		
-		public WeakTree(Random rand, DMatrixRMaj prob) {
+		public WeakTree(Random rand) {
 			this.rand = rand;
-			this.prob = prob;
 		}
 		
-		public void fit(DMatrixRMaj A) {
+		public void fit(DMatrixRMaj A, DMatrixRMaj prob) {
 			
 			if (rand != null)
 				this.chosen = rand.nextInt(3);
+			
+			this.size = A.numRows;
 					
 			switch(this.chosen) {
 			case 0:
@@ -201,7 +201,7 @@ public class GradientBoost2 {
 				classifyB(A, 2, A.numCols - 1);
 			}
 			
-			average();
+			average(prob);
 		}
 		
 		public double classify(int rowIndex) {
@@ -266,7 +266,7 @@ public class GradientBoost2 {
 			}
 		}	
 		
-		public void average() {
+		public void average(DMatrixRMaj prob) {
 			
 			/*** This following step is actually the derivative calcuation  ***/
 	        // Σ ( residual / Σ (Previous Probabilty * (1 - Previous Probability)) ) 
@@ -296,7 +296,7 @@ public class GradientBoost2 {
 		
 		public DMatrixRMaj toMatrix() {
 			
-			DMatrixRMaj mat = new DMatrixRMaj(prob.numRows, 1);
+			DMatrixRMaj mat = new DMatrixRMaj(this.size, 1);
 			
 			map.entrySet().stream().forEach(p -> {
 				
