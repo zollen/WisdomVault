@@ -3,13 +3,19 @@ package machinelearning.classifier;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.equation.Equation;
+import org.nd4j.linalg.primitives.Pair;
 
 import linearalgebra.MatrixFeatures;
 import weka.classifiers.trees.RandomTree;
@@ -43,16 +49,16 @@ public class GradientBoost2 {
 					"     0,    14,      0,    1 " +
 					"]");
 		
+	
 		DMatrixRMaj A = eq.lookupDDRM("A");
 		
-		// Let's get the average weight as our first prediction
-		// The first prediction suggest all predicted weigths are 71.166667
+		// Like Moves column
 		DMatrixRMaj W = CommonOps_DDRM.extractColumn(A, 3, null);
 	
 		/*** The averaging step is actually the derivative calcuation  ***/
 		/** There are 4 people who like movies, but 2 people do not.  **/
 		/** Instead of averging it like the regression example, 
-		 * we use toProbabilty to 'average' **/
+		/** we use toProbabilty to 'average' **/
 		double avg = toProbability(4.0/2.0);
 		
 		DMatrixRMaj PREV = new DMatrixRMaj(W.numRows, 1);
@@ -83,17 +89,19 @@ public class GradientBoost2 {
 					
 			RandomTree tree = new RandomTree();	
 			tree.setMaxDepth(1);   // we have a small toy data, this tree depth would be 3 to 6 
+			tree.setDebug(true);
 					
 			Instances data = toInstances(A, R);
 			
 			tree.buildClassifier(data);
-		
-			DMatrixRMaj C = toMatrix(tree, data);
 			
 			trees.add(tree);
 			
-
-			CommonOps_DDRM.add(ACC.copy(), LEARNING_RATE, toOutput(tree, data, C, PROB), ACC);
+			
+			CommonOps_DDRM.add(ACC.copy(), 
+									LEARNING_RATE, 
+									toAvgLeafMembers(tree, data, toOutput(tree, data), PROB), 
+									ACC);
 			
 			DMatrixRMaj logOdd = new DMatrixRMaj(ACC.numRows, 1);
 			CommonOps_DDRM.add(AVG, ACC, logOdd);
@@ -101,6 +109,7 @@ public class GradientBoost2 {
 			PROB = toProbability(logOdd);
 			
 			CommonOps_DDRM.subtract(W, PROB, R);
+			
 			
 			if (MatrixFeatures.isEquals(R, PREV, THRESHOLD))
 				break;	
@@ -117,7 +126,6 @@ public class GradientBoost2 {
 			for (Instance test : tests)
 				System.out.println(test + "   ==>    " + ff.format(classify(trees, avg, test)));
 		}		
-
 	}
 	
 
@@ -138,7 +146,7 @@ public class GradientBoost2 {
 		return r;
 	}
 	
-	private static DMatrixRMaj toOutput(RandomTree tree, 
+	private static DMatrixRMaj toAvgLeafMembers(RandomTree tree, 
 						Instances data, DMatrixRMaj C, DMatrixRMaj R) throws Exception {
 		
 		DMatrixRMaj r = new DMatrixRMaj(R.numRows, 1);
@@ -149,16 +157,18 @@ public class GradientBoost2 {
 			
 			double [] targetMembers = tree.getMembershipValues(data.get(target));
 			
+
 			Set<Double> set1 = new HashSet<Double>();
-			set1.add(C.get(target, 0));
-			nominator.add(set1);
-			
 			Set<Double> set2 = new HashSet<Double>();
-			set2.add(R.get(target, 0));
+			nominator.add(set1);
 			denominator.add(set2);
+					
+			set1.add(C.get(target, 0));
+			set2.add(R.get(target, 0));
 			
 			for (int row = 0; row < data.size(); row++) {
 				
+	
 				if (target != row) {
 			
 					double [] rowMembers = tree.getMembershipValues(data.get(row));
@@ -166,8 +176,7 @@ public class GradientBoost2 {
 					if (Arrays.equals(targetMembers, rowMembers)) {
 						
 						set1.add(C.get(row, 0));
-						set2.add(R.get(row, 0));
-						
+						set2.add(R.get(row, 0));					
 					}
 				}
 			}
@@ -225,7 +234,7 @@ public class GradientBoost2 {
 		return sum;
 	}
 	
-	private static DMatrixRMaj toMatrix(RandomTree tree, Instances data) throws Exception {
+	private static DMatrixRMaj toOutput(RandomTree tree, Instances data) throws Exception {
 		
 		double [][] res = tree.distributionsForInstances(data);
 		
@@ -294,6 +303,147 @@ public class GradientBoost2 {
 		
 		return attrs;
 		
+	}
+	
+	private static class WeakTree {
+		
+		private static final int MAX_LEAVES = 3;
+		
+		private Map<Double, Set<Pair<Integer, Double>>> map = new HashMap<Double, Set<Pair<Integer, Double>>>();
+		private Random rand;
+		private int chosen;
+		private DMatrixRMaj prob;
+		
+		public WeakTree(int chosen, DMatrixRMaj prob) {
+			this.chosen = chosen;
+			this.prob = prob;
+		}
+		
+		public WeakTree(Random rand, DMatrixRMaj prob) {
+			this.rand = rand;
+			this.prob = prob;
+		}
+		
+		public void fit(DMatrixRMaj A) {
+			
+			if (rand != null)
+				this.chosen = rand.nextInt(3);
+					
+			switch(this.chosen) {
+			case 0:
+				classifyB(A, 0, A.numCols - 1);
+			break;
+			case 1:
+				classifyN(A, 1, A.numCols - 1);
+			break;
+			default:
+				classifyB(A, 2, A.numCols - 1);
+			}
+			
+			average();
+		}
+		
+		private void classifyN(DMatrixRMaj A, int col, int cls) {
+			
+			Map<Integer, Integer> m = new TreeMap<Integer, Integer>();
+			
+			for (int row = 0; row < A.numRows; row++) {
+				m.put((int) A.get(row, col), row);
+			}
+			
+			Holder<Double> prev = new Holder<Double>(Double.NEGATIVE_INFINITY);
+			Holder<Double> prevKey = new Holder<Double>(Double.NEGATIVE_INFINITY);
+			
+			AtomicInteger counter = new AtomicInteger(1);
+			
+			m.entrySet().stream().forEach(p -> {
+				
+				double clsVal = A.get(p.getValue(), cls);
+				
+				Holder<Double> key = new Holder<Double>(clsVal);
+				
+				if (prev.get() != Double.NEGATIVE_INFINITY) {  
+						
+					if (Math.abs(clsVal - prev.get()) > THRESHOLD && map.size() < MAX_LEAVES)
+						key.set(clsVal + 100.0 * counter.get());
+					else
+						key.set(prevKey.get());
+				}
+				
+
+				Set<Pair<Integer, Double>> set = map.get(key.get());
+				if (set == null) {
+					set = new HashSet<Pair<Integer, Double>>();
+					map.put(key.get(), set);
+				}
+				
+				set.add(new Pair<>(p.getValue(), A.get(p.getValue(), cls)));
+				
+				prev.set(clsVal);
+				prevKey.set(key.get());
+				counter.incrementAndGet();
+					
+			});
+
+		}
+		
+		private void classifyB(DMatrixRMaj A, int col, int cls) {
+			
+			for (int row = 0; row < A.numRows; row++ ) {
+				
+				double key = A.get(row, col);
+				
+				Set<Pair<Integer, Double> > set = map.get(key);
+				if (set == null) {
+					set = new HashSet<Pair<Integer, Double>>();
+					map.put(key, set);
+				}
+				
+				set.add(new Pair<>(row, A.get(row, cls)));				
+			}
+		}	
+		
+		public void average() {
+			
+			map.entrySet().stream().forEach(p -> {
+				
+				
+			});
+		}
+		
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			
+			map.entrySet().stream().forEach(p -> {
+				
+				builder.append(p.getKey() + "\n");
+				
+				p.getValue().stream().forEach(k -> {
+					
+					builder.append("   row: " + k.getFirst() + " ==> " + k.getSecond() + "\n");
+				});
+			});
+			
+			return builder.toString();
+		}
+	}
+	
+	private static class Holder<T> {
+		
+		private T data;
+		
+		public Holder(T data) {
+			this.data = data;
+		}
+		
+		public T get() {
+			return data;
+		}
+		
+		public void set(T data) {
+			this.data = data;
+		}
 	}
 	
 	
