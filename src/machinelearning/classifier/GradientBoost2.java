@@ -51,7 +51,8 @@ public class GradientBoost2 {
 		// Like Moves column
 		DMatrixRMaj W = CommonOps_DDRM.extractColumn(A, 3, null);
 	
-		/*** We use log odd for our probabilty calculation  ***/
+		/** We use log odd for our probabilty calculation because there are only two outcomes **/
+		/** Like Movies(1) or Not Like Moves(0) **/
 		/** There are 4 people who like movies, but 2 people do not.  **/
 		/** Instead of averging it like the regression example, 
 		/** we use toProbabilty to 'average' **/
