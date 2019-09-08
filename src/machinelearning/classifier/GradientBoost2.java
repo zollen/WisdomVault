@@ -117,6 +117,29 @@ public class GradientBoost2 {
 	
 
 	private static double toProbability(double val) {
+		// Loss Function by probability: Σ cls(i) * log(prob) + (1 - cls(i)) * log(1 - prob)
+		// We can get rid of the Σ sign, replace cls(i) with y
+		// We need the negative log(likelihood) so that it is a function of
+		// the predicted log(odds) instead of the predicted probability, p.
+		// - ( y * log(prob) + ( 1 - y) * log(1 - prob) )
+		// - ( Observed * log(prob) + ( 1 - Observed ) * log(1 - prob) )
+		// - Observed * log(prob) - (1 - Observed) * log(1 - prob)
+		// - Observed * log(prob) - log(1 - prob) + Observed * log(1 - prob)
+		// - Observed * ( log(prob) - log(1 - prob) ) - log(1 - prob)
+		// Since log(prob) - log(1 - prob) = log(prob/(1-prob)) = log(odds)
+		// Therefore: - Observed * log(odds) - log(1 - prob)
+		// Since log(1 - prob) = log(1 - e^(log(odds))/(1 + e^(log(odds))))
+		// log((1 + e^(log(odds)))/(1 + e^(log(odds))) - e^(log(odds))/(1 + e^(log(odds))))
+		// log(1 / (1 + e^(log(odds))))
+		// log(1) - log(1 + e^(log(odds))) = 0 - log(1 + e^(log(odds)))
+		// log(1 - prob) =  log(1 + e^(log(odds)))
+		
+		// We have converted 
+		// Loss Function by probability: - (Observed * log(p) + (1 - Observed) * log(1 - p)
+		// to
+		// Loss function by log odds: - Observed * log(Odds) + log(1 + e^(log(odds)))
+		// We are going to perform derivates on the Loss function by log odds
+		// dL/do = -Observed + p = -Observed + e^(log(odds)) / (1 + e^(log(odds)))
 		
 		if (val <= 0)
 			val = Double.MIN_VALUE;
