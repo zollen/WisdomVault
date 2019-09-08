@@ -117,6 +117,9 @@ public class GradientBoost2 {
 	
 
 	private static double toProbability(double val) {
+		
+		// https://www.youtube.com/watch?v=StWY5QWMXCw
+		
 		// Loss Function by probability: Σ cls(i) * log(prob) + (1 - cls(i)) * log(1 - prob)
 		// We can get rid of the Σ sign, replace cls(i) with y
 		// We need the negative log(likelihood) so that it is a function of
@@ -128,11 +131,11 @@ public class GradientBoost2 {
 		// - Observed * ( log(prob) - log(1 - prob) ) - log(1 - prob)
 		// Since log(prob) - log(1 - prob) = log(prob/(1-prob)) = log(odds)
 		// Therefore: - Observed * log(odds) - log(1 - prob)
-		// Since log(1 - prob) = log(1 - e^(log(odds))/(1 + e^(log(odds))))
-		// log((1 + e^(log(odds)))/(1 + e^(log(odds))) - e^(log(odds))/(1 + e^(log(odds))))
-		// log(1 / (1 + e^(log(odds))))
-		// log(1) - log(1 + e^(log(odds))) = 0 - log(1 + e^(log(odds)))
-		// log(1 - prob) =  log(1 + e^(log(odds)))
+		// Since: log(1 - prob) = log(1 - e^(log(odds))/(1 + e^(log(odds))))
+		// log(1 - prob) = log((1 + e^(log(odds)))/(1 + e^(log(odds))) - e^(log(odds))/(1 + e^(log(odds))))
+		// log(1 - prob) = log(1 / (1 + e^(log(odds))))
+		// log(1 - prob) = log(1) - log(1 + e^(log(odds))) = 0 - log(1 + e^(log(odds)))
+		// log(1 - prob) = - log(1 + e^(log(odds)))
 		
 		// We have converted 
 		// Loss Function by probability: - (Observed * log(p) + (1 - Observed) * log(1 - p)
@@ -293,6 +296,7 @@ public class GradientBoost2 {
 		public void average(DMatrixRMaj prob) {
 			
 			/*** This following step is actually the derivative calcuation  ***/
+			// https://www.youtube.com/watch?v=StWY5QWMXCw
 	        // Σ ( residual / Σ (Previous Probabilty * (1 - Previous Probability)) ) 
 			
 			map.entrySet().stream().forEach(p -> {
