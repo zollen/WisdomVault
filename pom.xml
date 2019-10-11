@@ -14,7 +14,7 @@
 		<ejml-version>0.38</ejml-version>
 		<math3-version>3.6.1</math3-version>
 		<csv-version>1.5</csv-version>
-		<cmp-version>1.18</cmp-version>
+		<cmp-version>1.19</cmp-version>
 		<jfree-version>1.0.13</jfree-version>
 		<jmath-version>1.0</jmath-version>
 		<weka-version>3.8.3</weka-version>
