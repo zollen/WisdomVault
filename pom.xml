@@ -8,9 +8,9 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<deeplearning-version>1.0.0-beta4</deeplearning-version>
-		<nd4j-version>1.0.0-beta4</nd4j-version>
-		<datavec-version>1.0.0-beta4</datavec-version>
+		<deeplearning-version>1.0.0-beta6</deeplearning-version>
+		<nd4j-version>1.0.0-beta6</nd4j-version>
+		<datavec-version>1.0.0-beta6</datavec-version>
 		<ejml-version>0.38</ejml-version>
 		<math3-version>3.6.1</math3-version>
 		<csv-version>1.5</csv-version>
@@ -128,7 +128,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.deeplearning4j</groupId>
-			<artifactId>deeplearning4j-ui_2.11</artifactId>
+			<artifactId>deeplearning4j-ui</artifactId>
 			<version>${deeplearning-version}</version>
 		</dependency>
 		<dependency>
@@ -138,7 +138,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.deeplearning4j</groupId>
-			<artifactId>arbiter-ui_2.11</artifactId>
+			<artifactId>arbiter-ui</artifactId>
 			<version>${deeplearning-version}</version>
 		</dependency>
 		<dependency>
