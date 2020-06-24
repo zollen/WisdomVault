@@ -39,7 +39,7 @@ public class TestMe {
 		// | e |   | 1/4 |
 		// | f |   | 1   |
 		
-		// The solution space is a line in a 6th dimension space.
+		// The solution space is a vector in a 6th dimension space.
 		// Let f = 12, so we can have all integer values
 		// then
 		// | a |   | 5/6 |      | 10 |
