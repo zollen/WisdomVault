@@ -74,10 +74,10 @@ public class JeneticsDemo5 {
 	public static ISeq<String> random() {
 		
 		PermutationChromosome<String> cho = CHO.newInstance();
-		return ISeq.of(cho.getGene(0).getAllele(), 
-					cho.getGene(1).getAllele(), 
-					cho.getGene(2).getAllele(),
-					cho.getGene(3).getAllele());
+		return ISeq.of(cho.get(0).allele(), 
+					cho.get(1).allele(), 
+					cho.get(2).allele(),
+					cho.get(3).allele());
 	}
 	
 	public static double fitness(ISeq<String> numbers) {

@@ -19,7 +19,7 @@
 		<jmath-version>1.0</jmath-version>
 		<weka-version>3.8.3</weka-version>
 		<smile-version>1.5.2</smile-version>
-		<jenetic-version>5.0.0</jenetic-version>
+		<jenetic-version>6.0.1</jenetic-version>
 	</properties>
 
 	<profiles>

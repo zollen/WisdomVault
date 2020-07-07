@@ -25,7 +25,7 @@ public class JeneticsDemo1 {
 	}
 
 	private static int eval(Genotype<BitGene> gt) {
-		return gt.getChromosome().as(BitChromosome.class).bitCount();
+		return gt.chromosome().as(BitChromosome.class).bitCount();
 	}
 
 }

@@ -66,11 +66,11 @@ public class JeneticsDemo6 {
 				// Terminate the evolution after maximal 50000 generations.
 				.limit(50000).collect(EvolutionResult.toBestPhenotype());
 		
-		double [] res = CODEC.decode(result.getGenotype());
+		double [] res = CODEC.decode(result.genotype());
 		System.out.println("Best Phenotype: " + 
 					Arrays.stream(res).mapToObj(p -> ff.format(p))
 							.collect(Collectors.joining(", ")) + 
-					" ==> " + ff.format(result.getFitness()));
+					" ==> " + ff.format(result.fitness()));
 		System.out.println(statistics);
 
 	}

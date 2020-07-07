@@ -37,7 +37,7 @@ public class JeneticsDemo3 {
 
 	public static final ISeq<Op<Double>> TERMINALS = ISeq.of(
 			Var.of("x", 0),
-			EphemeralConst.of(() -> (double) RandomRegistry.getRandom().nextInt(10))
+			EphemeralConst.of(() -> (double) RandomRegistry.random().nextInt(10))
 	);
 	
 	public static final Codec<ProgramGene<Double>, ProgramGene<Double>> CODEC =
@@ -46,11 +46,11 @@ public class JeneticsDemo3 {
 		            // Program tree depth.
 		            5,
 		            // Chromosome validator.
-		            ch -> ch.getRoot().size() <= 50,
+		            ch -> ch.root().size() <= 50,
 		            OPERATIONS,
 		            TERMINALS
 		        )),
-		        Genotype::getGene
+		        Genotype::gene
 		    );
 	
 	public static final double [][] SAMPLES = {
@@ -98,7 +98,7 @@ public class JeneticsDemo3 {
 		        .limit(500)
 		        .peek(statistics)
 		        .collect(EvolutionResult.toBestGenotype())
-		        .getGene();
+		        .gene();
 
 		System.out.println(Tree.toString(program));
 		System.out.println(statistics);

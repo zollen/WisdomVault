@@ -51,7 +51,7 @@ public class MazeAgent {
 				.limit(MAX_GENERATIONS).collect(EvolutionResult.toBestPhenotype());
 		
 	
-		MazeGame game = result.getGenotype().getGene().getAllele();
+		MazeGame game = result.genotype().gene().allele();
 		System.out.println(game);
 	}
 	
@@ -79,7 +79,7 @@ public class MazeAgent {
 			population.forEach(child -> {
 				
 				Phenotype<AnyGene<MazeGame>, Double> target = child;
-				MazeGame game = child.getGenotype().getGene().getAllele();
+				MazeGame game = child.genotype().gene().allele();
 				
 				if (rand.nextDouble() <= this._probability) {
 					

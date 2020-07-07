@@ -26,7 +26,7 @@ public class JeneticsDemo4 {
 		// TODO Auto-generated method stub
 		final Codec<ABC, AnyGene<ABC>> CODEC = Codec.of(
 								Genotype.of(AnyChromosome.of(JeneticsDemo4::random)),
-								gt -> gt.getGene().getAllele());
+								gt -> gt.gene().allele());
 		
 		final Engine<AnyGene<ABC>, Integer> engine = 
 					Engine.builder(JeneticsDemo4::fitness, CODEC)
@@ -51,7 +51,7 @@ public class JeneticsDemo4 {
 	}
 	
 	private static ABC random() {
-		return new ABC(RandomRegistry.getRandom().nextInt(10000));
+		return new ABC(RandomRegistry.random().nextInt(10000));
 	}
 	
 	private static int fitness(final ABC abc) {
