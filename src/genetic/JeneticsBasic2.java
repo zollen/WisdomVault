@@ -150,7 +150,7 @@ public class JeneticsBasic2 {
 		
 		for (int i = 0; i < 25; i++) {
 			
-			if (generation > 20 && rand.nextDouble() < 0.3)
+			if (generation > 20 && rand.nextDouble() > 0.3)
 				continue;
 						
 			int pos = rand.nextInt(25);
