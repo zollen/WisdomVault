@@ -1,6 +1,31 @@
 package machinelearning.classifier;
 
 import java.text.DecimalFormat;
+/**
+ * Navie Bayes Explaination
+ * https://www.youtube.com/watch?v=O2L2Uv9pdDA
+ * 
+ * Training Data
+ * =============
+ * Total Messages = 12
+ * Normal Messges = 6
+ * Spam Message = 6
+ * P(Dear|Normal) = 0.38
+ * P(Friend|Normal) = 0.41
+ * P(Money|Normal) = 0.01
+ * P(Dear|Spam) = 0.02
+ * P(Friend|Spam) = 0.03
+ * P(Money|Spam) = 0.52
+ * P(Spam) = Prior(Spam) = 6 /12 = 0.5
+ * P(Normal) = Prior(Normal) = 6 / 12 = 0.5
+ * 
+ * Test Data
+ * =========
+ * Dear Friend
+ * Probabilty of Normal = P(Normal) * P(Dear|Normal) * P(Friend|Normal) = 0.0779
+ * Probabilty of Spam = P(Spam) * P(Dear|Spam) * P(Friend|Spam) = 0.0003
+ * Therefore the test message "Dear Friend" is a normal message.
+ */
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
