@@ -1,6 +1,11 @@
 package machinelearning.classifier;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.function.Predicate;
+
 /**
  * Navie Bayes Explaination
  * https://www.youtube.com/watch?v=O2L2Uv9pdDA
@@ -26,10 +31,6 @@ import java.text.DecimalFormat;
  * Probabilty of Spam = P(Spam) * P(Dear|Spam) * P(Friend|Spam) = 0.0003
  * Therefore the test message "Dear Friend" is a normal message.
  */
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.function.Predicate;
 
 public class NavieBayesClassifier {
 	
