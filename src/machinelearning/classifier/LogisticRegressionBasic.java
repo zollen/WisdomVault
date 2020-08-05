@@ -40,7 +40,7 @@ import org.apache.commons.math3.analysis.function.Sigmoid;
  *  ========
  *  for i in 1 to MAX_EPOCHS
  *     new_weights = update_weight(training_data, labels, weights, learning_rate)
- *     cost = cost_function(features, labels, new_weight)
+ *     cost = cost_function(features, labels, new_weights)
  *     print(cost)
  *     weights = new_weights
  * 
