@@ -38,6 +38,13 @@ public class KolmogorvSmirnovTest {
 		
 		// Null hypothesis: both vectors fit perfectly
 		
+		// P-value tells you the probability of getting a false positive.
+		// If a p-value is 0.02, it means there is only 0.02 chance the result is a false positive.
+		// Any p-value less than 0.05 is normally significant.
+		
+		// However if we are talking about a person has cancer or not, we would want a much 
+		// smaller p-value (i.e. 0.00001)
+		
 		// A small p-value (typically <= 0.05) indicates strong evidence against 
 		// the null hypothesis, so you reject the null hypothesis.
 
