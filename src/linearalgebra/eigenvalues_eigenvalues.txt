@@ -1,0 +1,68 @@
+The best explanation of EigenVectors and EigenValues
+https://www.youtube.com/watch?v=i8FukKfMKCI&t=1254s
+
+EigenVectors
+============
+A set of vectors that do not change direction even after the transformation is applied. The vector
+along the axis of a rotation transformation would never change direction. So EigenVectors are
+effectively the *axises* of the transformation. 
+
+EigenValues
+===========
+A set of values that show the amount of 'strech' on each eigenvector axis applied by the transformation.
+
+EigenVectors and EigenValues are for revealing the long term trends of the transformation.
+If a transform matrix applies to a matrix infinite times(or after many iterations), the 
+applied matrix would revals the *long term trends*.
+
+Zombies apocalypse Survival Example
+===================================
+Everyday 20% of human population turns to zombies because of zombies attacks.
+Everyday 10% of zombies population turns back to human because of vaccines.
+
+                      Humans  --- 20% ---> Zombies
+                      Human  <--- 10% ---  Zombies
+Days: n = 1....infinite
+H(n) = 0.8H(n-1) + 0.1Z(n-1)
+Z(n) = 0.2H(n-1) + 0.9Z(n-1)
+
+|H(n)|   | 0.8 0.1 | |H(n-1)|
+|    | = |         | |      |
+|Z(n)|   | 0.2 0.9 | |Z(n-1)|
+
+The eigenvectors reveals the equilibrium of the system and if the population size of both stay
+on the eigenvectors, the then the proportion between the popluation of Humans and Zombies will 
+never changes. If the eigenvalues is 1, then the population size of each would remain unchanged
+over time.
+
+Graph where Zombies population is on Y axis and Human population is on X axis.
+However if the population size of Zombies is way more than Humans, effectively *above* the 
+equilibrium/eigenvectors, then humans is going to extinct. But if the population size of humans
+is way more than Zombies, effectively *below* the equilibrium/eigenvectors, then zombies are going
+to disappear over time.
+
+
+Page Ranking Probabilities Trends Example
+=========================================
+Consider the following graph:
+Site A ---> Site B
+Site B ---> Site C, Site D
+Site C ---> Site A, Site D
+Site D ---> Site A, Site B
+
+Tracking the number of times of visits, then we can come up a probabilities matrix
+     A   B   C   D
+A  0.0 0.0 0.5 0.5
+B  1.0 0.0 0.0 0.5
+C  0.0 0.5 0.0 0.0
+D  0.0 0.5 0.5 0.0
+
+EigenVector
+| 0.217 |
+| 0.348 |
+| 0.174 |
+| 0.261 |
+
+The eigenvector of this matrix would reveal the long term probabilities of each site being 
+visited.
+
