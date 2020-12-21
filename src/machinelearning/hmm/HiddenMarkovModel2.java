@@ -9,6 +9,7 @@ import machinelearning.hmm.HMMComposite.HMMResult;
 
 public class HiddenMarkovModel2 {
 
+	// Reference: http://danushka.net/lect/dm/TextMining.pdf
 	private static final DecimalFormat ff = new DecimalFormat("0.00000000");
 
 	private static String [] states = { "U1", "U2", "U3" };
@@ -22,8 +23,8 @@ public class HiddenMarkovModel2 {
 		Equation eq = new Equation();
 
 		eq.process("T = [" +
-				 /* U1, U2, U3 */
-		/* U1 */ " 0.1, 0.4, 0.5;" +
+			 /* TO: U1,  U2,  U3 */
+  /* FROM: U1 */ " 0.1, 0.4, 0.5;" +
 		/* U2 */ " 0.6, 0.2, 0.2;" +
 		/* U3 */ " 0.3, 0.4, 0.3 " + "]");
 
